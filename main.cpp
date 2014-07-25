@@ -10,7 +10,9 @@
 const char *texts[NUM_EXAMPLES] = {
     "Test ЛенивыйVA",
     "Test كسول 123 الزنجبيل القط التعليقات",
-    "懶惰的姜貓",
+//    "Test באתר 123 בנייה, העגורן הוא"
+//    "Test الزنجبي",
+//    "懶惰的姜貓",
 };
 
 // a trivial example
@@ -21,6 +23,7 @@ int main ()
 
   styleSheet.language="ar-Arab";
   styleSheet.font("sans", "fonts/amiri-0.104/amiri-regular.ttf");
+//  styleSheet.font("sans", "/usr/share/fonts/freefont/FreeSans.ttf");
 
   std::vector<layoutInfo_c> l;
 

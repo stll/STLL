@@ -49,6 +49,16 @@ class textLayout_c
       data.push_back(d);
     }
 
+    void addCommandVector(const std::vector<commandData> & d, int dx, int dy)
+    {
+      for (auto a : d)
+      {
+        a.x += dx;
+        a.y += dy;
+        data.push_back(a);
+      }
+    }
+
     ~textLayout_c(void) { }
 
     textLayout_c(void) { }

@@ -15,13 +15,11 @@
 
 fontFace_c::fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const std::string & fname, uint32_t size) : lib(l)
 {
-  printf("font face const\n");
   f = lib->newFace(fname, size);
 }
 
 fontFace_c::~fontFace_c()
 {
-  printf("font face dest\n");
   lib->doneFace(f);
 }
 
@@ -101,7 +99,6 @@ FT_Face freeTypeLibrary_c::newFace(const std::string fname, uint32_t size)
 
 freeTypeLibrary_c::~freeTypeLibrary_c()
 {
-  printf("delete library\n");
   FT_Done_FreeType(lib);
 }
 
