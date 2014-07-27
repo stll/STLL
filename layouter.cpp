@@ -7,6 +7,8 @@
 
 #include <fribidi/fribidi.h>
 
+#include <linebreak.h>
+
 #include <vector>
 #include <string>
 #include <memory>
@@ -17,9 +19,10 @@ typedef struct
   std::vector<textLayout_c::commandData> run;
   int dx, dy;
   FriBidiLevel embeddingLevel;
+  char linebreak;
 } runInfo;
 
-textLayout_c layout(const std::string & txt, const textStyleSheet_c & rules)
+textLayout_c layout(const std::string & txt, const textStyleSheet_c & rules, const shape_c & shape)
 {
   /* Get our harfbuzz font structs */
   std::shared_ptr<fontFace_c> font = rules.findFamily("sans")->getFont(50*64);
@@ -33,24 +36,32 @@ textLayout_c layout(const std::string & txt, const textStyleSheet_c & rules)
   std::vector<FriBidiCharType> bidiTypes(txt32.length());
   fribidi_get_bidi_types((uint32_t*)txt32.c_str(), txt32.length(), bidiTypes.data());
   std::vector<FriBidiLevel> embedding_levels(txt32.length());
-  FriBidiParType base_dir = FRIBIDI_TYPE_RTL_VAL; // TODO depends on main script of text
+  FriBidiParType base_dir = FRIBIDI_TYPE_LTR_VAL; // TODO depends on main script of text
   FriBidiLevel max_level = fribidi_get_par_embedding_levels(bidiTypes.data(), txt32.length(),
                                                             &base_dir, embedding_levels.data());
+
+  std::vector<char> linebreaks(txt32.length());
+  set_linebreaks_utf32((utf32_t*)txt32.c_str(), txt32.length(), "", linebreaks.data());
 
   std::string lan = rules.language.substr(0, 2);
   std::string s = rules.language.substr(3, 4);
 
   hb_script_t scr = hb_script_from_iso15924_tag(HB_TAG(s[0], s[1], s[2], s[3]));
 
-  size_t spos = 1;
   size_t runstart = 0;
 
   std::vector<runInfo> runs;
 
-  while (spos < txt32.length())
+  while (runstart < txt32.length())
   {
+    size_t spos = runstart+1;
     // find end of current run
-    while (spos < txt32.length() && embedding_levels[runstart] == embedding_levels[spos])
+    while (   (spos < txt32.length())
+           && (embedding_levels[runstart] == embedding_levels[spos])
+           && (   (linebreaks[spos-1] == LINEBREAK_NOBREAK)
+               || (linebreaks[spos-1] == LINEBREAK_INSIDEACHAR)
+              )
+          )
     {
       spos++;
     }
@@ -80,6 +91,7 @@ textLayout_c layout(const std::string & txt, const textStyleSheet_c & rules)
 
     run.dx = run.dy = 0;
     run.embeddingLevel = embedding_levels[runstart];
+    run.linebreak = linebreaks[spos-1];
 
     for (size_t j=0; j < glyph_count; ++j)
     {
@@ -111,38 +123,62 @@ textLayout_c layout(const std::string & txt, const textStyleSheet_c & rules)
   hb_buffer_destroy(buf);
   hb_font_destroy(hb_ft_font);
 
-  // reorder runs
-  for (int i = max_level-1; i >= 0; i--)
-  {
-    // find starts of regions to reverse
-    for (size_t j = 0; j < runs.size(); j++)
-    {
-      if (runs[j].embeddingLevel > i)
-      {
-        // find the end of the current regions
-        size_t k = j+1;
-        while (k < runs.size() && runs[k].embeddingLevel > i)
-        {
-          k++;
-        }
+  std::vector<size_t> runorder(runs.size());
+  int n(0);
+  std::generate(runorder.begin(), runorder.end(), [&]{ return n++; });
 
-        std::reverse(runs.begin()+j, runs.begin()+k);
-        j = k;
+  // layout a run
+  runstart = 0;
+  int32_t ypos = 0;
+  textLayout_c l;
+
+  while (runstart < runs.size())
+  {
+    // todo use actual font line height
+    int32_t left = shape.getLeft(ypos, ypos) + runs[runstart].dx;
+    int32_t right = shape.getRight(ypos, ypos);
+
+    int spos = runstart + 1;
+
+    while (spos < runs.size() && left+runs[spos].dx < right)
+    {
+      left += runs[spos].dx;
+      spos++;
+    }
+
+    // reorder runs for current line
+    for (int i = max_level-1; i >= 0; i--)
+    {
+      // find starts of regions to reverse
+      for (size_t j = runstart; j < spos; j++)
+      {
+        if (runs[runorder[j]].embeddingLevel > i)
+        {
+          // find the end of the current regions
+          size_t k = j+1;
+          while (k < spos && runs[runorder[k]].embeddingLevel > i)
+          {
+            k++;
+          }
+
+          std::reverse(runorder.begin()+j, runorder.begin()+k);
+          j = k;
+        }
       }
     }
+
+    int32_t xpos = shape.getLeft(ypos, ypos);
+
+    for (size_t i = runstart; i < spos; i++)
+    {
+      l.addCommandVector(runs[runorder[i]].run, xpos, ypos);
+      xpos += runs[runorder[i]].dx;
+    }
+
+    runstart = spos;
+    ypos += 100;
   }
 
-  // create layout of reordered runs
-  textLayout_c l;
-  int x = 0;
-  int y = 0;
-
-  for (auto & r : runs)
-  {
-    l.addCommandVector(r.run, x, y);
-    x += r.dx;
-    y += r.dy;
-  }
 
   return l;
 }

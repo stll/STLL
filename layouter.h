@@ -134,6 +134,26 @@ class textStyleSheet_c
     std::map<std::string, std::shared_ptr<fontFamily_c> > families;
 };
 
-textLayout_c layout(const std::string & txt, const textStyleSheet_c & rules);
+// this class contains the information about the shape that a paragraph should have
+class shape_c
+{
+  public:
+    virtual int32_t getLeft(int32_t top, int32_t bottom) const = 0;
+    virtual int32_t getRight(int32_t top, int32_t bottom) const = 0;
+};
+
+class rectangleShape_c : public shape_c
+{
+  private:
+    int32_t w;
+
+  public:
+    rectangleShape_c(int32_t width) : w(width) { }
+
+    virtual int32_t getLeft(int32_t top, int32_t bottom) const { return 0; }
+    virtual int32_t getRight(int32_t top, int32_t bottom) const { return w; }
+};
+
+textLayout_c layout(const std::string & txt, const textStyleSheet_c & rules, const shape_c & shape);
 
 #endif

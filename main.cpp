@@ -27,7 +27,7 @@ int main ()
 
   std::vector<layoutInfo_c> l;
 
-  l.emplace_back(layoutInfo_c(layout(texts[1], styleSheet), 10, 80));
+  l.emplace_back(layoutInfo_c(layout(texts[1], styleSheet, rectangleShape_c(250)), 10, 80));
 
   showLayoutsSelf(800, 600, l);
 }
