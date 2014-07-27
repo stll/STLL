@@ -176,7 +176,7 @@ textLayout_c layout(const std::string & txt, const textStyleSheet_c & rules, con
     }
 
     runstart = spos;
-    ypos += 100;
+    ypos += font->getHeigt()/64;
   }
 
 

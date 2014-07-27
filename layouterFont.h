@@ -30,6 +30,8 @@ class fontFace_c : boost::noncopyable
 
     FT_Face getFace(void) const { return f; }
 
+    uint32_t getHeigt(void) const { return f->size->metrics.height; }
+
   private:
     FT_Face f;
     std::shared_ptr<freeTypeLibrary_c> lib;
