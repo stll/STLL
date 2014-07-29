@@ -212,6 +212,8 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
     runstart = spos;
   }
 
+  // TODO proper font handling for multiple fonts in a line
+  l.setHeight(ypos-runs[0].font->getAscender()/64);
 
   return l;
 }
@@ -264,7 +266,7 @@ textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSheet_c &
   {
     if (i.type() == pugi::node_element && std::string("p") == i.name())
     {
-      l.append(layoutXML_P(i, rules, shape));
+      l.append(layoutXML_P(i, rules, shape), 0, l.getHeight());
     }
     else if (i.type() == pugi::node_element && std::string("table") == i.name())
     {

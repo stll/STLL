@@ -1,11 +1,6 @@
 #ifndef __LAYOUTER_H__
 #define __LAYOUTER_H__
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_GLYPH_H
-#include FT_OUTLINE_H
-
 #include "layouterFont.h"
 #include "layouterCSS.h"
 
@@ -22,6 +17,9 @@
 // encapsulates a finished layout, the layout is supposed to be unchangeable after creation
 class textLayout_c
 {
+  private:
+    uint32_t height; // position where you can add additional text after this ...
+
   public:
 
     // information for draw command
@@ -43,6 +41,7 @@ class textLayout_c
 
     // order is the logical order, so when you do copy and paste we copy out of this using the order
     // within the vector
+    // TODO find better solution instead of public vector
     std::vector<commandData> data;
 
     void addCommand(const commandData & d)
@@ -60,32 +59,44 @@ class textLayout_c
       }
     }
 
-    void append(const textLayout_c & l)
+    void append(const textLayout_c & l, int32_t dx, int32_t dy)
     {
-      data.insert(data.end(), l.data.begin(), l.data.end());
+      for (auto a : l.data)
+      {
+        a.x += dx;
+        a.y += dy;
+        data.push_back(a);
+      }
+
+      height = std::max(height, dy+l.height);
     }
 
     void operator=(textLayout_c && l)
     {
       data.swap(l.data);
+      height = l.height;
     }
 
     void operator=(const textLayout_c & l)
     {
       data = l.data;
+      height = l.height;
     }
 
     ~textLayout_c(void) { }
 
-    textLayout_c(void) { }
+    textLayout_c(void) : height(0) { }
 
-    textLayout_c(const textLayout_c & src) : data(src.data) {  }
+    textLayout_c(const textLayout_c & src) : data(src.data), height(src.height) {  }
 
     textLayout_c(textLayout_c && src)
     {
       swap(data, src.data);
+      height = src.height;
     }
 
+    uint32_t getHeight(void) const { return height; }
+    uint32_t setHeight(uint32_t h) { height = h; }
 };
 
 // this class contains the information about the shape that a paragraph should have

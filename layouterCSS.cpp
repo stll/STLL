@@ -38,7 +38,6 @@ static uint8_t hex2num(char c)
 static uint8_t hex2byte(char c1, char c2)
 {
   return hex2num(c1)* 16 + hex2num(c2);
-
 }
 
 void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t &b)
@@ -89,7 +88,6 @@ const std::string & textStyleSheet_c::getValue(const pugi::xml_node & node, cons
   // choose the highest priority
   int16_t bestPrio = -1;
   std::string & res = defaultValue;
-
 
   for (auto & r : rules)
   {
