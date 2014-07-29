@@ -96,7 +96,7 @@ class textLayout_c
     }
 
     uint32_t getHeight(void) const { return height; }
-    uint32_t setHeight(uint32_t h) { height = h; }
+    void setHeight(uint32_t h) { height = h; }
 };
 
 // this class contains the information about the shape that a paragraph should have
