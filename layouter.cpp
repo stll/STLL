@@ -244,6 +244,10 @@ void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & rules, 
     {
       layoutXML_text(i, rules, txt, attr);
     }
+    else if (i.type() == pugi::node_element && std::string("div") == i.name())
+    {
+      layoutXML_text(i, rules, txt, attr);
+    }
   }
 }
 
