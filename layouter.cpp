@@ -248,9 +248,11 @@ void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & rules, 
       evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b);
       std::string fontFamily = rules.getValue(xml, "font-family");
       std::string fontStyle = rules.getValue(xml, "font-style");
+      std::string fontVariant = rules.getValue(xml, "font-variant");
+      std::string fontWeight = rules.getValue(xml, "font-weight");
       double fontSize = evalSize(rules.getValue(xml, "font-size"));
 
-      a.font = rules.findFamily(fontFamily)->getFont(64*fontSize, fontStyle);
+      a.font = rules.findFamily(fontFamily)->getFont(64*fontSize, fontStyle, fontVariant, fontWeight);
       a.lang = "en-eng";
 
       while (attr.size() < txt.length())
