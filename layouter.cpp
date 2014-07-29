@@ -46,7 +46,8 @@ FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32, std::vector<Fr
   return max_level;
 }
 
-textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<codepointAttributes> & attr, const shape_c & shape)
+textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<codepointAttributes> & attr,
+                             const shape_c & shape, const std::string & align)
 {
   // calculate embedding types for the text
   std::vector<FriBidiLevel> embedding_levels;
@@ -214,13 +215,38 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
       }
     }
 
-    // TODO, left, right block align
-    int32_t xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
+    int32_t spaceLeft = shape.getRight(ypos, ypos+curAscend-curDescend) -
+                        shape.getLeft(ypos, ypos+curAscend-curDescend);
+    spaceLeft -= curWidth;
+
+    int32_t xpos;
+    double spaceadder = 0;
+
+    if (align == "left")
+    {
+      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
+    }
+    else if (align == "right")
+    {
+      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft;
+    }
+    else if (align == "center")
+    {
+      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft/2;
+    }
+    else if (align == "justify")
+    {
+      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
+      // don't justify last paragraph
+      if (spos-runstart > 1 && spos < runs.size())
+        spaceadder = 1.0 * spaceLeft / (spos-runstart - 1);
+    }
+
     ypos += curAscend;
 
     for (size_t i = runstart; i < spos; i++)
     {
-      l.addCommandVector(runs[runorder[i]].run, xpos, ypos);
+      l.addCommandVector(runs[runorder[i]].run, xpos+spaceadder*(i-runstart), ypos);
       xpos += runs[runorder[i]].dx;
     }
 
@@ -277,7 +303,7 @@ textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet_c & ru
 
   layoutXML_text(xml, rules, txt, attr);
 
-  return layoutParagraph(txt, attr, shape);
+  return layoutParagraph(txt, attr, shape, rules.getValue(xml, "text-align"));
 }
 
 textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape)
@@ -373,5 +399,5 @@ textLayout_c layoutRaw(const std::string & txt, const std::shared_ptr<fontFace_c
     i.lang = language;
   }
 
-  return layoutParagraph(txt32, attr, shape);
+  return layoutParagraph(txt32, attr, shape, "left");
 }
