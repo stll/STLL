@@ -312,7 +312,16 @@ textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSheet_c &
 
   for (const auto & i : txt)
   {
-    if (i.type() == pugi::node_element && std::string("p") == i.name())
+    if (   (i.type() == pugi::node_element)
+        && (   (std::string("p") == i.name())
+            || (std::string("h1") == i.name())
+            || (std::string("h2") == i.name())
+            || (std::string("h3") == i.name())
+            || (std::string("h4") == i.name())
+            || (std::string("h5") == i.name())
+            || (std::string("h6") == i.name())
+           )
+       )
     {
       l.append(layoutXML_P(i, rules, shape), 0, l.getHeight());
     }
