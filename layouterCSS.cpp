@@ -68,6 +68,18 @@ static bool ruleFits(const std::string & sel, const pugi::xml_node & node)
 {
   if (sel == "*")         return true;
   if (sel == node.name()) return true;
+  if (sel[0] == '.')
+  {
+    auto attr = node.attribute("class");
+
+    if (!attr.empty())
+    {
+      if (attr.value() == sel.substr(1))
+      {
+        return true;
+      }
+    }
+  }
 
   return false;
 }
@@ -75,8 +87,9 @@ static bool ruleFits(const std::string & sel, const pugi::xml_node & node)
 static uint16_t rulePrio(const std::string & sel)
 {
   if (sel == "*") return 0;
+  if (sel[0] == '.') return 1;
 
-  return 1;
+  return 2;
 }
 
 const std::string & textStyleSheet_c::getValue(const pugi::xml_node & node, const std::string & attribute) const
