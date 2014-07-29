@@ -162,20 +162,34 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
   // layout a run
   // TODO take care of different font sizes of the different runs
   runstart = 0;
-  int32_t ypos = runs[0].font->getAscender()/64;
+  int32_t ypos = 0;
   textLayout_c l;
 
   while (runstart < runs.size())
   {
-    // todo use actual font line height
-    int32_t left = shape.getLeft(ypos-runs[runstart].font->getAscender()/64, ypos-runs[runstart].font->getDescender()/64) + runs[runstart].dx;
-    int32_t right = shape.getRight(ypos-runs[runstart].font->getAscender()/64, ypos-runs[runstart].font->getDescender()/64);
-
+    int32_t curAscend = runs[runstart].font->getAscender()/64;
+    int32_t curDescend = runs[runstart].font->getDescender()/64;
+    uint32_t curWidth = runs[runstart].dx;
     size_t spos = runstart + 1;
 
-    while (spos < runs.size() && left+runs[spos].dx < right)
+    while (spos < runs.size())
     {
-      left += runs[spos].dx;
+      // check, if we can add another span
+      int32_t newAscend = std::max(curAscend, runs[spos].font->getAscender()/64);
+      int32_t newDescend = std::min(curDescend, runs[spos].font->getDescender()/64);
+      uint32_t newWidth = curWidth + runs[spos].dx;
+
+      if (shape.getLeft(ypos, ypos+newAscend-newDescend)+newWidth >
+          shape.getRight(ypos, ypos+newAscend-newDescend))
+      {
+        // next run would overrun
+        break;
+      }
+
+      // additional run fits
+      curAscend = newAscend;
+      curDescend = newDescend;
+      curWidth = newWidth;
       spos++;
     }
 
@@ -200,7 +214,9 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
       }
     }
 
-    int32_t xpos = shape.getLeft(ypos-runs[runstart].font->getAscender(), ypos-runs[runstart].font->getDescender());
+    // TODO, left, right block align
+    int32_t xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
+    ypos += curAscend;
 
     for (size_t i = runstart; i < spos; i++)
     {
@@ -208,12 +224,12 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
       xpos += runs[runorder[i]].dx;
     }
 
-    ypos += runs[runstart].font->getHeigt()/64;
+    ypos -= curDescend;
     runstart = spos;
   }
 
   // TODO proper font handling for multiple fonts in a line
-  l.setHeight(ypos-runs[0].font->getAscender()/64);
+  l.setHeight(ypos);
 
   return l;
 }
