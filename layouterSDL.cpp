@@ -69,6 +69,7 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
   ftr_params.bit_test = 0;
   ftr_params.gray_spans = spanner;
 
+
   /* render */
   for (auto i : l.data)
   {
@@ -88,8 +89,8 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
       case textLayout_c::commandData::CMD_RECT:
 
         SDL_Rect r;
-        r.x = i.x;
-        r.y = i.y;
+        r.x = i.x+sx;
+        r.y = i.y+sy;
         r.w = i.w;
         r.h = i.h;
         SDL_FillRect(s, &r, SDL_MapRGBA(s->format, i.r, i.g, i.b, i.a));

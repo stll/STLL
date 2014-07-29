@@ -16,7 +16,7 @@ LIBS=\
     `pkg-config harfbuzz --libs` \
     `pkg-config glib-2.0 --libs` \
     `pkg-config fribidi --libs` \
-    -llinebreak
+    -llinebreak -lpugixml
 
 # so as not to have to use LD_LIBRARY_PATH when prefix is custom
 LDFLAGS=-Wl,-rpath -Wl,$(PREFIX)/lib

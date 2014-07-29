@@ -59,6 +59,21 @@ class textLayout_c
       }
     }
 
+    void append(const textLayout_c & l)
+    {
+      data.insert(data.end(), l.data.begin(), l.data.end());
+    }
+
+    void operator=(textLayout_c && l)
+    {
+      data.swap(l.data);
+    }
+
+    void operator=(const textLayout_c & l)
+    {
+      data = l.data;
+    }
+
     ~textLayout_c(void) { }
 
     textLayout_c(void) { }
@@ -82,7 +97,7 @@ class textStyleSheet_c
     typedef struct
     {
       std::string selector;
-      std::string property;
+      std::string attribute;
       std::string value;
     } rule;
 
@@ -115,11 +130,11 @@ class textStyleSheet_c
 
     std::shared_ptr<fontFamily_c> findFamily(const std::string & family) const { return families.find(family)->second; }
 
-    void addRule(const std::string sel, const std::string prop, const std::string val)
+    void addRule(const std::string sel, const std::string attr, const std::string val)
     {
       rule r;
       r.selector = sel;
-      r.property = prop;
+      r.attribute = attr;
       r.value = val;
 
       rules.push_back(r);
@@ -150,10 +165,19 @@ class rectangleShape_c : public shape_c
   public:
     rectangleShape_c(int32_t width) : w(width) { }
 
-    virtual int32_t getLeft(int32_t top, int32_t bottom) const { return 0; }
-    virtual int32_t getRight(int32_t top, int32_t bottom) const { return w; }
+    virtual int32_t getLeft(int32_t /*top*/, int32_t /*bottom*/) const { return 0; }
+    virtual int32_t getRight(int32_t /*top*/, int32_t /*bottom*/) const { return w; }
 };
 
-textLayout_c layout(const std::string & txt, const textStyleSheet_c & rules, const shape_c & shape);
+// the layouting routines
+
+// layout the given XHTML code
+textLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules, const shape_c & shape);
+
+// layout the given pugi-XML nodes, they must be a parsed XHTML document
+textLayout_c layoutXML(const pugi::xml_document & txt, const textStyleSheet_c & rules, const shape_c & shape);
+
+// layout raw text using the font given the given string must be utf-8
+textLayout_c layoutRaw(const std::string & txt, const std::shared_ptr<fontFace_c> font, const shape_c & shape, const std::string & language = "en");
 
 #endif

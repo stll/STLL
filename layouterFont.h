@@ -31,6 +31,8 @@ class fontFace_c : boost::noncopyable
     FT_Face getFace(void) const { return f; }
 
     uint32_t getHeigt(void) const { return f->size->metrics.height; }
+    int32_t getAscender(void) const { return f->size->metrics.ascender; }
+    int32_t getDescender(void) const { return f->size->metrics.descender; }
 
   private:
     FT_Face f;
