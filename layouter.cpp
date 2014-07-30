@@ -174,21 +174,39 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
 
   while (runstart < runs.size())
   {
-    int32_t curAscend = runs[runstart].font->getAscender()/64;
-    int32_t curDescend = runs[runstart].font->getDescender()/64;
-    uint32_t curWidth = runs[runstart].dx;
-    size_t spos = runstart + 1;
+    int32_t curAscend = 0;
+    int32_t curDescend = 0;
+    uint32_t curWidth = 0;
+    size_t spos = runstart;
 
+    // add runs until we run out of runs
     while (spos < runs.size())
     {
       // check, if we can add another run
       // TODO keep non break runs in mind
       // TODO take properly care of spaces at the end of lines (they must be left out)
-      int32_t newAscend = std::max(curAscend, runs[spos].font->getAscender()/64);
-      int32_t newDescend = std::min(curDescend, runs[spos].font->getDescender()/64);
-      uint32_t newWidth = curWidth + runs[spos].dx;
 
-      if (shape.getLeft(ypos, ypos+newAscend-newDescend)+newWidth >
+      int32_t newAscend = curAscend;
+      int32_t newDescend = curDescend;
+      uint32_t newWidth = curWidth;
+      size_t newspos = spos;
+
+      while (newspos < runs.size())
+      {
+        newAscend = std::max(newAscend, runs[newspos].font->getAscender()/64);
+        newDescend = std::min(newDescend, runs[newspos].font->getDescender()/64);
+        newWidth += runs[newspos].dx;
+        if (   (runs[newspos].linebreak == LINEBREAK_ALLOWBREAK)
+            || (runs[newspos].linebreak == LINEBREAK_MUSTBREAK)
+           )
+          break;
+        newspos++;
+      }
+
+      newspos++;
+
+      if (spos > runstart &&
+          shape.getLeft(ypos, ypos+newAscend-newDescend)+newWidth >
           shape.getRight(ypos, ypos+newAscend-newDescend))
       {
         // next run would overrun
@@ -199,7 +217,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
       curAscend = newAscend;
       curDescend = newDescend;
       curWidth = newWidth;
-      spos++;
+      spos = newspos;
     }
 
     // reorder runs for current line
