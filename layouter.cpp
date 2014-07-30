@@ -21,6 +21,7 @@ typedef struct
   FriBidiLevel embeddingLevel;
   char linebreak;
   std::shared_ptr<fontFace_c> font;
+  bool space;   // was the run followed by a space?
 #ifdef _DEBUG_
   std::u32string text;
 #endif
@@ -60,7 +61,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
   std::vector<char> linebreaks(txt32.length());
   set_linebreaks_utf32((utf32_t*)txt32.c_str(), txt32.length(), "", linebreaks.data());
 
-  // Get our harfbuzz font structs, TODO we need to do that for all the fonts
+  // Get our harfbuzz font structs
   std::map<const std::shared_ptr<fontFace_c>, hb_font_t *> hb_ft_fonts;
 
   for (const auto & a : attr)
@@ -74,6 +75,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
   // Create a buffer for harfbuzz to use
   hb_buffer_t *buf = hb_buffer_create();
 
+  // TODO language information should go to hrafbuzz and liblinebreak for each section
   std::string lan = attr[0].lang.substr(0, 2);
   std::string s = attr[0].lang.substr(3, 4);
 
@@ -101,6 +103,17 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
       spos++;
     }
 
+    runInfo run;
+
+    if (txt32[spos-1] == U' ')
+    {
+      run.space = true;
+    }
+    else
+    {
+      run.space = false;
+    }
+
     hb_buffer_add_utf32(buf, ((uint32_t*)txt32.c_str())+runstart, spos-runstart, 0, spos-runstart);
 
     if (embedding_levels[runstart] % 2 == 0)
@@ -118,7 +131,6 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
     hb_glyph_info_t     *glyph_info   = hb_buffer_get_glyph_infos(buf, &glyph_count);
     hb_glyph_position_t *glyph_pos    = hb_buffer_get_glyph_positions(buf, &glyph_count);
 
-    runInfo run;
 
     run.dx = run.dy = 0;
     run.embeddingLevel = embedding_levels[runstart];
@@ -166,8 +178,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
   int n(0);
   std::generate(runorder.begin(), runorder.end(), [&]{ return n++; });
 
-  // layout a run
-  // TODO take care of different font sizes of the different runs
+  // layout a paragraph line by line
   runstart = 0;
   int32_t ypos = 0;
   textLayout_c l;
@@ -178,24 +189,26 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
     int32_t curDescend = 0;
     uint32_t curWidth = 0;
     size_t spos = runstart;
+    size_t numSpace = 0;
 
     // add runs until we run out of runs
     while (spos < runs.size())
     {
       // check, if we can add another run
-      // TODO keep non break runs in mind
       // TODO take properly care of spaces at the end of lines (they must be left out)
 
       int32_t newAscend = curAscend;
       int32_t newDescend = curDescend;
       uint32_t newWidth = curWidth;
       size_t newspos = spos;
+      size_t newSpace = numSpace;
 
       while (newspos < runs.size())
       {
         newAscend = std::max(newAscend, runs[newspos].font->getAscender()/64);
         newDescend = std::min(newDescend, runs[newspos].font->getDescender()/64);
         newWidth += runs[newspos].dx;
+        if (runs[newspos].space) newSpace++;
         if (   (runs[newspos].linebreak == LINEBREAK_ALLOWBREAK)
             || (runs[newspos].linebreak == LINEBREAK_MUSTBREAK)
            )
@@ -205,9 +218,10 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
 
       newspos++;
 
-      if (spos > runstart &&
-          shape.getLeft(ypos, ypos+newAscend-newDescend)+newWidth >
-          shape.getRight(ypos, ypos+newAscend-newDescend))
+      if (   (spos > runstart)
+          && (shape.getLeft(ypos, ypos+newAscend-newDescend)+newWidth >
+              shape.getRight(ypos, ypos+newAscend-newDescend))
+         )
       {
         // next run would overrun
         break;
@@ -218,7 +232,10 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
       curDescend = newDescend;
       curWidth = newWidth;
       spos = newspos;
+      numSpace = newSpace;
     }
+
+    if (runs[spos-1].space) numSpace--;
 
     // reorder runs for current line
     for (int i = max_level-1; i >= 0; i--)
@@ -264,15 +281,17 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
     {
       xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
       // don't justify last paragraph
-      if (spos-runstart > 1 && spos < runs.size())
-        spaceadder = 1.0 * spaceLeft / (spos-runstart - 1);
+      if (numSpace > 1 && spos < runs.size())
+        spaceadder = 1.0 * spaceLeft / numSpace;
     }
 
     ypos += curAscend;
+    numSpace = 0;
 
     for (size_t i = runstart; i < spos; i++)
     {
-      l.addCommandVector(runs[runorder[i]].run, xpos+spaceadder*(i-runstart), ypos);
+      l.addCommandVector(runs[runorder[i]].run, xpos+spaceadder*numSpace, ypos);
+      if (runs[runorder[i]].space) numSpace++;
       xpos += runs[runorder[i]].dx;
     }
 
