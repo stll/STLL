@@ -175,7 +175,9 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
 
     while (spos < runs.size())
     {
-      // check, if we can add another span
+      // check, if we can add another run
+      // TODO keep non break runs in mind
+      // TODO take properly care of spaces at the end of lines (they must be left out)
       int32_t newAscend = std::max(curAscend, runs[spos].font->getAscender()/64);
       int32_t newDescend = std::min(curDescend, runs[spos].font->getDescender()/64);
       uint32_t newWidth = curWidth + runs[spos].dx;
@@ -323,6 +325,7 @@ textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSheet_c &
            )
        )
     {
+      // TODO rahmen und anderes beachten
       l.append(layoutXML_P(i, rules, shape), 0, l.getHeight());
     }
     else if (i.type() == pugi::node_element && std::string("table") == i.name())
@@ -387,6 +390,9 @@ textLayout_c layoutXML(const pugi::xml_document & txt, const textStyleSheet_c & 
 textLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules, const shape_c & shape)
 {
   pugi::xml_document doc;
+  // TODO preprocess to get rid of linebreaks and multiple spaces
+
+
   // TODO handle parser errors
   doc.load_buffer(txt.c_str(), txt.length());
   return layoutXML(doc, rules, shape);
