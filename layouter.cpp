@@ -262,6 +262,24 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
   return l;
 }
 
+static std::string normalizeHTML(const std::string & in, char prev)
+{
+  std::string out;
+
+  for (auto a : in)
+  {
+    if (a == '\n' || a == '\r')
+      a = ' ';
+
+    if (a != ' ' || prev != ' ')
+      out += a;
+
+    prev = a;
+  }
+
+  return out;
+}
+
 void layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, std::u32string & txt,
                std::vector<codepointAttributes> & attr)
 {
@@ -269,7 +287,10 @@ void layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, std::u32
   {
     if (i.type() == pugi::node_pcdata)
     {
-      txt += u8_convertToU32(i.value());
+      if (txt.length() == 0)
+        txt = u8_convertToU32(normalizeHTML(i.value(), ' '));
+      else
+        txt += u8_convertToU32(normalizeHTML(i.value(), txt[txt.length()-1]));
 
       codepointAttributes a;
 
