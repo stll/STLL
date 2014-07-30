@@ -21,6 +21,9 @@ typedef struct
   FriBidiLevel embeddingLevel;
   char linebreak;
   std::shared_ptr<fontFace_c> font;
+#ifdef _DEBUG_
+  std::u32string text;
+#endif
 } runInfo;
 
 // TODO create a sharing structure, where we only
@@ -121,6 +124,9 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
     run.embeddingLevel = embedding_levels[runstart];
     run.linebreak = linebreaks[spos-1];
     run.font = attr[runstart].font;
+#ifdef _DEBUG_
+    run.text = txt32.substr(runstart, spos-runstart);
+#endif
 
     for (size_t j=0; j < glyph_count; ++j)
     {
