@@ -307,11 +307,11 @@ void layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, std::u32
       while (attr.size() < txt.length())
         attr.push_back(a);
     }
-    else if (i.type() == pugi::node_element && std::string("i") == i.name())
-    {
-      layoutXML_text(i, rules, txt, attr);
-    }
-    else if (i.type() == pugi::node_element && std::string("div") == i.name())
+    else if (   (i.type() == pugi::node_element)
+             && (   (std::string("i") == i.name())
+                 || (std::string("div") == i.name())
+                )
+            )
     {
       layoutXML_text(i, rules, txt, attr);
     }
