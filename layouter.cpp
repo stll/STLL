@@ -262,7 +262,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
   return l;
 }
 
-void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & rules, std::u32string & txt,
+void layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, std::u32string & txt,
                std::vector<codepointAttributes> & attr)
 {
   for (const auto & i : xml)
