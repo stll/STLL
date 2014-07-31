@@ -22,6 +22,7 @@ typedef struct
   char linebreak;
   std::shared_ptr<fontFace_c> font;
   bool space;   // is this run a space run?
+  bool shy;  // is this a soft hypen??
 #ifdef _DEBUG_
   std::u32string text;
 #endif
@@ -100,6 +101,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
               )
            && (txt32[spos] != U' ')
            && (txt32[spos-1] != U' ')
+           && (txt32[spos] != U'\u00AD')
           )
     {
       spos++;
@@ -116,7 +118,12 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
       run.space = false;
     }
 
-    hb_buffer_add_utf32(buf, ((uint32_t*)txt32.c_str())+runstart, spos-runstart, 0, spos-runstart);
+    run.shy = txt32[runstart] == U'\u00AD';
+
+    if (!run.shy)
+      hb_buffer_add_utf32(buf, ((uint32_t*)txt32.c_str())+runstart, spos-runstart, 0, spos-runstart);
+    else
+      hb_buffer_add_utf32(buf, (uint32_t*)U"\u2010", 1, 0, 1);
 
     if (embedding_levels[runstart] % 2 == 0)
     {
@@ -238,6 +245,8 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
         break;
       }
 
+      if ((spos > runstart) && runs[spos-1].shy) newWidth -= runs[spos-1].dx;
+
       // additional run fits
       curAscend = newAscend;
       curDescend = newDescend;
@@ -301,9 +310,12 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
 
     for (size_t i = runstart; i < spos; i++)
     {
-      l.addCommandVector(runs[runorder[i]].run, xpos+spaceadder*numSpace, ypos);
-      if (runs[runorder[i]].space) numSpace++;
-      xpos += runs[runorder[i]].dx;
+      if (!runs[i].shy || i+1 == spos)
+      {
+        l.addCommandVector(runs[runorder[i]].run, xpos+spaceadder*numSpace, ypos);
+        if (runs[runorder[i]].space) numSpace++;
+        xpos += runs[runorder[i]].dx;
+      }
     }
 
     ypos -= curDescend;
