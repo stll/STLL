@@ -75,7 +75,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
   // Create a buffer for harfbuzz to use
   hb_buffer_t *buf = hb_buffer_create();
 
-  // TODO language information should go to hrafbuzz and liblinebreak for each section
+  // TODO language information should go to harfbuzz and liblinebreak for each section
   std::string lan = attr[0].lang.substr(0, 2);
   std::string s = attr[0].lang.substr(3, 4);
 
