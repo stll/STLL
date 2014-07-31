@@ -119,6 +119,19 @@ class rectangleShape_c : public shape_c
     virtual int32_t getRight(int32_t /*top*/, int32_t /*bottom*/) const { return w; }
 };
 
+class indentShape_c : public shape_c
+{
+  private:
+    int32_t ind_left, ind_right;
+    const shape_c & outside;
+
+  public:
+    indentShape_c(const shape_c & s, int32_t li, int32_t ri) : outside(s), ind_left(li), ind_right(ri) { }
+
+    virtual int32_t getLeft(int32_t top, int32_t bottom) const { return outside.getLeft(top, bottom)+ind_left; }
+    virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top, bottom)-ind_right; }
+};
+
 // the layouting routines
 
 // layout the given XHTML code

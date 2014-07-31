@@ -335,6 +335,17 @@ static std::string normalizeHTML(const std::string & in, char prev)
   return out;
 }
 
+static std::shared_ptr<fontFace_c> getFontForNode(pugi::xml_node xml, const textStyleSheet_c & rules)
+{
+  std::string fontFamily = rules.getValue(xml, "font-family");
+  std::string fontStyle = rules.getValue(xml, "font-style");
+  std::string fontVariant = rules.getValue(xml, "font-variant");
+  std::string fontWeight = rules.getValue(xml, "font-weight");
+  double fontSize = evalSize(rules.getValue(xml, "font-size"));
+
+  return rules.findFamily(fontFamily)->getFont(64*fontSize, fontStyle, fontVariant, fontWeight);
+}
+
 void layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, std::u32string & txt,
                std::vector<codepointAttributes> & attr)
 {
@@ -350,13 +361,7 @@ void layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, std::u32
       codepointAttributes a;
 
       evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b);
-      std::string fontFamily = rules.getValue(xml, "font-family");
-      std::string fontStyle = rules.getValue(xml, "font-style");
-      std::string fontVariant = rules.getValue(xml, "font-variant");
-      std::string fontWeight = rules.getValue(xml, "font-weight");
-      double fontSize = evalSize(rules.getValue(xml, "font-size"));
-
-      a.font = rules.findFamily(fontFamily)->getFont(64*fontSize, fontStyle, fontVariant, fontWeight);
+      a.font = getFontForNode(xml, rules);
       a.lang = "en-eng";
 
       while (attr.size() < txt.length())
@@ -384,6 +389,36 @@ textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet_c & ru
   return layoutParagraph(txt, attr, shape, rules.getValue(xml, "text-align"));
 }
 
+textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape)
+{
+  textLayout_c l;
+  for (const auto & i : txt)
+  {
+    if (   (i.type() == pugi::node_element)
+        && (std::string("li") == i.name())
+       )
+    {
+      // TODO depends on direction of text
+      pugi::xml_node j = txt;
+      while (j.type() != pugi::node_pcdata)
+        j = j.first_child();
+
+      auto font = getFontForNode(j, rules);
+      auto y = l.getHeight();
+
+      // TODO better indentation, todo colour of bullet right now fixed to white
+      l.append(layoutRaw(u8"\u2022", font, shape, "en-eng"), 0, y);
+      l.append(layoutXML_P(i, rules, indentShape_c(shape, font->getAscender()/64, 0)), 0, y);
+    }
+    else
+    {
+      // TODO esception?
+    }
+  }
+
+  return l;
+}
+
 textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape)
 {
   textLayout_c l;
@@ -406,6 +441,10 @@ textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSheet_c &
     }
     else if (i.type() == pugi::node_element && std::string("table") == i.name())
     {
+    }
+    else if (i.type() == pugi::node_element && std::string("ul") == i.name())
+    {
+      l.append(layoutXML_UL(i, rules, shape), 0, l.getHeight());
     }
     else
     {
