@@ -21,7 +21,7 @@ typedef struct
   FriBidiLevel embeddingLevel;
   char linebreak;
   std::shared_ptr<fontFace_c> font;
-  bool space;   // was the run followed by a space?
+  bool space;   // is this run a space run?
 #ifdef _DEBUG_
   std::u32string text;
 #endif
@@ -98,6 +98,8 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
            && (   (linebreaks[spos-1] == LINEBREAK_NOBREAK)
                || (linebreaks[spos-1] == LINEBREAK_INSIDEACHAR)
               )
+           && (txt32[spos] != U' ')
+           && (txt32[spos-1] != U' ')
           )
     {
       spos++;
@@ -183,6 +185,8 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
   int32_t ypos = 0;
   textLayout_c l;
 
+  while (runstart < runs.size() && runs[runstart].space) runstart++;
+
   while (runstart < runs.size())
   {
     int32_t curAscend = 0;
@@ -209,8 +213,15 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
         newDescend = std::min(newDescend, runs[newspos].font->getDescender()/64);
         newWidth += runs[newspos].dx;
         if (runs[newspos].space) newSpace++;
-        if (   (runs[newspos].linebreak == LINEBREAK_ALLOWBREAK)
-            || (runs[newspos].linebreak == LINEBREAK_MUSTBREAK)
+        if (  (    (newspos+1) < runs.size()
+                && (runs[newspos+1].space)
+                && (   (runs[newspos+1].linebreak == LINEBREAK_ALLOWBREAK)
+                    || (runs[newspos+1].linebreak == LINEBREAK_MUSTBREAK))
+              )
+            ||(    (!runs[newspos].space)
+                && (   (runs[newspos].linebreak == LINEBREAK_ALLOWBREAK)
+                    || (runs[newspos].linebreak == LINEBREAK_MUSTBREAK))
+              )
            )
           break;
         newspos++;
@@ -297,6 +308,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
 
     ypos -= curDescend;
     runstart = spos;
+    while (runstart < runs.size() && runs[runstart].space) runstart++;
   }
 
   // TODO proper font handling for multiple fonts in a line
