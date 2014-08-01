@@ -2,17 +2,10 @@
 #define __LAYOUTER_H__
 
 #include "layouterFont.h"
-#include "layouterCSS.h"
-
-#include <boost/utility.hpp>
-
-#include <pugixml.hpp>
 
 #include <string>
-#include <memory>
-#include <assert.h>
 #include <vector>
-#include <map>
+#include <memory>
 
 // encapsulates a finished layout, the layout is supposed to be unchangeable after creation
 class textLayout_c
@@ -99,6 +92,17 @@ class textLayout_c
     void setHeight(uint32_t h) { height = h; }
 };
 
+// TODO create a sharing structure, where we only
+// define structures for each configuration once
+// and link to it
+// but for now it is good as it is
+typedef struct
+{
+  uint8_t r, g, b;
+  std::shared_ptr<fontFace_c> font;
+  std::string lang;
+} codepointAttributes;
+
 // this class contains the information about the shape that a paragraph should have
 class shape_c
 {
@@ -119,26 +123,12 @@ class rectangleShape_c : public shape_c
     virtual int32_t getRight(int32_t /*top*/, int32_t /*bottom*/) const { return w; }
 };
 
-class indentShape_c : public shape_c
-{
-  private:
-    int32_t ind_left, ind_right;
-    const shape_c & outside;
-
-  public:
-    indentShape_c(const shape_c & s, int32_t li, int32_t ri) : outside(s), ind_left(li), ind_right(ri) { }
-
-    virtual int32_t getLeft(int32_t top, int32_t bottom) const { return outside.getLeft(top, bottom)+ind_left; }
-    virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top, bottom)-ind_right; }
-};
 
 // the layouting routines
 
-// layout the given XHTML code
-textLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules, const shape_c & shape);
-
-// layout the given pugi-XML nodes, they must be a parsed XHTML document
-textLayout_c layoutXML(const pugi::xml_document & txt, const textStyleSheet_c & rules, const shape_c & shape);
+// base layout function that does the layouting stuff for one paragraph
+textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<codepointAttributes> & attr,
+                             const shape_c & shape, const std::string & align);
 
 // layout raw text using the font given the given string must be utf-8
 textLayout_c layoutRaw(const std::string & txt, const std::shared_ptr<fontFace_c> font, const shape_c & shape, const std::string & language = "en");

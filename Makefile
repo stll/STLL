@@ -25,8 +25,8 @@ LDFLAGS=-Wl,-rpath -Wl,$(PREFIX)/lib
 
 all: test
 
-test: main.o layouter.o layouterSDL.o layouterFont.o utf-8.o layouterCSS.o
-	$(CC) -o test main.o layouter.o layouterSDL.o layouterFont.o utf-8.o layouterCSS.o $(LIBS)
+test: main.o layouter.o layouterSDL.o layouterFont.o utf-8.o layouterCSS.o layouterXHTML.o
+	$(CC) -o test main.o layouter.o layouterSDL.o layouterFont.o utf-8.o layouterCSS.o layouterXHTML.o $(LIBS)
 
 clean:
 	rm -f ex-sdl-freetype-harfbuzz
