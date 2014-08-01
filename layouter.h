@@ -153,12 +153,26 @@ class rectangleShape_c : public shape_c
     virtual int32_t getRight(int32_t /*top*/, int32_t /*bottom*/) const { return w; }
 };
 
+typedef struct {
+  enum {
+    ALG_LEFT,
+    ALG_RIGHT,
+    ALG_CENTER,
+    ALG_JUSTIFY_LEFT,
+    ALG_JUSTIFY_RIGHT
+  } align;
+
+  int32_t indent;
+
+} layoutProperties;
+
+
 
 // the layouting routines
 
 // base layout function that does the layouting stuff for one paragraph
 textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
-                             const shape_c & shape, const std::string & align, int32_t ystart);
+                             const shape_c & shape, const layoutProperties & prop, int32_t ystart);
 
 // layout raw text using the font given the given string must be utf-8
 textLayout_c layoutRaw(const std::string & txt, codepointAttributes attr,

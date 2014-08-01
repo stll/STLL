@@ -174,7 +174,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 static textLayout_c breakLines(const std::vector<runInfo> & runs,
                                const shape_c & shape,
                                FriBidiLevel max_level,
-                               const std::string & align, int32_t ystart)
+                               const layoutProperties & prop, int32_t ystart)
 {
   std::vector<size_t> runorder(runs.size());
   int n(0);
@@ -278,24 +278,39 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
     int32_t xpos;
     double spaceadder = 0;
 
-    if (align == "left")
+    switch (prop.align)
     {
-      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
-    }
-    else if (align == "right")
-    {
-      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft;
-    }
-    else if (align == "center")
-    {
-      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft/2;
-    }
-    else if (align == "justify")
-    {
-      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
-      // don't justify last paragraph
-      if (numSpace > 1 && spos < runs.size())
-        spaceadder = 1.0 * spaceLeft / numSpace;
+      case layoutProperties::ALG_LEFT:
+        xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
+        break;
+
+      case layoutProperties::ALG_RIGHT:
+        xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft;
+        break;
+
+      case layoutProperties::ALG_CENTER:
+        xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft/2;
+        break;
+
+      case layoutProperties::ALG_JUSTIFY_LEFT:
+        xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
+        // don't justify last paragraph
+        if (numSpace > 1 && spos < runs.size())
+          spaceadder = 1.0 * spaceLeft / numSpace;
+        break;
+
+      case layoutProperties::ALG_JUSTIFY_RIGHT:
+        // don't justify last paragraph
+        if (numSpace > 1 && spos < runs.size())
+        {
+          xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
+          spaceadder = 1.0 * spaceLeft / numSpace;
+        }
+        else
+        {
+          xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft;
+        }
+        break;
     }
 
     ypos += curAscend;
@@ -323,7 +338,7 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
 }
 
 textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
-                             const shape_c & shape, const std::string & align, int32_t ystart)
+                             const shape_c & shape, const layoutProperties & prop, int32_t ystart)
 {
   // calculate embedding types for the text
   std::vector<FriBidiLevel> embedding_levels;
@@ -335,7 +350,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_
 
   std::vector<runInfo> runs = createTextRuns(txt32, attr, embedding_levels, linebreaks);
 
-  return breakLines(runs, shape, max_level, align, ystart);
+  return breakLines(runs, shape, max_level, prop, ystart);
 }
 
 textLayout_c layoutRaw(const std::string & txt, codepointAttributes a,
@@ -350,5 +365,8 @@ textLayout_c layoutRaw(const std::string & txt, codepointAttributes a,
 
   attr.set(0, a);
 
-  return layoutParagraph(txt32, attr, shape, "left", ystart);
+  layoutProperties prop;
+  prop.align = layoutProperties::ALG_LEFT;
+
+  return layoutParagraph(txt32, attr, shape, prop, ystart);
 }

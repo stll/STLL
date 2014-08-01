@@ -100,7 +100,28 @@ static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet
 
   layoutXML_text(xml, rules, txt, attr);
 
-  return layoutParagraph(txt, attr, shape, rules.getValue(xml, "text-align"), ystart);
+  layoutProperties lprop;
+  std::string s = rules.getValue(xml, "text-align");
+
+  if      (s == "left")   lprop.align = layoutProperties::ALG_LEFT;
+  else if (s == "right")  lprop.align = layoutProperties::ALG_RIGHT;
+  else if (s == "center") lprop.align = layoutProperties::ALG_CENTER;
+  else if (s == "justify") {
+    s = rules.getValue(xml, "text-align-last");
+    if      (s == "left")  lprop.align = layoutProperties::ALG_JUSTIFY_LEFT;
+    else if (s == "right") lprop.align = layoutProperties::ALG_JUSTIFY_RIGHT;
+    else if (s == "")      lprop.align = layoutProperties::ALG_JUSTIFY_LEFT;
+    else { // TODO throw error
+    }
+  }
+  else
+  {
+   // TODO throw error
+  }
+
+  lprop.indent = 0;
+
+  return layoutParagraph(txt, attr, shape, lprop, ystart);
 }
 
 static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
