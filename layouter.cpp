@@ -28,7 +28,7 @@ typedef struct
 } runInfo;
 
 
-FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32, std::vector<FriBidiLevel> & embedding_levels)
+static FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32, std::vector<FriBidiLevel> & embedding_levels)
 {
   std::vector<FriBidiCharType> bidiTypes(txt32.length());
   fribidi_get_bidi_types((uint32_t*)txt32.c_str(), txt32.length(), bidiTypes.data());
@@ -40,17 +40,12 @@ FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32, std::vector<Fr
   return max_level;
 }
 
-textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<codepointAttributes> & attr,
-                             const shape_c & shape, const std::string & align)
+static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
+                                           const std::vector<codepointAttributes> & attr,
+                                           const std::vector<FriBidiLevel> & embedding_levels,
+                                           const std::vector<char> & linebreaks
+                                          )
 {
-  // calculate embedding types for the text
-  std::vector<FriBidiLevel> embedding_levels;
-  FriBidiLevel max_level = getBidiEmbeddingLevels(txt32, embedding_levels);
-
-  // calculate the possible linebreak positions
-  std::vector<char> linebreaks(txt32.length());
-  set_linebreaks_utf32((utf32_t*)txt32.c_str(), txt32.length(), "", linebreaks.data());
-
   // Get our harfbuzz font structs
   std::map<const std::shared_ptr<fontFace_c>, hb_font_t *> hb_ft_fonts;
 
@@ -69,10 +64,10 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
   std::string lan = attr[0].lang.substr(0, 2);
   std::string s = attr[0].lang.substr(3, 4);
 
-  hb_script_t scr = hb_script_from_iso15924_tag(HB_TAG(s[0], s[1], s[2], s[3]));
-  hb_buffer_set_script(buf, scr);
+//  hb_script_t scr = hb_script_from_iso15924_tag(HB_TAG(s[0], s[1], s[2], s[3]));
+//  hb_buffer_set_script(buf, scr);
   // TODO must come either from text or from rules
-  hb_buffer_set_language(buf, hb_language_from_string(lan.c_str(), lan.length()));
+//  hb_buffer_set_language(buf, hb_language_from_string(lan.c_str(), lan.length()));
 
   size_t runstart = 0;
 
@@ -129,7 +124,6 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
     hb_glyph_info_t     *glyph_info   = hb_buffer_get_glyph_infos(buf, &glyph_count);
     hb_glyph_position_t *glyph_pos    = hb_buffer_get_glyph_positions(buf, &glyph_count);
 
-
     run.dx = run.dy = 0;
     run.embeddingLevel = embedding_levels[runstart];
     run.linebreak = linebreaks[spos-1];
@@ -172,12 +166,20 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
   for (auto & a : hb_ft_fonts)
     hb_font_destroy(a.second);
 
+  return runs;
+}
+
+static textLayout_c breakLines(const std::vector<runInfo> & runs,
+                               const shape_c & shape,
+                               FriBidiLevel max_level,
+                               const std::string & align)
+{
   std::vector<size_t> runorder(runs.size());
   int n(0);
   std::generate(runorder.begin(), runorder.end(), [&]{ return n++; });
 
   // layout a paragraph line by line
-  runstart = 0;
+  size_t runstart = 0;
   int32_t ypos = 0;
   textLayout_c l;
 
@@ -316,6 +318,22 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
   l.setHeight(ypos);
 
   return l;
+}
+
+textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<codepointAttributes> & attr,
+                             const shape_c & shape, const std::string & align)
+{
+  // calculate embedding types for the text
+  std::vector<FriBidiLevel> embedding_levels;
+  FriBidiLevel max_level = getBidiEmbeddingLevels(txt32, embedding_levels);
+
+  // calculate the possible linebreak positions
+  std::vector<char> linebreaks(txt32.length());
+  set_linebreaks_utf32((utf32_t*)txt32.c_str(), txt32.length(), "", linebreaks.data());
+
+  std::vector<runInfo> runs = createTextRuns(txt32, attr, embedding_levels, linebreaks);
+
+  return breakLines(runs, shape, max_level, align);
 }
 
 textLayout_c layoutRaw(const std::string & txt, const std::shared_ptr<fontFace_c> font, const shape_c & shape, const std::string & language)
