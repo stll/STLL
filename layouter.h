@@ -80,7 +80,7 @@ class textLayout_c
 
     textLayout_c(void) : height(0) { }
 
-    textLayout_c(const textLayout_c & src) : data(src.data), height(src.height) {  }
+    textLayout_c(const textLayout_c & src) : height(src.height), data(src.data)  {  }
 
     textLayout_c(textLayout_c && src)
     {

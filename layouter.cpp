@@ -187,7 +187,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
   {
     int32_t curAscend = 0;
     int32_t curDescend = 0;
-    uint32_t curWidth = 0;
+    int32_t curWidth = 0;
     size_t spos = runstart;
     size_t numSpace = 0;
 
@@ -199,7 +199,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
 
       int32_t newAscend = curAscend;
       int32_t newDescend = curDescend;
-      uint32_t newWidth = curWidth;
+      int32_t newWidth = curWidth;
       size_t newspos = spos;
       size_t newSpace = numSpace;
 

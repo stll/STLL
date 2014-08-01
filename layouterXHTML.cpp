@@ -7,8 +7,8 @@
 class indentShape_c : public shape_c
 {
   private:
-    int32_t ind_left, ind_right;
     const shape_c & outside;
+    int32_t ind_left, ind_right;
 
   public:
     indentShape_c(const shape_c & s, int32_t li, int32_t ri) : outside(s), ind_left(li), ind_right(ri) { }
