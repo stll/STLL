@@ -1,4 +1,4 @@
-#include "layouter.h"
+#include "layouterXHTML.h"
 #include "layouterSDL.h"
 
 #define TXT_WIDTH 700
@@ -32,15 +32,17 @@ int main ()
 
   // der zu formatierende text
   std::string text = u8"<html><body>"
-    "<h1>Überschrift</h1><p>Test <i>Text</i> more and some"
-    "<div class=\"BoldFont\">more text so</div> that the pa\u00ADra\u00ADgraph is at least "
+    "<h1>Überschrift</h1>"
+    "<p>Test <i>Text</i> more and some "
+    "<div class='BoldFont'>more text so</div> that the pa\u00ADra\u00ADgraph is at least "
     "<div>long</div> enough to span some lines on the screen let us "
     "also <i>i</i>nclude sm hebrew נייה, העגורן הוא and back to english</p>"
-    "<p>2nd Paragraph<div class=\"BigFont\"> with <div class=\"BoldFont\">a\ndivision</div>"
+    "<p>2nd Paragraph<div class='BigFont'> with <div class='BoldFont'>a\ndivision</div>"
     "</div>.</p>"
     "<p>a b c andnowone<i>very</i>longwordthatdoesntfitononelineandmight d e f °C</p>"
     "<ul><li>First long text in an ul list of html sdfsd fsd fs dfsd f gobble di gock and"
     "even more</li><li>Second with just a bit</li></ul>"
+    "<p>Margaret­Are­You­Grieving­Over­Goldengrove­Unleaving­Leaves­Like­The­Things­Of­Man­You­With­Your­Fresh­Thoughts­Care­For­Can­You­Ah­As­The­Heart­Grows­Older­It­Will­Come­To­Such­Sights­Colder­By­And­By­Nor­Spare­A­Sigh­Though­Worlds­Of­Wanwood­Leafmeal­Lie­And­Yet­You­Will­Weep­And­Know­Why­Now­No­Matter­Child­The­Name­Sorrows­Springs­Are­The­Same­Nor­Mouth­Had­No­Nor­Mind­Expressed­What­Heart­Heard­Of­Ghost­Guessed­It­Is­The­Blight­Man­Was­Born­For­It­Is­Margaret­You­Mourn­For</p>"
     "</body></html>";
 
   // Vektor mit auszugebenden Text layouts, besteht immer aus einem layoute
