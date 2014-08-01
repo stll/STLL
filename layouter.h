@@ -99,6 +99,40 @@ typedef struct
   std::string lang;
 } codepointAttributes;
 
+
+class attributeIndex_c
+{
+  private:
+    std::vector<codepointAttributes> attr;
+
+  public:
+    attributeIndex_c(void) { }
+
+    void set(size_t i, codepointAttributes a)
+    {
+      if (i >= attr.size())
+        attr.resize(i+1);
+      attr[i] = a;
+    }
+
+   void set(size_t start, size_t end, codepointAttributes a)
+   {
+     if (end > attr.size())
+       attr.resize(end);
+
+     for (size_t i = start; i < end; i++)
+       attr[i] = a;
+   }
+
+    const codepointAttributes & get(size_t i) const
+    {
+      if (i < attr.size())
+        return attr[i];
+      else
+        return attr[0];
+    }
+};
+
 // this class contains the information about the shape that a paragraph should have
 class shape_c
 {
@@ -123,7 +157,7 @@ class rectangleShape_c : public shape_c
 // the layouting routines
 
 // base layout function that does the layouting stuff for one paragraph
-textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<codepointAttributes> & attr,
+textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
                              const shape_c & shape, const std::string & align, int32_t ystart);
 
 // layout raw text using the font given the given string must be utf-8

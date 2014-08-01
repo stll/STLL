@@ -41,7 +41,7 @@ static FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32, std::ve
 }
 
 static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
-                                           const std::vector<codepointAttributes> & attr,
+                                           const attributeIndex_c & attr,
                                            const std::vector<FriBidiLevel> & embedding_levels,
                                            const std::vector<char> & linebreaks
                                           )
@@ -49,8 +49,10 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
   // Get our harfbuzz font structs
   std::map<const std::shared_ptr<fontFace_c>, hb_font_t *> hb_ft_fonts;
 
-  for (const auto & a : attr)
+  for (size_t i = 0; i < txt32.length(); i++)
   {
+    auto a = attr.get(i);
+
     if (hb_ft_fonts.find(a.font) == hb_ft_fonts.end())
     {
       hb_ft_fonts[a.font] = hb_ft_font_create(a.font->getFace(), NULL);
@@ -61,8 +63,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
   hb_buffer_t *buf = hb_buffer_create();
 
   // TODO language information should go to harfbuzz and liblinebreak for each section
-  std::string lan = attr[0].lang.substr(0, 2);
-  std::string s = attr[0].lang.substr(3, 4);
+  std::string lan = attr.get(0).lang.substr(0, 2);
+  std::string s = attr.get(0).lang.substr(3, 4);
 
 //  hb_script_t scr = hb_script_from_iso15924_tag(HB_TAG(s[0], s[1], s[2], s[3]));
 //  hb_buffer_set_script(buf, scr);
@@ -79,7 +81,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     // find end of current run
     while (   (spos < txt32.length())
            && (embedding_levels[runstart] == embedding_levels[spos])
-           && (attr[runstart].font == attr[spos].font)
+           && (attr.get(runstart).font == attr.get(spos).font)
            && (   (linebreaks[spos-1] == LINEBREAK_NOBREAK)
                || (linebreaks[spos-1] == LINEBREAK_INSIDEACHAR)
               )
@@ -118,7 +120,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       hb_buffer_set_direction(buf, HB_DIRECTION_RTL);
     }
 
-    hb_shape(hb_ft_fonts[attr[runstart].font], buf, NULL, 0);
+    hb_shape(hb_ft_fonts[attr.get(runstart).font], buf, NULL, 0);
 
     unsigned int         glyph_count;
     hb_glyph_info_t     *glyph_info   = hb_buffer_get_glyph_infos(buf, &glyph_count);
@@ -127,7 +129,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     run.dx = run.dy = 0;
     run.embeddingLevel = embedding_levels[runstart];
     run.linebreak = linebreaks[spos-1];
-    run.font = attr[runstart].font;
+    run.font = attr.get(runstart).font;
 #ifdef _DEBUG_
     run.text = txt32.substr(runstart, spos-runstart);
 #endif
@@ -137,7 +139,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       textLayout_c::commandData g;
 
       g.glyphIndex = glyph_info[j].codepoint;
-      g.font = attr[runstart].font;
+      g.font = attr.get(runstart).font;
       // TODO the other parameters
 
       g.x = run.dx + (glyph_pos[j].x_offset/64);
@@ -146,9 +148,9 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       run.dx += glyph_pos[j].x_advance/64;
       run.dy -= glyph_pos[j].y_advance/64;
 
-      g.r = attr[glyph_info[j].cluster + runstart].r;
-      g.g = attr[glyph_info[j].cluster + runstart].g;
-      g.b = attr[glyph_info[j].cluster + runstart].b;
+      g.r = attr.get(glyph_info[j].cluster + runstart).r;
+      g.g = attr.get(glyph_info[j].cluster + runstart).g;
+      g.b = attr.get(glyph_info[j].cluster + runstart).b;
 
       g.command = textLayout_c::commandData::CMD_GLYPH;
 
@@ -320,7 +322,7 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
   return l;
 }
 
-textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<codepointAttributes> & attr,
+textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
                              const shape_c & shape, const std::string & align, int32_t ystart)
 {
   // calculate embedding types for the text
@@ -343,14 +345,15 @@ textLayout_c layoutRaw(const std::string & txt, const std::shared_ptr<fontFace_c
   // and assign the given font and language to all the codepoints of that text
 
   std::u32string txt32 = u8_convertToU32(txt);
-  std::vector<codepointAttributes> attr(txt32.size());
+  attributeIndex_c attr;
 
-  for (auto & i : attr)
-  {
-    i.r = i.g = i.b = 255;
-    i.font = font;
-    i.lang = language;
-  }
+  codepointAttributes i;
+
+  i.r = i.g = i.b = 255;
+  i.font = font;
+  i.lang = language;
+
+  attr.set(0, i);
 
   return layoutParagraph(txt32, attr, shape, "left", ypos);
 }

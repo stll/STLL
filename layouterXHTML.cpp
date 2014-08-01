@@ -60,12 +60,14 @@ static std::shared_ptr<fontFace_c> getFontForNode(pugi::xml_node xml, const text
 }
 
 static void layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, std::u32string & txt,
-               std::vector<codepointAttributes> & attr)
+               attributeIndex_c & attr)
 {
   for (const auto & i : xml)
   {
     if (i.type() == pugi::node_pcdata)
     {
+      size_t s = txt.length();
+
       if (txt.length() == 0)
         txt = u8_convertToU32(normalizeHTML(i.value(), ' '));
       else
@@ -77,8 +79,7 @@ static void layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, s
       a.font = getFontForNode(xml, rules);
       a.lang = "en-eng";
 
-      while (attr.size() < txt.length())
-        attr.push_back(a);
+      attr.set(s, txt.length(), a);
     }
     else if (   (i.type() == pugi::node_element)
              && (   (std::string("i") == i.name())
@@ -95,7 +96,7 @@ static void layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, s
 static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
   std::u32string txt;
-  std::vector<codepointAttributes> attr;
+  attributeIndex_c attr;
 
   layoutXML_text(xml, rules, txt, attr);
 
