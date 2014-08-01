@@ -122,7 +122,14 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleShee
       auto y = l.getHeight();
 
       // TODO better indentation, todo colour of bullet right now fixed to white
-      l.append(layoutRaw(u8"\u2022", font, shape, "en-eng", y));
+      codepointAttributes a;
+      evalColor(rules.getValue(txt, "color"), a.r, a.g, a.b);
+      a.font = font;
+
+      // TODO do properly
+      a.lang = "en-engl";
+
+      l.append(layoutRaw(u8"\u2022", a, shape, y));
       l.append(layoutXML_P(i, rules, indentShape_c(shape, font->getAscender()/64, 0), y));
     }
     else

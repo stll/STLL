@@ -88,14 +88,14 @@ class textLayout_c
     void setHeight(uint32_t h) { height = h; }
 };
 
-// TODO create a sharing structure, where we only
-// define structures for each configuration once
-// and link to it
-// but for now it is good as it is
+// this structure contains all attributes that a single glyph can get assigned
 typedef struct
 {
+  // color of the letter
   uint8_t r, g, b;
+  // font of the letter
   std::shared_ptr<fontFace_c> font;
+  // of which languages it is
   std::string lang;
 } codepointAttributes;
 
@@ -161,7 +161,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_
                              const shape_c & shape, const std::string & align, int32_t ystart);
 
 // layout raw text using the font given the given string must be utf-8
-textLayout_c layoutRaw(const std::string & txt, const std::shared_ptr<fontFace_c> font,
-                       const shape_c & shape, const std::string & language = "en", int32_t ystart = 0);
+textLayout_c layoutRaw(const std::string & txt, codepointAttributes attr,
+                       const shape_c & shape, int32_t ystart = 0);
 
 #endif
