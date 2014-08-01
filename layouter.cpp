@@ -172,7 +172,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 static textLayout_c breakLines(const std::vector<runInfo> & runs,
                                const shape_c & shape,
                                FriBidiLevel max_level,
-                               const std::string & align)
+                               const std::string & align, int32_t ystart)
 {
   std::vector<size_t> runorder(runs.size());
   int n(0);
@@ -180,7 +180,7 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
 
   // layout a paragraph line by line
   size_t runstart = 0;
-  int32_t ypos = 0;
+  int32_t ypos = ystart;
   textLayout_c l;
 
   while (runstart < runs.size() && runs[runstart].space) runstart++;
@@ -321,7 +321,7 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
 }
 
 textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<codepointAttributes> & attr,
-                             const shape_c & shape, const std::string & align)
+                             const shape_c & shape, const std::string & align, int32_t ystart)
 {
   // calculate embedding types for the text
   std::vector<FriBidiLevel> embedding_levels;
@@ -333,10 +333,10 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<cod
 
   std::vector<runInfo> runs = createTextRuns(txt32, attr, embedding_levels, linebreaks);
 
-  return breakLines(runs, shape, max_level, align);
+  return breakLines(runs, shape, max_level, align, ystart);
 }
 
-textLayout_c layoutRaw(const std::string & txt, const std::shared_ptr<fontFace_c> font, const shape_c & shape, const std::string & language)
+textLayout_c layoutRaw(const std::string & txt, const std::shared_ptr<fontFace_c> font, const shape_c & shape, const std::string & language, int32_t ypos)
 {
   // when we layout raw text we
   // only have to convert the text to utf-32
@@ -352,5 +352,5 @@ textLayout_c layoutRaw(const std::string & txt, const std::shared_ptr<fontFace_c
     i.lang = language;
   }
 
-  return layoutParagraph(txt32, attr, shape, "left");
+  return layoutParagraph(txt32, attr, shape, "left", ypos);
 }

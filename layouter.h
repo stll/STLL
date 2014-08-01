@@ -52,16 +52,12 @@ class textLayout_c
       }
     }
 
-    void append(const textLayout_c & l, int32_t dx, int32_t dy)
+    void append(const textLayout_c & l)
     {
       for (auto a : l.data)
-      {
-        a.x += dx;
-        a.y += dy;
         data.push_back(a);
-      }
 
-      height = std::max(height, dy+l.height);
+      height = std::max(height, l.height);
     }
 
     void operator=(textLayout_c && l)
@@ -128,9 +124,10 @@ class rectangleShape_c : public shape_c
 
 // base layout function that does the layouting stuff for one paragraph
 textLayout_c layoutParagraph(const std::u32string & txt32, const std::vector<codepointAttributes> & attr,
-                             const shape_c & shape, const std::string & align);
+                             const shape_c & shape, const std::string & align, int32_t ystart);
 
 // layout raw text using the font given the given string must be utf-8
-textLayout_c layoutRaw(const std::string & txt, const std::shared_ptr<fontFace_c> font, const shape_c & shape, const std::string & language = "en");
+textLayout_c layoutRaw(const std::string & txt, const std::shared_ptr<fontFace_c> font,
+                       const shape_c & shape, const std::string & language = "en", int32_t ystart = 0);
 
 #endif

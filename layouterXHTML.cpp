@@ -17,6 +17,18 @@ class indentShape_c : public shape_c
     virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top, bottom)-ind_right; }
 };
 
+class shiftShape_c : public shape_c
+{
+  private:
+    const shape_c & outside;
+    int32_t shift;
+
+  public:
+    shiftShape_c(const shape_c & s, int32_t sh) : outside(s), shift(sh) { }
+
+    virtual int32_t getLeft(int32_t top, int32_t bottom) const { return outside.getLeft(top+shift, bottom+shift); }
+    virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top+shift, bottom+shift); }
+};
 
 static std::string normalizeHTML(const std::string & in, char prev)
 {
@@ -80,19 +92,20 @@ static void layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, s
 }
 
 // this whole stuff is a recursive descending parser of the XHTML stuff
-static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape)
+static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
   std::u32string txt;
   std::vector<codepointAttributes> attr;
 
   layoutXML_text(xml, rules, txt, attr);
 
-  return layoutParagraph(txt, attr, shape, rules.getValue(xml, "text-align"));
+  return layoutParagraph(txt, attr, shape, rules.getValue(xml, "text-align"), ystart);
 }
 
-static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape)
+static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
   textLayout_c l;
+  l.setHeight(ystart);
   for (const auto & i : txt)
   {
     if (   (i.type() == pugi::node_element)
@@ -108,8 +121,8 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleShee
       auto y = l.getHeight();
 
       // TODO better indentation, todo colour of bullet right now fixed to white
-      l.append(layoutRaw(u8"\u2022", font, shape, "en-eng"), 0, y);
-      l.append(layoutXML_P(i, rules, indentShape_c(shape, font->getAscender()/64, 0)), 0, y);
+      l.append(layoutRaw(u8"\u2022", font, shape, "en-eng", y));
+      l.append(layoutXML_P(i, rules, indentShape_c(shape, font->getAscender()/64, 0), y));
     }
     else
     {
@@ -138,14 +151,14 @@ static textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSh
        )
     {
       // TODO rahmen und anderes beachten
-      l.append(layoutXML_P(i, rules, shape), 0, l.getHeight());
+      l.append(layoutXML_P(i, rules, shape, l.getHeight()));
     }
     else if (i.type() == pugi::node_element && std::string("table") == i.name())
     {
     }
     else if (i.type() == pugi::node_element && std::string("ul") == i.name())
     {
-      l.append(layoutXML_UL(i, rules, shape), 0, l.getHeight());
+      l.append(layoutXML_UL(i, rules, shape, l.getHeight()));
     }
     else
     {
