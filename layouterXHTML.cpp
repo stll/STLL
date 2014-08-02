@@ -109,6 +109,14 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
     {
       layoutXML_text(i, rules, txt, attr);
     }
+    else if ((i.type() == pugi::node_element) && (std::string("br") == i.name()))
+    {
+      txt += U'\n';
+      codepointAttributes a;
+      a.font = getFontForNode(xml, rules);
+      // TODO language
+      attr.set(txt.length()-1, a);
+    }
     else
     {
       throw XhtmlException_c("Within paragraph environments only text and 'i' and 'div' "

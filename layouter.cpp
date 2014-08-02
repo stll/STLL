@@ -104,6 +104,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
               )
            && (txt32[spos] != U' ')
            && (txt32[spos-1] != U' ')
+           && (txt32[spos] != U'\n')
+           && (txt32[spos-1] != U'\n')
            && (txt32[spos] != U'\u00AD')
           )
     {
@@ -112,7 +114,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
     runInfo run;
 
-    if (txt32[spos-1] == U' ')
+    if (txt32[spos-1] == U' ' || txt32[spos-1] == U'\n')
     {
       run.space = true;
     }
@@ -201,37 +203,58 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
   int32_t ypos = ystart;
   textLayout_c l;
   bool firstline = true;
+  bool forcebreak = false;
 
-  while (runstart < runs.size() && runs[runstart].space) runstart++;
-
+  // while there are runs left to do
   while (runstart < runs.size())
   {
+    // accumulate enough runs to fill the line, this is done by accumulating runs
+    // until we come to a place where we might break the line
+    // then we check if the line would be too long with the new set of runs
+
+    // skip initial spaces
+    while (runstart < runs.size() && runs[runstart].space) runstart++;
+
+    // these variables contain the current line information
+    // which run it starts at, when the first run that will go onto the next
+    // line, how many spaces there are in the line (for justification)
+    // and what the width of the runs is
     int32_t curAscend = 0;
     int32_t curDescend = 0;
     int32_t curWidth = 0;
     size_t spos = runstart;
     size_t numSpace = 0;
+    forcebreak = false;
 
+    // if it is a first line, we add the indent first
     if (firstline && prop.align != layoutProperties::ALG_CENTER) curWidth = prop.indent;
 
-    // add runs until we run out of runs
+    // now go through the remaining runs and add them
     while (spos < runs.size())
     {
-      // check, if we can add another run
-      // TODO take properly care of spaces at the end of lines (they must be left out)
-
+      // calculate the line information including the added runs
+      // we start with the current line settings
       int32_t newAscend = curAscend;
       int32_t newDescend = curDescend;
       int32_t newWidth = curWidth;
       size_t newspos = spos;
       size_t newSpace = numSpace;
 
+      // now add runs, until we get to a new point where we can break
+      // the line, or we run out of runs
       while (newspos < runs.size())
       {
+        // update line hight and with with the new run
         newAscend = std::max(newAscend, runs[newspos].font->getAscender()/64);
         newDescend = std::min(newDescend, runs[newspos].font->getDescender()/64);
         newWidth += runs[newspos].dx;
         if (runs[newspos].space) newSpace++;
+
+        // if we come to a point where we can break the line, we stop and
+        // evaluate if these new added runs still fits
+        // we break out here, if the next run is a space and will allow breaking
+        // after the space (this will remove spaces at the end of the line
+        // we also break out, if we can break after the current run
         if (  (    (newspos+1) < runs.size()
                 && (runs[newspos+1].space)
                 && (   (runs[newspos+1].linebreak == LINEBREAK_ALLOWBREAK)
@@ -242,12 +265,23 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
                     || (runs[newspos].linebreak == LINEBREAK_MUSTBREAK))
               )
            )
+        {
           break;
+        }
+
+        // next run
         newspos++;
       }
 
+      // we have included runs up to newspos, we will continue with the one after that
+      // so increment once more
       newspos++;
 
+      // check, if the line still fits in the available space
+      // if not break out and don't take over the new additional
+      // but even if it doesn't fit, we need to take over when we have
+      // not yet anything in our line, this might happen when there is one
+      // run that is longer than the available space
       if (   (spos > runstart)
           && (shape.getLeft(ypos, ypos+newAscend-newDescend)+newWidth >
               shape.getRight(ypos, ypos+newAscend-newDescend))
@@ -257,16 +291,31 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
         break;
       }
 
+      // when the final character at the end of the line (prior to the latest
+      // additions is a shy, remove that one from the width, because them
+      // shy will only be output at the end of the line
       if ((spos > runstart) && runs[spos-1].shy) newWidth -= runs[spos-1].dx;
 
-      // additional run fits
+      // additional run fits, so take over the new line
       curAscend = newAscend;
       curDescend = newDescend;
       curWidth = newWidth;
       spos = newspos;
       numSpace = newSpace;
+
+      // the current end of the line forces a break, or the next character is a space and forces a break
+      if (  (runs[spos-1].linebreak == LINEBREAK_MUSTBREAK)
+          ||((spos < runs.size()) && runs[spos].space && runs[spos].linebreak == LINEBREAK_MUSTBREAK)
+         )
+      {
+        forcebreak = true;
+        break;
+      }
     }
 
+    // this normally doesn't happen because the final run will never be a space
+    // because the linebreak will then happen before that space, but just in case
+    // remove it from the space counter
     if (runs[spos-1].space) numSpace--;
 
     // reorder runs for current line
@@ -290,10 +339,12 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
       }
     }
 
+    // calculate how many pixels are left on the line (for justification)
     int32_t spaceLeft = shape.getRight(ypos, ypos+curAscend-curDescend) -
-                        shape.getLeft(ypos, ypos+curAscend-curDescend);
-    spaceLeft -= curWidth;
+                        shape.getLeft(ypos, ypos+curAscend-curDescend) - curWidth;
 
+    // depending on the paragraph alignment settings we calculate where at the
+    // x-axis we start with the runs and how many additional pixels we add to a space
     int32_t xpos;
     double spaceadder = 0;
 
@@ -315,7 +366,7 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
       case layoutProperties::ALG_JUSTIFY_LEFT:
         xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
         // don't justify last paragraph
-        if (numSpace > 1 && spos < runs.size())
+        if (numSpace > 1 && spos < runs.size() && !forcebreak)
           spaceadder = 1.0 * spaceLeft / numSpace;
 
         if (firstline) xpos += prop.indent;
@@ -324,7 +375,7 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
 
       case layoutProperties::ALG_JUSTIFY_RIGHT:
         // don't justify last paragraph
-        if (numSpace > 1 && spos < runs.size())
+        if (numSpace > 1 && spos < runs.size() && !forcebreak)
         {
           xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
           spaceadder = 1.0 * spaceLeft / numSpace;
@@ -336,24 +387,36 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
         break;
     }
 
+    // go down to the baseline
     ypos += curAscend;
     numSpace = 0;
 
+    // output runs
     for (size_t i = runstart; i < spos; i++)
     {
-      if (!runs[i].shy || i+1 == spos)
+      if (!runs[runorder[i]].shy || i+1 == spos)
       {
-        l.addCommandVector(runs[runorder[i]].run, xpos+spaceadder*numSpace, ypos);
+        // output only non-space runs
+        if (!runs[runorder[i]].space)
+          l.addCommandVector(runs[runorder[i]].run, xpos+spaceadder*numSpace, ypos);
+
+        // count the spaces
         if (runs[runorder[i]].space) numSpace++;
+
+        // advance the x-position
         xpos += runs[runorder[i]].dx;
       }
     }
 
+    // go the the top of the next line
     ypos -= curDescend;
-    runstart = spos;
-    while (runstart < runs.size() && runs[runstart].space) runstart++;
 
-    firstline = false;
+    // set the runstart at the next run and skip space runs
+    runstart = spos;
+
+    // if we have a forces break, the next line will be like the first
+    // in the way that is will be indented
+    firstline = forcebreak;
   }
 
   l.setHeight(ypos);
