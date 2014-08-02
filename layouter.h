@@ -55,6 +55,11 @@ class textLayout_c
       data.push_back(d);
     }
 
+    void addCommandStart(const commandData & d)
+    {
+      data.insert(data.begin(), d);
+    }
+
     void addCommandVector(const std::vector<commandData> & d, int dx, int dy)
     {
       for (auto a : d)

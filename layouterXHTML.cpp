@@ -151,6 +151,37 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
   }
 }
 
+typedef textLayout_c (*ParseFunction)(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart);
+
+
+// handles padding, margin and border, all in one, it takes the text returned from the
+// ParseFunction and boxes it
+static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart, ParseFunction fkt)
+{
+  int32_t padding = evalSize(rules.getValue(xml, "padding"));
+  auto l2 = fkt(xml, rules, indentShape_c(shape, padding, padding), ystart+padding);
+  l2.setHeight(l2.getHeight()+padding);
+
+#ifdef _DEBUG_ // allows to see the boxes using a random color for each
+
+  textLayout_c::commandData c;
+  c.command = textLayout_c::commandData::CMD_RECT;
+  c.x = shape.getLeft(ystart, ystart);
+  c.y = ystart;
+  c.w = shape.getRight(ystart, ystart)-shape.getLeft(ystart, ystart);
+  c.h = l2.getHeight()-ystart;
+  c.r = rand() % 128;
+  c.g = rand() % 128;
+  c.b = rand() % 128;
+  c.a = 128;
+
+  l2.addCommandStart(c);
+
+#endif
+
+  return l2;
+}
+
 // this whole stuff is a recursive descending parser of the XHTML stuff
 static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
@@ -236,17 +267,15 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleShee
         prop.align = layoutProperties::ALG_CENTER;
         l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
                                  stripLeftShape_c(shape, padding, padding+listIndent), prop, y+padding));
-        l.append(layoutXML_P(i, rules, indentShape_c(shape, padding+listIndent, padding), y+padding));
+        l.append(boxIt(i, rules, indentShape_c(shape, listIndent, 0), y, layoutXML_P));
       }
       else
       {
         prop.align = layoutProperties::ALG_CENTER;
         l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
                                  stripRightShape_c(shape, padding+listIndent, padding), prop, y+padding));
-        l.append(layoutXML_P(i, rules, indentShape_c(shape, padding, padding+listIndent), y+padding));
+        l.append(boxIt(i, rules, indentShape_c(shape, 0, listIndent), y, layoutXML_P));
       }
-
-      l.setHeight(l.getHeight()+padding);
     }
     else
     {
@@ -275,22 +304,14 @@ static textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSh
            )
        )
     {
-      int32_t padding = evalSize(rules.getValue(i, "padding"));
-      auto l2 = layoutXML_P(i, rules, indentShape_c(shape, padding, padding), l.getHeight()+padding);
-      l2.setHeight(l2.getHeight()+padding);
-
-      l.append(l2);
+      l.append(boxIt(i, rules, shape, l.getHeight(), layoutXML_P));
     }
     else if (i.type() == pugi::node_element && std::string("table") == i.name())
     {
     }
     else if (i.type() == pugi::node_element && std::string("ul") == i.name())
     {
-      int32_t padding = evalSize(rules.getValue(i, "padding"));
-      auto l2 = layoutXML_UL(i, rules, indentShape_c(shape, padding, padding), l.getHeight()+padding);
-      l2.setHeight(l2.getHeight()+padding);
-
-      l.append(l2);
+      l.append(boxIt(i, rules, shape, l.getHeight(), layoutXML_UL));
     }
     else
     {
@@ -318,9 +339,7 @@ static textLayout_c layoutXML_HTML(const pugi::xml_node & txt, const textStyleSh
     else if (i.type() == pugi::node_element && std::string("body") == i.name() && !bodyfound)
     {
       bodyfound = true;
-      int32_t padding = evalSize(rules.getValue(i, "padding"));
-      l = layoutXML_BODY(i, rules, indentShape_c(shape, padding, padding), padding);
-      l.setHeight(l.getHeight()+padding);
+      l = boxIt(i, rules, shape, 0, layoutXML_BODY);
     }
     else
     {
