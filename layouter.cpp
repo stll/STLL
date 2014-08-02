@@ -1,7 +1,5 @@
 #include "layouter.h"
 
-#include "utf-8.h"
-
 #include <harfbuzz/hb.h>
 #include <harfbuzz/hb-ft.h>
 
