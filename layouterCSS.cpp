@@ -92,31 +92,25 @@ static uint16_t rulePrio(const std::string & sel)
 
 const std::string & textStyleSheet_c::getValue(pugi::xml_node node, const std::string & attribute) const
 {
-  static std::string defaultValue("");
+  const static std::string defaultValue("");
 
   // go through all rules, check only the ones that give a value to the requested attribute
   // evaluate rule by priority (look at the CSS priority rules
   // choose the highest priority
-  int16_t bestPrio = -1;
-  std::string & res = defaultValue;
-
+  // TODO this is now without priority.. is this still correct?
   while (!node.empty())
   {
     for (auto & r : rules)
     {
-      if (ruleFits(r.selector, node) && r.attribute == attribute && rulePrio(r.selector) > bestPrio)
+      if (ruleFits(r.selector, node) && r.attribute == attribute)
       {
-        res = r.value;
-        bestPrio = rulePrio(r.selector);
+        return r.value;
       }
     }
-
-    if (bestPrio >= 0) break;
-
     node = node.parent();
   }
 
-  return res;
+  return defaultValue;
 }
 
 void textStyleSheet_c::font(const std::string& family, const std::string& file, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
