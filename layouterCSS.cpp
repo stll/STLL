@@ -97,6 +97,22 @@ static uint16_t rulePrio(const std::string & sel)
   return 2;
 }
 
+static bool isInheriting(const std::string & attribute)
+{
+  if (attribute == "color") return true;
+  if (attribute == "font-family") return true;
+  if (attribute == "font-style") return true;
+  if (attribute == "font-size") return true;
+  if (attribute == "font-variant") return true;
+  if (attribute == "font-weight") return true;
+  if (attribute == "padding") return false;
+  if (attribute == "text-align") return true;
+  if (attribute == "text-align-last") return true;
+  if (attribute == "text-indent") return true;
+
+  assert(0);
+}
+
 const std::string & textStyleSheet_c::getValue(pugi::xml_node node, const std::string & attribute) const
 {
   const static std::string defaultValue("");
@@ -114,6 +130,10 @@ const std::string & textStyleSheet_c::getValue(pugi::xml_node node, const std::s
         return r.value;
       }
     }
+
+    if (!isInheriting(attribute))
+      return defaultValue;
+
     node = node.parent();
   }
 
