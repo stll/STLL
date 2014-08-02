@@ -195,13 +195,7 @@ static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet
 
   lprop.indent = evalSize(rules.getValue(xml, "text-indent"));
 
-  int32_t padding = evalSize(rules.getValue(xml, "padding"));
-
-  auto l = layoutParagraph(txt, attr, indentShape_c(shape, padding, padding), lprop, ystart+padding);
-
-  l.setHeight(padding + l.getHeight());
-
-  return l;
+  return layoutParagraph(txt, attr, shape, lprop, ystart);
 }
 
 static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
@@ -242,14 +236,14 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleShee
         prop.align = layoutProperties::ALG_CENTER;
         l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
                                  stripLeftShape_c(shape, padding, padding+listIndent), prop, y+padding));
-        l.append(layoutXML_P(i, rules, indentShape_c(shape, listIndent, 0), y));
+        l.append(layoutXML_P(i, rules, indentShape_c(shape, padding+listIndent, padding), y+padding));
       }
       else
       {
         prop.align = layoutProperties::ALG_CENTER;
         l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
                                  stripRightShape_c(shape, padding+listIndent, padding), prop, y+padding));
-        l.append(layoutXML_P(i, rules, indentShape_c(shape, 0, listIndent), y));
+        l.append(layoutXML_P(i, rules, indentShape_c(shape, padding, padding+listIndent), y+padding));
       }
 
       l.setHeight(l.getHeight()+padding);
@@ -281,15 +275,22 @@ static textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSh
            )
        )
     {
-      // TODO rahmen und anderes beachten
-      l.append(layoutXML_P(i, rules, shape, l.getHeight()));
+      int32_t padding = evalSize(rules.getValue(i, "padding"));
+      auto l2 = layoutXML_P(i, rules, indentShape_c(shape, padding, padding), l.getHeight()+padding);
+      l2.setHeight(l2.getHeight()+padding);
+
+      l.append(l2);
     }
     else if (i.type() == pugi::node_element && std::string("table") == i.name())
     {
     }
     else if (i.type() == pugi::node_element && std::string("ul") == i.name())
     {
-      l.append(layoutXML_UL(i, rules, shape, l.getHeight()));
+      int32_t padding = evalSize(rules.getValue(i, "padding"));
+      auto l2 = layoutXML_UL(i, rules, indentShape_c(shape, padding, padding), l.getHeight()+padding);
+      l2.setHeight(l2.getHeight()+padding);
+
+      l.append(l2);
     }
     else
     {
@@ -318,7 +319,7 @@ static textLayout_c layoutXML_HTML(const pugi::xml_node & txt, const textStyleSh
     {
       bodyfound = true;
       int32_t padding = evalSize(rules.getValue(i, "padding"));
-      l = layoutXML_BODY(i, rules, indentShape_c(shape, padding, padding), 10);
+      l = layoutXML_BODY(i, rules, indentShape_c(shape, padding, padding), padding);
       l.setHeight(l.getHeight()+padding);
     }
     else
