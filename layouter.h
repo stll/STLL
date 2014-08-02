@@ -48,13 +48,13 @@ class textLayout_c
       {
         a.x += dx;
         a.y += dy;
-        data.push_back(a);
+        data.emplace_back(a);
       }
     }
 
     void append(const textLayout_c & l)
     {
-      for (auto a : l.data)
+      for (auto & a : l.data)
         data.push_back(a);
 
       height = std::max(height, l.height);
