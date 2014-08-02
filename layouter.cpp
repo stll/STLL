@@ -184,6 +184,7 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
   size_t runstart = 0;
   int32_t ypos = ystart;
   textLayout_c l;
+  bool firstline = true;
 
   while (runstart < runs.size() && runs[runstart].space) runstart++;
 
@@ -194,6 +195,8 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
     int32_t curWidth = 0;
     size_t spos = runstart;
     size_t numSpace = 0;
+
+    if (firstline && prop.align != layoutProperties::ALG_CENTER) curWidth = prop.indent;
 
     // add runs until we run out of runs
     while (spos < runs.size())
@@ -282,6 +285,7 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
     {
       case layoutProperties::ALG_LEFT:
         xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
+        if (firstline) xpos += prop.indent;
         break;
 
       case layoutProperties::ALG_RIGHT:
@@ -297,6 +301,9 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
         // don't justify last paragraph
         if (numSpace > 1 && spos < runs.size())
           spaceadder = 1.0 * spaceLeft / numSpace;
+
+        if (firstline) xpos += prop.indent;
+
         break;
 
       case layoutProperties::ALG_JUSTIFY_RIGHT:
@@ -329,6 +336,8 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
     ypos -= curDescend;
     runstart = spos;
     while (runstart < runs.size() && runs[runstart].space) runstart++;
+
+    firstline = false;
   }
 
   // TODO proper font handling for multiple fonts in a line

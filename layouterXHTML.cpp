@@ -119,7 +119,7 @@ static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet
    // TODO throw error
   }
 
-  lprop.indent = 0;
+  lprop.indent = evalSize(rules.getValue(xml, "text-indent"));
 
   return layoutParagraph(txt, attr, shape, lprop, ystart);
 }
