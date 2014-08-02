@@ -97,6 +97,9 @@ typedef struct
   std::shared_ptr<fontFace_c> font;
   // of which languages it is
   std::string lang;
+
+  // TODO things like underline and strike-through are missing
+  // TODO shadows
 } codepointAttributes;
 
 

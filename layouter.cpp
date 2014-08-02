@@ -15,19 +15,37 @@
 
 typedef struct
 {
+  // the commands to output this run
   std::vector<textLayout_c::commandData> run;
+
+  // the advance information of this run
   int dx, dy;
+
+  // the embedding level (text direction) of this run
   FriBidiLevel embeddingLevel;
+
+  // linebreak information for AFTER this run, for values see liblinebreak
   char linebreak;
+
+  // the font used for this run... will probably be identical to
+  // the fonts in the run
   std::shared_ptr<fontFace_c> font;
-  bool space;   // is this run a space run?
-  bool shy;  // is this a soft hypen??
+
+  // is this run a space run? Will be removed at line ends
+  bool space;
+
+  // is this a soft hypen?? will ony be shown at line ends
+  bool shy;
+
 #ifdef _DEBUG_
+  // the text of this run, useful for debugging to see what is going on
   std::u32string text;
 #endif
+
 } runInfo;
 
 
+// create the text direction information using libfribidi
 static FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32, std::vector<FriBidiLevel> & embedding_levels)
 {
   std::vector<FriBidiCharType> bidiTypes(txt32.length());
@@ -40,6 +58,7 @@ static FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32, std::ve
   return max_level;
 }
 
+// use harfbuzz to layout runs of text
 static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
                                            const attributeIndex_c & attr,
                                            const std::vector<FriBidiLevel> & embedding_levels,
@@ -140,7 +159,6 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
       g.glyphIndex = glyph_info[j].codepoint;
       g.font = attr.get(runstart).font;
-      // TODO the other parameters
 
       g.x = run.dx + (glyph_pos[j].x_offset/64);
       g.y = run.dy - (glyph_pos[j].y_offset/64);
@@ -340,7 +358,6 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
     firstline = false;
   }
 
-  // TODO proper font handling for multiple fonts in a line
   l.setHeight(ypos);
 
   return l;
@@ -357,8 +374,11 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_
   std::vector<char> linebreaks(txt32.length());
   set_linebreaks_utf32((utf32_t*)txt32.c_str(), txt32.length(), "", linebreaks.data());
 
+  // create runs of layout text. Each run is a cohesive set, e.g. a word with a single
+  // font, ...
   std::vector<runInfo> runs = createTextRuns(txt32, attr, embedding_levels, linebreaks);
 
+  // layout the runs into lines
   return breakLines(runs, shape, max_level, prop, ystart);
 }
 
