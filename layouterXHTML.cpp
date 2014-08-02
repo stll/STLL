@@ -32,6 +32,32 @@ class shiftShape_c : public shape_c
     virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top+shift, bottom+shift); }
 };
 
+class stripLeftShape_c : public shape_c
+{
+  private:
+    const shape_c & outside;
+    int32_t ind_left, ind_right;
+
+  public:
+    stripLeftShape_c(const shape_c & s, int32_t li, int32_t ri) : outside(s), ind_left(li), ind_right(ri) { }
+
+    virtual int32_t getLeft(int32_t top, int32_t bottom) const { return outside.getLeft(top, bottom)+ind_left; }
+    virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getLeft(top, bottom)+ind_right; }
+};
+
+class stripRightShape_c : public shape_c
+{
+  private:
+    const shape_c & outside;
+    int32_t ind_left, ind_right;
+
+  public:
+    stripRightShape_c(const shape_c & s, int32_t li, int32_t ri) : outside(s), ind_left(li), ind_right(ri) { }
+
+    virtual int32_t getLeft(int32_t top, int32_t bottom) const { return outside.getRight(top, bottom)-ind_left; }
+    virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top, bottom)-ind_right; }
+};
+
 static std::string normalizeHTML(const std::string & in, char prev)
 {
   std::string out;
@@ -143,12 +169,23 @@ static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet
     s = rules.getValue(xml, "text-align-last");
     if      (s == "left")  lprop.align = layoutProperties::ALG_JUSTIFY_LEFT;
     else if (s == "right") lprop.align = layoutProperties::ALG_JUSTIFY_RIGHT;
-    else if (s == "")      lprop.align = layoutProperties::ALG_JUSTIFY_LEFT;
+    else if (s == "")
+    {
+      s = rules.getValue(xml, "direction");
+      if (s == "ltr") lprop.align = layoutProperties::ALG_JUSTIFY_LEFT;
+      if (s == "rtl") lprop.align = layoutProperties::ALG_JUSTIFY_RIGHT;
+    }
     else
     {
       throw XhtmlException_c("Only 'left' and 'right' are allowed as values for the "
                              "'text-align-last' CSS property (" + getNodePath(xml) + ")");
     }
+  }
+  else if (s == "")
+  {
+    s = rules.getValue(xml, "direction");
+    if (s == "ltr") lprop.align = layoutProperties::ALG_LEFT;
+    if (s == "rtl") lprop.align = layoutProperties::ALG_RIGHT;
   }
   else
   {
@@ -190,16 +227,30 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleShee
       evalColor(rules.getValue(txt, "color"), a.r, a.g, a.b);
       a.font = font;
       int32_t padding = evalSize(rules.getValue(i, "padding"));
+      int32_t listIndent = font->getAscender()/64;
 
       // TODO do properly
       a.lang = "en-engl";
 
+      auto direction = rules.getValue(txt, "direction");
+
       layoutProperties prop;
-      prop.align = layoutProperties::ALG_LEFT;
       prop.indent = 0;
 
-      l.append(layoutParagraph(U"\u2022", attributeIndex_c(a), indentShape_c(shape, padding, padding), prop, y+padding));
-      l.append(layoutXML_P(i, rules, indentShape_c(shape, font->getAscender()/64, 0), y));
+      if (direction == "ltr")
+      {
+        prop.align = layoutProperties::ALG_CENTER;
+        l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
+                                 stripLeftShape_c(shape, padding, padding+listIndent), prop, y+padding));
+        l.append(layoutXML_P(i, rules, indentShape_c(shape, listIndent, 0), y));
+      }
+      else
+      {
+        prop.align = layoutProperties::ALG_CENTER;
+        l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
+                                 stripRightShape_c(shape, padding+listIndent, padding), prop, y+padding));
+        l.append(layoutXML_P(i, rules, indentShape_c(shape, 0, listIndent), y));
+      }
 
       l.setHeight(l.getHeight()+padding);
     }

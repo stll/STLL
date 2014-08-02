@@ -86,6 +86,30 @@ static bool ruleFits(const std::string & sel, const pugi::xml_node & node)
       }
     }
   }
+  if (sel.find_first_of('[') != sel.npos)
+  {
+    size_t st = sel.find_first_of('[');
+    size_t en = sel.find_first_of(']');
+    size_t mi = sel.find_first_of('=');
+
+    if (sel[mi-1] == '|')
+    {
+      std::string tag = sel.substr(0, st);
+      std::string attr = sel.substr(st+1, mi-2-st);
+      std::string val = sel.substr(mi+1, en-mi-1);
+
+      if (tag == node.name())
+      {
+        auto a = node.attribute(attr.c_str());
+        if (!a.empty())
+        {
+          std::string nodeattrval = std::string(a.value());
+          if (val.length() <= nodeattrval.length() && nodeattrval.substr(0, val.length()) == nodeattrval)
+            return true;
+        }
+      }
+    }
+  }
 
   return false;
 }
@@ -93,6 +117,7 @@ static bool ruleFits(const std::string & sel, const pugi::xml_node & node)
 static uint16_t rulePrio(const std::string & sel)
 {
   if (sel[0] == '.') return 2;
+  if (sel.find_first_of('[') != sel.npos) return 2;
 
   return 1;
 }
@@ -109,6 +134,7 @@ static bool isInheriting(const std::string & attribute)
   if (attribute == "text-align") return true;
   if (attribute == "text-align-last") return true;
   if (attribute == "text-indent") return true;
+  if (attribute == "direction") return true;
 
   assert(0);
 }
@@ -125,6 +151,7 @@ static const std::string getDefault(const std::string & attribute)
   if (attribute == "text-align") return "";
   if (attribute == "text-align-last") return "";
   if (attribute == "text-indent") return "0px";
+  if (attribute == "direction") return "ltr";
 
   assert(0);
 }
@@ -141,6 +168,8 @@ static bool isValidAttribute(const std::string & attribute)
   if (attribute == "text-align") return true;
   if (attribute == "text-align-last") return true;
   if (attribute == "text-indent") return true;
+  if (attribute == "direction") return true;
+
 
   return false;
 }
