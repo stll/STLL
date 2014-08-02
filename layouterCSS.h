@@ -67,15 +67,7 @@ class textStyleSheet_c
 
     std::shared_ptr<fontFamily_c> findFamily(const std::string & family) const { return families.find(family)->second; }
 
-    void addRule(const std::string sel, const std::string attr, const std::string val)
-    {
-      rule r;
-      r.selector = sel;
-      r.attribute = attr;
-      r.value = val;
-
-      rules.push_back(r);
-    }
+    void addRule(const std::string sel, const std::string attr, const std::string val);
 
     // TODO make back into a reference
     const std::string getValue(pugi::xml_node node, const std::string & attribute) const;

@@ -129,6 +129,22 @@ static const std::string getDefault(const std::string & attribute)
   assert(0);
 }
 
+static bool isValidAttribute(const std::string & attribute)
+{
+  if (attribute == "color") return true;
+  if (attribute == "font-family") return true;
+  if (attribute == "font-style") return true;
+  if (attribute == "font-size") return true;
+  if (attribute == "font-variant") return true;
+  if (attribute == "font-weight") return true;
+  if (attribute == "padding") return true;
+  if (attribute == "text-align") return true;
+  if (attribute == "text-align-last") return true;
+  if (attribute == "text-indent") return true;
+
+  return false;
+}
+
 const std::string textStyleSheet_c::getValue(pugi::xml_node node, const std::string & attribute) const
 {
   // go through all rules, check only the ones that give a value to the requested attribute
@@ -186,5 +202,18 @@ void textStyleSheet_c::font(std::shared_ptr<fontCache_c> fc, const std::string& 
   }
 
   i->second->addFont(file, style, variant, weight, stretch);
+}
+
+void textStyleSheet_c::addRule(const std::string sel, const std::string attr, const std::string val)
+{
+  if (!isValidAttribute(attr))
+    throw XhtmlException_c(std::string("attribute not supported: ") + attr);
+
+  rule r;
+  r.selector = sel;
+  r.attribute = attr;
+  r.value = val;
+
+  rules.push_back(r);
 }
 
