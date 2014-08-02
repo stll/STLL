@@ -7,7 +7,10 @@
 #include <vector>
 #include <memory>
 
-// encapsulates a finished layout, the layout is supposed to be unchangeable after creation
+/** encapsulates a finished layout.
+ *
+ * This class encapsulates a layout, it is a list of drawing commands
+ */
 class textLayout_c
 {
   private:
@@ -15,20 +18,30 @@ class textLayout_c
 
   public:
 
-    // information for draw command
+    /** A drawing command
+     */
     typedef struct
     {
       enum
       {
-        CMD_GLYPH,
-        CMD_RECT
-      } command;
+        CMD_GLYPH,  ///< draw a glyph from a font
+        CMD_RECT    ///< draw a rectangle
+      } command;    ///< specifies what to draw
 
-      int32_t x, y; // where to put the glyph
+      /// position of the glyph or upper left corner of rectangle
+      int32_t x, y;
+
+      /// which glyph to draw
       FT_UInt glyphIndex;
-      std::shared_ptr<fontFace_c> font;    // which front to take it from
-      uint32_t w, h;  // width height of glyph, used for marking selections, can be 0 for accents and co
-      uint8_t r, g, b, a; // rgba color for font foreground
+
+      /// which front to take the glyph from
+      std::shared_ptr<fontFace_c> font;
+
+      /// width and hight of the box to draw
+      uint32_t w, h;
+
+      // color of the glyph or the rectangle
+      uint8_t r, g, b, a;
 
     } commandData;
 
