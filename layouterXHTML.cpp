@@ -224,7 +224,7 @@ static textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSh
     }
     else
     {
-      throw XhtmlException_c("Only 'p', 'hx', 'ul' and 'table' tag is allowed within a "
+      throw XhtmlException_c("Only 'p', 'h1'-'h6', 'ul' and 'table' tag is allowed within a "
                              "body tag (" + getNodePath(i) + ")");
     }
   }
