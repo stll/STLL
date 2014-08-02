@@ -158,7 +158,13 @@ static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet
 
   lprop.indent = evalSize(rules.getValue(xml, "text-indent"));
 
-  return layoutParagraph(txt, attr, shape, lprop, ystart);
+  int32_t padding = evalSize(rules.getValue(xml, "padding"));
+
+  auto l = layoutParagraph(txt, attr, indentShape_c(shape, padding, padding), lprop, ystart+padding);
+
+  l.setHeight(padding + l.getHeight());
+
+  return l;
 }
 
 static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
@@ -183,6 +189,7 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleShee
       codepointAttributes a;
       evalColor(rules.getValue(txt, "color"), a.r, a.g, a.b);
       a.font = font;
+      int32_t padding = evalSize(rules.getValue(i, "padding"));
 
       // TODO do properly
       a.lang = "en-engl";
@@ -191,8 +198,10 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleShee
       prop.align = layoutProperties::ALG_LEFT;
       prop.indent = 0;
 
-      l.append(layoutParagraph(U"\u2022", attributeIndex_c(a), shape, prop, y));
+      l.append(layoutParagraph(U"\u2022", attributeIndex_c(a), indentShape_c(shape, padding, padding), prop, y+padding));
       l.append(layoutXML_P(i, rules, indentShape_c(shape, font->getAscender()/64, 0), y));
+
+      l.setHeight(l.getHeight()+padding);
     }
     else
     {
@@ -203,9 +212,10 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleShee
   return l;
 }
 
-static textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape)
+static textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
   textLayout_c l;
+  l.setHeight(ystart);
 
   for (const auto & i : txt)
   {
@@ -256,7 +266,9 @@ static textLayout_c layoutXML_HTML(const pugi::xml_node & txt, const textStyleSh
     else if (i.type() == pugi::node_element && std::string("body") == i.name() && !bodyfound)
     {
       bodyfound = true;
-      l = layoutXML_BODY(i, rules, shape);
+      int32_t padding = evalSize(rules.getValue(i, "padding"));
+      l = layoutXML_BODY(i, rules, indentShape_c(shape, padding, padding), 10);
+      l.setHeight(l.getHeight()+padding);
     }
     else
     {
