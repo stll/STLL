@@ -9,9 +9,6 @@
 
 
 // TODO the fontFace_c constructor and library interface is not perfect...
-// TODO get rid of all asserts, we may do nothing on error, but we should
-//      not exit the program
-
 
 fontFace_c::fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const std::string & fname, uint32_t size) : lib(l)
 {
@@ -37,7 +34,7 @@ std::shared_ptr<fontFace_c> fontCache_c::getFont(const std::string fname, uint32
       return a;
   }
 
-  // TODO kann es sein, dass noch jeman anderes hier den Font öffnet?
+  // TODO is it possible that someone else opens a font here???
 
   auto f = std::make_shared<fontFace_c>(lib, fname, size);
 
@@ -46,32 +43,40 @@ std::shared_ptr<fontFace_c> fontCache_c::getFont(const std::string fname, uint32
   return f;
 }
 
-
-
-FT_Error fontFace_c::outlineRender(uint32_t idx, FT_Raster_Params* params)
+void fontFace_c::outlineRender(uint32_t idx, FT_Raster_Params* params)
 {
-  FT_Error fterr = FT_Load_Glyph(f, idx, 0);
-
-  if (fterr == 0)
+  if (FT_Load_Glyph(f, idx, FT_LOAD_DEFAULT | FT_LOAD_FORCE_AUTOHINT))
   {
-    if (f->glyph->format != FT_GLYPH_FORMAT_OUTLINE)
-    {
-      return 0; // TODO return error that the glyph has not the right format
-    }
-    else
-    {
-      fterr = lib->outlineRender(&f->glyph->outline, params);
-    }
+    throw FreetypeException_c("A font doesn't contain a required glyph");
   }
 
-  return fterr;
+  if (f->glyph->format != FT_GLYPH_FORMAT_OUTLINE)
+  {
+    throw FreetypeException_c("This text library can only handle outline fonts");
+  }
+
+  if (lib->outlineRender(&f->glyph->outline, params))
+  {
+    throw FreetypeException_c("The rendering of a glyph failed");
+  }
 }
 
 FT_Face freeTypeLibrary_c::newFace(const std::string fname, uint32_t size)
 {
   FT_Face f;
-  assert(!FT_New_Face(lib, fname.c_str(), 0, &f));
-  assert(!FT_Set_Char_Size(f, 0, size, 72, 72));
+  if (FT_New_Face(lib, fname.c_str(), 0, &f))
+  {
+    throw FreetypeException_c(std::string("Could not open Font '") + fname + "' maybe "
+                              "file is spelled wrong or file is broken");
+  }
+
+  if (FT_Set_Char_Size(f, 0, size, 72, 72))
+  {
+    doneFace(f);
+
+    throw FreetypeException_c(std::string("Could not set the requested file to font '") +
+                              fname + "'");
+  }
 
   /*  See http://www.microsoft.com/typography/otspec/name.htm
    *        for a list of some possible platform-encoding pairs.
@@ -89,12 +94,19 @@ FT_Face freeTypeLibrary_c::newFace(const std::string fname, uint32_t size)
             && (f->charmaps[i]->encoding_id == 1))
        )
     {
-      assert(!FT_Set_Charmap(f, f->charmaps[i]));
+      if (FT_Set_Charmap(f, f->charmaps[i]))
+      {
+        doneFace(f);
+        throw FreetypeException_c(std::string("Could not set a unicode character map to font '") +
+                                  fname + "'. Maybe the font doesn't have one?");
+      }
       return f;
     }
   }
 
-  assert(0);
+  doneFace(f);
+  throw FreetypeException_c(std::string("Could not find a unicode character map to font '") +
+                            fname + "'. Maybe the font doesn't have one?");
 }
 
 freeTypeLibrary_c::~freeTypeLibrary_c()
@@ -104,7 +116,10 @@ freeTypeLibrary_c::~freeTypeLibrary_c()
 
 freeTypeLibrary_c::freeTypeLibrary_c()
 {
-  assert(!FT_Init_FreeType(&lib));
+  if (FT_Init_FreeType(&lib))
+  {
+    throw FreetypeException_c("Could not initialize font rendering library instance");
+  }
 }
 
 void fontFamily_c::addFont(const std::string& file, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
@@ -116,10 +131,7 @@ void fontFamily_c::addFont(const std::string& file, const std::string& style, co
   par.weight = weight;
   par.stretch = stretch;
 
-  // make sure we only add once
-  assert(fonts.find(par) == fonts.end());
-
-  fonts.insert(std::make_pair(par, file));
+  fonts[par] = file;
 }
 
 std::shared_ptr<fontFace_c> fontFamily_c::getFont(uint32_t size, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
@@ -133,6 +145,7 @@ std::shared_ptr<fontFace_c> fontFamily_c::getFont(uint32_t size, const std::stri
 
   auto i = fonts.find(par);
 
+  // when the font is not found, return an empty pointer
   if (i == fonts.end())
   {
     return std::shared_ptr<fontFace_c>();

@@ -16,6 +16,15 @@
 
 #include <stdint.h>
 
+#include <stdexcept>
+
+class FreetypeException_c : public std::runtime_error
+{
+  public:
+    explicit FreetypeException_c(const std::string & what_arg) : std::runtime_error(what_arg) {}
+
+};
+
 class freeTypeLibrary_c;
 
 // one font, made out of one file with a certain size
@@ -26,7 +35,7 @@ class fontFace_c : boost::noncopyable
     fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const std::string & fname, uint32_t size);
     ~fontFace_c();
 
-    FT_Error outlineRender(uint32_t idx, FT_Raster_Params * params);
+    void outlineRender(uint32_t idx, FT_Raster_Params * params);
 
     FT_Face getFace(void) const { return f; }
 
