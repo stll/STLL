@@ -50,7 +50,15 @@ static std::string normalizeHTML(const std::string & in, char prev)
   return out;
 }
 
-static std::shared_ptr<fontFace_c> getFontForNode(pugi::xml_node xml, const textStyleSheet_c & rules)
+static std::string getNodePath(const pugi::xml_node & xml)
+{
+  if (xml.empty())
+    return "";
+  else
+    return getNodePath(xml.parent()) + "/" + xml.name();
+}
+
+static std::shared_ptr<fontFace_c> getFontForNode(const pugi::xml_node & xml, const textStyleSheet_c & rules)
 {
   std::string fontFamily = rules.getValue(xml, "font-family");
   std::string fontStyle = rules.getValue(xml, "font-style");
@@ -58,10 +66,20 @@ static std::shared_ptr<fontFace_c> getFontForNode(pugi::xml_node xml, const text
   std::string fontWeight = rules.getValue(xml, "font-weight");
   double fontSize = evalSize(rules.getValue(xml, "font-size"));
 
-  return rules.findFamily(fontFamily)->getFont(64*fontSize, fontStyle, fontVariant, fontWeight);
+  auto f = rules.findFamily(fontFamily)->getFont(64*fontSize, fontStyle, fontVariant, fontWeight);
+
+  if (!f)
+  {
+    throw XhtmlException_c(std::string("Requested font not found (family:'") + fontFamily +
+                                       "', style: '" + fontStyle +
+                                       "', variant: '" + fontVariant +
+                                       "', weight: '" + fontWeight + ") required here: " + getNodePath(xml));
+  }
+
+  return f;
 }
 
-static void layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, std::u32string & txt,
+static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & rules, std::u32string & txt,
                attributeIndex_c & attr)
 {
   for (const auto & i : xml)
@@ -91,6 +109,11 @@ static void layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, s
     {
       layoutXML_text(i, rules, txt, attr);
     }
+    else
+    {
+      throw XhtmlException_c("Within paragraph environments only text and 'i' and 'div' "
+                             "tags are allowed (" + getNodePath(i) + ")");
+    }
   }
 }
 
@@ -113,12 +136,16 @@ static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet
     if      (s == "left")  lprop.align = layoutProperties::ALG_JUSTIFY_LEFT;
     else if (s == "right") lprop.align = layoutProperties::ALG_JUSTIFY_RIGHT;
     else if (s == "")      lprop.align = layoutProperties::ALG_JUSTIFY_LEFT;
-    else { // TODO throw error
+    else
+    {
+      throw XhtmlException_c("Only 'left' and 'right' are allowed as values for the "
+                             "'text-align-last' CSS property (" + getNodePath(xml) + ")");
     }
   }
   else
   {
-   // TODO throw error
+    throw XhtmlException_c("Only 'left, 'right', 'center' and 'justify' are allowed for "
+                           "the 'text-align' CSS property (" + getNodePath(xml) + ")");
   }
 
   lprop.indent = evalSize(rules.getValue(xml, "text-indent"));
@@ -161,7 +188,7 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleShee
     }
     else
     {
-      // TODO esception?
+      throw XhtmlException_c("Only 'li' tags allowed within 'ul' tag (" + getNodePath(i) + ")");
     }
   }
 
@@ -197,7 +224,8 @@ static textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSh
     }
     else
     {
-      // TODO exception nothing else supported
+      throw XhtmlException_c("Only 'p', 'hx', 'ul' and 'table' tag is allowed within a "
+                             "body tag (" + getNodePath(i) + ")");
     }
   }
 
@@ -213,18 +241,19 @@ static textLayout_c layoutXML_HTML(const pugi::xml_node & txt, const textStyleSh
 
   for (const auto & i : txt)
   {
-    if (std::string("head") == i.name() && !headfound)
+    if (i.type() == pugi::node_element && std::string("head") == i.name() && !headfound)
     {
       headfound = true;
     }
-    else if (std::string("body") == i.name() && !bodyfound)
+    else if (i.type() == pugi::node_element && std::string("body") == i.name() && !bodyfound)
     {
       bodyfound = true;
       l = layoutXML_BODY(i, rules, shape);
     }
     else
     {
-      // nothing else permitted -> exception TODO
+      throw XhtmlException_c("Only up to one 'head' and up to one 'body' tag and no other "
+                             "tags are allowed inside the 'html' tag (" + getNodePath(i) + ")");
     }
   }
 
@@ -238,13 +267,13 @@ textLayout_c layoutXML(const pugi::xml_document & txt, const textStyleSheet_c & 
   // we must have a HTML root node
   for (const auto & i : txt)
   {
-    if (std::string("html") == i.name())
+    if (i.type() == pugi::node_element && std::string("html") == i.name())
     {
       l = layoutXML_HTML(i, rules, shape);
     }
     else
     {
-      // nothing else permitted -> exception TODO
+      throw XhtmlException_c("Top level tag must be the html tag (" + getNodePath(i) + ")");
     }
   }
 
