@@ -31,7 +31,8 @@ static uint8_t hex2num(char c)
     case 'E': return 14;
     case 'f':
     case 'F': return 15;
-    default:  return 0;
+    default:
+      throw XhtmlException_c("Wrong format for a hex-number");
   }
 }
 
@@ -42,12 +43,17 @@ static uint8_t hex2byte(char c1, char c2)
 
 void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t &b)
 {
-  if (col[0] == '#' && col.length() >= 7)
+  if (col.length() != 7)
+    throw XhtmlException_c("color string must be 7 characters long");
+
+  if (col[0] == '#')
   {
     r = hex2byte(col[1], col[2]);
     g = hex2byte(col[3], col[4]);
     b = hex2byte(col[5], col[6]);
   }
+  else
+    throw XhtmlException_c("only the # color scheme is supported");
 }
 
 double evalSize(const std::string & sz)
@@ -60,7 +66,8 @@ double evalSize(const std::string & sz)
     return atof(sz.c_str());
   }
 
-  // TODO exception
+  throw XhtmlException_c("only pixel size format is supported");
+
   return 0;
 }
 

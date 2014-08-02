@@ -18,6 +18,13 @@
 #include <vector>
 #include <map>
 
+class XhtmlException_c : public std::runtime_error
+{
+  public:
+    explicit XhtmlException_c(const std::string & what_arg) : std::runtime_error(what_arg) {}
+
+};
+
 // this class encapsulates information for HOW to format a text, just like the style sheets
 // in html are doing
 class textStyleSheet_c
