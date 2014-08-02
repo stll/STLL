@@ -150,7 +150,11 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleShee
       // TODO do properly
       a.lang = "en-engl";
 
-      l.append(layoutRaw(u8"\u2022", a, shape, y));
+      layoutProperties prop;
+      prop.align = layoutProperties::ALG_LEFT;
+      prop.indent = 0;
+
+      l.append(layoutParagraph(U"\u2022", attributeIndex_c(a), shape, prop, y));
       l.append(layoutXML_P(i, rules, indentShape_c(shape, font->getAscender()/64, 0), y));
     }
     else

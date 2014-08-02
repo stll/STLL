@@ -110,6 +110,7 @@ class attributeIndex_c
 
   public:
     attributeIndex_c(void) { }
+    attributeIndex_c(const codepointAttributes & a) { attr.push_back(a); }
 
     void set(size_t i, codepointAttributes a)
     {
@@ -176,9 +177,5 @@ typedef struct {
 // base layout function that does the layouting stuff for one paragraph
 textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
                              const shape_c & shape, const layoutProperties & prop, int32_t ystart);
-
-// layout raw text using the font given the given string must be utf-8
-textLayout_c layoutRaw(const std::string & txt, codepointAttributes attr,
-                       const shape_c & shape, int32_t ystart = 0);
 
 #endif

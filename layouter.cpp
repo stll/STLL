@@ -381,21 +381,3 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_
   // layout the runs into lines
   return breakLines(runs, shape, max_level, prop, ystart);
 }
-
-textLayout_c layoutRaw(const std::string & txt, codepointAttributes a,
-                       const shape_c & shape, int32_t ystart)
-{
-  // when we layout raw text we
-  // only have to convert the text to utf-32
-  // and assign the given font and language to all the codepoints of that text
-
-  std::u32string txt32 = u8_convertToU32(txt);
-  attributeIndex_c attr;
-
-  attr.set(0, a);
-
-  layoutProperties prop;
-  prop.align = layoutProperties::ALG_LEFT;
-
-  return layoutParagraph(txt32, attr, shape, prop, ystart);
-}
