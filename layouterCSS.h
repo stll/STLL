@@ -77,7 +77,8 @@ class textStyleSheet_c
       rules.push_back(r);
     }
 
-    const std::string & getValue(pugi::xml_node node, const std::string & attribute) const;
+    // TODO make back into a reference
+    const std::string getValue(pugi::xml_node node, const std::string & attribute) const;
 
     std::string language;   // format: language code: 2 letters, dash, script "de-Latn" TODO remove
 

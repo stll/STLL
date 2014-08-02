@@ -92,9 +92,9 @@ static bool ruleFits(const std::string & sel, const pugi::xml_node & node)
 
 static uint16_t rulePrio(const std::string & sel)
 {
-  if (sel[0] == '.') return 1;
+  if (sel[0] == '.') return 2;
 
-  return 2;
+  return 1;
 }
 
 static bool isInheriting(const std::string & attribute)
@@ -113,31 +113,55 @@ static bool isInheriting(const std::string & attribute)
   assert(0);
 }
 
-const std::string & textStyleSheet_c::getValue(pugi::xml_node node, const std::string & attribute) const
+static const std::string getDefault(const std::string & attribute)
 {
-  const static std::string defaultValue("");
+  if (attribute == "color") throw XhtmlException_c("You must specify the required colors, there is no default");
+  if (attribute == "font-family") return "sans";
+  if (attribute == "font-style") return "normal";
+  if (attribute == "font-size") throw XhtmlException_c("You must specify all required font sizes, there is no default");
+  if (attribute == "font-variant") return "normal";
+  if (attribute == "font-weight") return "normal";
+  if (attribute == "padding") return "0px";
+  if (attribute == "text-align") return "";
+  if (attribute == "text-align-last") return "";
+  if (attribute == "text-indent") return "0px";
 
+  assert(0);
+}
+
+const std::string textStyleSheet_c::getValue(pugi::xml_node node, const std::string & attribute) const
+{
   // go through all rules, check only the ones that give a value to the requested attribute
   // evaluate rule by priority (look at the CSS priority rules
   // choose the highest priority
-  // TODO this is now without priority.. is this still correct?
+
   while (!node.empty())
   {
-    for (auto & r : rules)
+    uint16_t prio = 0;
+    size_t bestI;
+
+    for (size_t i = 0; i < rules.size(); i++)
     {
-      if (ruleFits(r.selector, node) && r.attribute == attribute)
+      if (   rules[i].attribute == attribute
+          && ruleFits(rules[i].selector, node)
+          && rulePrio(rules[i].selector) > prio
+         )
       {
-        return r.value;
+        prio = rulePrio(rules[i].selector);
+        bestI = i;
       }
     }
 
+    if (prio)
+      return rules[bestI].value;
+
     if (!isInheriting(attribute))
-      return defaultValue;
+      return getDefault(attribute);
 
     node = node.parent();
   }
 
-  return defaultValue;
+  return getDefault(attribute);
 }
 
 void textStyleSheet_c::font(const std::string& family, const std::string& file, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
