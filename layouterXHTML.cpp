@@ -4,6 +4,8 @@
 
 #include <vector>
 
+#include <boost/lexical_cast.hpp>
+
 class indentShape_c : public shape_c
 {
   private:
@@ -256,6 +258,15 @@ textLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules
 
 
   // TODO handle parser errors
-  doc.load_buffer(txt.c_str(), txt.length());
-  return layoutXML(doc, rules, shape);
+  auto res = doc.load_buffer(txt.c_str(), txt.length());
+
+  if (res)
+    return layoutXML(doc, rules, shape);
+  else
+  {
+    throw XhtmlException_c(std::string("Error Parsing XHTML [") + doc.child("node").attribute("attr").value() + "]\n" +
+            "Error description: " + res.description() + "\n" +
+            "Error offset: " + boost::lexical_cast<std::string>(res.offset) + "  " +
+            txt.substr(std::max<int>(res.offset-20, 0), 20) + "[here]" + txt.substr(res.offset, 20));
+  }
 }
