@@ -36,14 +36,15 @@ class XhtmlException_c : public std::runtime_error
  */
 class textStyleSheet_c
 {
-  public:
-
     typedef struct
     {
       std::string selector;
       std::string attribute;
       std::string value;
     } rule;
+   
+  public:
+
 
     textStyleSheet_c(void) : language("en-Latn") {}
 
