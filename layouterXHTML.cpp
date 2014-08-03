@@ -211,11 +211,17 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
   int32_t padding = evalSize(rules.getValue(xml, "padding"));
   int32_t borderwidth = evalSize(rules.getValue(xml, "border-width"));
   int32_t margin = evalSize(rules.getValue(xml, "margin"));
-  // TODO collapse margin
+  int32_t marginElementAbove = 0;
+  if (!xml.previous_sibling().empty())
+  {
+    marginElementAbove = evalSize(rules.getValue(xml.previous_sibling(), "margin"));
+  }
+
+  int32_t topmargin = std::max(marginElementAbove, margin)-marginElementAbove;
 
   auto l2 = fkt(xml, rules,
                 indentShape_c(shape, padding+borderwidth+margin, padding+borderwidth+margin),
-                ystart+padding+borderwidth+margin);
+                ystart+padding+borderwidth+topmargin);
   l2.setHeight(l2.getHeight()+padding+borderwidth+margin);
 
   textLayout_c::commandData c;
@@ -230,22 +236,22 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
 
     if (c.a != 0)
     {
-      c.x = shape.getLeft(ystart+margin, ystart+margin)+margin;
-      c.y = ystart+margin;
-      c.w = shape.getRight(ystart+margin, ystart+margin)-shape.getLeft(ystart+margin, ystart+margin)-2*margin;
+      c.x = shape.getLeft(ystart+topmargin, ystart+topmargin)+margin;
+      c.y = ystart+topmargin;
+      c.w = shape.getRight(ystart+topmargin, ystart+topmargin)-shape.getLeft(ystart+topmargin, ystart+topmargin)-2*margin;
       c.h = borderwidth;
       l2.addCommandStart(c);
 
       c.y = l2.getHeight()-borderwidth-margin;
       l2.addCommandStart(c);
 
-      c.x = shape.getRight(ystart+margin, ystart+margin)-borderwidth-margin;
-      c.y = ystart+margin;
+      c.x = shape.getRight(ystart+topmargin, ystart+topmargin)-borderwidth-margin;
+      c.y = ystart+topmargin;
       c.w = borderwidth;
-      c.h = l2.getHeight()-ystart-2*margin;
+      c.h = l2.getHeight()-ystart-margin-topmargin;
       l2.addCommandStart(c);
 
-      c.x = shape.getLeft(ystart+margin, ystart+margin)+margin;
+      c.x = shape.getLeft(ystart+topmargin, ystart+topmargin)+margin;
       l2.addCommandStart(c);
     }
   }
@@ -256,11 +262,11 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
   {
     c.command = textLayout_c::commandData::CMD_RECT;
 
-    c.x = shape.getLeft(ystart+margin, ystart+margin)+borderwidth+margin;
-    c.y = ystart+borderwidth+margin;
-    c.w = shape.getRight(ystart+margin, ystart+margin)-
-          shape.getLeft(ystart+margin, ystart+margin)-2*borderwidth-2*margin;
-    c.h = l2.getHeight()-ystart-2*borderwidth-2*margin;
+    c.x = shape.getLeft(ystart+topmargin, ystart+topmargin)+borderwidth+margin;
+    c.y = ystart+borderwidth+topmargin;
+    c.w = shape.getRight(ystart+topmargin, ystart+topmargin)-
+          shape.getLeft(ystart+topmargin, ystart+topmargin)-2*borderwidth-2*margin;
+    c.h = l2.getHeight()-ystart-2*borderwidth-margin-topmargin;
     l2.addCommandStart(c);
   }
 
