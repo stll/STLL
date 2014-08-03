@@ -111,7 +111,7 @@ static bool ruleFits(const std::string & sel, const pugi::xml_node & node)
         if (!a.empty())
         {
           std::string nodeattrval = std::string(a.value());
-          if (val.length() <= nodeattrval.length() && nodeattrval.substr(0, val.length()) == nodeattrval)
+          if (val.length() <= nodeattrval.length() && nodeattrval.substr(0, val.length()) == val)
             return true;
         }
       }
