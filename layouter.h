@@ -281,6 +281,8 @@ typedef struct {
 
   int32_t indent;      ///< indentation of the first line in pixel
 
+  bool ltr;            ///< is the base direction of the text left to right?
+
 } layoutProperties;
 
 

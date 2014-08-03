@@ -191,11 +191,12 @@ typedef struct
 
 
 // create the text direction information using libfribidi
-static FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32, std::vector<FriBidiLevel> & embedding_levels)
+static FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32,
+                                           std::vector<FriBidiLevel> & embedding_levels,
+                                           FriBidiParType base_dir)
 {
   std::vector<FriBidiCharType> bidiTypes(txt32.length());
   fribidi_get_bidi_types((uint32_t*)txt32.c_str(), txt32.length(), bidiTypes.data());
-  FriBidiParType base_dir = FRIBIDI_TYPE_LTR_VAL; // TODO depends on main script of text
   embedding_levels.resize(txt32.length());
   FriBidiLevel max_level = fribidi_get_par_embedding_levels(bidiTypes.data(), txt32.length(),
                                                             &base_dir, embedding_levels.data());
@@ -577,7 +578,8 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_
 {
   // calculate embedding types for the text
   std::vector<FriBidiLevel> embedding_levels;
-  FriBidiLevel max_level = getBidiEmbeddingLevels(txt32, embedding_levels);
+  FriBidiLevel max_level = getBidiEmbeddingLevels(txt32, embedding_levels,
+                                prop.ltr ? FRIBIDI_TYPE_LTR_VAL : FRIBIDI_TYPE_RTL_VAL);
 
   // calculate the possible linebreak positions
   std::vector<char> linebreaks(txt32.length());

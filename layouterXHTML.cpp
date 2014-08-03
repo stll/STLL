@@ -333,6 +333,7 @@ static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet
   }
 
   lprop.indent = evalSize(rules.getValue(xml, "text-indent"));
+  lprop.ltr = rules.getValue(xml, "direction") == "ltr";
 
   return layoutParagraph(txt, attr, shape, lprop, ystart);
 }
@@ -369,6 +370,7 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleShee
 
       layoutProperties prop;
       prop.indent = 0;
+      prop.ltr = true;
 
       if (direction == "ltr")
       {
