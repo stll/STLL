@@ -135,6 +135,8 @@ static bool isInheriting(const std::string & attribute)
   if (attribute == "text-align-last") return true;
   if (attribute == "text-indent") return true;
   if (attribute == "direction") return true;
+  if (attribute == "border-width") return false;
+  if (attribute == "border-color") return false;
 
   assert(0);
 }
@@ -152,6 +154,8 @@ static const std::string getDefault(const std::string & attribute)
   if (attribute == "text-align-last") return "";
   if (attribute == "text-indent") return "0px";
   if (attribute == "direction") return "ltr";
+  if (attribute == "border-width") return "0px";
+  if (attribute == "border-color") return "";
 
   assert(0);
 }
@@ -169,7 +173,8 @@ static bool isValidAttribute(const std::string & attribute)
   if (attribute == "text-align-last") return true;
   if (attribute == "text-indent") return true;
   if (attribute == "direction") return true;
-
+  if (attribute == "border-width") return true;
+  if (attribute == "border-color") return true;
 
   return false;
 }

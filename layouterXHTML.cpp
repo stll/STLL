@@ -159,8 +159,39 @@ typedef textLayout_c (*ParseFunction)(const pugi::xml_node & xml, const textStyl
 static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart, ParseFunction fkt)
 {
   int32_t padding = evalSize(rules.getValue(xml, "padding"));
-  auto l2 = fkt(xml, rules, indentShape_c(shape, padding, padding), ystart+padding);
-  l2.setHeight(l2.getHeight()+padding);
+  int32_t borderwidth = evalSize(rules.getValue(xml, "border-width"));
+  auto l2 = fkt(xml, rules, indentShape_c(shape, padding+borderwidth, padding+borderwidth), ystart+padding+borderwidth);
+  l2.setHeight(l2.getHeight()+padding+borderwidth);
+
+  if (borderwidth)
+  {
+    textLayout_c::commandData c;
+    c.command = textLayout_c::commandData::CMD_RECT;
+
+    std::string color = rules.getValue(xml, "border-color");
+    if (color == "")
+      color = rules.getValue(xml, "color");
+    evalColor(color, c.r, c.g, c.b);
+    c.a = 255;
+
+    c.x = shape.getLeft(ystart, ystart);
+    c.y = ystart;
+    c.w = shape.getRight(ystart, ystart)-shape.getLeft(ystart, ystart);
+    c.h = borderwidth;
+    l2.addCommandStart(c);
+
+    c.y = l2.getHeight()-borderwidth;
+    l2.addCommandStart(c);
+
+    c.x = shape.getRight(ystart, ystart)-borderwidth;
+    c.y = ystart;
+    c.w = borderwidth;
+    c.h = l2.getHeight()-ystart;
+    l2.addCommandStart(c);
+
+    c.x = shape.getLeft(ystart, ystart);
+    l2.addCommandStart(c);
+  }
 
 #ifdef _DEBUG_ // allows to see the boxes using a random color for each
 
