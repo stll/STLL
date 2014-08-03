@@ -482,10 +482,7 @@ textLayout_c layoutXML(const pugi::xml_document & txt, const textStyleSheet_c & 
 textLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules, const shape_c & shape)
 {
   pugi::xml_document doc;
-  // TODO preprocess to get rid of linebreaks and multiple spaces
 
-
-  // TODO handle parser errors
   auto res = doc.load_buffer(txt.c_str(), txt.length());
 
   if (res)
