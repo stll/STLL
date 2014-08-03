@@ -144,6 +144,7 @@ static bool isInheriting(const std::string & attribute)
   if (attribute == "direction") return true;
   if (attribute == "border-width") return false;
   if (attribute == "border-color") return false;
+  if (attribute == "background-color") return false;
 
   assert(0);
 }
@@ -163,6 +164,7 @@ static const std::string getDefault(const std::string & attribute)
   if (attribute == "direction") return "ltr";
   if (attribute == "border-width") return "0px";
   if (attribute == "border-color") return "";
+  if (attribute == "background-color") return "transparent";
 
   assert(0);
 }
@@ -182,6 +184,7 @@ static bool isValidAttribute(const std::string & attribute)
   if (attribute == "direction") return true;
   if (attribute == "border-width") return true;
   if (attribute == "border-color") return true;
+  if (attribute == "background-color") return true;
 
   return false;
 }

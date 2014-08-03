@@ -163,33 +163,48 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
   auto l2 = fkt(xml, rules, indentShape_c(shape, padding+borderwidth, padding+borderwidth), ystart+padding+borderwidth);
   l2.setHeight(l2.getHeight()+padding+borderwidth);
 
+  textLayout_c::commandData c;
   if (borderwidth)
   {
-    textLayout_c::commandData c;
     c.command = textLayout_c::commandData::CMD_RECT;
 
     std::string color = rules.getValue(xml, "border-color");
     if (color == "")
       color = rules.getValue(xml, "color");
-    evalColor(color, c.r, c.g, c.b);
-    c.a = 255;
+    evalColor(color, c.r, c.g, c.b, c.a);
 
-    c.x = shape.getLeft(ystart, ystart);
-    c.y = ystart;
-    c.w = shape.getRight(ystart, ystart)-shape.getLeft(ystart, ystart);
-    c.h = borderwidth;
-    l2.addCommandStart(c);
+    if (c.a != 0)
+    {
+      c.x = shape.getLeft(ystart, ystart);
+      c.y = ystart;
+      c.w = shape.getRight(ystart, ystart)-shape.getLeft(ystart, ystart);
+      c.h = borderwidth;
+      l2.addCommandStart(c);
 
-    c.y = l2.getHeight()-borderwidth;
-    l2.addCommandStart(c);
+      c.y = l2.getHeight()-borderwidth;
+      l2.addCommandStart(c);
 
-    c.x = shape.getRight(ystart, ystart)-borderwidth;
-    c.y = ystart;
-    c.w = borderwidth;
-    c.h = l2.getHeight()-ystart;
-    l2.addCommandStart(c);
+      c.x = shape.getRight(ystart, ystart)-borderwidth;
+      c.y = ystart;
+      c.w = borderwidth;
+      c.h = l2.getHeight()-ystart;
+      l2.addCommandStart(c);
 
-    c.x = shape.getLeft(ystart, ystart);
+      c.x = shape.getLeft(ystart, ystart);
+      l2.addCommandStart(c);
+    }
+  }
+
+  evalColor(rules.getValue(xml, "background-color"), c.r, c.g, c.b, c.a);
+
+  if (c.a != 0)
+  {
+    c.command = textLayout_c::commandData::CMD_RECT;
+
+    c.x = shape.getLeft(ystart, ystart)+borderwidth;
+    c.y = ystart+borderwidth;
+    c.w = shape.getRight(ystart, ystart)-shape.getLeft(ystart, ystart)-2*borderwidth;
+    c.h = l2.getHeight()-ystart-2*borderwidth;
     l2.addCommandStart(c);
   }
 
@@ -280,7 +295,7 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleShee
 
       // TODO better indentation, todo colour of bullet right now fixed to white
       codepointAttributes a;
-      evalColor(rules.getValue(txt, "color"), a.r, a.g, a.b);
+      evalColor(rules.getValue(txt, "color"), a.r, a.g, a.b, a.a);
       a.font = font;
       int32_t padding = evalSize(rules.getValue(i, "padding"));
       int32_t listIndent = font->getAscender()/64;
