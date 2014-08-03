@@ -210,8 +210,13 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
 {
   int32_t padding = evalSize(rules.getValue(xml, "padding"));
   int32_t borderwidth = evalSize(rules.getValue(xml, "border-width"));
-  auto l2 = fkt(xml, rules, indentShape_c(shape, padding+borderwidth, padding+borderwidth), ystart+padding+borderwidth);
-  l2.setHeight(l2.getHeight()+padding+borderwidth);
+  int32_t margin = evalSize(rules.getValue(xml, "margin"));
+  // TODO collapse margin
+
+  auto l2 = fkt(xml, rules,
+                indentShape_c(shape, padding+borderwidth+margin, padding+borderwidth+margin),
+                ystart+padding+borderwidth+margin);
+  l2.setHeight(l2.getHeight()+padding+borderwidth+margin);
 
   textLayout_c::commandData c;
   if (borderwidth)
@@ -225,22 +230,22 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
 
     if (c.a != 0)
     {
-      c.x = shape.getLeft(ystart, ystart);
-      c.y = ystart;
-      c.w = shape.getRight(ystart, ystart)-shape.getLeft(ystart, ystart);
+      c.x = shape.getLeft(ystart+margin, ystart+margin)+margin;
+      c.y = ystart+margin;
+      c.w = shape.getRight(ystart+margin, ystart+margin)-shape.getLeft(ystart+margin, ystart+margin)-2*margin;
       c.h = borderwidth;
       l2.addCommandStart(c);
 
-      c.y = l2.getHeight()-borderwidth;
+      c.y = l2.getHeight()-borderwidth-margin;
       l2.addCommandStart(c);
 
-      c.x = shape.getRight(ystart, ystart)-borderwidth;
-      c.y = ystart;
+      c.x = shape.getRight(ystart+margin, ystart+margin)-borderwidth-margin;
+      c.y = ystart+margin;
       c.w = borderwidth;
-      c.h = l2.getHeight()-ystart;
+      c.h = l2.getHeight()-ystart-2*margin;
       l2.addCommandStart(c);
 
-      c.x = shape.getLeft(ystart, ystart);
+      c.x = shape.getLeft(ystart+margin, ystart+margin)+margin;
       l2.addCommandStart(c);
     }
   }
@@ -251,10 +256,11 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
   {
     c.command = textLayout_c::commandData::CMD_RECT;
 
-    c.x = shape.getLeft(ystart, ystart)+borderwidth;
-    c.y = ystart+borderwidth;
-    c.w = shape.getRight(ystart, ystart)-shape.getLeft(ystart, ystart)-2*borderwidth;
-    c.h = l2.getHeight()-ystart-2*borderwidth;
+    c.x = shape.getLeft(ystart+margin, ystart+margin)+borderwidth+margin;
+    c.y = ystart+borderwidth+margin;
+    c.w = shape.getRight(ystart+margin, ystart+margin)-
+          shape.getLeft(ystart+margin, ystart+margin)-2*borderwidth-2*margin;
+    c.h = l2.getHeight()-ystart-2*borderwidth-2*margin;
     l2.addCommandStart(c);
   }
 

@@ -138,6 +138,7 @@ static bool isInheriting(const std::string & attribute)
   if (attribute == "font-variant") return true;
   if (attribute == "font-weight") return true;
   if (attribute == "padding") return false;
+  if (attribute == "margin") return false;
   if (attribute == "text-align") return true;
   if (attribute == "text-align-last") return true;
   if (attribute == "text-indent") return true;
@@ -158,6 +159,7 @@ static const std::string getDefault(const std::string & attribute)
   if (attribute == "font-variant") return "normal";
   if (attribute == "font-weight") return "normal";
   if (attribute == "padding") return "0px";
+  if (attribute == "margin") return "0px";
   if (attribute == "text-align") return "";
   if (attribute == "text-align-last") return "";
   if (attribute == "text-indent") return "0px";
@@ -178,6 +180,7 @@ static bool isValidAttribute(const std::string & attribute)
   if (attribute == "font-variant") return true;
   if (attribute == "font-weight") return true;
   if (attribute == "padding") return true;
+  if (attribute == "margin") return true;
   if (attribute == "text-align") return true;
   if (attribute == "text-align-last") return true;
   if (attribute == "text-indent") return true;
