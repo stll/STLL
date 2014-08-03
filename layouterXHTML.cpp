@@ -121,7 +121,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
 
       codepointAttributes a;
 
-      evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b);
+      evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b, a.a);
       a.font = getFontForNode(xml, rules);
       a.lang = "en-eng";
 

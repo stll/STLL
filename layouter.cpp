@@ -242,6 +242,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       g.r = attr.get(glyph_info[j].cluster + runstart).r;
       g.g = attr.get(glyph_info[j].cluster + runstart).g;
       g.b = attr.get(glyph_info[j].cluster + runstart).b;
+      g.a = attr.get(glyph_info[j].cluster + runstart).a;
 
       g.command = textLayout_c::commandData::CMD_GLYPH;
 

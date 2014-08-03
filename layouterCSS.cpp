@@ -41,8 +41,14 @@ static uint8_t hex2byte(char c1, char c2)
   return hex2num(c1)* 16 + hex2num(c2);
 }
 
-void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t &b)
+void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t &b, uint8_t &a)
 {
+  if (col == "transparent")
+  {
+    r = g = b = a = 0;
+    return;
+  }
+
   if (col.length() != 7)
     throw XhtmlException_c("color string must be 7 characters long");
 
@@ -51,9 +57,10 @@ void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t &b)
     r = hex2byte(col[1], col[2]);
     g = hex2byte(col[3], col[4]);
     b = hex2byte(col[5], col[6]);
+    a = 255;
   }
   else
-    throw XhtmlException_c("only the # color scheme is supported");
+    throw XhtmlException_c("only the # color scheme is supported and keyword transparent");
 }
 
 double evalSize(const std::string & sz)

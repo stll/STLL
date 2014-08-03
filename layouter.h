@@ -110,7 +110,7 @@ class textLayout_c
 typedef struct
 {
   // color of the letter
-  uint8_t r, g, b;
+  uint8_t r, g, b, a;
   // font of the letter
   std::shared_ptr<fontFace_c> font;
   // of which languages it is
