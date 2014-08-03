@@ -1,5 +1,7 @@
 #include "layouterSDL.h"
 
+// TODO we need some kind of caching here...
+
 typedef struct
 {
   // set to the origin of the pixel
