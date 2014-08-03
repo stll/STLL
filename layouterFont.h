@@ -1,6 +1,10 @@
 #ifndef __LAYOUTER_FONT_H__
 #define __LAYOUTER_FONT_H__
 
+/** \file
+ *  \brief a freetype wrapper
+ */
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
@@ -18,6 +22,10 @@
 
 #include <stdexcept>
 
+/** \brief exception thrown on problems with the freetype library
+ *
+ * You normally don't need to use the stuff in this header
+ */
 class FreetypeException_c : public std::runtime_error
 {
   public:
@@ -27,7 +35,8 @@ class FreetypeException_c : public std::runtime_error
 
 class freeTypeLibrary_c;
 
-// one font, made out of one file with a certain size
+/** \brief one font, made out of one file with a certain size
+ */
 class fontFace_c : boost::noncopyable
 {
   public:
@@ -48,7 +57,8 @@ class fontFace_c : boost::noncopyable
     std::shared_ptr<freeTypeLibrary_c> lib;
 };
 
-// access to the functionality of the freetype library
+/** \brief access to the functionality of the freetype library
+ */
 class freeTypeLibrary_c : boost::noncopyable
 {
   public:
@@ -70,8 +80,9 @@ class freeTypeLibrary_c : boost::noncopyable
     FT_Library lib;
 };
 
-// this class encapsulates fonts of a single library, it makes
-// sure that each font is opened only once as long as it is open
+/** \brief this class encapsulates fonts of a single library, it makes
+ *  sure that each font is opened only once as long as it is open
+ */
 class fontCache_c
 {
   public:

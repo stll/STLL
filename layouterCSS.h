@@ -1,6 +1,10 @@
 #ifndef __LAYOUTER_CSS_H__
 #define __LAYOUTER_CSS_H__
 
+/** \file
+ *  \brief Module containing CSS functionality
+ */
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
@@ -18,6 +22,8 @@
 #include <vector>
 #include <map>
 
+/** \brief exception thrown on XHTML and CSS problems
+ */
 class XhtmlException_c : public std::runtime_error
 {
   public:
@@ -25,8 +31,9 @@ class XhtmlException_c : public std::runtime_error
 
 };
 
-// this class encapsulates information for HOW to format a text, just like the style sheets
-// in html are doing
+/** \brief this class encapsulates information for HOW to format a text, just like the style sheets
+ * in html are doing.
+ */
 class textStyleSheet_c
 {
   public:
@@ -79,8 +86,18 @@ class textStyleSheet_c
     std::map<std::string, std::shared_ptr<fontFamily_c> > families;
 };
 
+/** \brief evaluate a color string
+ *  \param col string with the color
+ *  \param r red value of the color
+ *  \param g green value of the color
+ *  \param b blue value of the color
+ */
 void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t &b, uint8_t &a);
-double evalSize(const std::string & sz);
 
+/** \brief evaluate size
+ *  \param sz the size string from the CSS
+ *  \return the resulting size in pixel
+ */
+double evalSize(const std::string & sz);
 
 #endif

@@ -11,7 +11,7 @@
 #include <vector>
 #include <memory>
 
-/** encapsulates a finished layout.
+/** \brief encapsulates a finished layout.
  *
  * This class encapsulates a layout, it is a list of drawing commands
  */
@@ -54,16 +54,28 @@ class textLayout_c
     // TODO find better solution instead of public vector
     std::vector<commandData> data;
 
+    /** \brief add a single drawing command to the end of the command list
+     *  \param d the command to add
+     */
     void addCommand(const commandData & d)
     {
       data.push_back(d);
     }
 
+    /** \brief add a single drawing command to the start of the command list
+     *  \param d the command to add
+     */
     void addCommandStart(const commandData & d)
     {
       data.insert(data.begin(), d);
     }
 
+    /** \brief add whole vector of commands to the layout, the commands are offset
+     *         by a certain amount to shift everything that is drawn
+     *  \param d the commands to add
+     *  \param dx the x offset
+     *  \param dy the y offset
+     */
     void addCommandVector(const std::vector<commandData> & d, int dx, int dy)
     {
       for (auto a : d)
@@ -74,6 +86,10 @@ class textLayout_c
       }
     }
 
+    /** \brief append a layout to this layout, which means that the drawing
+     *         commands of the 2nd layout are copied into this layout
+     *  \param l the layout to append
+     */
     void append(const textLayout_c & l)
     {
       for (auto & a : l.data)
@@ -82,12 +98,16 @@ class textLayout_c
       height = std::max(height, l.height);
     }
 
+    /** \brief move assignment
+     */
     void operator=(textLayout_c && l)
     {
       data.swap(l.data);
       height = l.height;
     }
 
+    /** \brief copy assignment
+     */
     void operator=(const textLayout_c & l)
     {
       data = l.data;
@@ -96,17 +116,29 @@ class textLayout_c
 
     ~textLayout_c(void) { }
 
+    /** \brief create empty layout
+     */
     textLayout_c(void) : height(0) { }
 
+    /** \brief copy constructor
+     */
     textLayout_c(const textLayout_c & src) : height(src.height), data(src.data)  {  }
 
+    /** \brief move constructor
+     */
     textLayout_c(textLayout_c && src)
     {
       swap(data, src.data);
       height = src.height;
     }
 
+    /** \brief the height of the layout. This is supposed to be the vertical
+     *  space that this layout takes up
+     */
     uint32_t getHeight(void) const { return height; }
+
+    /** \brief set the height
+     */
     void setHeight(uint32_t h) { height = h; }
 };
 

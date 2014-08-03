@@ -55,6 +55,7 @@
  *   is used
  * - background-color, only #-synatax and "transparent", default is transparent
  */
+
 class indentShape_c : public shape_c
 {
   private:
@@ -324,18 +325,18 @@ static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet
   return layoutParagraph(txt, attr, shape, lprop, ystart);
 }
 
-static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
   textLayout_c l;
   l.setHeight(ystart);
-  for (const auto & i : txt)
+  for (const auto & i : xml)
   {
     if (   (i.type() == pugi::node_element)
         && (std::string("li") == i.name())
        )
     {
       // TODO depends on direction of text
-      pugi::xml_node j = txt;
+      pugi::xml_node j = xml;
       while (j.type() != pugi::node_pcdata)
         j = j.first_child();
 
@@ -344,7 +345,7 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleShee
 
       // TODO better indentation, todo colour of bullet right now fixed to white
       codepointAttributes a;
-      evalColor(rules.getValue(txt, "color"), a.r, a.g, a.b, a.a);
+      evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b, a.a);
       a.font = font;
       int32_t padding = evalSize(rules.getValue(i, "padding"));
       int32_t listIndent = font->getAscender()/64;
@@ -352,7 +353,7 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & txt, const textStyleShee
       // TODO do properly
       a.lang = "en-engl";
 
-      auto direction = rules.getValue(txt, "direction");
+      auto direction = rules.getValue(xml, "direction");
 
       layoutProperties prop;
       prop.indent = 0;
