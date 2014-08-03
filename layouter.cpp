@@ -84,6 +84,80 @@
  *
  */
 
+/**
+ * \page tutorial_pg Tutorial
+ * \section tut_basic_sec Using the Paragraph Layouter
+ * To use the paragraph layouter only you need to use code like the following
+ * \code{.cpp}
+// create a font cache to get fonts, you need to keep this one
+// until you are done with the layouting and the output
+fontCache_c fc;
+
+// setup the attributes for the text to output
+// we use a font from the fontcache and the color white
+// we also use the English language
+codepointAttributes attr;
+attr.font = fc->getFont("FreeSans.ttf", 20);
+attr.r = attr.g = attr.b = attr.a = 255;
+attr.lang = "en";
+
+// setup the attribute index. This index assigns attributes to
+// all the characters in your text, the way we create it here
+// will setup the index in such a way, that _all_ characters Will
+// have the given attributes
+attributeIndex_c ai(attr);
+
+// setup layouting properties. we want the text left aligned and
+// without any indentation
+layoutProperties prop;
+prop.align = layoutProperties::ALG_LEFT;
+prop.indent = 0;
+
+// now layout the text "Hello World" with the given attributes, put
+// it into a retcangle of width 200 pixel, use our layouting properties
+// and start at y position 0
+// the text needs to be utf-32 encoded for this function
+auto layout = layoutParagraph(U"Hello World", ai, rectangleShape_c(200), prop, 0);
+
+// that is it, now you can output the layout, using one of the Output
+// driver functions, e.g. using the SDL driver you can output the text
+// at position 20, 20 on the given surface
+showLayoutSDL(layout, 20, 20, videoSurface);
+
+// now you can get rid of the cache, if you want
+\endcode
+ *
+ * \section tut_xhtml_sec Using the XHTML Layouter
+ * For the XHTML layouter the flow is slightly different
+ * \code{.cpp}
+// setup a stylesheet
+textStyleSheet_c styleSheet;
+
+// add the fonts that are required
+styleSheet.font("sans", "/usr/share/fonts/freefont/FreeSans.ttf");
+styleSheet.font("sans", "/usr/share/fonts/freefont/FreeSansBold.ttf", "normal", "normal", "bold");
+
+// add the CSS rules you need
+styleSheet.addRule("body", "color", "#ffffff");
+styleSheet.addRule("body", "font-size", "20px");
+styleSheet.addRule("body", "text-align", "justify");
+styleSheet.addRule("body", "padding", "10px");
+styleSheet.addRule("h1", "font-weight", "bold");
+styleSheet.addRule("h1", "font-size", "60px");
+styleSheet.addRule("h1", "text-align", "center");
+
+// The XHTML code we want to format, this time it needs to be utf-8 encoded
+std::string text = u8"<html><body><h1>Title</h1><p>Some text</p></body></html>";
+
+// layout the XHTML code, again in a 200 pixel wide rectangle
+auto layout = layoutXHTML(text, styleSheet, rectangleShape_c(200));
+
+// again output the layout
+showLayoutSDL(layout, 20, 20, videoSurface);
+\endcode
+ *
+ */
+
 typedef struct
 {
   // the commands to output this run
