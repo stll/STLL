@@ -194,6 +194,6 @@ typedef struct {
 
 // base layout function that does the layouting stuff for one paragraph
 textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
-                             const shape_c & shape, const layoutProperties & prop, int32_t ystart);
+                             const shape_c & shape, const layoutProperties & prop, int32_t ystart = 0);
 
 #endif

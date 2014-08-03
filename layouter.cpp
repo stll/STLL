@@ -117,7 +117,7 @@ prop.indent = 0;
 // it into a retcangle of width 200 pixel, use our layouting properties
 // and start at y position 0
 // the text needs to be utf-32 encoded for this function
-auto layout = layoutParagraph(U"Hello World", ai, rectangleShape_c(200), prop, 0);
+auto layout = layoutParagraph(U"Hello World", ai, rectangleShape_c(200), prop);
 
 // that is it, now you can output the layout, using one of the Output
 // driver functions, e.g. using the SDL driver you can output the text
