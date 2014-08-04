@@ -42,11 +42,11 @@ class textStyleSheet_c
       std::string attribute;
       std::string value;
     } rule;
-   
+
   public:
 
 
-    textStyleSheet_c(void) : language("en-Latn") {}
+    textStyleSheet_c(void) { }
 
     // add a font to a family
     // family is the name of the font familiy to add to
@@ -79,8 +79,6 @@ class textStyleSheet_c
 
     // TODO make back into a reference
     const std::string getValue(pugi::xml_node node, const std::string & attribute) const;
-
-    std::string language;   // format: language code: 2 letters, dash, script "de-Latn" TODO remove
 
   private:
     std::vector<rule> rules;

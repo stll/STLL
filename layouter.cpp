@@ -227,14 +227,6 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
   // Create a buffer for harfbuzz to use
   hb_buffer_t *buf = hb_buffer_create();
 
-  // TODO language information should go to harfbuzz and liblinebreak for each section
-  std::string lan = attr.get(0).lang.substr(0, 2);
-  std::string s = attr.get(0).lang.substr(3, 4);
-
-//  hb_script_t scr = hb_script_from_iso15924_tag(HB_TAG(s[0], s[1], s[2], s[3]));
-//  hb_buffer_set_script(buf, scr);
-  // TODO must come either from text or from rules
-//  hb_buffer_set_language(buf, hb_language_from_string(lan.c_str(), lan.length()));
 
   size_t runstart = 0;
 
@@ -246,6 +238,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     // find end of current run
     while (   (spos < txt32.length())
            && (embedding_levels[runstart] == embedding_levels[spos])
+           && (attr.get(runstart).lang == attr.get(spos).lang)
            && (attr.get(runstart).font == attr.get(spos).font)
            && (   (linebreaks[spos-1] == LINEBREAK_NOBREAK)
                || (linebreaks[spos-1] == LINEBREAK_INSIDEACHAR)
@@ -272,6 +265,28 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     }
 
     run.shy = txt32[runstart] == U'\u00AD';
+
+    std::string language = attr.get(runstart).lang;
+
+    // reset is not required, when no language is set, the buffer
+    // reset automatically resets the language and scribt info as well
+    if (language != "")
+    {
+      size_t i = language.find_first_of('-');
+
+      if (i != std::string::npos)
+      {
+        hb_script_t scr = hb_script_from_iso15924_tag(HB_TAG(language[i+1], language[i+2],
+                                                             language[i+3], language[i+4]));
+        hb_buffer_set_script(buf, scr);
+
+        hb_buffer_set_language(buf, hb_language_from_string(language.c_str(), i-1));
+      }
+      else
+      {
+        hb_buffer_set_language(buf, hb_language_from_string(language.c_str(), language.length()));
+      }
+    }
 
     if (!run.shy)
       hb_buffer_add_utf32(buf, ((uint32_t*)txt32.c_str())+runstart, spos-runstart, 0, spos-runstart);
@@ -582,6 +597,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_
                                 prop.ltr ? FRIBIDI_TYPE_LTR_VAL : FRIBIDI_TYPE_RTL_VAL);
 
   // calculate the possible linebreak positions
+  // TODO get language to liblinebreak
   std::vector<char> linebreaks(txt32.length());
   set_linebreaks_utf32((utf32_t*)txt32.c_str(), txt32.length(), "", linebreaks.data());
 

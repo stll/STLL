@@ -173,7 +173,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
 
       evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b, a.a);
       a.font = getFontForNode(xml, rules);
-      a.lang = "en-eng";
+      a.lang = xml.attribute("lang").value();
 
       attr.set(s, txt.length(), a);
     }
@@ -348,7 +348,6 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleShee
         && (std::string("li") == i.name())
        )
     {
-      // TODO depends on direction of text
       pugi::xml_node j = xml;
       while (j.type() != pugi::node_pcdata)
         j = j.first_child();
@@ -356,15 +355,13 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleShee
       auto font = getFontForNode(j, rules);
       auto y = l.getHeight();
 
-      // TODO better indentation, todo colour of bullet right now fixed to white
       codepointAttributes a;
       evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b, a.a);
       a.font = font;
+      a.lang = "";
+
       int32_t padding = evalSize(rules.getValue(i, "padding"));
       int32_t listIndent = font->getAscender()/64;
-
-      // TODO do properly
-      a.lang = "en-engl";
 
       auto direction = rules.getValue(xml, "direction");
 
