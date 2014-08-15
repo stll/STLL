@@ -83,15 +83,11 @@ static bool ruleFits(const std::string & sel, const pugi::xml_node & node)
   if (sel == node.name()) return true;
   if (sel[0] == '.')
   {
-    auto attr = node.attribute("class");
-
-    if (!attr.empty())
-    {
-      if (attr.value() == sel.substr(1))
+    for (auto attr: node.attributes())
+      if ((std::string("class") == attr.name()) && (attr.value() == sel.substr(1)))
       {
         return true;
       }
-    }
   }
   if (sel.find_first_of('[') != sel.npos)
   {
