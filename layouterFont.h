@@ -51,6 +51,8 @@ class fontFace_c : boost::noncopyable
     uint32_t getHeigt(void) const { return f->size->metrics.height; }
     int32_t getAscender(void) const { return f->size->metrics.ascender; }
     int32_t getDescender(void) const { return f->size->metrics.descender; }
+    int32_t getUnderlinePosition(void) const { return (int64_t)f->underline_position*f->size->metrics.y_scale / 65536; }
+    int32_t getUnderlineThickness(void) const { return (int64_t)f->underline_thickness*f->size->metrics.y_scale / 65536; }
 
   private:
     FT_Face f;

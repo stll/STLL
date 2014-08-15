@@ -337,6 +337,16 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       g.command = textLayout_c::commandData::CMD_GLYPH;
 
       run.run.push_back(g);
+
+      if (attr.get(runstart).flags & codepointAttributes::FL_UNDERLINE)
+      {
+        g.command = textLayout_c::commandData::CMD_RECT;
+        g.w = glyph_pos[j].x_advance/64+1;
+        g.y = -((g.font->getUnderlinePosition()+g.font->getUnderlineThickness()/2)/64);
+        g.h = std::max(1, g.font->getUnderlineThickness()/64);
+
+        run.run.push_back(g);
+      }
     }
 
     runs.push_back(run);
@@ -353,7 +363,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
   return runs;
 }
 
-static textLayout_c breakLines(const std::vector<runInfo> & runs,
+static textLayout_c breakLines(std::vector<runInfo> & runs,
                                const shape_c & shape,
                                FriBidiLevel max_level,
                                const layoutProperties & prop, int32_t ystart)
@@ -563,6 +573,18 @@ static textLayout_c breakLines(const std::vector<runInfo> & runs,
         // output only non-space runs
         if (!runs[runorder[i]].space)
           l.addCommandVector(runs[runorder[i]].run, xpos+spaceadder*numSpace, ypos);
+        else
+        {
+          // in space runs, there may be an rectangular command that represents
+          // the underline, make that unterline longer by spaceadder
+          for (size_t j = 0; j < runs[runorder[i]].run.size(); j++)
+            if (runs[runorder[i]].run[j].command == textLayout_c::commandData::CMD_RECT)
+            {
+               runs[runorder[i]].run[j].w+= spaceadder;
+            }
+
+          l.addCommandVector(runs[runorder[i]].run, xpos+spaceadder*numSpace, ypos);
+        }
 
         // count the spaces
         if (runs[runorder[i]].space) numSpace++;

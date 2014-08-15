@@ -160,6 +160,10 @@ typedef struct
   /// current language at this letter
   std::string lang;
 
+  static const uint8_t FL_UNDERLINE = 1;
+
+  uint8_t flags;
+
   // TODO things like underline and strike-through are missing
   // TODO shadows
 } codepointAttributes;

@@ -174,6 +174,11 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
       evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b, a.a);
       a.font = getFontForNode(xml, rules);
       a.lang = xml.attribute("lang").value();
+      a.flags = 0;
+      if (rules.getValue(xml, "text-decoration") == "underline")
+      {
+        a.flags |= codepointAttributes::FL_UNDERLINE;
+      }
 
       attr.set(s, txt.length(), a);
     }
