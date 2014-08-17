@@ -612,6 +612,32 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
   return l;
 }
 
+static std::vector<char> getLinebreaks(const std::u32string & txt32, const attributeIndex_c & attr)
+{
+  size_t length = txt32.length();
+
+  std::vector<char> linebreaks(length);
+
+  size_t runstart = 0;
+
+  while (runstart < length)
+  {
+    size_t runpos = runstart+1;
+
+    while (runpos < length && attr.get(runstart).lang == attr.get(runpos).lang)
+    {
+      runpos++;
+    }
+
+    set_linebreaks_utf32((const utf32_t*)txt32.c_str()+runstart, runpos-runstart,
+                         attr.get(runstart).lang.c_str(), linebreaks.data()+runstart);
+
+    runstart = runpos;
+  }
+
+  return linebreaks;
+}
+
 textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
                              const shape_c & shape, const layoutProperties & prop, int32_t ystart)
 {
@@ -621,9 +647,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_
                                 prop.ltr ? FRIBIDI_TYPE_LTR_VAL : FRIBIDI_TYPE_RTL_VAL);
 
   // calculate the possible linebreak positions
-  // TODO get language to liblinebreak
-  std::vector<char> linebreaks(txt32.length());
-  set_linebreaks_utf32((utf32_t*)txt32.c_str(), txt32.length(), "", linebreaks.data());
+  auto linebreaks = getLinebreaks(txt32, attr);
 
   // create runs of layout text. Each run is a cohesive set, e.g. a word with a single
   // font, ...
