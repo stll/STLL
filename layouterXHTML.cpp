@@ -13,7 +13,7 @@
  * likely a bug and needs to be fixed.
  *
  * Nevertheless, the supported subset of HTML and CSS is limited to whatever is suitable
- * for the intended usage, namely: textoutput in games and GUIs.
+ * for the intended usage, namely: text output in games and GUIs.
  *
  * The library will be very picky, if it detects something that is not according to what
  * it expects, it will throw an exception.
@@ -32,6 +32,10 @@
  *  - ul, li
  *  - div
  *  - br
+ *
+ *  Global attributes:
+ *  - lang, the value is inherited by subtags, it may be used for language dependent CSS rules
+ *    and it is used by the text output for language dependent shaping
  *
  * \section css_sec CSS
  * The following selectors formats are supported:
