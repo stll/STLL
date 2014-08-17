@@ -10,9 +10,9 @@
 
 // TODO the fontFace_c constructor and library interface is not perfect...
 
-fontFace_c::fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const std::string & fname, uint32_t size) : lib(l)
+fontFace_c::fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const fontRessource_c & res, uint32_t size) : lib(l)
 {
-  f = lib->newFace(fname, size);
+  f = lib->newFace(res, size);
 }
 
 fontFace_c::~fontFace_c()
@@ -20,9 +20,9 @@ fontFace_c::~fontFace_c()
   lib->doneFace(f);
 }
 
-std::shared_ptr<fontFace_c> fontCache_c::getFont(const std::string fname, uint32_t size)
+std::shared_ptr<fontFace_c> fontCache_c::getFont(const fontRessource_c & res, uint32_t size)
 {
-  fontFaceParameter_c ffp(fname, size);
+  fontFaceParameter_c ffp(res, size);
 
   auto i = fonts.find(ffp);
 
@@ -34,9 +34,9 @@ std::shared_ptr<fontFace_c> fontCache_c::getFont(const std::string fname, uint32
       return a;
   }
 
-  // TODO is it possible that someone else opens a font here???
+  // TODO... race maybe someone else opens a font here?
 
-  auto f = std::make_shared<fontFace_c>(lib, fname, size);
+  auto f = std::make_shared<fontFace_c>(lib, res, size);
 
   fonts[ffp] = f;
 
@@ -61,12 +61,12 @@ void fontFace_c::outlineRender(uint32_t idx, FT_Raster_Params* params)
   }
 }
 
-FT_Face freeTypeLibrary_c::newFace(const std::string fname, uint32_t size)
+FT_Face freeTypeLibrary_c::newFace(const fontRessource_c & res, uint32_t size)
 {
   FT_Face f;
-  if (FT_New_Face(lib, fname.c_str(), 0, &f))
+  if (FT_Open_Face(lib, &res, 0, &f))
   {
-    throw FreetypeException_c(std::string("Could not open Font '") + fname + "' maybe "
+    throw FreetypeException_c(std::string("Could not open Font '") + res.getDescription() + "' maybe "
                               "file is spelled wrong or file is broken");
   }
 
@@ -75,7 +75,7 @@ FT_Face freeTypeLibrary_c::newFace(const std::string fname, uint32_t size)
     doneFace(f);
 
     throw FreetypeException_c(std::string("Could not set the requested file to font '") +
-                              fname + "'");
+                              res.getDescription() + "'");
   }
 
   /*  See http://www.microsoft.com/typography/otspec/name.htm
@@ -98,7 +98,7 @@ FT_Face freeTypeLibrary_c::newFace(const std::string fname, uint32_t size)
       {
         doneFace(f);
         throw FreetypeException_c(std::string("Could not set a unicode character map to font '") +
-                                  fname + "'. Maybe the font doesn't have one?");
+                                  res.getDescription() + "'. Maybe the font doesn't have one?");
       }
       return f;
     }
@@ -106,7 +106,7 @@ FT_Face freeTypeLibrary_c::newFace(const std::string fname, uint32_t size)
 
   doneFace(f);
   throw FreetypeException_c(std::string("Could not find a unicode character map to font '") +
-                            fname + "'. Maybe the font doesn't have one?");
+                            res.getDescription() + "'. Maybe the font doesn't have one?");
 }
 
 freeTypeLibrary_c::~freeTypeLibrary_c()
@@ -122,7 +122,7 @@ freeTypeLibrary_c::freeTypeLibrary_c()
   }
 }
 
-void fontFamily_c::addFont(const std::string& file, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
+void fontFamily_c::addFont(const fontRessource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
   fontFamilyParameter_c par;
 
@@ -131,7 +131,7 @@ void fontFamily_c::addFont(const std::string& file, const std::string& style, co
   par.weight = weight;
   par.stretch = stretch;
 
-  fonts[par] = file;
+  fonts[par] = res;
 }
 
 std::shared_ptr<fontFace_c> fontFamily_c::getFont(uint32_t size, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)

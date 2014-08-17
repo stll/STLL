@@ -60,20 +60,22 @@ class textStyleSheet_c
     // already in this style. If you have multiple styles and want to
     // share caches, you will need to at least once call the
     // other version of this function below
-    void font(const std::string & family, const std::string & file,
+    void font(const std::string & family, const fontRessource_c & res,
                  const std::string & style = "normal",
                  const std::string & variant = "normal",
                  const std::string & weight = "normal",
                  const std::string & stretch = "normal");
 
     // same as above, but allows you to set the cache
-    void font(std::shared_ptr<fontCache_c> fc, const std::string & family, const std::string & file,
+    void font(std::shared_ptr<fontCache_c> fc, const std::string & family, const fontRessource_c & res,
                  const std::string & style = "normal",
                  const std::string & variant = "normal",
                  const std::string & weight = "normal",
                  const std::string & stretch = "normal");
 
-    std::shared_ptr<fontFamily_c> findFamily(const std::string & family) const { return families.find(family)->second; }
+    std::shared_ptr<fontFamily_c> findFamily(const std::string & family) const {
+      return families.find(family)->second;
+    }
 
     void addRule(const std::string sel, const std::string attr, const std::string val);
 

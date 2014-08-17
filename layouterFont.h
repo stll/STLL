@@ -35,13 +35,58 @@ class FreetypeException_c : public std::runtime_error
 
 class freeTypeLibrary_c;
 
+/** \brief this class represents a font ressource, right now a filename or a memory pointer
+ *  are supported
+ */
+class fontRessource_c : public FT_Open_Args
+{
+  private:
+    std::string v;
+    std::shared_ptr<uint8_t> dat;
+
+  public:
+
+    /** create a font ressource for a file given its path */
+    fontRessource_c(const std::string & fname)
+    {
+      flags = FT_OPEN_PATHNAME;
+      v = fname;
+      pathname = (FT_String*)v.c_str();  // TODO const correctness is not given
+
+      memory_base = 0;
+      memory_size = 0;
+    }
+
+    /** create a font ressource from memory, descr must be a unique name identifying the file
+     */
+    fontRessource_c(std::pair<std::shared_ptr<uint8_t>, size_t> data, const std::string & descr) : v(descr), dat(data.first)
+    {
+      flags = FT_OPEN_MEMORY;
+
+      memory_base = data.first.get();
+      memory_size = data.second;
+
+      v = descr;
+
+      pathname = 0;
+    }
+
+    fontRessource_c(void)
+    {
+      v = "unused";
+      flags = 0;
+    }
+
+    const std::string & getDescription(void) const { return v; }
+};
+
 /** \brief one font, made out of one file with a certain size
  */
 class fontFace_c : boost::noncopyable
 {
   public:
 
-    fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const std::string & fname, uint32_t size);
+    fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const fontRessource_c & res, uint32_t size);
     ~fontFace_c();
 
     void outlineRender(uint32_t idx, FT_Raster_Params * params);
@@ -68,7 +113,7 @@ class freeTypeLibrary_c : boost::noncopyable
     freeTypeLibrary_c();
     ~freeTypeLibrary_c();
 
-    FT_Face newFace(const std::string fname, uint32_t size);
+    FT_Face newFace(const fontRessource_c & res, uint32_t size);
 
     FT_Error outlineRender(FT_Outline * o, FT_Raster_Params * params)
     {
@@ -102,22 +147,29 @@ class fontCache_c
     // get a font face from this cache with the given name and size attribute
     // if there is already one instance of this font open, it will be used
     // otherwise a new one will be opened
-    std::shared_ptr<fontFace_c> getFont(const std::string fname, uint32_t size);
+    std::shared_ptr<fontFace_c> getFont(const fontRessource_c & fname, uint32_t size);
 
   private:
 
     class fontFaceParameter_c
     {
     public:
-      std::string fname;
+      fontRessource_c res;
       uint32_t size;
 
-      fontFaceParameter_c(const std::string & f, uint32_t s) : fname(f), size(s) {}
+      fontFaceParameter_c(const fontRessource_c & r, uint32_t s) : res(r), size(s) {}
 
       bool operator<(const fontFaceParameter_c & b) const
       {
-        if (fname < b.fname) return true;
-        if (fname > b.fname) return false;
+        if (res.flags < b.res.flags) return true;
+        if (res.flags > b.res.flags) return false;
+
+        if (res.memory_base < b.res.memory_base) return true;
+        if (res.memory_base > b.res.memory_base) return false;
+
+        if (res.pathname < b.res.pathname) return true;
+        if (res.pathname > b.res.pathname) return false;
+
         if (size < b.size) return true;
         return false;
       }
@@ -187,7 +239,7 @@ class fontFamily_c
                                         const std::string & stretch = "normal");
 
     // add a font to the family
-    void addFont(const std::string & file,
+    void addFont(const fontRessource_c & res,
                  const std::string & style = "normal",
                  const std::string & variant = "normal",
                  const std::string & weight = "normal",
@@ -197,7 +249,7 @@ class fontFamily_c
     std::shared_ptr<fontCache_c> getCache(void) { return cache; }
 
   private:
-    std::map<fontFamilyParameter_c, std::string> fonts;
+    std::map<fontFamilyParameter_c, fontRessource_c> fonts;
     std::shared_ptr<fontCache_c> cache;
 };
 
