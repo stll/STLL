@@ -155,6 +155,30 @@ static std::shared_ptr<fontFace_c> getFontForNode(const pugi::xml_node & xml, co
   return f;
 }
 
+static const pugi::char_t * getHTMLAttribute(pugi::xml_node xml, const std::string attr)
+{
+  while (true)
+  {
+    const pugi::char_t * res = xml.attribute(attr.c_str()).value();
+
+    if (res && *res) return res;
+
+    if ("lang" == attr)
+    {
+      xml = xml.parent();
+
+      if (xml.empty())
+      {
+        return res;
+      }
+    }
+    else
+    {
+      return res;
+    }
+  }
+}
+
 static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & rules, std::u32string & txt,
                attributeIndex_c & attr)
 {
@@ -173,7 +197,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
 
       evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b, a.a);
       a.font = getFontForNode(xml, rules);
-      a.lang = xml.attribute("lang").value();
+      a.lang = getHTMLAttribute(xml, "lang");
       a.flags = 0;
       if (rules.getValue(xml, "text-decoration") == "underline")
       {
