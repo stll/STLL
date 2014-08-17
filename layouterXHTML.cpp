@@ -194,6 +194,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
     {
       txt += U'\n';
       codepointAttributes a;
+      a.flags = 0;
       a.font = getFontForNode(xml, rules);
       // TODO language
       attr.set(txt.length()-1, a);
@@ -364,6 +365,7 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleShee
       evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b, a.a);
       a.font = font;
       a.lang = "";
+      a.flags = 0;
 
       int32_t padding = evalSize(rules.getValue(i, "padding"));
       int32_t listIndent = font->getAscender()/64;
