@@ -60,6 +60,8 @@
  * - background-color, only #-synatax and "transparent", default is transparent
  */
 
+namespace STLL {
+
 class indentShape_c : public shape_c
 {
   private:
@@ -528,4 +530,6 @@ textLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules
             "Error offset: " + boost::lexical_cast<std::string>(res.offset) + "  " +
             txt.substr(std::max<int>(res.offset-20, 0), 20) + "[here]" + txt.substr(res.offset, 20));
   }
+}
+
 }

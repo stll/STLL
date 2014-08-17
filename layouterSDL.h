@@ -11,6 +11,8 @@
 
 #include <vector>
 
+namespace STLL {
+
 /** \brief display a single layout
  *  \param l layout to draw
  *  \param sx x position on the target surface
@@ -30,5 +32,7 @@ class layoutInfo_c
 };
 
 void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data);
+
+}
 
 #endif

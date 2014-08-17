@@ -14,6 +14,8 @@
 
 #include <stdexcept>
 
+namespace STLL {
+
 /** \brief layout the given XHTML code
  *  \param txt the html text to parse, is must be utf-8
  *  \param rules the stylesheet to use for layouting
@@ -29,5 +31,7 @@ textLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules
  *  \param shape the shape to layout into
  */
 textLayout_c layoutXML(const pugi::xml_document & xml, const textStyleSheet_c & rules, const shape_c & shape);
+
+}
 
 #endif

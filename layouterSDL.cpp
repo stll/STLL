@@ -2,6 +2,8 @@
 
 // TODO we need some kind of caching here...
 
+namespace STLL {
+
 typedef struct
 {
   // set to the origin of the pixel
@@ -156,4 +158,6 @@ void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
   }
 
   SDL_Quit();
+}
+
 }

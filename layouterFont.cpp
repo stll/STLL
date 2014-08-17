@@ -7,6 +7,7 @@
 #include <string>
 #include <memory>
 
+namespace STLL {
 
 // TODO the fontFace_c constructor and library interface is not perfect...
 
@@ -156,3 +157,4 @@ std::shared_ptr<fontFace_c> fontFamily_c::getFont(uint32_t size, const std::stri
   }
 }
 
+}

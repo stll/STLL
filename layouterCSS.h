@@ -22,6 +22,8 @@
 #include <vector>
 #include <map>
 
+namespace STLL {
+
 /** \brief exception thrown on XHTML and CSS problems
  */
 class XhtmlException_c : public std::runtime_error
@@ -100,5 +102,7 @@ void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t &b, ui
  *  \return the resulting size in pixel
  */
 double evalSize(const std::string & sz);
+
+}
 
 #endif

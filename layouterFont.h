@@ -22,6 +22,8 @@
 
 #include <stdexcept>
 
+namespace STLL {
+
 /** \brief exception thrown on problems with the freetype library
  *
  * You normally don't need to use the stuff in this header
@@ -253,5 +255,6 @@ class fontFamily_c
     std::shared_ptr<fontCache_c> cache;
 };
 
+}
 
 #endif

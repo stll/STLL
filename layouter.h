@@ -11,6 +11,8 @@
 #include <vector>
 #include <memory>
 
+namespace STLL {
+
 /** \brief encapsulates a finished layout.
  *
  * This class encapsulates a layout, it is a list of drawing commands
@@ -304,5 +306,7 @@ typedef struct {
  */
 textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
                              const shape_c & shape, const layoutProperties & prop, int32_t ystart = 0);
+
+}
 
 #endif

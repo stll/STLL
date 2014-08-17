@@ -5,6 +5,8 @@
 #include <memory>
 #include <algorithm>
 
+namespace STLL {
+
 static uint8_t hex2num(char c)
 {
   switch (c)
@@ -263,3 +265,4 @@ void textStyleSheet_c::addRule(const std::string sel, const std::string attr, co
   rules.push_back(r);
 }
 
+}

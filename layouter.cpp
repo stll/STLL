@@ -158,6 +158,8 @@ showLayoutSDL(layout, 20, 20, videoSurface);
  *
  */
 
+namespace STLL {
+
 typedef struct
 {
   // the commands to output this run
@@ -629,4 +631,6 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_
 
   // layout the runs into lines
   return breakLines(runs, shape, max_level, prop, ystart);
+}
+
 }
