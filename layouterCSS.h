@@ -70,14 +70,14 @@ class textStyleSheet_c
      * \param weight See fontFamily_c::getFont()
      * \param stretch See fontFamily_c::getFont()
      */
-    void font(const std::string & family, const fontRessource_c & res,
+    void font(const std::string & family, const fontResource_c & res,
                  const std::string & style = "normal",
                  const std::string & variant = "normal",
                  const std::string & weight = "normal",
                  const std::string & stretch = "normal");
 
     // same as above, but allows you to set the cache
-    void font(std::shared_ptr<fontCache_c> fc, const std::string & family, const fontRessource_c & res,
+    void font(std::shared_ptr<fontCache_c> fc, const std::string & family, const fontResource_c & res,
                  const std::string & style = "normal",
                  const std::string & variant = "normal",
                  const std::string & weight = "normal",

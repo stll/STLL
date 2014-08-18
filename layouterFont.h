@@ -40,7 +40,7 @@ class freeTypeLibrary_c;
  *
  *  Right now a file name or a memory pointer are supported resource types
  */
-class fontRessource_c : public FT_Open_Args
+class fontResource_c : public FT_Open_Args
 {
   private:
     std::string v;
@@ -52,7 +52,7 @@ class fontRessource_c : public FT_Open_Args
      *
      * \param fname File name of the file to use as font
      */
-    fontRessource_c(const std::string & fname)
+    fontResource_c(const std::string & fname)
     {
       flags = FT_OPEN_PATHNAME;
       v = fname;
@@ -68,7 +68,7 @@ class fontRessource_c : public FT_Open_Args
      * \param descr description string, will be used to describe the font when an exception is thrown
      *              (e.g. problems loading the font)
      */
-    fontRessource_c(std::pair<std::shared_ptr<uint8_t>, size_t> data, const std::string & descr) : v(descr), dat(data.first)
+    fontResource_c(std::pair<std::shared_ptr<uint8_t>, size_t> data, const std::string & descr) : v(descr), dat(data.first)
     {
       flags = FT_OPEN_MEMORY;
 
@@ -84,7 +84,7 @@ class fontRessource_c : public FT_Open_Args
      *
      * This constructor is required by the STL containers, don't use it
      */
-    fontRessource_c(void)
+    fontResource_c(void)
     {
       flags = 0;
     }
@@ -103,7 +103,7 @@ class fontFace_c : boost::noncopyable
 {
   public:
 
-    fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const fontRessource_c & res, uint32_t size);
+    fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const fontResource_c & res, uint32_t size);
     ~fontFace_c();
 
     /** \brief Perform an outline rendering of a glyph of this font
@@ -179,7 +179,7 @@ class freeTypeLibrary_c : boost::noncopyable
      * \param size The requested font size
      * \return The FT_Face value
      */
-    FT_Face newFace(const fontRessource_c & res, uint32_t size);
+    FT_Face newFace(const fontResource_c & res, uint32_t size);
 
     /** Make the library render an outline of a glyph
      *
@@ -238,17 +238,17 @@ class fontCache_c
      * \param size The requested size
      * \return The instance of the font face
      */
-    std::shared_ptr<fontFace_c> getFont(const fontRessource_c & res, uint32_t size);
+    std::shared_ptr<fontFace_c> getFont(const fontResource_c & res, uint32_t size);
 
   private:
 
     class fontFaceParameter_c
     {
     public:
-      fontRessource_c res;
+      fontResource_c res;
       uint32_t size;
 
-      fontFaceParameter_c(const fontRessource_c & r, uint32_t s) : res(r), size(s) {}
+      fontFaceParameter_c(const fontResource_c & r, uint32_t s) : res(r), size(s) {}
 
       bool operator<(const fontFaceParameter_c & b) const
       {
@@ -348,7 +348,7 @@ class fontFamily_c
      * \param weight Font weight, typical values are: "lighter", "normal", "bold", "bolder"
      * \param stretch Font stretch, typical values are: "normal", "condensed"
      */
-    void addFont(const fontRessource_c & res,
+    void addFont(const fontResource_c & res,
                  const std::string & style = "normal",
                  const std::string & variant = "normal",
                  const std::string & weight = "normal",
@@ -360,7 +360,7 @@ class fontFamily_c
     std::shared_ptr<fontCache_c> getCache(void) { return cache; }
 
   private:
-    std::map<fontFamilyParameter_c, fontRessource_c> fonts;
+    std::map<fontFamilyParameter_c, fontResource_c> fonts;
     std::shared_ptr<fontCache_c> cache;
 };
 

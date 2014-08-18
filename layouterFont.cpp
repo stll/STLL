@@ -11,7 +11,7 @@ namespace STLL {
 
 // TODO the fontFace_c constructor and library interface is not perfect...
 
-fontFace_c::fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const fontRessource_c & res, uint32_t size) : lib(l)
+fontFace_c::fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const fontResource_c & res, uint32_t size) : lib(l)
 {
   f = lib->newFace(res, size);
 }
@@ -21,7 +21,7 @@ fontFace_c::~fontFace_c()
   lib->doneFace(f);
 }
 
-std::shared_ptr<fontFace_c> fontCache_c::getFont(const fontRessource_c & res, uint32_t size)
+std::shared_ptr<fontFace_c> fontCache_c::getFont(const fontResource_c & res, uint32_t size)
 {
   fontFaceParameter_c ffp(res, size);
 
@@ -62,7 +62,7 @@ void fontFace_c::outlineRender(uint32_t idx, FT_Raster_Params* params)
   }
 }
 
-FT_Face freeTypeLibrary_c::newFace(const fontRessource_c & res, uint32_t size)
+FT_Face freeTypeLibrary_c::newFace(const fontResource_c & res, uint32_t size)
 {
   FT_Face f;
   if (FT_Open_Face(lib, &res, 0, &f))
@@ -123,7 +123,7 @@ freeTypeLibrary_c::freeTypeLibrary_c()
   }
 }
 
-void fontFamily_c::addFont(const fontRessource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
+void fontFamily_c::addFont(const fontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
   fontFamilyParameter_c par;
 

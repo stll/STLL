@@ -156,7 +156,7 @@ const std::string textStyleSheet_c::getValue(pugi::xml_node node, const std::str
   return getDefault(attribute);
 }
 
-void textStyleSheet_c::font(const std::string& family, const fontRessource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
+void textStyleSheet_c::font(const std::string& family, const fontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
   if (families.size())
   {
@@ -168,7 +168,7 @@ void textStyleSheet_c::font(const std::string& family, const fontRessource_c & r
   }
 }
 
-void textStyleSheet_c::font(std::shared_ptr<fontCache_c> fc, const std::string& family, const fontRessource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
+void textStyleSheet_c::font(std::shared_ptr<fontCache_c> fc, const std::string& family, const fontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
   auto i = families.find(family);
 
