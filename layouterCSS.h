@@ -105,8 +105,7 @@ class textStyleSheet_c
      *
      * \return The value of the attribute
      */
-    // TODO make back into a reference
-    const std::string getValue(pugi::xml_node node, const std::string & attribute) const;
+    const std::string & getValue(pugi::xml_node node, const std::string & attribute) const;
 
   private:
     std::vector<rule> rules;

@@ -77,24 +77,26 @@ static bool isInheriting(const std::string & attribute)
   assert(0);
 }
 
-static const std::string getDefault(const std::string & attribute)
+static const std::string & getDefault(const std::string & attribute)
 {
+  static std::string defaults[]= { "sans", "normal", "0px", "", "ltr", "transparent" };
+
   if (attribute == "color") throw XhtmlException_c("You must specify the required colors, there is no default");
-  if (attribute == "font-family") return "sans";
-  if (attribute == "font-style") return "normal";
+  if (attribute == "font-family") return defaults[0];
+  if (attribute == "font-style") return defaults[1];
   if (attribute == "font-size") throw XhtmlException_c("You must specify all required font sizes, there is no default");
-  if (attribute == "font-variant") return "normal";
-  if (attribute == "font-weight") return "normal";
-  if (attribute == "padding") return "0px";
-  if (attribute == "margin") return "0px";
-  if (attribute == "text-align") return "";
-  if (attribute == "text-align-last") return "";
-  if (attribute == "text-indent") return "0px";
-  if (attribute == "direction") return "ltr";
-  if (attribute == "border-width") return "0px";
-  if (attribute == "border-color") return "";
-  if (attribute == "background-color") return "transparent";
-  if (attribute == "text-decoration") return "";
+  if (attribute == "font-variant") return defaults[1];
+  if (attribute == "font-weight") return defaults[1];
+  if (attribute == "padding") return defaults[2];
+  if (attribute == "margin") return defaults[2];
+  if (attribute == "text-align") return defaults[3];
+  if (attribute == "text-align-last") return defaults[3];
+  if (attribute == "text-indent") return defaults[2];
+  if (attribute == "direction") return defaults[4];
+  if (attribute == "border-width") return defaults[2];
+  if (attribute == "border-color") return defaults[3];
+  if (attribute == "background-color") return defaults[5];
+  if (attribute == "text-decoration") return defaults[3];
 
   assert(0);
 }
@@ -121,7 +123,7 @@ static bool isValidAttribute(const std::string & attribute)
   return false;
 }
 
-const std::string textStyleSheet_c::getValue(pugi::xml_node node, const std::string & attribute) const
+const std::string & textStyleSheet_c::getValue(pugi::xml_node node, const std::string & attribute) const
 {
   // go through all rules, check only the ones that give a value to the requested attribute
   // evaluate rule by priority (look at the CSS priority rules
