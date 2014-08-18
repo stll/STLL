@@ -336,11 +336,6 @@ class fontFamily_c
                  const std::string & weight = "normal",
                  const std::string & stretch = "normal");
 
-    /** Get the font cache used by this family
-     * \return The cache used by this family
-     */
-    std::shared_ptr<fontCache_c> getCache(void) { return cache; }
-
   private:
     std::map<fontFamilyParameter_c, fontResource_c> fonts;
     std::shared_ptr<fontCache_c> cache;

@@ -50,10 +50,14 @@ class textStyleSheet_c
 
   public:
 
-    /** \brief create an empty style sheet only with default rules */
-
-    /* TODO simplify: only one cache per stylesheet, and make it possible to specify here */
-    textStyleSheet_c(void) { }
+    /** \brief create an empty style sheet only with default rules
+     *
+     * If you do not specify a default cache, the style sheet will create its
+     * own cache with its own library instance
+     *
+     * This cache will be used for all fonts of the style sheet.
+     */
+    textStyleSheet_c(std::shared_ptr<fontCache_c> c = 0);
 
     /** \brief Add a font to a family.
      *
@@ -71,13 +75,6 @@ class textStyleSheet_c
      * \param stretch See fontFamily_c::getFont()
      */
     void font(const std::string & family, const fontResource_c & res,
-                 const std::string & style = "normal",
-                 const std::string & variant = "normal",
-                 const std::string & weight = "normal",
-                 const std::string & stretch = "normal");
-
-    // same as above, but allows you to set the cache
-    void font(std::shared_ptr<fontCache_c> fc, const std::string & family, const fontResource_c & res,
                  const std::string & style = "normal",
                  const std::string & variant = "normal",
                  const std::string & weight = "normal",
@@ -114,6 +111,7 @@ class textStyleSheet_c
   private:
     std::vector<rule> rules;
     std::map<std::string, std::shared_ptr<fontFamily_c> > families;
+    std::shared_ptr<fontCache_c> cache;
 };
 
 }

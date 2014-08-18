@@ -158,23 +158,11 @@ const std::string textStyleSheet_c::getValue(pugi::xml_node node, const std::str
 
 void textStyleSheet_c::font(const std::string& family, const fontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
-  if (families.size())
-  {
-    font(families.begin()->second->getCache(), family, std::move(res), style, variant, weight, stretch);
-  }
-  else
-  {
-    font(std::make_shared<fontCache_c>(), family, std::move(res), style, variant, weight, stretch);
-  }
-}
-
-void textStyleSheet_c::font(std::shared_ptr<fontCache_c> fc, const std::string& family, const fontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
-{
   auto i = families.find(family);
 
   if (i == families.end())
   {
-    i = families.insert(std::make_pair(family, std::make_shared<fontFamily_c>(fc))).first;
+    i = families.insert(std::make_pair(family, std::make_shared<fontFamily_c>(cache))).first;
   }
 
   i->second->addFont(res, style, variant, weight, stretch);
@@ -191,6 +179,18 @@ void textStyleSheet_c::addRule(const std::string sel, const std::string attr, co
   r.value = val;
 
   rules.push_back(r);
+}
+
+textStyleSheet_c::textStyleSheet_c(std::shared_ptr< fontCache_c > c)
+{
+  if (c)
+  {
+    cache = c;
+  }
+  else
+  {
+    cache = std::make_shared<fontCache_c>();
+  }
 }
 
 }
