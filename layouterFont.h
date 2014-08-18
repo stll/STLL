@@ -52,15 +52,7 @@ class fontResource_c : public FT_Open_Args
      *
      * \param fname File name of the file to use as font
      */
-    fontResource_c(const std::string & fname)
-    {
-      flags = FT_OPEN_PATHNAME;
-      v = fname;
-      pathname = (FT_String*)v.c_str();  // TODO const correctness is not given
-
-      memory_base = 0;
-      memory_size = 0;
-    }
+    fontResource_c(const std::string & fname);
 
     /** Create a font resource from memory.
      *
@@ -68,17 +60,7 @@ class fontResource_c : public FT_Open_Args
      * \param descr description string, will be used to describe the font when an exception is thrown
      *              (e.g. problems loading the font)
      */
-    fontResource_c(std::pair<std::shared_ptr<uint8_t>, size_t> data, const std::string & descr) : v(descr), dat(data.first)
-    {
-      flags = FT_OPEN_MEMORY;
-
-      memory_base = data.first.get();
-      memory_size = data.second;
-
-      v = descr;
-
-      pathname = 0;
-    }
+    fontResource_c(std::pair<std::shared_ptr<uint8_t>, size_t> data, const std::string & descr);
 
     /** Create an empty resource
      *

@@ -157,4 +157,25 @@ std::shared_ptr<fontFace_c> fontFamily_c::getFont(uint32_t size, const std::stri
   }
 }
 
+fontResource_c::fontResource_c(const std::string& fname)
+{
+  flags = FT_OPEN_PATHNAME;
+  v = fname;
+  pathname = (FT_String*)v.c_str();  // TODO const correctness is not given
+
+  memory_base = 0;
+  memory_size = 0;
+}
+
+fontResource_c::fontResource_c(std::pair<std::shared_ptr<uint8_t>, size_t> data, const std::string& descr) : v(descr), dat(data.first)
+{
+  flags = FT_OPEN_MEMORY;
+
+  memory_base = data.first.get();
+  memory_size = data.second;
+
+  v = descr;
+  pathname = 0;
+}
+
 }
