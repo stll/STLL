@@ -11,6 +11,9 @@
 #include <vector>
 #include <memory>
 
+/** \brief the namespace for the library.
+ *  Every function and class is within this namespace
+ */
 namespace STLL {
 
 /** \brief encapsulates a finished layout.

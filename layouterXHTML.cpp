@@ -6,60 +6,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-/**
- * \page HTML_CSS_pg HTML and CSS
- * Generally STLL tries strives to support a subset of HTML and CSS. The set that is
- * supported is supposed to be conforming to the specifications. If it is not it is
- * likely a bug and needs to be fixed.
- *
- * Nevertheless, the supported subset of HTML and CSS is limited to whatever is suitable
- * for the intended usage, namely: text output in games and GUIs.
- *
- * The library will be very picky, if it detects something that is not according to what
- * it expects, it will throw an exception.
- *
- * The following 2 sections will try to detail the supported subset of HTML and CSS.
- *
- * \section html_sec HTML
- *
- *  The following tags are supported:
- *  - html
- *  - header, the content is ignored
- *  - body
- *  - p
- *  - h1 - h6
- *  - i
- *  - ul, li
- *  - div
- *  - br
- *
- *  Global attributes:
- *  - lang, the value is inherited by subtags, it may be used for language dependent CSS rules
- *    and it is used by the text output for language dependent shaping
- *
- * \section css_sec CSS
- * The following selectors formats are supported:
- * - selection by tag, e.g. "p"
- * - selection by class, e.g ".framed" for tags with class="framed" attributes
- * - selection by attribute, e.g. p[lang|=he] for paragraph tags with language attribute that starts with "he"
- *
- * The following attributes are supported:
- * - color to set text color, only #-syntax and "transparent" is supported, there is no
- *   default here, you have to set it
- * - font-family to set a font family, the default family is "sans"
- * - font-style, font-variant, font-weight
- * - font-size to set the font size. There is no default here, you have to set it in a CSS rule
- * - padding, to set box padding, only sizes in px units are supported
- * - text-align, text_align-last to set text aligning
- * - text-indent for indentation only px sizes
- * - direction to set basic text direction, this influences lists (where are the bullets)
- *   and text output (left or right or last list alignment in justification)
- * - border-width only pixel sizes
- * - border-color only #-syntax and "transparent", when "" then the normal color attribute
- *   is used
- * - background-color, only #-synatax and "transparent", default is transparent
- */
-
 namespace STLL {
 
 class indentShape_c : public shape_c

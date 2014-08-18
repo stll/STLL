@@ -185,10 +185,12 @@ class fontCache_c
     std::shared_ptr<freeTypeLibrary_c> lib;
 };
 
-// a class contains all file names for a family of fonts
-// a family is a set of fonts with roman, italics, bold, ... variants
-// this class will store the filenames to each font file
-// and open create a fontFace_c for it, whenn requested
+/** \brief a class contains all file names for a family of fonts
+ *
+ * A family is a set of fonts with roman, italics, bold, ... variants
+ * this class will store the filenames to each font file
+ * and open create a fontFace_c for it, whenn requested.
+ */
 class fontFamily_c
 {
   private:
