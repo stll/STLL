@@ -17,7 +17,7 @@
 namespace STLL {
 
 /** \brief layout the given XHTML code
- *  \param txt the html text to parse, is must be utf-8
+ *  \param txt the html text to parse, is must be utf-8. The text must be a proper XHTML document (see also \ref html_sec)
  *  \param rules the stylesheet to use for layouting
  *  \param shape the shape to layout into
  *  \attention it is not checked that txt is proper utf-8. If you have unsafe sources

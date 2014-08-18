@@ -33,8 +33,11 @@ class XhtmlException_c : public std::runtime_error
 
 };
 
-/** \brief this class encapsulates information for HOW to format a text, just like the style sheets
- * in html are doing.
+/** \brief this class encapsulates information for how to format a text, just like the
+ * style sheets in html are doing.
+ *
+ * This class contains a list of normal CSS rules as well as a list of font families
+ * to use for outputting text.
  */
 class textStyleSheet_c
 {
@@ -47,21 +50,26 @@ class textStyleSheet_c
 
   public:
 
+    /** \brief create an empty style sheet only with default rules */
 
+    /* TODO simplify: only one cache per stylesheet, and make it possible to specify here */
     textStyleSheet_c(void) { }
 
-    // add a font to a family
-    // family is the name of the font familiy to add to
-    // file the ttf (or other freetype) font file
-    // the remaining parameters correspond to the style settings
-    // that a font can have in html
-    //
-    // !ATTENTION!, this version will automatically set a fontCache_c class
-    // for each family, this will either be the same class as an already
-    // existing family, or a new cache if there is no font family
-    // already in this style. If you have multiple styles and want to
-    // share caches, you will need to at least once call the
-    // other version of this function below
+    /** \brief Add a font to a family.
+     *
+     * This function will add a new font to a family within this stylesheet.
+     * If the given family doesn't exist, it will be created
+     *
+     * The class will use the same font cache and thus the same instance of the
+     * freetype library for all the fonts. So you can only use it from one thread.
+     *
+     * \param family The name of the font family that gets a new member
+     * \param res The resource for the new family member
+     * \param style See fontFamily_c::getFont()
+     * \param variant See fontFamily_c::getFont()
+     * \param weight See fontFamily_c::getFont()
+     * \param stretch See fontFamily_c::getFont()
+     */
     void font(const std::string & family, const fontRessource_c & res,
                  const std::string & style = "normal",
                  const std::string & variant = "normal",
@@ -75,12 +83,31 @@ class textStyleSheet_c
                  const std::string & weight = "normal",
                  const std::string & stretch = "normal");
 
+    /** \brief Get a font family from the CSS
+     *
+     * \param family The family you want to get
+     * \returns The family of nullptr
+     */
     std::shared_ptr<fontFamily_c> findFamily(const std::string & family) const {
       return families.find(family)->second;
     }
 
+    /** \brief add a rule to the stylesheet
+     *
+     * \param sel The CSS selector (see \ref css_sec for supported selectors)
+     * \param attr The attribute this rule applies to (see \ref css_sec for supported attributes)
+     * \param val The value for the attribute
+     */
     void addRule(const std::string sel, const std::string attr, const std::string val);
 
+
+    /** \brief get the value for an attribute for a given xml-node
+     *
+     * \param node The xml node that the attribute value is requested for
+     * \param attribute The attribute the value is requested for
+     *
+     * \return The value of the attribute
+     */
     // TODO make back into a reference
     const std::string getValue(pugi::xml_node node, const std::string & attribute) const;
 
@@ -88,20 +115,6 @@ class textStyleSheet_c
     std::vector<rule> rules;
     std::map<std::string, std::shared_ptr<fontFamily_c> > families;
 };
-
-/** \brief evaluate a color string
- *  \param col string with the color
- *  \param r red value of the color
- *  \param g green value of the color
- *  \param b blue value of the color
- */
-void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t &b, uint8_t &a);
-
-/** \brief evaluate size
- *  \param sz the size string from the CSS
- *  \return the resulting size in pixel
- */
-double evalSize(const std::string & sz);
 
 }
 

@@ -11,14 +11,14 @@
 #include <vector>
 #include <memory>
 
-/** \brief the namespace for the library.
- *  Every function and class is within this namespace
+/** \brief The namespace for the library.
+ *  Every function and class is within this namespace.
  */
 namespace STLL {
 
 /** \brief encapsulates a finished layout.
  *
- * This class encapsulates a layout, it is a list of drawing commands
+ * This class encapsulates a layout, it is a list of drawing commands.
  */
 class textLayout_c
 {
@@ -27,7 +27,7 @@ class textLayout_c
 
   public:
 
-    /** A drawing command
+    /** \brief This structure encapsulates a drawing command
      */
     typedef struct
     {
@@ -37,20 +37,31 @@ class textLayout_c
         CMD_RECT    ///< draw a rectangle
       } command;    ///< specifies what to draw
 
-      /// position of the glyph or upper left corner of rectangle
-      int32_t x, y;
+      /** \name position of the glyph, or upper left corner of rectangle
+       *  @{ */
+      int32_t x;  ///< x position
+      int32_t y;  ///< y position
+      /** @} */
 
-      /// which glyph to draw
+      /** \brief which glyph to draw */
       FT_UInt glyphIndex;
 
-      /// which front to take the glyph from
+      /** \brief which front to take the glyph from */
       std::shared_ptr<fontFace_c> font;
 
-      /// width and hight of the box to draw
-      uint32_t w, h;
+      /** \name width and height of the rectangle to draw
+       *  @{ */
+      uint32_t w;  ///< width of block
+      uint32_t h;  ///< height of block
+      /** @} */
 
-      // color of the glyph or the rectangle
-      uint8_t r, g, b, a;
+      /** \name colour of the glyph or the rectangle
+       *  @{ */
+      uint8_t r;  ///< red value
+      uint8_t g;  ///< green value
+      uint8_t b;  ///< blue value
+      uint8_t a;  ///< alpha value (0: transparent, 255: opaque)
+      /** @} */
 
     } commandData;
 

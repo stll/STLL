@@ -1,5 +1,7 @@
 #include "utf-8.h"
 
+namespace STLL {
+
 #define UNI_MAX_LEGAL_UTF32 (char32_t)0x0010FFFF
 
 /*
@@ -121,4 +123,6 @@ std::u32string u8_convertToU32(const std::string & in)
   }
 
   return out;
+}
+
 }

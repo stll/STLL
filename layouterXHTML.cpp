@@ -60,6 +60,89 @@ class stripRightShape_c : public shape_c
     virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top, bottom)-ind_right; }
 };
 
+static uint8_t hex2num(char c)
+{
+  switch (c)
+  {
+    case '0': return 0;
+    case '1': return 1;
+    case '2': return 2;
+    case '3': return 3;
+    case '4': return 4;
+    case '5': return 5;
+    case '6': return 6;
+    case '7': return 7;
+    case '8': return 8;
+    case '9': return 9;
+    case 'a':
+    case 'A': return 10;
+    case 'b':
+    case 'B': return 11;
+    case 'c':
+    case 'C': return 12;
+    case 'd':
+    case 'D': return 13;
+    case 'e':
+    case 'E': return 14;
+    case 'f':
+    case 'F': return 15;
+    default:
+      throw XhtmlException_c("Wrong format for a hex-number");
+  }
+}
+
+static uint8_t hex2byte(char c1, char c2)
+{
+  return hex2num(c1)* 16 + hex2num(c2);
+}
+
+/** \brief evaluate a color string
+ *  \param col string with the color
+ *  \param r red value of the color
+ *  \param g green value of the color
+ *  \param b blue value of the color
+ */
+void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t &b, uint8_t &a)
+{
+  if (col == "transparent")
+  {
+    r = g = b = a = 0;
+    return;
+  }
+
+  if (col.length() != 7)
+    throw XhtmlException_c("color string must be 7 characters long");
+
+  if (col[0] == '#')
+  {
+    r = hex2byte(col[1], col[2]);
+    g = hex2byte(col[3], col[4]);
+    b = hex2byte(col[5], col[6]);
+    a = 255;
+  }
+  else
+    throw XhtmlException_c("only the # color scheme is supported and keyword transparent");
+}
+
+/** \brief evaluate size
+ *  \param sz the size string from the CSS
+ *  \return the resulting size in pixel
+ */
+double evalSize(const std::string & sz)
+{
+  // right now we accept only pixel sizes
+  size_t l = sz.length();
+
+  if (sz[l-2] == 'p' && sz[l-1] == 'x')
+  {
+    return atof(sz.c_str());
+  }
+
+  throw XhtmlException_c("only pixel size format is supported");
+
+  return 0;
+}
+
 static std::string normalizeHTML(const std::string & in, char prev)
 {
   std::string out;
