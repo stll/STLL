@@ -306,7 +306,6 @@ typedef struct {
 } layoutProperties;
 
 
-// base layout function that does the layouting stuff for one paragraph
 /** paragraph layouting function
  *
  * \param txt32 the utf-32 encoded text to layout, no control sequences exist, use "\n" for newlines
