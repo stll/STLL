@@ -1,5 +1,7 @@
 #include "layouterSDL.h"
 
+#ifdef HAVE_SDL
+
 // TODO we need some kind of caching here...
 
 namespace STLL {
@@ -111,53 +113,6 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
   }
 }
 
-void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
-{
-  /* Initialize our SDL window */
-  if(SDL_Init(SDL_INIT_VIDEO) < 0)   {
-    fprintf(stderr, "Failed to initialize SDL");
-    return;
-  }
-
-  SDL_Surface *screen;
-  screen = SDL_SetVideoMode(w, h, 32, SDL_SWSURFACE | SDL_DOUBLEBUF);
-
-  /* Enable key repeat, just makes it so we don't have to worry about fancy
-   * scanboard keyboard input and such */
-  SDL_EnableKeyRepeat(300, 130);
-  SDL_EnableUNICODE(1);
-
-  /* Clear our surface */
-  SDL_FillRect(screen, NULL, 0 );
-
-  for (auto & a : data)
-    showLayoutSDL(a.layout, a.sx, a.sy, screen);
-
-  SDL_Flip(screen);
-
-  /* Our main event/draw loop */
-  int done = 0;
-
-  while (!done)
-  {
-
-    /* Handle SDL events */
-    SDL_Event event;
-    while(SDL_PollEvent(&event))
-    {
-      switch (event.type)
-      {
-        case SDL_KEYDOWN:
-        case SDL_QUIT:
-          done = 1;
-          break;
-      }
-    }
-
-    SDL_Delay(150);
-  }
-
-  SDL_Quit();
 }
 
-}
+#endif

@@ -1,6 +1,8 @@
 #ifndef __LAYOUTER_SDL__
 #define __LAYOUTER_SDL__
 
+#ifdef HAVE_SDL
+
 /** \file
  *  \brief SDL output driver
  */
@@ -31,8 +33,8 @@ class layoutInfo_c
     int sx, sy;
 };
 
-void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data);
-
 }
+
+#endif
 
 #endif

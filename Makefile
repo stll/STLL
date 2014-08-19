@@ -3,8 +3,8 @@
 PREFIX?=/usr
 export PKG_CONFIG_PATH:=$(PREFIX)/lib/pkgconfig
 CC=g++
-CXXFLAGS=-Wall -Wextra -pedantic -std=c++11 -g \
-    `pkg-config sdl --cflags` \
+CXXFLAGS=-W -Wall -Wextra -pedantic -std=c++11 -g -O3\
+    `pkg-config sdl --cflags` -DHAVE_SDL\
     `pkg-config freetype2 --cflags` \
     `pkg-config harfbuzz --cflags` \
     `pkg-config glib-2.0 --cflags` \
