@@ -73,6 +73,7 @@ static bool isInheriting(const std::string & attribute)
   if (attribute == "border-color") return false;
   if (attribute == "background-color") return false;
   if (attribute == "text-decoration") return false;
+  if (attribute == "text-shadow") return true;
 
   assert(0);
 }
@@ -97,6 +98,7 @@ static const std::string & getDefault(const std::string & attribute)
   if (attribute == "border-color") return defaults[3];
   if (attribute == "background-color") return defaults[5];
   if (attribute == "text-decoration") return defaults[3];
+  if (attribute == "text-shadow") return defaults[3];
 
   assert(0);
 }
@@ -119,6 +121,7 @@ static bool isValidAttribute(const std::string & attribute)
   if (attribute == "border-color") return true;
   if (attribute == "background-color") return true;
   if (attribute == "text-decoration") return true;
+  if (attribute == "text-shadow") return true;
 
   return false;
 }

@@ -180,6 +180,18 @@ typedef struct
 
   uint8_t flags;
 
+  typedef struct
+  {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+    uint8_t a;
+    int8_t dx;
+    int8_t dy;
+  } shadow;
+
+  std::vector<shadow> shadows;
+
   // TODO things like underline and strike-through are missing
   // TODO shadows
 } codepointAttributes;

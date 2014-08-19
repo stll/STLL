@@ -175,11 +175,29 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     {
       textLayout_c::commandData g;
 
+      g.command = textLayout_c::commandData::CMD_GLYPH;
+
       g.glyphIndex = glyph_info[j].codepoint;
       g.font = attr.get(runstart).font;
 
       g.x = run.dx + (glyph_pos[j].x_offset/64);
       g.y = run.dy - (glyph_pos[j].y_offset/64);
+
+      for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
+      {
+        g.x += attr.get(runstart).shadows[j].dx;
+        g.y += attr.get(runstart).shadows[j].dy;
+
+        g.r = attr.get(runstart).shadows[j].r;
+        g.g = attr.get(runstart).shadows[j].g;
+        g.b = attr.get(runstart).shadows[j].b;
+        g.a = attr.get(runstart).shadows[j].a;
+
+        run.run.push_back(g);
+
+        g.x -= attr.get(runstart).shadows[j].dx;
+        g.y -= attr.get(runstart).shadows[j].dy;
+      }
 
       run.dx += glyph_pos[j].x_advance/64;
       run.dy -= glyph_pos[j].y_advance/64;
@@ -189,7 +207,6 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       g.b = attr.get(glyph_info[j].cluster + runstart).b;
       g.a = attr.get(glyph_info[j].cluster + runstart).a;
 
-      g.command = textLayout_c::commandData::CMD_GLYPH;
 
       run.run.push_back(g);
 

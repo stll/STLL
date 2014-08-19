@@ -143,6 +143,48 @@ double evalSize(const std::string & sz)
   return 0;
 }
 
+static std::vector<codepointAttributes::shadow> evalShadows(const std::string & v)
+{
+  std::vector<codepointAttributes::shadow> s;
+
+  codepointAttributes::shadow sh;
+
+  size_t spos = 0;
+
+  while (spos < v.length())
+  {
+    while (v[spos] == ' ' && spos < v.length()) spos++;
+    if (spos >= v.length()) throw XhtmlException_c("Format of shadow invalid");
+
+    sh.dx = evalSize(v.substr(spos, v.find(' ', spos)-spos));
+
+    while (v[spos] != ' ' && spos < v.length()) spos++;
+    if (spos >= v.length()) throw XhtmlException_c("Format of shadow invalid");
+
+    while (v[spos] == ' ' && spos < v.length()) spos++;
+    if (spos >= v.length()) throw XhtmlException_c("Format of shadow invalid");
+
+    sh.dy = evalSize(v.substr(spos, v.find(' ', spos)-spos));
+
+    while (v[spos] != ' ' && spos < v.length()) spos++;
+    if (spos >= v.length()) throw XhtmlException_c("Format of shadow invalid");
+
+    while (v[spos] == ' ' && spos < v.length()) spos++;
+    if (spos >= v.length()) throw XhtmlException_c("Format of shadow invalid");
+
+    evalColor(v.substr(spos, v.find(',', spos)-spos), sh.r, sh.g, sh.b, sh.a);
+
+    s.push_back(sh);
+
+    while (v[spos] != ',' && spos < v.length()) spos++;
+    if (spos >= v.length()) break;
+
+    spos++;
+  }
+
+  return s;
+}
+
 static std::string normalizeHTML(const std::string & in, char prev)
 {
   std::string out;
@@ -238,6 +280,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
       {
         a.flags |= codepointAttributes::FL_UNDERLINE;
       }
+      a.shadows = evalShadows(rules.getValue(xml, "text-shadow"));
 
       attr.set(s, txt.length(), a);
     }
