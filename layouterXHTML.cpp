@@ -102,7 +102,7 @@ static uint8_t hex2byte(char c1, char c2)
  *  \param g green value of the color
  *  \param b blue value of the color
  */
-void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t &b, uint8_t &a)
+static void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t &b, uint8_t &a)
 {
   if (col == "transparent")
   {
@@ -128,7 +128,7 @@ void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t &b, ui
  *  \param sz the size string from the CSS
  *  \return the resulting size in pixel
  */
-double evalSize(const std::string & sz)
+static double evalSize(const std::string & sz)
 {
   // right now we accept only pixel sizes
   size_t l = sz.length();
