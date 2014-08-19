@@ -298,7 +298,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
       codepointAttributes a;
       a.flags = 0;
       a.font = getFontForNode(xml, rules);
-      // TODO language
+      a.lang = getHTMLAttribute(xml, "lang");
       attr.set(txt.length()-1, a);
     }
     else
