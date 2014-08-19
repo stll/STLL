@@ -379,6 +379,7 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
 
     switch (prop.align)
     {
+      default:
       case layoutProperties::ALG_LEFT:
         xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
         if (firstline) xpos += prop.indent;
