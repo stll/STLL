@@ -282,7 +282,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
       }
       a.shadows = evalShadows(rules.getValue(xml, "text-shadow"));
 
-      attr.set(s, txt.length(), a);
+      attr.set(s, txt.length()-1, a);
     }
     else if (   (i.type() == pugi::node_element)
              && (   (std::string("i") == i.name())

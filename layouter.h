@@ -7,6 +7,9 @@
 
 #include "layouterFont.h"
 
+#include <boost/icl/split_interval_map.hpp>
+#include <boost/icl/closed_interval.hpp>
+
 #include <string>
 #include <vector>
 #include <memory>
@@ -160,8 +163,10 @@ class textLayout_c
 
 /** \brief this structure contains all attributes that a single glyph can get assigned
  */
-typedef struct
+class codepointAttributes
 {
+  public:
+
   //@{
   /// color of the letter, r, g, b values and alpha (0: transparent 255: opaque)
   uint8_t r;
@@ -180,7 +185,7 @@ typedef struct
 
   uint8_t flags;
 
-  typedef struct
+  typedef struct shadow
   {
     uint8_t r;
     uint8_t g;
@@ -188,13 +193,38 @@ typedef struct
     uint8_t a;
     int8_t dx;
     int8_t dy;
+
+    bool operator==(const struct shadow & rhs) const
+    {
+      return r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a && dx == rhs.dx && dy == rhs.dy;
+    }
+
   } shadow;
 
   std::vector<shadow> shadows;
 
-  // TODO things like underline and strike-through are missing
-  // TODO shadows
-} codepointAttributes;
+  bool operator==(const codepointAttributes & rhs) const
+  {
+    return r == rhs.r && g == rhs.g && b == rhs.b && font == rhs.font && lang == rhs.lang
+      && flags == rhs.flags && shadows.size() && rhs.shadows.size()
+      && std::equal(shadows.begin(), shadows.end(), rhs.shadows.begin());
+  }
+
+  codepointAttributes operator += (const codepointAttributes & rhs)
+  {
+    // when someone tries to overwrite the attributes, we take over the new ones
+    r = rhs.r;
+    g = rhs.g;
+    b = rhs.b;
+    a = rhs.a;
+    font = rhs.font;
+    lang = rhs.lang;
+    flags = rhs.flags;
+    shadows = rhs.shadows;
+
+    return *this;
+  }
+};
 
 
 /** \brief collection of codepointAttributes for the layouter.
@@ -205,7 +235,7 @@ typedef struct
 class attributeIndex_c
 {
   private:
-    std::vector<codepointAttributes> attr;
+    boost::icl::interval_map<size_t, codepointAttributes> attr;
 
   public:
     /** \brief create an empty index
@@ -216,7 +246,10 @@ class attributeIndex_c
     /** \brief create an index where all entries have the same attribute
      *  \param a the attribute that all will share
      */
-    attributeIndex_c(const codepointAttributes & a) { attr.push_back(a); }
+    attributeIndex_c(const codepointAttributes & a)
+    {
+      attr += std::make_pair(boost::icl::interval<size_t>::closed(0, SIZE_MAX), a);
+    }
 
     /** \brief set attributes for a singe of indices
      *  \param i index that will have the attribute
@@ -224,9 +257,7 @@ class attributeIndex_c
      */
     void set(size_t i, codepointAttributes a)
     {
-      if (i >= attr.size())
-        attr.resize(i+1);
-      attr[i] = a;
+      attr += std::make_pair(boost::icl::interval<size_t>::closed(i, i), a);
     }
 
     /** \brief set attributes for a range of indices
@@ -236,11 +267,7 @@ class attributeIndex_c
      */
     void set(size_t start, size_t end, codepointAttributes a)
     {
-      if (end > attr.size())
-        attr.resize(end);
-
-      for (size_t i = start; i < end; i++)
-        attr[i] = a;
+      attr += std::make_pair(boost::icl::interval<size_t>::closed(start, end), a);
     }
 
     /** \brief get the attribute for given index
@@ -249,10 +276,7 @@ class attributeIndex_c
      */
     const codepointAttributes & get(size_t i) const
     {
-      if (i < attr.size())
-        return attr[i];
-      else
-        return attr[0];
+      return attr.find(i)->second;
     }
 };
 
