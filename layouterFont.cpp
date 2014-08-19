@@ -46,7 +46,7 @@ std::shared_ptr<fontFace_c> fontCache_c::getFont(const fontResource_c & res, uin
 
 void fontFace_c::outlineRender(uint32_t idx, FT_Raster_Params* params)
 {
-  if (FT_Load_Glyph(f, idx, FT_LOAD_DEFAULT | FT_LOAD_FORCE_AUTOHINT))
+  if (FT_Load_Glyph(f, idx, FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING))
   {
     throw FreetypeException_c("A font doesn't contain a required glyph");
   }
