@@ -1,0 +1,2 @@
+./darcs-to-git.ry ../try2
+git push -u origin master

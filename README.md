@@ -14,4 +14,7 @@ Status
 
 This is work in progress and should not be used in production code for the time beeing.
 
+Documentation
+---------------
 
+You can find the current doxygen documentation at https://stll.github.io/
