@@ -468,6 +468,7 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleShee
       a.font = font;
       a.lang = "";
       a.flags = 0;
+      a.shadows = evalShadows(rules.getValue(xml, "text-shadow"));
 
       int32_t padding = evalSize(rules.getValue(i, "padding"));
       int32_t listIndent = font->getAscender()/64;
