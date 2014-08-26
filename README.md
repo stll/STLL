@@ -17,4 +17,4 @@ This is work in progress and should not be used in production code for the time 
 Documentation
 ---------------
 
-You can find the current doxygen documentation at https://stll.github.io/
+You can find the current doxygen documentation at https://stll.github.io/STLL/
