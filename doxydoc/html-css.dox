@@ -51,4 +51,5 @@
  *   is used
  * - background-color, only #-synatax and "transparent", default is transparent
  * - text-decoration, only the underline attribute, everything else means nothing
+ * - text-shadow, multpile shadows are possible, no blurr, underline doesn't have a shadow
  */

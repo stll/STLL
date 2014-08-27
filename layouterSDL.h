@@ -1,11 +1,11 @@
 #ifndef __LAYOUTER_SDL__
 #define __LAYOUTER_SDL__
 
-#ifdef HAVE_SDL
-
 /** \file
  *  \brief SDL output driver
  */
+
+#ifdef HAVE_SDL
 
 #include "layouter.h"
 
@@ -22,16 +22,6 @@ namespace STLL {
  *  \param s target surface
  */
 void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s);
-
-class layoutInfo_c
-{
-  public:
-
-    layoutInfo_c(textLayout_c l, int x, int y) : layout(l), sx(x), sy(y) { }
-
-    textLayout_c layout;
-    int sx, sy;
-};
 
 }
 
