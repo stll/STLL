@@ -60,6 +60,45 @@ class stripRightShape_c : public shape_c
     virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top, bottom)-ind_right; }
 };
 
+template <class T>
+class vector2d {
+  private:
+    std::vector<std::vector<T> > data;
+    T def;
+  public:
+    void set(size_t x, size_t y, const T & val) {
+      if (data.size() <= y) data.resize(y+1);
+      if (data[y].size() <= x) data[y].resize(x+1);
+      data[y][x] = val;
+    }
+
+    const T & get(size_t x, size_t y) const
+    {
+      if (y >= data.size() || x >= data[y].size()) return def;
+      return data[y][x];
+    }
+
+    T & get(size_t x, size_t y)
+    {
+      if (y >= data.size() || x >= data[y].size()) return def;
+      return data[y][x];
+    }
+
+    void rectangularize(void)
+    {
+      data.resize(data.size()+1);
+      size_t m = 0;
+
+      for (const auto & a : data)
+        m = std::max(m, a.size());
+
+      m++;
+
+      for (auto & a : data)
+        a.resize(m);
+    }
+};
+
 static uint8_t hex2num(char c)
 {
   switch (c)
@@ -314,23 +353,55 @@ typedef textLayout_c (*ParseFunction)(const pugi::xml_node & xml, const textStyl
 
 // handles padding, margin and border, all in one, it takes the text returned from the
 // ParseFunction and boxes it
-static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart, ParseFunction fkt)
+static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & rules,
+                          const shape_c & shape, int32_t ystart, ParseFunction fkt,
+                          const pugi::xml_node & above, const pugi::xml_node & left,
+                          bool collapseBorder = false, uint32_t minHeight = 0)
 {
   int32_t padding = evalSize(rules.getValue(xml, "padding"));
   int32_t borderwidth = evalSize(rules.getValue(xml, "border-width"));
   int32_t margin = evalSize(rules.getValue(xml, "margin"));
   int32_t marginElementAbove = 0;
-  if (!xml.previous_sibling().empty())
+  int32_t marginElementLeft = 0;
+  int32_t borderElementAbove = 0;
+  int32_t borderElementLeft = 0;
+
+  if (!above.empty())
   {
-    marginElementAbove = evalSize(rules.getValue(xml.previous_sibling(), "margin"));
+    marginElementAbove = evalSize(rules.getValue(above, "margin"));
+
+    if (margin == 0 && marginElementAbove == 0)
+    {
+      borderElementAbove = evalSize(rules.getValue(above, "border-width"));
+    }
+  }
+
+  if (!left.empty())
+  {
+    marginElementLeft = evalSize(rules.getValue(left, "margin"));
+
+    if (margin == 0 && marginElementLeft == 0)
+    {
+      borderElementLeft = evalSize(rules.getValue(left, "border-width"));
+    }
   }
 
   int32_t topmargin = std::max(marginElementAbove, margin)-marginElementAbove;
+  int32_t leftmargin = std::max(marginElementLeft, margin)-marginElementLeft;
+
+  int32_t topborderwidth = std::max(borderElementAbove, borderwidth)-borderElementAbove;
+  int32_t leftborderwidth = std::max(borderElementLeft, borderwidth)-borderElementLeft;
+
+  if (!collapseBorder)
+  {
+    topborderwidth = borderwidth;
+    leftborderwidth = borderwidth;
+  }
 
   auto l2 = fkt(xml, rules,
-                indentShape_c(shape, padding+borderwidth+margin, padding+borderwidth+margin),
-                ystart+padding+borderwidth+topmargin);
-  l2.setHeight(l2.getHeight()+padding+borderwidth+margin);
+                indentShape_c(shape, padding+leftborderwidth+leftmargin, padding+borderwidth+margin),
+                ystart+padding+topborderwidth+topmargin);
+  l2.setHeight(std::max(minHeight, l2.getHeight()+padding+borderwidth+margin));
 
   textLayout_c::commandData c;
   if (borderwidth)
@@ -344,12 +415,16 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
 
     if (c.a != 0)
     {
-      c.x = shape.getLeft(ystart+topmargin, ystart+topmargin)+margin;
+      c.x = shape.getLeft(ystart+topmargin, ystart+topmargin)+leftmargin;
       c.y = ystart+topmargin;
-      c.w = shape.getRight(ystart+topmargin, ystart+topmargin)-shape.getLeft(ystart+topmargin, ystart+topmargin)-2*margin;
-      c.h = borderwidth;
-      l2.addCommandStart(c);
+      c.w = shape.getRight(ystart+topmargin, ystart+topmargin)-shape.getLeft(ystart+topmargin, ystart+topmargin)-margin-leftmargin;
+      if (topborderwidth)
+      {
+        c.h = topborderwidth;
+        l2.addCommandStart(c);
+      }
 
+      c.h = borderwidth;
       c.y = l2.getHeight()-borderwidth-margin;
       l2.addCommandStart(c);
 
@@ -359,8 +434,13 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
       c.h = l2.getHeight()-ystart-margin-topmargin;
       l2.addCommandStart(c);
 
-      c.x = shape.getLeft(ystart+topmargin, ystart+topmargin)+margin;
-      l2.addCommandStart(c);
+      c.w = borderwidth;
+      c.x = shape.getLeft(ystart+topmargin, ystart+topmargin)+leftmargin;
+      if (leftborderwidth)
+      {
+        c.w = leftborderwidth;
+        l2.addCommandStart(c);
+      }
     }
   }
 
@@ -370,11 +450,11 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
   {
     c.command = textLayout_c::commandData::CMD_RECT;
 
-    c.x = shape.getLeft(ystart+topmargin, ystart+topmargin)+borderwidth+margin;
-    c.y = ystart+borderwidth+topmargin;
+    c.x = shape.getLeft(ystart+topmargin, ystart+topmargin)+leftborderwidth+leftmargin;
+    c.y = ystart+topborderwidth+topmargin;
     c.w = shape.getRight(ystart+topmargin, ystart+topmargin)-
-          shape.getLeft(ystart+topmargin, ystart+topmargin)-2*borderwidth-2*margin;
-    c.h = l2.getHeight()-ystart-2*borderwidth-margin-topmargin;
+          shape.getLeft(ystart+topmargin, ystart+topmargin)-borderwidth-leftborderwidth-margin-leftmargin;
+    c.h = l2.getHeight()-ystart-borderwidth-topborderwidth-margin-topmargin;
     l2.addCommandStart(c);
   }
 
@@ -484,14 +564,14 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleShee
         prop.align = layoutProperties::ALG_CENTER;
         l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
                                  stripLeftShape_c(shape, padding, padding+listIndent), prop, y+padding));
-        l.append(boxIt(i, rules, indentShape_c(shape, listIndent, 0), y, layoutXML_P));
+        l.append(boxIt(i, rules, indentShape_c(shape, listIndent, 0), y, layoutXML_P, i.previous_sibling(), pugi::xml_node()));
       }
       else
       {
         prop.align = layoutProperties::ALG_CENTER;
         l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
                                  stripRightShape_c(shape, padding+listIndent, padding), prop, y+padding));
-        l.append(boxIt(i, rules, indentShape_c(shape, 0, listIndent), y, layoutXML_P));
+        l.append(boxIt(i, rules, indentShape_c(shape, 0, listIndent), y, layoutXML_P, i.previous_sibling(), pugi::xml_node()));
       }
     }
     else
@@ -499,6 +579,225 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleShee
       throw XhtmlException_c("Only 'li' tags allowed within 'ul' tag (" + getNodePath(i) + ")");
     }
   }
+
+  return l;
+}
+
+typedef struct
+{
+  uint32_t row;
+  uint32_t col;
+  uint32_t rowspan;
+  uint32_t colspan;
+
+  pugi::xml_node xml;
+
+  textLayout_c l;
+
+} tableCell;
+
+static void layoutXML_TR(const pugi::xml_node & xml, uint32_t row, const textStyleSheet_c & rules,
+                         std::vector<tableCell> & cells, vector2d<pugi::xml_node> & cellarray)
+{
+  uint32_t col = 0;
+  while (!cellarray.get(col+1, row+1).empty()) col++;
+
+  // collect all cells of the row
+  for (const auto & i : xml)
+  {
+    if (   (i.type() == pugi::node_element)
+        && (   (std::string("th") == i.name())
+            || (std::string("td") == i.name())
+           )
+       )
+    {
+      tableCell c;
+
+      c.xml = i;
+      c.rowspan = 1;
+      c.colspan = 1;
+
+      for (const auto & a : i.attributes())
+      {
+        if (std::string("rowspan") == a.name())
+        {
+          c.rowspan = atoi(a.value());
+        }
+        if (std::string("colspan") == a.name())
+        {
+          c.colspan = atoi(a.value());
+        }
+      }
+
+      c.row = row;
+      c.col = col;
+
+      cells.emplace_back(c);
+
+      for (uint32_t x = col; x < col+c.colspan; x++)
+        for (uint32_t y = row; y < row+c.rowspan; y++)
+          cellarray.set(x+1, y+1, i);
+
+      col += c.colspan;
+    }
+    else
+    {
+      throw XhtmlException_c("Only 'th' or 'td' tags allowed within 'ul' tag (" + getNodePath(i) + ")");
+    }
+  }
+}
+
+static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+{
+  std::vector<tableCell> cells;
+  std::vector<uint32_t> widths;
+  std::vector<uint32_t> colStart;
+  vector2d<pugi::xml_node> cellarray;
+  uint32_t row = 0;
+  bool col = false;
+
+  // collect all cells of the table
+  for (const auto & i : xml)
+  {
+    if (   (i.type() == pugi::node_element)
+        && (std::string("colgroup") == i.name())
+       )
+    {
+      for (const auto & j : i)
+      {
+        if (   (j.type() == pugi::node_element)
+            && (std::string("col") == j.name())
+           )
+        {
+          int span = 1;
+          auto a = j.attribute("span");
+          if (a)
+          {
+            span = atoi(a.value());
+          }
+
+          if (span == 0)
+          {
+            throw XhtmlException_c("malformed 'span' attribute (" + getNodePath(j) + ")");
+          }
+
+          uint32_t width = atoi(rules.getValue(j, "width").c_str());
+
+          while (span > 0)
+          {
+            widths.push_back(width);
+            span--;
+          }
+        }
+        else
+        {
+          throw XhtmlException_c("Only 'col' tags allowed within 'colgroup' tag (" + getNodePath(j) + ")");
+        }
+      }
+      col = true;
+    }
+    else if (   (i.type() == pugi::node_element)
+        && (std::string("tr") == i.name())
+       )
+    {
+      if (!col)
+      {
+        throw XhtmlException_c("You must define columns and widths in a table (" + getNodePath(i) + ")");
+      }
+
+      layoutXML_TR(i, row, rules, cells, cellarray);
+      row++;
+    }
+    else
+    {
+      throw XhtmlException_c("Only 'tr' and 'colgroup' tags allowed within 'table' tag (" + getNodePath(i) + ")");
+    }
+  }
+
+  // TODO reorder columns according to direction
+
+  // make cellarray contain one extra row and column to get the neighbors easily
+  cellarray.rectangularize();
+
+  // calculate the start of each columns
+  colStart.push_back(shape.getLeft(ystart, ystart));
+  for (size_t i = 0; i < widths.size(); i++)
+    colStart.push_back(*colStart.rbegin() + widths[i]);
+
+  // make a first run over all cells to get a first minimal
+  // hight for each cell
+  for (auto & c : cells)
+  {
+    c.l = boxIt(c.xml, rules, rectangleShape_c(colStart[c.col+c.colspan]-colStart[c.col]),
+                0, layoutXML_P, cellarray.get(c.col+1, c.row), cellarray.get(c.col, c.row+1),
+                rules.getValue(xml, "border-collapse") == "collapse");
+  }
+
+  // calculate the height of each row of the table by finding the cell with the maximal
+  // height for each row
+  // multi row cells only count for the final row
+  uint32_t maxrow = 0;
+
+  for (auto & c : cells)
+  {
+    maxrow = std::max(maxrow, c.row+c.rowspan);
+  }
+
+  std::vector<uint32_t> rowheights(maxrow);
+
+  for (auto & c : cells)
+  {
+    if (c.rowspan == 1)
+    {
+      rowheights[c.row] = std::max(rowheights[c.row], c.l.getHeight());
+    }
+  }
+
+  for (auto & c : cells)
+  {
+    if (c.rowspan > 1)
+    {
+      uint32_t h = 0;
+
+      for (size_t r = c.row; r < c.row+c.rowspan; r++)
+        h += c.l.getHeight();
+
+      if (h < c.l.getHeight())
+        rowheights[c.row+c.rowspan-1] += c.l.getHeight()-h;
+    }
+  }
+
+  // find out the real width of the table
+  int width = *colStart.rbegin();
+
+  int xindent = (shape.getLeft(ystart, ystart) + shape.getRight(ystart, ystart) - width - shape.getLeft(ystart, ystart)) / 2;
+  if (xindent < 0) xindent = 0;
+
+  // layout the table
+  textLayout_c l;
+  row = 0;
+
+  for (auto & c : cells)
+  {
+    if (row != c.row)
+    {
+      ystart += rowheights[row];
+      row = c.row;
+    }
+
+    uint32_t rh = 0;
+    for (size_t r = row; r < row+c.rowspan; r++)
+      rh += rowheights[r];
+
+    if (rh != c.l.getHeight())
+      c.l = boxIt(c.xml, rules, rectangleShape_c(colStart[c.col+c.colspan]-colStart[c.col]),
+                  0, layoutXML_P, cellarray.get(c.col+1, c.row), cellarray.get(c.col, c.row+1),
+                  rules.getValue(xml, "border-collapse") == "collapse", rh);
+
+    l.addCommandVector(c.l.data, colStart[c.col]+xindent, ystart);
+  }
+
+  l.setHeight(ystart+rowheights[row]);
 
   return l;
 }
@@ -521,14 +820,15 @@ static textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSh
            )
        )
     {
-      l.append(boxIt(i, rules, shape, l.getHeight(), layoutXML_P));
+      l.append(boxIt(i, rules, shape, l.getHeight(), layoutXML_P, i.previous_sibling(), pugi::xml_node()));
     }
     else if (i.type() == pugi::node_element && std::string("table") == i.name())
     {
+      l.append(boxIt(i, rules, shape, l.getHeight(), layoutXML_TABLE, i.previous_sibling(), pugi::xml_node()));
     }
     else if (i.type() == pugi::node_element && std::string("ul") == i.name())
     {
-      l.append(boxIt(i, rules, shape, l.getHeight(), layoutXML_UL));
+      l.append(boxIt(i, rules, shape, l.getHeight(), layoutXML_UL, i.previous_sibling(), pugi::xml_node()));
     }
     else
     {
@@ -556,7 +856,7 @@ static textLayout_c layoutXML_HTML(const pugi::xml_node & txt, const textStyleSh
     else if (i.type() == pugi::node_element && std::string("body") == i.name() && !bodyfound)
     {
       bodyfound = true;
-      l = boxIt(i, rules, shape, 0, layoutXML_BODY);
+      l = boxIt(i, rules, shape, 0, layoutXML_BODY, i.previous_sibling(), pugi::xml_node());
     }
     else
     {
