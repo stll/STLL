@@ -13,7 +13,7 @@ var files =
       [ "fontCache_c", "class_s_t_l_l_1_1font_cache__c.html", "class_s_t_l_l_1_1font_cache__c" ],
       [ "fontFamily_c", "class_s_t_l_l_1_1font_family__c.html", "class_s_t_l_l_1_1font_family__c" ]
     ] ],
-    [ "layouterSDL.h", "layouter_s_d_l_8h.html", null ],
+    [ "layouterSDL.h", "layouter_s_d_l_8h.html", "layouter_s_d_l_8h" ],
     [ "layouterXHTML.h", "layouter_x_h_t_m_l_8h.html", "layouter_x_h_t_m_l_8h" ],
     [ "utf-8.h", "utf-8_8h.html", "utf-8_8h" ]
 ];

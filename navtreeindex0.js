@@ -107,6 +107,7 @@ var NAVTREEINDEX0 =
 "layouter_font_8h.html":[6,0,2],
 "layouter_font_8h_source.html":[6,0,2],
 "layouter_s_d_l_8h.html":[6,0,3],
+"layouter_s_d_l_8h.html#af81e2752c270c924d3bd1051966080a2":[6,0,3,0],
 "layouter_s_d_l_8h_source.html":[6,0,3],
 "layouter_x_h_t_m_l_8h.html":[6,0,4],
 "layouter_x_h_t_m_l_8h.html#a24076325d5bdb0ce293da6657db38c2f":[6,0,4,0],

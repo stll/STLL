@@ -25,7 +25,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">STLL
-   &#160;<span id="projectnumber">0.1</span>
+   &#160;<span id="projectnumber">0.0</span>
    </div>
    <div id="projectbrief">Simple Text Layouting Library</div>
   </td>
@@ -126,6 +126,9 @@ Classes</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:adcb36725cfe35eacfcddad0a2a06ced8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html">textLayout_c</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#adcb36725cfe35eacfcddad0a2a06ced8">layoutParagraph</a> (const std::u32string &amp;txt32, const <a class="el" href="class_s_t_l_l_1_1attribute_index__c.html">attributeIndex_c</a> &amp;attr, const <a class="el" href="class_s_t_l_l_1_1shape__c.html">shape_c</a> &amp;shape, const <a class="el" href="struct_s_t_l_l_1_1layout_properties.html">layoutProperties</a> &amp;prop, int32_t ystart=0)</td></tr>
 <tr class="separator:adcb36725cfe35eacfcddad0a2a06ced8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af81e2752c270c924d3bd1051966080a2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#af81e2752c270c924d3bd1051966080a2">showLayoutSDL</a> (const <a class="el" href="class_s_t_l_l_1_1text_layout__c.html">textLayout_c</a> &amp;l, int sx, int sy, SDL_Surface *s)</td></tr>
+<tr class="memdesc:af81e2752c270c924d3bd1051966080a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">display a single layout  <a href="#af81e2752c270c924d3bd1051966080a2">More...</a><br/></td></tr>
+<tr class="separator:af81e2752c270c924d3bd1051966080a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a24076325d5bdb0ce293da6657db38c2f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html">textLayout_c</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#a24076325d5bdb0ce293da6657db38c2f">layoutXHTML</a> (const std::string &amp;txt, const <a class="el" href="class_s_t_l_l_1_1text_style_sheet__c.html">textStyleSheet_c</a> &amp;rules, const <a class="el" href="class_s_t_l_l_1_1shape__c.html">shape_c</a> &amp;shape)</td></tr>
 <tr class="memdesc:a24076325d5bdb0ce293da6657db38c2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">layout the given XHTML code  <a href="#a24076325d5bdb0ce293da6657db38c2f">More...</a><br/></td></tr>
 <tr class="separator:a24076325d5bdb0ce293da6657db38c2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -277,6 +280,53 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="af81e2752c270c924d3bd1051966080a2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void STLL::showLayoutSDL </td>
+          <td>(</td>
+          <td class="paramtype">const textLayout_c &amp;&#160;</td>
+          <td class="paramname"><em>l</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>sx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>sy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">SDL_Surface *&#160;</td>
+          <td class="paramname"><em>s</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">l</td><td>layout to draw </td></tr>
+    <tr><td class="paramname">sx</td><td>x position on the target surface </td></tr>
+    <tr><td class="paramname">sy</td><td>y position on the target surface </td></tr>
+    <tr><td class="paramname">s</td><td>target surface </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="aa4ad1e8136e42d987cbdfe41a946a95e"></a>
 <div class="memitem">
 <div class="memproto">
@@ -329,7 +379,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li>
-    <li class="footer">Generated on Tue Aug 26 2014 20:07:46 for STLL by
+    <li class="footer">Generated on Wed Aug 27 2014 21:24:18 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>
