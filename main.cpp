@@ -4,7 +4,7 @@
 
 #include <fstream>
 
-#define TXT_WIDTH 700
+#define TXT_WIDTH 750
 #define WIN_WIDTH 800
 
 using namespace STLL;
@@ -34,6 +34,16 @@ std::pair<std::shared_ptr<uint8_t>, size_t> loadFile(const std::string & fn)
 
   return std::make_pair(std::shared_ptr<uint8_t>(dat, std::default_delete<uint8_t[]>()), size);
 }
+
+class layoutInfo_c
+{
+  public:
+
+    layoutInfo_c(textLayout_c l, int x, int y) : layout(l), sx(x), sy(y) { }
+
+    textLayout_c layout;
+    int sx, sy;
+};
 
 void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
 {
@@ -96,11 +106,12 @@ int main ()
 
   // CSS regeln, immer Selector, attribut, wert
   styleSheet.addRule("body", "color", "#ffffff");
-  styleSheet.addRule("body", "font-size", "18px");
+  styleSheet.addRule("body", "font-size", "16px");
   styleSheet.addRule("body", "text-align", "justify");
   styleSheet.addRule("p", "text-indent", "10px");
   styleSheet.addRule("body", "padding", "10px");
-  styleSheet.addRule("body", "background-color", "#303030");
+  styleSheet.addRule("body", "background-color", "#808080");
+  styleSheet.addRule("body", "text-shadow", "1px 1px #000000");
 //  styleSheet.addRule("p", "padding", "10px");
 //  styleSheet.addRule("ul", "padding", "10px");
 //  styleSheet.addRule("li", "padding", "10px");
@@ -112,6 +123,8 @@ int main ()
   styleSheet.addRule("h1", "font-size", "60px");
   styleSheet.addRule("h1", "text-align", "center");
   styleSheet.addRule("h1", "text-decoration", "underline");
+  styleSheet.addRule("h1", "text-shadow", "1px 1px #F0F0F0, -1px -1px #000000");
+  styleSheet.addRule("h1", "color", "#909090");
   styleSheet.addRule(".und", "text-decoration", "underline");
   styleSheet.addRule("p[lang|=he]", "direction", "rtl");
   styleSheet.addRule("ul[lang|=he]", "direction", "rtl");
@@ -122,11 +135,34 @@ int main ()
   styleSheet.addRule(".framed", "border-color", "#ff0000");
   styleSheet.addRule(".framed", "background-color", "#ff8080");
   styleSheet.addRule(".framed", "margin", "10px");
+  styleSheet.addRule(".normcol", "width", "200px");
+  styleSheet.addRule("th", "font-weight", "bold");
+  styleSheet.addRule("th", "background-color", "#606060");
+
+  styleSheet.addRule("th", "border-width", "1px");
+  styleSheet.addRule("th", "padding", "10px");
+  styleSheet.addRule("th", "border-color", "#000000");
+  styleSheet.addRule("th", "text-align", "center");
+  styleSheet.addRule("th", "margin", "0px");
+//  styleSheet.addRule("th", "margin", "10px");
+  styleSheet.addRule("table", "margin", "10px");
+//  styleSheet.addRule("table", "border-width", "1px");
+  styleSheet.addRule("table", "border-color", "#000000");
+  styleSheet.addRule("table", "border-collapse", "collapse");
+  styleSheet.addRule("table", "padding", "0px");
+  styleSheet.addRule("table", "text-indent", "0px");
+  styleSheet.addRule("table", "text-align", "center");
+
+  styleSheet.addRule("td", "padding", "10px");
+  styleSheet.addRule("td", "margin", "0px");
+  styleSheet.addRule("td", "text-align", "left");
+  styleSheet.addRule("td", "border-width", "1px");
+  styleSheet.addRule("td", "border-color", "#000000");
 
   // der zu formatierende text
   std::string text = u8"<html><body>"
     "<h1 lang='de'>Überschrift mit</h1>"
-    "<p class='und'>Test <i class='BigFont' class='und'>Text</i> more and some "
+    "<p class='und'>Test <i class='BigFont' class='und'>Text</i> more and somme ii "
     "<div class='BoldFont' class='und'>more text so</div> that the pa\u00ADra\u00ADgraph is at least "
     "<div>long</div> enough to span some lines on the screen let us "
     "also <i>i</i>nclude some more hebrew נייה, העגורן הוא and back to english </p>"
@@ -138,7 +174,7 @@ int main ()
     "אבולעפיה חיבר עשרות ספרי קבלה, שזכו להתייחסות נרחבת גם בקרב קהיליית החוקרים המדעית. חלקם יצאו "
     "לאור לאחרונה במהדורות מחודשות.</p>"
     "<p lang='ar-arab'>كأس الأمم الأفريقية لكرة القدم 2008، ,عرفت أيضاً باسم إم.تي.إن كأس الأمم الأفريقية "
-    "لكرة <div class='und'>القدم بسبب الشركة</div> القدم بسبب الشركة الراعية للبطولة إم.تي.إن، كانت النسخة السادسة والعشرون من كأس الأمم الأفريقية، "
+"لكرة <div class='und'>القدم بسبب الشركة</div> القدم بسبب الشركة الراعية للبطولة إم.تي.إن، كانت النسخة السادسة والعشرون من كأس الأمم الأفريقية، "
     "وهي البطولة الرئيسية لمنتخبات الاتحاد الأفريقي لكرة القدم (كاف) والتي تقام كل سنتين منذ سنة "
     "1957. نظمت المسابقة في أربعة مدن في جميع أنحاء غانا بين 20 يناير و 10 فبراير 2008. وبحضور 16 منتخبا "
     "أفريقيا مقسمين على 4 مجموعات ويتأهل أول فريقين لكل مجموعة إلى دور الثمانية حيث الأدوار الإقصائية، "
@@ -157,6 +193,13 @@ int main ()
     "­Spare­A­Sigh­Though­Worlds­Of­Wanwood­Leafmeal­Lie­And­Yet­You­Will­Weep­And­Know­Why­Now­No­Matter­Child"
     "­The­Name­Sorrows­Springs­Are­The­Same­Nor­Mouth­Had­No­Nor­Mind­Expressed­What­Heart­Heard­Of­Ghost­Gues"
     "sed­It­Is­The­Blight­Man­Was­Born­For­It­Is­Margaret­You­Mourn­For</p>"
+    "<table><colgroup><col span='3' class='normcol' /></colgroup>"
+    "<tr><th>Col 1</th><th>Col 2</th><th>Column 3</th></tr>"
+    "<tr><td rowspan='2'>A bit of text for the first column, with a bit more text so that it can span multiple rows</td>"
+    "<td colspan='2'>And a rather longish text for the final column, let us hope that we are not breaking anything with this text, but isdf sdfjk klsdf sdklfj skler</td></tr>"
+    "<tr><td>And a final cell 1</td><td>and 2</td></tr>"
+    "<tr><td>And </td><td>a</td><td>normal row</td></tr>"
+    "</table>"
     "</body></html>";
 
   // Vektor mit auszugebenden Text layouts, besteht immer aus einem layoute
