@@ -12,7 +12,9 @@
  *
  * This library is supposed to be in the middle between the heavyweight Pango
  * and the trivial libraries like SDL_ttf. It is supposed to support all line-based
- * text systems. Column base support is not planned.
+ * text systems. Column bases support is not planned.
+ *
+ * Current home of the library is at <a href="https://github.com/stll/STLL">github</a>.
  *
  * \section design_sec Design of the library
  * The library is split into some parts that can be used independently and that are
