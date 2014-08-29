@@ -379,9 +379,42 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
                           const pugi::xml_node & above, const pugi::xml_node & left,
                           bool collapseBorder = false, uint32_t minHeight = 0)
 {
-  int32_t padding = evalSize(rules.getValue(xml, "padding"));
-  int32_t borderwidth = evalSize(rules.getValue(xml, "border-width"));
-  int32_t margin = evalSize(rules.getValue(xml, "margin"));
+  int32_t padding_left = 0;
+  int32_t padding_right = 0;
+  int32_t padding_top = 0;
+  int32_t padding_bottom = 0;
+
+  padding_left = padding_right = padding_top = padding_bottom = evalSize(rules.getValue(xml, "padding"));
+
+  if (rules.getValue(xml, "padding-left") != "")   padding_left   = evalSize(rules.getValue(xml, "padding-left"));
+  if (rules.getValue(xml, "padding-right") != "")  padding_right  = evalSize(rules.getValue(xml, "padding-right"));
+  if (rules.getValue(xml, "padding-top") != "")    padding_top    = evalSize(rules.getValue(xml, "padding-top"));
+  if (rules.getValue(xml, "padding-bottom") != "") padding_bottom = evalSize(rules.getValue(xml, "padding-bottom"));
+
+  int32_t borderwidth_left = 0;
+  int32_t borderwidth_right = 0;
+  int32_t borderwidth_top = 0;
+  int32_t borderwidth_bottom = 0;
+
+  borderwidth_left = borderwidth_right = borderwidth_top =borderwidth_bottom = evalSize(rules.getValue(xml, "border-width"));
+
+  if (rules.getValue(xml, "border-left-width") != "")   borderwidth_left   = evalSize(rules.getValue(xml, "border-left-width"));
+  if (rules.getValue(xml, "border-right-width") != "")  borderwidth_right  = evalSize(rules.getValue(xml, "border-right-width"));
+  if (rules.getValue(xml, "border-top-width") != "")    borderwidth_top    = evalSize(rules.getValue(xml, "border-top-width"));
+  if (rules.getValue(xml, "border-bottom-width") != "") borderwidth_bottom = evalSize(rules.getValue(xml, "border-bottom-width"));
+
+  int32_t margin_left = 0;
+  int32_t margin_right = 0;
+  int32_t margin_top = 0;
+  int32_t margin_bottom = 0;
+
+  margin_left = margin_right = margin_top = margin_bottom = evalSize(rules.getValue(xml, "margin"));
+
+  if (rules.getValue(xml, "margin-left") != "")   margin_left   = evalSize(rules.getValue(xml, "margin-left"));
+  if (rules.getValue(xml, "margin-right") != "")  margin_right  = evalSize(rules.getValue(xml, "margin-right"));
+  if (rules.getValue(xml, "margin-top") != "")    margin_top    = evalSize(rules.getValue(xml, "margin-top"));
+  if (rules.getValue(xml, "margin-bottom") != "") margin_bottom = evalSize(rules.getValue(xml, "margin-bottom"));
+
   int32_t marginElementAbove = 0;
   int32_t marginElementLeft = 0;
   int32_t borderElementAbove = 0;
@@ -390,78 +423,114 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
   if (!above.empty())
   {
     marginElementAbove = evalSize(rules.getValue(above, "margin"));
+    if (rules.getValue(above, "margin-bottom") != "")
+      marginElementAbove = evalSize(rules.getValue(above, "margin-bottom"));
 
-    if (margin == 0 && marginElementAbove == 0)
+    if (margin_top == 0 && marginElementAbove == 0)
     {
       borderElementAbove = evalSize(rules.getValue(above, "border-width"));
+      if (rules.getValue(above, "border-bottom-width") != "")
+        borderElementAbove = evalSize(rules.getValue(above, "border-bottom-width"));
     }
   }
 
   if (!left.empty())
   {
     marginElementLeft = evalSize(rules.getValue(left, "margin"));
+    if (rules.getValue(left, "margin-right") != "")
+      marginElementLeft = evalSize(rules.getValue(left, "margin-right"));
 
-    if (margin == 0 && marginElementLeft == 0)
+    if (margin_left == 0 && marginElementLeft == 0)
     {
       borderElementLeft = evalSize(rules.getValue(left, "border-width"));
+      if (rules.getValue(left, "border-right-width") != "")
+        borderElementLeft = evalSize(rules.getValue(left, "border-right-width"));
     }
   }
 
-  int32_t topmargin = std::max(marginElementAbove, margin)-marginElementAbove;
-  int32_t leftmargin = std::max(marginElementLeft, margin)-marginElementLeft;
+  margin_top = std::max(marginElementAbove, margin_top)-marginElementAbove;
+  margin_left = std::max(marginElementLeft, margin_left)-marginElementLeft;
 
-  int32_t topborderwidth = std::max(borderElementAbove, borderwidth)-borderElementAbove;
-  int32_t leftborderwidth = std::max(borderElementLeft, borderwidth)-borderElementLeft;
-
-  if (!collapseBorder)
+  if (collapseBorder)
   {
-    topborderwidth = borderwidth;
-    leftborderwidth = borderwidth;
+    borderwidth_top =  std::max(borderElementAbove, borderwidth_top)-borderElementAbove;
+    borderwidth_left = std::max(borderElementLeft, borderwidth_left)-borderElementLeft;
   }
 
   auto l2 = fkt(xml, rules,
-                indentShape_c(shape, padding+leftborderwidth+leftmargin, padding+borderwidth+margin),
-                ystart+padding+topborderwidth+topmargin);
-  l2.setHeight(std::max(minHeight, l2.getHeight()+padding+borderwidth+margin));
+                indentShape_c(shape, padding_left+borderwidth_left+margin_left, padding_right+borderwidth_right+margin_right),
+                ystart+padding_top+borderwidth_top+margin_top);
+  l2.setHeight(std::max(minHeight, l2.getHeight()+padding_bottom+borderwidth_bottom+margin_bottom));
 
   textLayout_c::commandData c;
-  if (borderwidth)
-  {
-    c.command = textLayout_c::commandData::CMD_RECT;
 
+  c.command = textLayout_c::commandData::CMD_RECT;
+
+  if (borderwidth_top)
+  {
     std::string color = rules.getValue(xml, "border-color");
-    if (color == "")
-      color = rules.getValue(xml, "color");
+    if (rules.getValue(xml, "border-top-color") != "") color = rules.getValue(xml, "border-top-color");
+    if (color == "")                                   color = rules.getValue(xml, "color");
     evalColor(color, c.r, c.g, c.b, c.a);
 
     if (c.a != 0)
     {
-      c.x = shape.getLeft(ystart+topmargin, ystart+topmargin)+leftmargin;
-      c.y = ystart+topmargin;
-      c.w = shape.getRight(ystart+topmargin, ystart+topmargin)-shape.getLeft(ystart+topmargin, ystart+topmargin)-margin-leftmargin;
-      if (topborderwidth)
-      {
-        c.h = topborderwidth;
-        l2.addCommandStart(c);
-      }
-
-      c.h = borderwidth;
-      c.y = l2.getHeight()-borderwidth-margin;
+      c.x = shape.getLeft(ystart+margin_top, ystart+margin_top)+margin_left;
+      c.y = ystart+margin_top;
+      c.w = shape.getRight(ystart+margin_top, ystart+margin_top)-shape.getLeft(ystart+margin_top, ystart+margin_top)-margin_right-margin_left;
+      c.h = borderwidth_top;
       l2.addCommandStart(c);
+    }
+  }
 
-      c.x = shape.getRight(ystart+topmargin, ystart+topmargin)-borderwidth-margin;
-      c.y = ystart+topmargin;
-      c.w = borderwidth;
-      c.h = l2.getHeight()-ystart-margin-topmargin;
+  if (borderwidth_bottom)
+  {
+    std::string color = rules.getValue(xml, "border-color");
+    if (rules.getValue(xml, "border-bottom-color") != "") color = rules.getValue(xml, "border-bottom-color");
+    if (color == "")                                      color = rules.getValue(xml, "color");
+    evalColor(color, c.r, c.g, c.b, c.a);
+
+    if (c.a != 0)
+    {
+      c.x = shape.getLeft(ystart+margin_top, ystart+margin_top)+margin_left;
+      c.y = l2.getHeight()-borderwidth_bottom-margin_bottom;
+      c.w = shape.getRight(ystart+margin_top, ystart+margin_top)-shape.getLeft(ystart+margin_top, ystart+margin_top)-margin_right-margin_left;
+      c.h = borderwidth_bottom;
       l2.addCommandStart(c);
+    }
+  }
 
-      c.w = borderwidth;
-      c.x = shape.getLeft(ystart+topmargin, ystart+topmargin)+leftmargin;
-      if (leftborderwidth)
-      {
-        c.w = leftborderwidth;
-        l2.addCommandStart(c);
-      }
+  if (borderwidth_right)
+  {
+    std::string color = rules.getValue(xml, "border-color");
+    if (rules.getValue(xml, "border-right-color") != "") color = rules.getValue(xml, "border-right-color");
+    if (color == "")                                     color = rules.getValue(xml, "color");
+    evalColor(color, c.r, c.g, c.b, c.a);
+
+    if (c.a != 0)
+    {
+      c.x = shape.getRight(ystart+margin_top, ystart+margin_top)-borderwidth_right-margin_right;
+      c.y = ystart+margin_top;
+      c.w = borderwidth_right;
+      c.h = l2.getHeight()-ystart-margin_bottom-margin_top;
+      l2.addCommandStart(c);
+    }
+  }
+
+  if (borderwidth_left)
+  {
+    std::string color = rules.getValue(xml, "border-color");
+    if (rules.getValue(xml, "border-left-color") != "") color = rules.getValue(xml, "border-left-color");
+    if (color == "")                                    color = rules.getValue(xml, "color");
+    evalColor(color, c.r, c.g, c.b, c.a);
+
+    if (c.a != 0)
+    {
+      c.x = shape.getLeft(ystart+margin_top, ystart+margin_top)+margin_left;
+      c.y = ystart+margin_top;
+      c.w = borderwidth_left;
+      c.h = l2.getHeight()-ystart-margin_bottom-margin_top;
+      l2.addCommandStart(c);
     }
   }
 
@@ -471,11 +540,11 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
   {
     c.command = textLayout_c::commandData::CMD_RECT;
 
-    c.x = shape.getLeft(ystart+topmargin, ystart+topmargin)+leftborderwidth+leftmargin;
-    c.y = ystart+topborderwidth+topmargin;
-    c.w = shape.getRight(ystart+topmargin, ystart+topmargin)-
-          shape.getLeft(ystart+topmargin, ystart+topmargin)-borderwidth-leftborderwidth-margin-leftmargin;
-    c.h = l2.getHeight()-ystart-borderwidth-topborderwidth-margin-topmargin;
+    c.x = shape.getLeft(ystart+margin_top, ystart+margin_top)+borderwidth_left+margin_left;
+    c.y = ystart+borderwidth_top+margin_top;
+    c.w = shape.getRight(ystart+margin_top, ystart+margin_top)-
+          shape.getLeft(ystart+margin_top, ystart+margin_top)-borderwidth_right-borderwidth_left-margin_right-margin_left;
+    c.h = l2.getHeight()-ystart-borderwidth_bottom-borderwidth_top-margin_bottom-margin_top;
     l2.addCommandStart(c);
   }
 
