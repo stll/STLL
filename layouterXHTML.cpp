@@ -697,7 +697,7 @@ typedef struct
 
 } tableCell;
 
-static void layoutXML_TR(const pugi::xml_node & xml, uint32_t row, const textStyleSheet_c & rules,
+static void layoutXML_TR(const pugi::xml_node & xml, uint32_t row, const textStyleSheet_c & /* rules */,
                          std::vector<tableCell> & cells, vector2d<pugi::xml_node> & cellarray)
 {
   uint32_t col = 0;
