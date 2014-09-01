@@ -48,6 +48,7 @@ class textLayout_c
 {
   private:
     uint32_t height; // position where you can add additional text after this ...
+    int32_t left, right;
 
   public:
 
@@ -180,6 +181,24 @@ class textLayout_c
     /** \brief set the height
      */
     void setHeight(uint32_t h) { height = h; }
+
+    /** \brief the width of the layout. This is supposed to be the horizontal
+     *  space that this layout takes up
+     */
+    int32_t getLeft(void) const { return left; }
+
+    /** \brief set the width
+     */
+    void setLeft(int32_t l) { left = l; }
+
+    /** \brief the width of the layout. This is supposed to be the horizontal
+     *  space that this layout takes up
+     */
+    int32_t getRight(void) const { return right; }
+
+    /** \brief set the width
+     */
+    void setRight(int32_t r) { right = r; }
 };
 
 /** \brief this structure contains all attributes that a single glyph can get assigned
@@ -325,6 +344,20 @@ class shape_c
      *  \return the right edge usable for this section of the y-axis
      */
     virtual int32_t getRight(int32_t top, int32_t bottom) const = 0;
+
+    /** \brief get the left edge
+     *  \param top top limit of the area to get the edge for
+     *  \param bottom bottom limit
+     *  \return the left outer edge for this section of the y-axis
+     */
+    virtual int32_t getLeft2(int32_t top, int32_t bottom) const = 0;
+
+    /** \brief get the right edge
+     *  \param top top limit of the area to get the edge for
+     *  \param bottom bottom limit
+     *  \return the right outer edge for this section of the y-axis
+     */
+    virtual int32_t getRight2(int32_t top, int32_t bottom) const = 0;
 };
 
 /** \brief conctrete implementation of the shape that will allow layouting
@@ -342,7 +375,9 @@ class rectangleShape_c : public shape_c
     rectangleShape_c(int32_t width) : w(width) { }
 
     virtual int32_t getLeft(int32_t /*top*/, int32_t /*bottom*/) const { return 0; }
+    virtual int32_t getLeft2(int32_t /*top*/, int32_t /*bottom*/) const { return 0; }
     virtual int32_t getRight(int32_t /*top*/, int32_t /*bottom*/) const { return w; }
+    virtual int32_t getRight2(int32_t /*top*/, int32_t /*bottom*/) const { return w; }
 };
 
 /** \brief this structure contains information for the layouter how to layout the text

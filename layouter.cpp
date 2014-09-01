@@ -501,6 +501,8 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
   }
 
   l.setHeight(ypos);
+  l.setLeft(shape.getLeft2(ystart, ypos));
+  l.setRight(shape.getRight2(ystart, ypos));
 
   return l;
 }

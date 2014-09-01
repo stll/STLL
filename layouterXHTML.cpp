@@ -40,6 +40,8 @@ class indentShape_c : public shape_c
 
     virtual int32_t getLeft(int32_t top, int32_t bottom) const { return outside.getLeft(top, bottom)+ind_left; }
     virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top, bottom)-ind_right; }
+    virtual int32_t getLeft2(int32_t top, int32_t bottom) const { return outside.getLeft2(top, bottom)+ind_left; }
+    virtual int32_t getRight2(int32_t top, int32_t bottom) const { return outside.getRight2(top, bottom)-ind_right; }
 };
 
 class shiftShape_c : public shape_c
@@ -53,6 +55,8 @@ class shiftShape_c : public shape_c
 
     virtual int32_t getLeft(int32_t top, int32_t bottom) const { return outside.getLeft(top+shift, bottom+shift); }
     virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top+shift, bottom+shift); }
+    virtual int32_t getLeft2(int32_t top, int32_t bottom) const { return outside.getLeft2(top+shift, bottom+shift); }
+    virtual int32_t getRight2(int32_t top, int32_t bottom) const { return outside.getRight2(top+shift, bottom+shift); }
 };
 
 class stripLeftShape_c : public shape_c
@@ -66,6 +70,8 @@ class stripLeftShape_c : public shape_c
 
     virtual int32_t getLeft(int32_t top, int32_t bottom) const { return outside.getLeft(top, bottom)+ind_left; }
     virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getLeft(top, bottom)+ind_right; }
+    virtual int32_t getLeft2(int32_t top, int32_t bottom) const { return outside.getLeft2(top, bottom)+ind_left; }
+    virtual int32_t getRight2(int32_t top, int32_t bottom) const { return outside.getLeft2(top, bottom)+ind_right; }
 };
 
 class stripRightShape_c : public shape_c
@@ -79,6 +85,8 @@ class stripRightShape_c : public shape_c
 
     virtual int32_t getLeft(int32_t top, int32_t bottom) const { return outside.getRight(top, bottom)-ind_left; }
     virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top, bottom)-ind_right; }
+    virtual int32_t getLeft2(int32_t top, int32_t bottom) const { return outside.getRight2(top, bottom)-ind_left; }
+    virtual int32_t getRight2(int32_t top, int32_t bottom) const { return outside.getRight2(top, bottom)-ind_right; }
 };
 
 template <class T>
@@ -475,9 +483,9 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
 
     if (c.a != 0)
     {
-      c.x = shape.getLeft(ystart+margin_top, ystart+margin_top)+margin_left;
+      c.x = l2.getLeft()-padding_left-borderwidth_left;
       c.y = ystart+margin_top;
-      c.w = shape.getRight(ystart+margin_top, ystart+margin_top)-shape.getLeft(ystart+margin_top, ystart+margin_top)-margin_right-margin_left;
+      c.w = l2.getRight()-l2.getLeft()+padding_left+padding_right+borderwidth_left+borderwidth_right;
       c.h = borderwidth_top;
       l2.addCommandStart(c);
     }
@@ -492,9 +500,9 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
 
     if (c.a != 0)
     {
-      c.x = shape.getLeft(ystart+margin_top, ystart+margin_top)+margin_left;
+      c.x = l2.getLeft()-padding_left-borderwidth_left;
       c.y = l2.getHeight()-borderwidth_bottom-margin_bottom;
-      c.w = shape.getRight(ystart+margin_top, ystart+margin_top)-shape.getLeft(ystart+margin_top, ystart+margin_top)-margin_right-margin_left;
+      c.w = l2.getRight()-l2.getLeft()+padding_left+padding_right+borderwidth_left+borderwidth_right;
       c.h = borderwidth_bottom;
       l2.addCommandStart(c);
     }
@@ -509,7 +517,7 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
 
     if (c.a != 0)
     {
-      c.x = shape.getRight(ystart+margin_top, ystart+margin_top)-borderwidth_right-margin_right;
+      c.x = l2.getRight()+padding_right;
       c.y = ystart+margin_top;
       c.w = borderwidth_right;
       c.h = l2.getHeight()-ystart-margin_bottom-margin_top;
@@ -526,7 +534,7 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
 
     if (c.a != 0)
     {
-      c.x = shape.getLeft(ystart+margin_top, ystart+margin_top)+margin_left;
+      c.x = l2.getLeft()-padding_left-borderwidth_left;
       c.y = ystart+margin_top;
       c.w = borderwidth_left;
       c.h = l2.getHeight()-ystart-margin_bottom-margin_top;
@@ -663,6 +671,9 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleShee
                                  stripRightShape_c(shape, padding+listIndent, padding), prop, y+padding));
         l.append(boxIt(i, rules, indentShape_c(shape, 0, listIndent), y, layoutXML_P, i.previous_sibling(), pugi::xml_node()));
       }
+
+      l.setLeft(shape.getLeft2(ystart, l.getHeight()));
+      l.setRight(shape.getRight2(ystart, l.getHeight()));
     }
     else
     {
@@ -860,6 +871,7 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
   // find out the real width of the table
   int width = *colStart.rbegin();
 
+  // place table into the center... TODO we may not always want to do that
   int xindent = (shape.getLeft(ystart, ystart) + shape.getRight(ystart, ystart) - width - shape.getLeft(ystart, ystart)) / 2;
   if (xindent < 0) xindent = 0;
 
@@ -888,6 +900,8 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
   }
 
   l.setHeight(ystart+rowheights[row]);
+  l.setLeft(xindent+colStart[0]);
+  l.setRight(xindent+width);
 
   return l;
 }
