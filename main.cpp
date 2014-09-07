@@ -131,7 +131,7 @@ int main ()
   styleSheet.addRule("body", "text-align", "justify");
   styleSheet.addRule("p", "text-indent", "10px");
   styleSheet.addRule("body", "padding", "10px");
-  styleSheet.addRule("body", "background-color", "#808080");
+  styleSheet.addRule("body", "background-color", "#303030");
   styleSheet.addRule("body", "text-shadow", "1px 1px #000000");
 //  styleSheet.addRule("p", "padding", "10px");
 //  styleSheet.addRule("ul", "padding", "10px");
@@ -151,7 +151,7 @@ int main ()
   styleSheet.addRule("ul[lang|=he]", "direction", "rtl");
   styleSheet.addRule("p[lang|=ar]", "direction", "rtl");
   styleSheet.addRule("p[lang|=ar]", "font-family", "sans-ar");
-  styleSheet.addRule(".framed", "border-width", "3px");
+  styleSheet.addRule(".framed", "border-width", "1px");
   styleSheet.addRule(".framed", "padding", "10px");
   styleSheet.addRule(".framed", "border-color", "#ff0000");
   styleSheet.addRule(".framed", "background-color", "#ff8080");
@@ -160,33 +160,50 @@ int main ()
   styleSheet.addRule("th", "font-weight", "bold");
   styleSheet.addRule("th", "background-color", "#606060");
 
-  styleSheet.addRule("th", "border-width", "1px");
-  styleSheet.addRule("th", "padding", "10px");
+  styleSheet.addRule("th", "border-left-width", "1px");
+  styleSheet.addRule("th", "border-right-width", "1px");
+  styleSheet.addRule("th", "border-top-width", "1px");
+  styleSheet.addRule("th", "border-bottom-width", "5px");
+  styleSheet.addRule("th", "padding-top", "10px");
+  styleSheet.addRule("th", "padding-bottom", "10px");
   styleSheet.addRule("th", "border-color", "#000000");
+  styleSheet.addRule("th", "border-bottom-color", "#FFFFFF");
   styleSheet.addRule("th", "text-align", "center");
-  styleSheet.addRule("th", "margin", "0px");
+  styleSheet.addRule("th", "text-shadow", "1px 1px #000000");
 //  styleSheet.addRule("th", "margin", "10px");
   styleSheet.addRule("table", "margin", "10px");
-//  styleSheet.addRule("table", "border-width", "1px");
+  styleSheet.addRule("table", "border-width", "1px");
+
   styleSheet.addRule("table", "border-color", "#000000");
   styleSheet.addRule("table", "border-collapse", "collapse");
-  styleSheet.addRule("table", "padding", "0px");
+  styleSheet.addRule("table", "padding", "1px");
   styleSheet.addRule("table", "text-indent", "0px");
   styleSheet.addRule("table", "text-align", "center");
+  styleSheet.addRule("table", "direction", "rtl");
 
-  styleSheet.addRule("td", "padding", "10px");
+  styleSheet.addRule("td", "padding", "00px");
+  styleSheet.addRule("td", "padding-left", "00px");
   styleSheet.addRule("td", "margin", "0px");
   styleSheet.addRule("td", "text-align", "left");
   styleSheet.addRule("td", "border-width", "1px");
   styleSheet.addRule("td", "border-color", "#000000");
 
+  styleSheet.addRule(".pframed", "border-width", "2px");
+  styleSheet.addRule(".pframed", "padding", "2px");
+  styleSheet.addRule(".pframed", "border-color", "#ff00ff");
+  styleSheet.addRule(".cent", "text-align", "center");
+
   // der zu formatierende text
   std::string text = u8"<html><body>"
     "<h1 lang='de'>Überschrift mit</h1>"
     "<p class='und'>Test <i class='BigFont' class='und'>Text</i> more and somme ii "
-    "<div class='BoldFont' class='und'>more text so</div> that the pa\u00ADra\u00ADgraph is at least "
-    "<div>long</div> enough to span some lines on the screen let us "
-    "also <i>i</i>nclude some more hebrew נייה, העגורן הוא and back to english </p>"
+    "<div class='BoldFont' class='und'>more text so</div> that the pa\u00ADra\u00ADgraph iiiiii is at least "
+    "<div>long</div> enough to span some lines on the screen "
+    "<img class='pframed' src='i1' width='30px' height='30px'/> <img class='pframed' src='i1' width='10px' height='10px'/>"
+    "<img src='i1' width='10px' height='10px'/> "
+    "let us "
+    "also <i class='und'>i</i>nclude some more hebrew נייה, העגורן הוא and back to english </p>"
+    "<p class='cent'><img class='pframed' src='i1' width='110px' height='30px'/></p>"
     "<p lang='he' class='framed'>אברהם בן שמואל אבולעפיה (1240 - 1291 בערך), רב ומקובל שראה עצמו כנביא וכמשיח, "
     "נחשב לרוב כנציג הבולט של זרם הקבלה האקסטטית. היה בין הראשונים שהחלו במסע לגילוי עשרת "
     "השבטים האבודים. עקב חרם שהוטל עליו על ידי הרשבא בעקבות הכרזתו על עצמו כמשיח, נשתכח אבולעפיה "
