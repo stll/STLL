@@ -324,60 +324,8 @@ static const pugi::char_t * getHTMLAttribute(pugi::xml_node xml, const std::stri
   }
 }
 
-static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & rules, std::u32string & txt,
-               attributeIndex_c & attr)
-{
-  for (const auto & i : xml)
-  {
-    if (i.type() == pugi::node_pcdata)
-    {
-      size_t s = txt.length();
-
-      if (txt.length() == 0)
-        txt = u8_convertToU32(normalizeHTML(i.value(), ' '));
-      else
-        txt += u8_convertToU32(normalizeHTML(i.value(), txt[txt.length()-1]));
-
-      codepointAttributes a;
-
-      evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b, a.a);
-      a.font = getFontForNode(xml, rules);
-      a.lang = getHTMLAttribute(xml, "lang");
-      a.flags = 0;
-      if (rules.getValue(xml, "text-decoration") == "underline")
-      {
-        a.flags |= codepointAttributes::FL_UNDERLINE;
-      }
-      a.shadows = evalShadows(rules.getValue(xml, "text-shadow"));
-
-      attr.set(s, txt.length()-1, a);
-    }
-    else if (   (i.type() == pugi::node_element)
-             && (   (std::string("i") == i.name())
-                 || (std::string("div") == i.name())
-                )
-            )
-    {
-      layoutXML_text(i, rules, txt, attr);
-    }
-    else if ((i.type() == pugi::node_element) && (std::string("br") == i.name()))
-    {
-      txt += U'\n';
-      codepointAttributes a;
-      a.flags = 0;
-      a.font = getFontForNode(xml, rules);
-      a.lang = getHTMLAttribute(xml, "lang");
-      attr.set(txt.length()-1, a);
-    }
-    else
-    {
-      throw XhtmlException_c("Within paragraph environments only text and 'i' and 'div' "
-                             "tags are allowed (" + getNodePath(i) + ")");
-    }
-  }
-}
-
-typedef textLayout_c (*ParseFunction)(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart);
+typedef textLayout_c (*ParseFunction)(const pugi::xml_node & xml, const textStyleSheet_c & rules,
+                                      const shape_c & shape, int32_t ystart);
 
 
 // handles padding, margin and border, all in one, it takes the text returned from the
@@ -573,7 +521,99 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
 
 #endif
 
+  l2.setLeft(l2.getLeft()-padding_left-borderwidth_left-margin_left);
+  l2.setRight(l2.getRight()+padding_right+borderwidth_right+margin_right);
+
   return l2;
+}
+
+static textLayout_c layoutXML_IMG(const pugi::xml_node & xml, const textStyleSheet_c & rules,
+                                  const shape_c & shape, int32_t ystart)
+{
+  textLayout_c l;
+
+  textLayout_c::commandData c;
+  c.command = textLayout_c::commandData::CMD_IMAGE;
+  c.x = shape.getLeft(ystart, ystart);
+  c.y = ystart;
+  c.imageURL = xml.attribute("src").value();
+  l.addCommand(c);
+  l.setHeight(ystart+evalSize(xml.attribute("height").value()));
+  l.setLeft(c.x);
+  l.setRight(c.x+evalSize(xml.attribute("width").value()));
+
+  return l;
+}
+
+static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & rules, std::u32string & txt,
+               attributeIndex_c & attr)
+{
+  for (const auto & i : xml)
+  {
+    if (i.type() == pugi::node_pcdata)
+    {
+      size_t s = txt.length();
+
+      if (txt.length() == 0)
+        txt = u8_convertToU32(normalizeHTML(i.value(), ' '));
+      else
+        txt += u8_convertToU32(normalizeHTML(i.value(), txt[txt.length()-1]));
+
+      codepointAttributes a;
+
+      evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b, a.a);
+      a.font = getFontForNode(xml, rules);
+      a.lang = getHTMLAttribute(xml, "lang");
+      a.flags = 0;
+      if (rules.getValue(xml, "text-decoration") == "underline")
+      {
+        a.flags |= codepointAttributes::FL_UNDERLINE;
+      }
+      a.shadows = evalShadows(rules.getValue(xml, "text-shadow"));
+
+      attr.set(s, txt.length()-1, a);
+    }
+    else if (   (i.type() == pugi::node_element)
+             && (   (std::string("i") == i.name())
+                 || (std::string("div") == i.name())
+                )
+            )
+    {
+      layoutXML_text(i, rules, txt, attr);
+    }
+    else if ((i.type() == pugi::node_element) && (std::string("br") == i.name()))
+    {
+      txt += U'\n';
+      codepointAttributes a;
+      a.flags = 0;
+      a.font = getFontForNode(xml, rules);
+      a.lang = getHTMLAttribute(xml, "lang");
+      attr.set(txt.length()-1, a);
+    }
+    else if ((i.type() == pugi::node_element) && (std::string("img") == i.name()))
+    {
+      codepointAttributes a;
+      a.inlay = std::make_shared<textLayout_c>(boxIt(i, rules, rectangleShape_c(10000), 0,
+                                                     layoutXML_IMG, pugi::xml_node(), pugi::xml_node()));
+      a.h_above = a.inlay->getHeight();
+
+      // if we want underlines, we add the font so that the layouter
+      // can find the position of the underline
+      if (rules.getValue(xml, "text-decoration") == "underline")
+      {
+        a.flags |= codepointAttributes::FL_UNDERLINE;
+        a.font = getFontForNode(xml, rules);
+        evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b, a.a);
+      }
+      txt += U'\u00A0';
+      attr.set(txt.length()-1, a);
+    }
+    else
+    {
+      throw XhtmlException_c("Within paragraph environments only text and 'i' and 'div' "
+                             "tags are allowed (" + getNodePath(i) + ")");
+    }
+  }
 }
 
 // this whole stuff is a recursive descending parser of the XHTML stuff
@@ -996,7 +1036,7 @@ textLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules
 {
   pugi::xml_document doc;
 
-  auto res = doc.load_buffer(txt.c_str(), txt.length());
+  auto res = doc.load_buffer(txt.c_str(), txt.length(), pugi::parse_ws_pcdata);
 
   if (res)
     return layoutXML(doc, rules, shape);

@@ -59,6 +59,9 @@ typedef struct
   // is this a soft hypen?? will ony be shown at line ends
   bool shy;
 
+  // ascender and descender of this run
+  int32_t ascender, descender;
+
 #ifdef _DEBUG_
   // the text of this run, useful for debugging to see what is going on
   std::u32string text;
@@ -95,7 +98,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
   {
     auto a = attr.get(i);
 
-    if (hb_ft_fonts.find(a.font) == hb_ft_fonts.end())
+    if (a.font && (hb_ft_fonts.find(a.font) == hb_ft_fonts.end()))
     {
       hb_ft_fonts[a.font] = hb_ft_font_create(a.font->getFace(), NULL);
     }
@@ -117,6 +120,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
            && (embedding_levels[runstart] == embedding_levels[spos])
            && (attr.get(runstart).lang == attr.get(spos).lang)
            && (attr.get(runstart).font == attr.get(spos).font)
+           && (!attr.get(spos).inlay)
            && (   (linebreaks[spos-1] == LINEBREAK_NOBREAK)
                || (linebreaks[spos-1] == LINEBREAK_INSIDEACHAR)
               )
@@ -179,7 +183,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       hb_buffer_set_direction(buf, HB_DIRECTION_RTL);
     }
 
-    hb_shape(hb_ft_fonts[attr.get(runstart).font], buf, NULL, 0);
+    if (attr.get(runstart).font)
+      hb_shape(hb_ft_fonts[attr.get(runstart).font], buf, NULL, 0);
 
     unsigned int         glyph_count;
     hb_glyph_info_t     *glyph_info   = hb_buffer_get_glyph_infos(buf, &glyph_count);
@@ -189,57 +194,103 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     run.embeddingLevel = embedding_levels[runstart];
     run.linebreak = linebreaks[spos-1];
     run.font = attr.get(runstart).font;
+    if (attr.get(runstart).inlay)
+    {
+      run.ascender = attr.get(runstart).h_above;
+      run.descender = attr.get(runstart).inlay->getHeight()-run.ascender;
+    }
+    else
+    {
+      run.ascender = run.font->getAscender()/64;
+      run.descender = run.font->getDescender()/64;
+    }
 #ifdef _DEBUG_
     run.text = txt32.substr(runstart, spos-runstart);
 #endif
 
     for (size_t j=0; j < glyph_count; ++j)
     {
-      textLayout_c::commandData g;
+      auto a = attr.get(glyph_info[j].cluster + runstart);
 
-      g.command = textLayout_c::commandData::CMD_GLYPH;
-
-      g.glyphIndex = glyph_info[j].codepoint;
-      g.font = attr.get(runstart).font;
-
-      g.x = run.dx + (glyph_pos[j].x_offset/64);
-      g.y = run.dy - (glyph_pos[j].y_offset/64);
-
-      for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
+      if (a.inlay)
       {
-        g.x += attr.get(runstart).shadows[j].dx;
-        g.y += attr.get(runstart).shadows[j].dy;
+        for (auto in : a.inlay->data)
+        {
+          // if ascender is 0 we want to be below the baseline
+          // but if we leave the inlay where is is the top line of them
+          // image will be _on_ the baseline, which is not what we want
+          // so we actually need to go one below
+          in.y -= (run.ascender-1);
+          in.x += run.dx;
 
-        g.r = attr.get(runstart).shadows[j].r;
-        g.g = attr.get(runstart).shadows[j].g;
-        g.b = attr.get(runstart).shadows[j].b;
-        g.a = attr.get(runstart).shadows[j].a;
+          run.run.push_back(in);
+        }
 
-        run.run.push_back(g);
+        if (a.flags & codepointAttributes::FL_UNDERLINE)
+        {
+          textLayout_c::commandData g;
 
-        g.x -= attr.get(runstart).shadows[j].dx;
-        g.y -= attr.get(runstart).shadows[j].dy;
+          g.command = textLayout_c::commandData::CMD_RECT;
+          g.x = run.dx;
+          g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2)/64);
+          g.w = a.inlay->getRight();
+          g.h = std::max(1, a.font->getUnderlineThickness()/64);
+          g.r = a.r;
+          g.g = a.g;
+          g.b = a.b;
+
+          run.run.push_back(g);
+        }
+
+        run.dx += a.inlay->getRight();
       }
-
-      run.dx += glyph_pos[j].x_advance/64;
-      run.dy -= glyph_pos[j].y_advance/64;
-
-      g.r = attr.get(glyph_info[j].cluster + runstart).r;
-      g.g = attr.get(glyph_info[j].cluster + runstart).g;
-      g.b = attr.get(glyph_info[j].cluster + runstart).b;
-      g.a = attr.get(glyph_info[j].cluster + runstart).a;
-
-
-      run.run.push_back(g);
-
-      if (attr.get(runstart).flags & codepointAttributes::FL_UNDERLINE)
+      else
       {
-        g.command = textLayout_c::commandData::CMD_RECT;
-        g.w = glyph_pos[j].x_advance/64+1;
-        g.y = -((g.font->getUnderlinePosition()+g.font->getUnderlineThickness()/2)/64);
-        g.h = std::max(1, g.font->getUnderlineThickness()/64);
+        textLayout_c::commandData g;
+
+        g.command = textLayout_c::commandData::CMD_GLYPH;
+
+        g.glyphIndex = glyph_info[j].codepoint;
+        g.font = attr.get(runstart).font;
+
+        g.x = run.dx + (glyph_pos[j].x_offset/64);
+        g.y = run.dy - (glyph_pos[j].y_offset/64);
+
+        for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
+        {
+          g.x += attr.get(runstart).shadows[j].dx;
+          g.y += attr.get(runstart).shadows[j].dy;
+
+          g.r = attr.get(runstart).shadows[j].r;
+          g.g = attr.get(runstart).shadows[j].g;
+          g.b = attr.get(runstart).shadows[j].b;
+          g.a = attr.get(runstart).shadows[j].a;
+
+          run.run.push_back(g);
+
+          g.x -= attr.get(runstart).shadows[j].dx;
+          g.y -= attr.get(runstart).shadows[j].dy;
+        }
+
+        run.dx += glyph_pos[j].x_advance/64;
+        run.dy -= glyph_pos[j].y_advance/64;
+
+        g.r = a.r;
+        g.g = a.g;
+        g.b = a.b;
+        g.a = a.a;
 
         run.run.push_back(g);
+
+        if (a.flags & codepointAttributes::FL_UNDERLINE)
+        {
+          g.command = textLayout_c::commandData::CMD_RECT;
+          g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2)/64);
+          g.w = glyph_pos[j].x_advance/64+1;
+          g.h = std::max(1, a.font->getUnderlineThickness()/64);
+
+          run.run.push_back(g);
+        }
       }
     }
 
@@ -313,8 +364,8 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
       while (newspos < runs.size())
       {
         // update line hight and with with the new run
-        newAscend = std::max(newAscend, runs[newspos].font->getAscender()/64);
-        newDescend = std::min(newDescend, runs[newspos].font->getDescender()/64);
+        newAscend = std::max(newAscend, runs[newspos].ascender);
+        newDescend = std::min(newDescend, runs[newspos].descender);
         newWidth += runs[newspos].dx;
         if (runs[newspos].space) newSpace++;
 

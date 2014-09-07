@@ -59,10 +59,11 @@ class textLayout_c
       enum
       {
         CMD_GLYPH,  ///< draw a glyph from a font
-        CMD_RECT    ///< draw a rectangle
+        CMD_RECT,   ///< draw a rectangle
+        CMD_IMAGE   ///< draw an image
       } command;    ///< specifies what to draw
 
-      /** \name position of the glyph, or upper left corner of rectangle
+      /** \name position of the glyph, or upper left corner of rectangle or image
        *  @{ */
       int32_t x;  ///< x position
       int32_t y;  ///< y position
@@ -87,6 +88,8 @@ class textLayout_c
       uint8_t b;  ///< blue value
       uint8_t a;  ///< alpha value (0: transparent, 255: opaque)
       /** @} */
+
+      std::string imageURL; ///< URL of image to draw
 
     } commandData;
 
@@ -163,7 +166,8 @@ class textLayout_c
 
     /** \brief copy constructor
      */
-    textLayout_c(const textLayout_c & src) : height(src.height), data(src.data)  {  }
+    textLayout_c(const textLayout_c & src) : height(src.height), left(src.left),
+                                             right(src.right), data(src.data)  {  }
 
     /** \brief move constructor
      */
@@ -171,6 +175,8 @@ class textLayout_c
     {
       swap(data, src.data);
       height = src.height;
+      left = src.left;
+      right = src.right;
     }
 
     /** \brief the height of the layout. This is supposed to be the vertical
@@ -243,11 +249,26 @@ class codepointAttributes
 
   std::vector<shadow> shadows;
 
+
+  /// a layout of to be placed instead of the actual character, when empty it is a normal
+  /// glyp that needs to be placed, if you set the layout, the font information will be ignored
+  /// how the image interacts with line breaks depends on the character that is given
+  /// as the placeholder. Linebreaks are done as if there was the given placeholder
+  /// character and not the image
+  /// the vertial alignment is controled by h_above and h_below. The image will have
+  /// a height of h_above+h_below
+  std::shared_ptr<textLayout_c> inlay;
+
+  uint32_t h_above;  ///< how much of the inlay is supposed to go above the base line
+
+  codepointAttributes(void) : r(0), g(0), b(0), a(0), font(0), lang(""), flags(0), inlay(0), h_above(0) { }
+
   bool operator==(const codepointAttributes & rhs) const
   {
     return r == rhs.r && g == rhs.g && b == rhs.b && font == rhs.font && lang == rhs.lang
       && flags == rhs.flags && shadows.size() && rhs.shadows.size()
-      && std::equal(shadows.begin(), shadows.end(), rhs.shadows.begin());
+      && std::equal(shadows.begin(), shadows.end(), rhs.shadows.begin())
+      && inlay == rhs.inlay && h_above == rhs.h_above;
   }
 
   codepointAttributes operator += (const codepointAttributes & rhs)
@@ -261,6 +282,8 @@ class codepointAttributes
     lang = rhs.lang;
     flags = rhs.flags;
     shadows = rhs.shadows;
+    inlay = rhs.inlay;
+    h_above = rhs.h_above;
 
     return *this;
   }
