@@ -253,7 +253,7 @@ int main ()
   c.x = c.y = 0;
   c.w = TXT_WIDTH;
   c.h = 600;
-  c.r = c.g = c.b = 50;
+  c.c = color_c(50, 50, 50);
   la.addCommand(c);
   l.emplace_back(layoutInfo_c(la, (WIN_WIDTH-TXT_WIDTH)/2, 10));
 

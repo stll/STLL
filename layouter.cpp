@@ -235,9 +235,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2)/64);
           g.w = a.inlay->getRight();
           g.h = std::max(1, a.font->getUnderlineThickness()/64);
-          g.r = a.r;
-          g.g = a.g;
-          g.b = a.b;
+          g.c = a.c;
 
           run.run.push_back(g);
         }
@@ -261,10 +259,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           g.x += attr.get(runstart).shadows[j].dx;
           g.y += attr.get(runstart).shadows[j].dy;
 
-          g.r = attr.get(runstart).shadows[j].r;
-          g.g = attr.get(runstart).shadows[j].g;
-          g.b = attr.get(runstart).shadows[j].b;
-          g.a = attr.get(runstart).shadows[j].a;
+          g.c = attr.get(runstart).shadows[j].c;
 
           run.run.push_back(g);
 
@@ -275,10 +270,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         run.dx += glyph_pos[j].x_advance/64;
         run.dy -= glyph_pos[j].y_advance/64;
 
-        g.r = a.r;
-        g.g = a.g;
-        g.b = a.b;
-        g.a = a.a;
+        g.c = a.c;
 
         run.run.push_back(g);
 

@@ -28,6 +28,8 @@
 
 #include "layouterFont.h"
 
+#include "color.h"
+
 #include <boost/icl/split_interval_map.hpp>
 #include <boost/icl/closed_interval.hpp>
 
@@ -81,13 +83,8 @@ class textLayout_c
       uint32_t h;  ///< height of block
       /** @} */
 
-      /** \name colour of the glyph or the rectangle
-       *  @{ */
-      uint8_t r;  ///< red value
-      uint8_t g;  ///< green value
-      uint8_t b;  ///< blue value
-      uint8_t a;  ///< alpha value (0: transparent, 255: opaque)
-      /** @} */
+      /** \brief colour of the glyph or the rectangle */
+      color_c c;
 
       std::string imageURL; ///< URL of image to draw
 
@@ -213,13 +210,8 @@ class codepointAttributes
 {
   public:
 
-  //@{
-  /// color of the letter, r, g, b values and alpha (0: transparent 255: opaque)
-  uint8_t r;
-  uint8_t g;
-  uint8_t b;
-  uint8_t a;
-  //@}
+  /// colour of the letter
+  color_c c;
 
   /// font of the letter
   std::shared_ptr<fontFace_c> font;
@@ -233,16 +225,13 @@ class codepointAttributes
 
   typedef struct shadow
   {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-    uint8_t a;
+    color_c c;
     int8_t dx;
     int8_t dy;
 
     bool operator==(const struct shadow & rhs) const
     {
-      return r == rhs.r && g == rhs.g && b == rhs.b && a == rhs.a && dx == rhs.dx && dy == rhs.dy;
+      return c == rhs.c && dx == rhs.dx && dy == rhs.dy;
     }
 
   } shadow;
@@ -261,11 +250,11 @@ class codepointAttributes
 
   uint32_t h_above;  ///< how much of the inlay is supposed to go above the base line
 
-  codepointAttributes(void) : r(0), g(0), b(0), a(0), font(0), lang(""), flags(0), inlay(0), h_above(0) { }
+  codepointAttributes(void) : font(0), lang(""), flags(0), inlay(0), h_above(0) { }
 
   bool operator==(const codepointAttributes & rhs) const
   {
-    return r == rhs.r && g == rhs.g && b == rhs.b && font == rhs.font && lang == rhs.lang
+    return c == rhs.c && font == rhs.font && lang == rhs.lang
       && flags == rhs.flags && shadows.size() && rhs.shadows.size()
       && std::equal(shadows.begin(), shadows.end(), rhs.shadows.begin())
       && inlay == rhs.inlay && h_above == rhs.h_above;
@@ -274,10 +263,7 @@ class codepointAttributes
   codepointAttributes operator += (const codepointAttributes & rhs)
   {
     // when someone tries to overwrite the attributes, we take over the new ones
-    r = rhs.r;
-    g = rhs.g;
-    b = rhs.b;
-    a = rhs.a;
+    c = rhs.c;
     font = rhs.font;
     lang = rhs.lang;
     flags = rhs.flags;

@@ -42,7 +42,7 @@ typedef struct
   uint32_t bshift;
   uint32_t ashift;
 
-  uint8_t r, g, b, a;
+  color_c c;
 
 } spanInfo;
 
@@ -61,7 +61,7 @@ void spanner(int y, int count, const FT_Span* spans, void *user)
       if (start + spans[i].len >= baton->last_pixel)
         return;
 
-      uint8_t alpha = (spans[i].coverage * baton->a) / 255;
+      uint8_t alpha = (spans[i].coverage * baton->c.a()) / 255;
 
       for (int x = 0; x < spans[i].len; x++)
       {
@@ -69,9 +69,9 @@ void spanner(int y, int count, const FT_Span* spans, void *user)
         uint8_t pg = *start >> baton->gshift;
         uint8_t pb = *start >> baton->bshift;
 
-        pr = ((255-alpha)*pr + (alpha*baton->r))/255;
-        pg = ((255-alpha)*pg + (alpha*baton->g))/255;
-        pb = ((255-alpha)*pb + (alpha*baton->b))/255;
+        pr = ((255-alpha)*pr + (alpha*baton->c.r()))/255;
+        pg = ((255-alpha)*pg + (alpha*baton->c.g()))/255;
+        pb = ((255-alpha)*pb + (alpha*baton->c.b()))/255;
 
         *start = (pr << baton->rshift) | (pg << baton->gshift) | (pb << baton->bshift);
         start++;
@@ -113,10 +113,7 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
       case textLayout_c::commandData::CMD_GLYPH:
 
         span.pixels = (uint32_t *)(((uint8_t *) s->pixels) + (sy+i.y) * s->pitch) + (sx+i.x);
-        span.r = i.r;
-        span.g = i.g;
-        span.b = i.b;
-        span.a = i.a;
+        span.c = i.c;
 
         i.font->outlineRender(i.glyphIndex, &ftr_params);
 
@@ -128,7 +125,7 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
         r.y = i.y+sy;
         r.w = i.w;
         r.h = i.h;
-        SDL_FillRect(s, &r, SDL_MapRGBA(s->format, i.r, i.g, i.b, i.a));
+        SDL_FillRect(s, &r, SDL_MapRGBA(s->format, i.c.r(), i.c.g(), i.c.b(), i.c.a()));
         break;
 
       case textLayout_c::commandData::CMD_IMAGE:

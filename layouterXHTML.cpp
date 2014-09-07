@@ -170,11 +170,11 @@ static uint8_t hex2byte(char c1, char c2)
  *  \param g green value of the color
  *  \param b blue value of the color
  */
-static void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t &b, uint8_t &a)
+static void evalColor(const std::string & col, color_c & c)
 {
   if (col == "transparent")
   {
-    r = g = b = a = 0;
+    c = color_c();
     return;
   }
 
@@ -183,10 +183,7 @@ static void evalColor(const std::string & col, uint8_t & r, uint8_t & g, uint8_t
 
   if (col[0] == '#')
   {
-    r = hex2byte(col[1], col[2]);
-    g = hex2byte(col[3], col[4]);
-    b = hex2byte(col[5], col[6]);
-    a = 255;
+    c = color_c(hex2byte(col[1], col[2]), hex2byte(col[3], col[4]), hex2byte(col[5], col[6]));
   }
   else
     throw XhtmlException_c("only the # color scheme is supported and keyword transparent");
@@ -240,7 +237,7 @@ static std::vector<codepointAttributes::shadow> evalShadows(const std::string & 
     while (v[spos] == ' ' && spos < v.length()) spos++;
     if (spos >= v.length()) throw XhtmlException_c("Format of shadow invalid");
 
-    evalColor(v.substr(spos, v.find(',', spos)-spos), sh.r, sh.g, sh.b, sh.a);
+    evalColor(v.substr(spos, v.find(',', spos)-spos), sh.c);
 
     s.push_back(sh);
 
@@ -427,9 +424,9 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
     std::string color = rules.getValue(xml, "border-color");
     if (rules.getValue(xml, "border-top-color") != "") color = rules.getValue(xml, "border-top-color");
     if (color == "")                                   color = rules.getValue(xml, "color");
-    evalColor(color, c.r, c.g, c.b, c.a);
+    evalColor(color, c.c);
 
-    if (c.a != 0)
+    if (c.c.a() != 0)
     {
       c.x = l2.getLeft()-padding_left-borderwidth_left;
       c.y = ystart+margin_top;
@@ -444,9 +441,9 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
     std::string color = rules.getValue(xml, "border-color");
     if (rules.getValue(xml, "border-bottom-color") != "") color = rules.getValue(xml, "border-bottom-color");
     if (color == "")                                      color = rules.getValue(xml, "color");
-    evalColor(color, c.r, c.g, c.b, c.a);
+    evalColor(color, c.c);
 
-    if (c.a != 0)
+    if (c.c.a() != 0)
     {
       c.x = l2.getLeft()-padding_left-borderwidth_left;
       c.y = l2.getHeight()-borderwidth_bottom-margin_bottom;
@@ -461,9 +458,9 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
     std::string color = rules.getValue(xml, "border-color");
     if (rules.getValue(xml, "border-right-color") != "") color = rules.getValue(xml, "border-right-color");
     if (color == "")                                     color = rules.getValue(xml, "color");
-    evalColor(color, c.r, c.g, c.b, c.a);
+    evalColor(color, c.c);
 
-    if (c.a != 0)
+    if (c.c.a() != 0)
     {
       c.x = l2.getRight()+padding_right;
       c.y = ystart+margin_top;
@@ -478,9 +475,9 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
     std::string color = rules.getValue(xml, "border-color");
     if (rules.getValue(xml, "border-left-color") != "") color = rules.getValue(xml, "border-left-color");
     if (color == "")                                    color = rules.getValue(xml, "color");
-    evalColor(color, c.r, c.g, c.b, c.a);
+    evalColor(color, c.c);
 
-    if (c.a != 0)
+    if (c.c.a() != 0)
     {
       c.x = l2.getLeft()-padding_left-borderwidth_left;
       c.y = ystart+margin_top;
@@ -490,9 +487,9 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
     }
   }
 
-  evalColor(rules.getValue(xml, "background-color"), c.r, c.g, c.b, c.a);
+  evalColor(rules.getValue(xml, "background-color"), c.c);
 
-  if (c.a != 0)
+  if (c.c.a() != 0)
   {
     c.command = textLayout_c::commandData::CMD_RECT;
 
@@ -561,7 +558,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
 
       codepointAttributes a;
 
-      evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b, a.a);
+      evalColor(rules.getValue(xml, "color"), a.c);
       a.font = getFontForNode(xml, rules);
       a.lang = getHTMLAttribute(xml, "lang");
       a.flags = 0;
@@ -603,7 +600,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
       {
         a.flags |= codepointAttributes::FL_UNDERLINE;
         a.font = getFontForNode(xml, rules);
-        evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b, a.a);
+        evalColor(rules.getValue(xml, "color"), a.c);
       }
       txt += U'\u00A0';
       attr.set(txt.length()-1, a);
@@ -682,7 +679,7 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleShee
       auto y = l.getHeight();
 
       codepointAttributes a;
-      evalColor(rules.getValue(xml, "color"), a.r, a.g, a.b, a.a);
+      evalColor(rules.getValue(xml, "color"), a.c);
       a.font = font;
       a.lang = "";
       a.flags = 0;
