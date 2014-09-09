@@ -898,7 +898,7 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
       uint32_t h = 0;
 
       for (size_t r = c.row; r < c.row+c.rowspan; r++)
-        h += c.l.getHeight();
+        h += rowheights[r];
 
       if (h < c.l.getHeight())
         rowheights[c.row+c.rowspan-1] += c.l.getHeight()-h;
