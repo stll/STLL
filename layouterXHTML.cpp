@@ -611,6 +611,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
       a.inlay = std::make_shared<textLayout_c>(boxIt(i, rules, rectangleShape_c(10000), 0,
                                                      layoutXML_IMG, pugi::xml_node(), pugi::xml_node()));
       a.baseline_shift = 0;
+      a.shadows = evalShadows(rules.getValue(xml, "text-shadow"));
 
       // if we want underlines, we add the font so that the layouter
       // can find the position of the underline

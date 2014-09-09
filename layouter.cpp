@@ -38,7 +38,7 @@ namespace STLL {
 typedef struct
 {
   // the commands to output this run
-  std::vector<textLayout_c::commandData> run;
+  std::vector<std::pair<size_t, textLayout_c::commandData>> run;
 
   // the advance information of this run
   int dx, dy;
@@ -94,6 +94,9 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
   // Get our harfbuzz font structs
   std::map<const std::shared_ptr<fontFace_c>, hb_font_t *> hb_ft_fonts;
 
+  // also get the maximal shadow numbers, so that we know how many layers there are
+  size_t normalLayer = 0;
+
   for (size_t i = 0; i < txt32.length(); i++)
   {
     auto a = attr.get(i);
@@ -102,6 +105,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     {
       hb_ft_fonts[a.font] = hb_ft_font_create(a.font->getFace(), NULL);
     }
+
+    normalLayer = std::max(normalLayer, attr.get(i).shadows.size());
   }
 
   // Create a buffer for harfbuzz to use
@@ -224,7 +229,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           in.y -= (run.ascender-1);
           in.x += run.dx;
 
-          run.run.push_back(in);
+          run.run.push_back(std::make_pair(normalLayer, in));
         }
 
         if (a.flags & codepointAttributes::FL_UNDERLINE)
@@ -236,9 +241,23 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2)/64);
           g.w = a.inlay->getRight();
           g.h = std::max(1, a.font->getUnderlineThickness()/64);
+
+          for (size_t j = 0; j < a.shadows.size(); j++)
+          {
+            g.x += a.shadows[j].dx;
+            g.y += a.shadows[j].dy;
+
+            g.c = a.shadows[j].c;
+
+            run.run.push_back(std::make_pair(j, g));
+
+            g.x -= a.shadows[j].dx;
+            g.y -= a.shadows[j].dy;
+          }
+
           g.c = a.c;
 
-          run.run.push_back(g);
+          run.run.push_back(std::make_pair(normalLayer, g));
         }
 
         run.dx += a.inlay->getRight();
@@ -262,7 +281,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
           g.c = attr.get(runstart).shadows[j].c;
 
-          run.run.push_back(g);
+          run.run.push_back(std::make_pair(j, g));
 
           g.x -= attr.get(runstart).shadows[j].dx;
           g.y -= attr.get(runstart).shadows[j].dy;
@@ -273,16 +292,32 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
         g.c = a.c;
 
-        run.run.push_back(g);
+        run.run.push_back(std::make_pair(normalLayer, g));
 
         if (a.flags & codepointAttributes::FL_UNDERLINE)
         {
           g.command = textLayout_c::commandData::CMD_RECT;
-          g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2)/64);
-          g.w = glyph_pos[j].x_advance/64+1;
           g.h = std::max(1, a.font->getUnderlineThickness()/64);
+          g.w = glyph_pos[j].x_advance/64+1;
 
-          run.run.push_back(g);
+          for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
+          {
+            g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2)/64);
+
+            g.x += attr.get(runstart).shadows[j].dx;
+            g.y += attr.get(runstart).shadows[j].dy;
+
+            g.c = attr.get(runstart).shadows[j].c;
+
+            run.run.push_back(std::make_pair(j, g));
+
+            g.x -= attr.get(runstart).shadows[j].dx;
+            g.y -= attr.get(runstart).shadows[j].dy;
+          }
+
+          g.command = textLayout_c::commandData::CMD_RECT;
+          g.c = a.c;
+          run.run.push_back(std::make_pair(normalLayer, g));
         }
       }
     }
@@ -502,34 +537,60 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
 
     // go down to the baseline
     ypos += curAscend;
-    numSpace = 0;
 
-    // output runs
+    // find the number of layers that we need to output
+    size_t maxlayer = 0;
     for (size_t i = runstart; i < spos; i++)
+      for (auto & r : runs[runorder[i]].run)
+        maxlayer = std::max(maxlayer, r.first+1);
+
+    for (uint32_t layer = 0; layer < maxlayer; layer++)
     {
-      if (!runs[runorder[i]].shy || i+1 == spos)
+      int32_t xpos2 = xpos;
+      numSpace = 0;
+
+      // output runs of current layer
+      for (size_t i = runstart; i < spos; i++)
       {
-        // output only non-space runs
-        if (!runs[runorder[i]].space)
-          l.addCommandVector(runs[runorder[i]].run, xpos+spaceadder*numSpace, ypos);
-        else
+        if (!runs[runorder[i]].shy || i+1 == spos)
         {
-          // in space runs, there may be an rectangular command that represents
-          // the underline, make that unterline longer by spaceadder
-          for (size_t j = 0; j < runs[runorder[i]].run.size(); j++)
-            if (runs[runorder[i]].run[j].command == textLayout_c::commandData::CMD_RECT)
+          // output only non-space runs
+          if (!runs[runorder[i]].space)
+          {
+            for (auto & cc : runs[runorder[i]].run)
             {
-               runs[runorder[i]].run[j].w+= spaceadder;
+              if (cc.first == layer)
+              {
+                cc.second.x += xpos2+spaceadder*numSpace;
+                cc.second.y += ypos;
+                l.addCommand(cc.second);
+              }
             }
+          }
+          else
+          {
+            // in space runs, there may be an rectangular command that represents
+            // the underline, make that underline longer by spaceadder
+            for (auto & cc : runs[runorder[i]].run)
+            {
+              if (   (cc.first == layer)
+                  && (cc.second.command == textLayout_c::commandData::CMD_RECT)
+                 )
+              {
+                cc.second.w+= spaceadder;
+                cc.second.x += xpos2+spaceadder*numSpace;
+                cc.second.y += ypos;
+                l.addCommand(cc.second);
+              }
+            }
+          }
 
-          l.addCommandVector(runs[runorder[i]].run, xpos+spaceadder*numSpace, ypos);
+          // count the spaces
+          if (runs[runorder[i]].space) numSpace++;
+
+          // advance the x-position
+          xpos2 += runs[runorder[i]].dx;
         }
-
-        // count the spaces
-        if (runs[runorder[i]].space) numSpace++;
-
-        // advance the x-position
-        xpos += runs[runorder[i]].dx;
       }
     }
 
