@@ -793,6 +793,8 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
   vector2d<pugi::xml_node> cellarray;
   uint32_t row = 0;
   bool col = false;
+  bool rtl = (rules.getValue(xml, "direction") == "rtl");
+  int left = rtl ? 1 : -1;
 
   // collect all cells of the table
   for (const auto & i : xml)
@@ -852,13 +854,11 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
     }
   }
 
-  // TODO reorder columns according to direction
-
   // make cellarray contain one extra row and column to get the neighbors easily
   cellarray.rectangularize();
 
   // calculate the start of each columns
-  colStart.push_back(shape.getLeft(ystart, ystart));
+  colStart.push_back(0);
   for (size_t i = 0; i < widths.size(); i++)
     colStart.push_back(*colStart.rbegin() + widths[i]);
 
@@ -867,7 +867,7 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
   for (auto & c : cells)
   {
     c.l = boxIt(c.xml, rules, rectangleShape_c(colStart[c.col+c.colspan]-colStart[c.col]),
-                0, layoutXML_P, cellarray.get(c.col+1, c.row), cellarray.get(c.col, c.row+1),
+                0, layoutXML_P, cellarray.get(c.col+1, c.row), cellarray.get(c.col+(1+left)*c.colspan, c.row+1),
                 rules.getValue(xml, "border-collapse") == "collapse");
   }
 
@@ -909,7 +909,10 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
   int width = *colStart.rbegin();
 
   // place table into the center... TODO we may not always want to do that
-  int xindent = (shape.getLeft(ystart, ystart) + shape.getRight(ystart, ystart) - width - shape.getLeft(ystart, ystart)) / 2;
+  int xindent = 0;
+
+  xindent = shape.getLeft(ystart, ystart) + (shape.getRight(ystart, ystart) - shape.getLeft(ystart, ystart) - width) / 2 ;
+
   if (xindent < 0) xindent = 0;
 
   // layout the table
@@ -930,10 +933,17 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
 
     if (rh != c.l.getHeight())
       c.l = boxIt(c.xml, rules, rectangleShape_c(colStart[c.col+c.colspan]-colStart[c.col]),
-                  0, layoutXML_P, cellarray.get(c.col+1, c.row), cellarray.get(c.col, c.row+1),
+                  0, layoutXML_P, cellarray.get(c.col+1, c.row), cellarray.get(c.col+(1+left)*c.colspan, c.row+1),
                   rules.getValue(xml, "border-collapse") == "collapse", rh);
 
-    l.addCommandVector(c.l.data, colStart[c.col]+xindent, ystart);
+    if (rtl)
+    {
+      l.addCommandVector(c.l.data, xindent+*colStart.rbegin()-colStart[1]+colStart[0]-colStart[c.col+c.colspan-1], ystart);
+    }
+    else
+    {
+      l.addCommandVector(c.l.data, colStart[c.col]+xindent, ystart);
+    }
   }
 
   l.setHeight(ystart+rowheights[row]);
