@@ -120,6 +120,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
            && (embedding_levels[runstart] == embedding_levels[spos])
            && (attr.get(runstart).lang == attr.get(spos).lang)
            && (attr.get(runstart).font == attr.get(spos).font)
+           && (attr.get(runstart).baseline_shift == attr.get(spos).baseline_shift)
            && (!attr.get(spos).inlay)
            && (   (linebreaks[spos-1] == LINEBREAK_NOBREAK)
                || (linebreaks[spos-1] == LINEBREAK_INSIDEACHAR)
@@ -196,13 +197,13 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     run.font = attr.get(runstart).font;
     if (attr.get(runstart).inlay)
     {
-      run.ascender = attr.get(runstart).h_above;
+      run.ascender = attr.get(runstart).inlay->getHeight()+attr.get(runstart).baseline_shift;
       run.descender = attr.get(runstart).inlay->getHeight()-run.ascender;
     }
     else
     {
-      run.ascender = run.font->getAscender()/64;
-      run.descender = run.font->getDescender()/64;
+      run.ascender = run.font->getAscender()/64+attr.get(runstart).baseline_shift;
+      run.descender = run.font->getDescender()/64+attr.get(runstart).baseline_shift;
     }
 #ifdef _DEBUG_
     run.text = txt32.substr(runstart, spos-runstart);
@@ -252,7 +253,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         g.font = attr.get(runstart).font;
 
         g.x = run.dx + (glyph_pos[j].x_offset/64);
-        g.y = run.dy - (glyph_pos[j].y_offset/64);
+        g.y = run.dy - (glyph_pos[j].y_offset/64)-attr.get(runstart).baseline_shift;
 
         for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
         {

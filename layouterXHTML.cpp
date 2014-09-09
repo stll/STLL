@@ -543,7 +543,7 @@ static textLayout_c layoutXML_IMG(const pugi::xml_node & xml, const textStyleShe
 }
 
 static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & rules, std::u32string & txt,
-               attributeIndex_c & attr)
+               attributeIndex_c & attr, int32_t baseline = 0)
 {
   for (const auto & i : xml)
   {
@@ -568,6 +568,8 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
       }
       a.shadows = evalShadows(rules.getValue(xml, "text-shadow"));
 
+      a.baseline_shift = baseline;
+
       attr.set(s, txt.length()-1, a);
     }
     else if (   (i.type() == pugi::node_element)
@@ -577,6 +579,22 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
             )
     {
       layoutXML_text(i, rules, txt, attr);
+    }
+    else if (   (i.type() == pugi::node_element)
+             && (std::string("sub") == i.name())
+            )
+    {
+      auto font = getFontForNode(i, rules);
+
+      layoutXML_text(i, rules, txt, attr, baseline-font->getAscender()/128);
+    }
+    else if (   (i.type() == pugi::node_element)
+             && (std::string("sup") == i.name())
+            )
+    {
+      auto font = getFontForNode(xml, rules);
+
+      layoutXML_text(i, rules, txt, attr, baseline+font->getAscender()/128);
     }
     else if ((i.type() == pugi::node_element) && (std::string("br") == i.name()))
     {
@@ -592,7 +610,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
       codepointAttributes a;
       a.inlay = std::make_shared<textLayout_c>(boxIt(i, rules, rectangleShape_c(10000), 0,
                                                      layoutXML_IMG, pugi::xml_node(), pugi::xml_node()));
-      a.h_above = a.inlay->getHeight();
+      a.baseline_shift = 0;
 
       // if we want underlines, we add the font so that the layouter
       // can find the position of the underline

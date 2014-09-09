@@ -244,20 +244,22 @@ class codepointAttributes
   /// how the image interacts with line breaks depends on the character that is given
   /// as the placeholder. Linebreaks are done as if there was the given placeholder
   /// character and not the image
-  /// the vertial alignment is controled by h_above and h_below. The image will have
-  /// a height of h_above+h_below
+  /// the vertial alignment is controlled by baseline_shift, the usual behavior is
+  /// that the inlay is ON the baseline.
   std::shared_ptr<textLayout_c> inlay;
 
-  uint32_t h_above;  ///< how much of the inlay is supposed to go above the base line
+  /// do you want to move the baseline of this character or inlay relative to the
+  /// baseline of the line? A positive value means to move it up
+  int32_t baseline_shift;
 
-  codepointAttributes(void) : font(0), lang(""), flags(0), inlay(0), h_above(0) { }
+  codepointAttributes(void) : font(0), lang(""), flags(0), inlay(0), baseline_shift(0) { }
 
   bool operator==(const codepointAttributes & rhs) const
   {
     return c == rhs.c && font == rhs.font && lang == rhs.lang
       && flags == rhs.flags && shadows.size() && rhs.shadows.size()
       && std::equal(shadows.begin(), shadows.end(), rhs.shadows.begin())
-      && inlay == rhs.inlay && h_above == rhs.h_above;
+      && inlay == rhs.inlay && baseline_shift == rhs.baseline_shift;
   }
 
   codepointAttributes operator += (const codepointAttributes & rhs)
@@ -269,7 +271,7 @@ class codepointAttributes
     flags = rhs.flags;
     shadows = rhs.shadows;
     inlay = rhs.inlay;
-    h_above = rhs.h_above;
+    baseline_shift = rhs.baseline_shift;
 
     return *this;
   }
