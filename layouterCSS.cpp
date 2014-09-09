@@ -109,7 +109,7 @@ static bool isInheriting(const std::string & attribute)
   if (attribute == "border-bottom-color") return false;
   if (attribute == "border-color") return false;
   if (attribute == "background-color") return false;
-  if (attribute == "text-decoration") return false;
+  if (attribute == "text-decoration") return true;
   if (attribute == "text-shadow") return true;
   if (attribute == "width") return false;
   if (attribute == "border-collapse") return true;
