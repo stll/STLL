@@ -28,6 +28,9 @@
  *  \brief this file contains just a little helper class for a 4-value color
  */
 
+/** \brief a little class representing an rgba colour value, an a value of 255 is
+ *  assumed to be opaque
+ */
 namespace STLL {
 
 class color_c
@@ -37,20 +40,26 @@ class color_c
 
   public:
 
+    /** default constructor, transparent and black colour */
     color_c(void) : val{0, 0, 0, 0} {}
+
+    /** constructor for an rgb opaque or rgba colour */
     color_c(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) : val{r, g, b, a} {}
 
-    uint8_t r(void) const { return val[0]; }
-    uint8_t g(void) const { return val[1]; }
-    uint8_t b(void) const { return val[2]; }
-    uint8_t a(void) const { return val[3]; }
 
+    uint8_t r(void) const { return val[0]; } ///< get the r value of the colour
+    uint8_t g(void) const { return val[1]; } ///< get the g value of the colour
+    uint8_t b(void) const { return val[2]; } ///< get the b value of the colour
+    uint8_t a(void) const { return val[3]; } ///< get the a value of the colour
+
+    /** comparison operator */
     bool operator== (const color_c & rhs) const
     {
       return (val[0] == rhs.val[0]) && (val[1] == rhs.val[1]) &&
              (val[2] == rhs.val[2]) && (val[3] == rhs.val[3]);
     }
 
+    /** assignment operator */
     void operator= (const color_c & rhs)
     {
       val[0] = rhs.val[0];
