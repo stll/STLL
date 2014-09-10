@@ -746,17 +746,16 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleShee
       layoutProperties prop;
       prop.indent = 0;
       prop.ltr = true;
+      prop.align = layoutProperties::ALG_CENTER;
 
       if (direction == "ltr")
       {
-        prop.align = layoutProperties::ALG_CENTER;
         l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
                                  stripLeftShape_c(shape, padding, padding+listIndent), prop, y+padding));
         l.append(boxIt(i, rules, indentShape_c(shape, listIndent, 0), y, layoutXML_P, i.previous_sibling(), pugi::xml_node()));
       }
       else
       {
-        prop.align = layoutProperties::ALG_CENTER;
         l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
                                  stripRightShape_c(shape, padding+listIndent, padding), prop, y+padding));
         l.append(boxIt(i, rules, indentShape_c(shape, 0, listIndent), y, layoutXML_P, i.previous_sibling(), pugi::xml_node()));
