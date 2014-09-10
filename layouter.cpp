@@ -299,11 +299,10 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           g.command = textLayout_c::commandData::CMD_RECT;
           g.h = std::max(1, a.font->getUnderlineThickness()/64);
           g.w = glyph_pos[j].x_advance/64+1;
+          g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2)/64);
 
           for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
           {
-            g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2)/64);
-
             g.x += attr.get(runstart).shadows[j].dx;
             g.y += attr.get(runstart).shadows[j].dy;
 
