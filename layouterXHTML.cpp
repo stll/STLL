@@ -189,11 +189,18 @@ static void evalColor(const std::string & col, color_c & c)
     throw XhtmlException_c("only the # color scheme is supported and keyword transparent");
 }
 
+class szFunctor
+{
+  public:
+    virtual double get(void) = 0;
+};
+
+
 /** \brief evaluate size
  *  \param sz the size string from the CSS
  *  \return the resulting size in pixel
  */
-static double evalSize(const std::string & sz)
+static double evalSize(const std::string & sz, szFunctor * f = nullptr)
 {
   // right now we accept only pixel sizes
   size_t l = sz.length();
@@ -202,11 +209,36 @@ static double evalSize(const std::string & sz)
   {
     return atof(sz.c_str());
   }
+  else if (f && sz[l-1] == '%')
+  {
+    return f->get() * atof(sz.c_str()) / 100;
+  }
 
   throw XhtmlException_c("only pixel size format is supported");
 
   return 0;
 }
+
+class parentFunctor : public szFunctor
+{
+  private:
+    std::string tag;
+    pugi::xml_node node;
+    const textStyleSheet_c & rules;
+
+  public:
+    parentFunctor(const std::string & t, pugi::xml_node n, const textStyleSheet_c & r) :
+       tag(t), node(n), rules(r) {}
+
+    double get(void)
+    {
+      if (!node)
+        throw XhtmlException_c("no parent node to base a percent value on");
+
+      parentFunctor f(tag, node.parent(), rules);
+      return evalSize(rules.getValue(node, tag), &f);
+    }
+};
 
 static std::vector<codepointAttributes::shadow> evalShadows(const std::string & v)
 {
@@ -282,7 +314,9 @@ static std::shared_ptr<fontFace_c> getFontForNode(const pugi::xml_node & xml, co
   std::string fontStyle = rules.getValue(xml, "font-style");
   std::string fontVariant = rules.getValue(xml, "font-variant");
   std::string fontWeight = rules.getValue(xml, "font-weight");
-  double fontSize = evalSize(rules.getValue(xml, "font-size"));
+
+  parentFunctor fkt("font-size", xml.parent(), rules);
+  double fontSize = evalSize(rules.getValue(xml, "font-size"), &fkt);
 
   auto f = rules.findFamily(fontFamily)->getFont(64*fontSize, fontStyle, fontVariant, fontWeight);
 
