@@ -112,6 +112,10 @@ class textStyleSheet_c
 
     /** \brief add a rule to the stylesheet
      *
+     * The rule will be checked as much as possible against syntactic and semantic
+     * Problems, when a problem is detected (e.g. invalid values) the XhtmlException_c
+     * is thrown.
+     *
      * \param sel The CSS selector (see \ref css_sec for supported selectors)
      * \param attr The attribute this rule applies to (see \ref css_sec for supported attributes)
      * \param val The value for the attribute

@@ -201,6 +201,200 @@ static bool isValidAttribute(const std::string & attribute)
   return false;
 }
 
+static bool isHexChar(char c)
+{
+  switch(c)
+  {
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+    case 'a':
+    case 'b':
+    case 'c':
+    case 'd':
+    case 'e':
+    case 'f':
+    case 'A':
+    case 'B':
+    case 'C':
+    case 'D':
+    case 'E':
+    case 'F':
+      return true;
+    default:
+      return false;
+  }
+}
+
+static bool isNumChar(char c)
+{
+  switch(c)
+  {
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+      return true;
+    default:
+      return false;
+  }
+}
+
+static void checkFormatColor(const std::string & value)
+{
+  if (value[0] == '#')
+  {
+    if (value.size() != 7)
+      throw XhtmlException_c(std::string("wrong length of #-colour value"));
+
+    for (size_t i = 1; i < 7; i++)
+      if (!isHexChar(value[i]))
+        throw XhtmlException_c(std::string("wrong character in #-colour value ") + value);
+  }
+  else if (value == "transparent")
+  {
+    // ok
+  }
+  else
+    throw XhtmlException_c(std::string("only #-colour syntax or the keyword 'transparent' is supported for colour"));
+
+}
+
+#define SZ_PX 1
+#define SZ_PERCENT 2
+
+static void checkFormatSize(const std::string & value, uint8_t formats)
+{
+  size_t l = value.length();
+  if ((formats & SZ_PX) && value[l-2] == 'p' && value[l-1] == 'x')
+  {
+    for (size_t i = 0; i < l-2; i++)
+      if (!isNumChar(value[i]))
+        throw XhtmlException_c(std::string("size format for pixel size not correct") + value);
+  }
+  else if ((formats & SZ_PERCENT) && value[l-1] == '%')
+  {
+    for (size_t i = 0; i < l-1; i++)
+      if (!isNumChar(value[i]))
+        throw XhtmlException_c(std::string("size format for percent size not correct") + value);
+  }
+  else
+  {
+    throw XhtmlException_c(std::string("size value not pixel or percent format") + value);
+  }
+}
+
+static void checkValues(const std::string & value, std::vector<std::string> vals, const std::string & attrib)
+{
+  if (std::find(vals.begin(), vals.end(), value) == vals.end())
+    throw XhtmlException_c(std::string("attribute ") + attrib + " has none of the alloved values " + value);
+}
+
+static void checkShadowFormat(const std::string & value)
+{
+  uint8_t state = 0;
+
+  for (size_t i = 0; i < value.size(); i++)
+  {
+    switch (value[i])
+    {
+      case '-':
+        if      (state == 0)                 state = 1;
+        else if (state == 4)                 state = 5;
+        else                                 state = 0xff;        break;
+      case '0': case '1': case '2': case '3': case '4':
+      case '5': case '6': case '7': case '8': case '9':
+        if      (state == 0 || state == 1 || state == 2)   state = 2;
+        else if (state == 4 || state == 5 || state == 6)   state = 6;
+        else if (state >= 9 && state <= 14)  state++;
+        else                                 state = 0xff;        break;
+      case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
+      case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
+        if      (state >= 9 && state <= 14)  state++;
+        else                                 state = 0xff;        break;
+      case ' ':
+        if      (state == 0)                 state = 0;
+        else if (state == 4)                 state = 4;
+        else if (state == 8)                 state = 8;
+        else if (state == 15)                state = 15;
+        else                                 state = 0xff;        break;
+      case 'p':
+        if      (state == 2)                 state = 3;
+        else if (state == 6)                 state = 7;
+        else                                 state = 0xff;        break;
+      case 'x':
+        if      (state == 3)                 state = 4;
+        else if (state == 7)                 state = 8;
+        else                                 state = 0xff;        break;
+      case '#':
+        if      (state == 8)                 state = 9;
+        else                                 state = 0xff;        break;
+      case ',':
+        if      (state == 15)                state = 0;
+        else                                 state = 0xff;        break;
+      default:                               state = 0xff;        break;
+    }
+
+    if (state == 0xff)
+      throw XhtmlException_c(std::string("format for shadow string not correct ") + value);
+  }
+
+  if (value != "" && state != 15)
+    throw XhtmlException_c(std::string("format for shadow string not correct: no proper end ") + value);
+}
+
+static void checkValueFormat(const std::string & attribute, const std::string & value)
+{
+  if (attribute == "color") checkFormatColor(value);
+  if (attribute == "font-family") {} // no restrictions
+  if (attribute == "font-style") {} // no restrictions
+  if (attribute == "font-size") checkFormatSize(value, SZ_PX + SZ_PERCENT);
+  if (attribute == "font-variant") {} // no restrictions
+  if (attribute == "font-weight") {} // no restrictions
+  if (attribute == "padding") checkFormatSize(value, SZ_PX);
+  if (attribute == "padding-left") checkFormatSize(value, SZ_PX);
+  if (attribute == "padding-right") checkFormatSize(value, SZ_PX);
+  if (attribute == "padding-top") checkFormatSize(value, SZ_PX);
+  if (attribute == "padding-bottom") checkFormatSize(value, SZ_PX);
+  if (attribute == "margin") checkFormatSize(value, SZ_PX);
+  if (attribute == "margin-left") checkFormatSize(value, SZ_PX);
+  if (attribute == "margin-right") checkFormatSize(value, SZ_PX);
+  if (attribute == "margin-top") checkFormatSize(value, SZ_PX);
+  if (attribute == "margin-bottom") checkFormatSize(value, SZ_PX);
+  if (attribute == "text-align") checkValues(value, {"left", "right", "center", "justify"}, "text-align");
+  if (attribute == "text-align-last") checkValues(value, {"left", "right", ""}, "text-align-last");
+  if (attribute == "text-indent") checkFormatSize(value, SZ_PX);
+  if (attribute == "direction") checkValues(value, {"ltr", "rtl"}, "direction");
+  if (attribute == "border-width") checkFormatSize(value, SZ_PX);
+  if (attribute == "border-left-width") checkFormatSize(value, SZ_PX);
+  if (attribute == "border-right-width") checkFormatSize(value, SZ_PX);
+  if (attribute == "border-top-width") checkFormatSize(value, SZ_PX);
+  if (attribute == "border-bottom-width")checkFormatSize(value, SZ_PX);
+  if (attribute == "border-color") checkFormatColor(value);
+  if (attribute == "border-left-color") checkFormatColor(value);
+  if (attribute == "border-right-color") checkFormatColor(value);
+  if (attribute == "border-top-color") checkFormatColor(value);
+  if (attribute == "border-bottom-color") checkFormatColor(value);
+  if (attribute == "background-color") checkFormatColor(value);
+  if (attribute == "text-decoration") checkValues(value, {"underline", ""}, "text-decoration");
+  if (attribute == "text-shadow") checkShadowFormat(value);
+  if (attribute == "width") checkFormatSize(value, SZ_PX);
+  if (attribute == "border-collapse") checkValues(value, {"collapse", "separate"}, "border-collapse");
+}
+
 const std::string & textStyleSheet_c::getValue(pugi::xml_node node, const std::string & attribute) const
 {
   // go through all rules, check only the ones that give a value to the requested attribute
@@ -248,10 +442,59 @@ void textStyleSheet_c::font(const std::string& family, const fontResource_c & re
   i->second->addFont(res, style, variant, weight, stretch);
 }
 
+static void checkSelectorValidity(const std::string & sel)
+{
+  // valid attributes to select on
+  static std::vector<std::string> val_att { "lang" };
+  static std::vector<std::string> val_tag {
+    "p", "html", "body", "ul", "li", "img", "table", "th", "tr", "td",
+    "h1", "h2", "h3", "h4", "h5", "h6", "sub", "sup", "i", "p"
+  };
+
+  if (sel[0] == '.')
+  {
+    // class selector..
+    // TODO check valid format of class name
+  }
+  else if (sel.find_first_of('[') != sel.npos)
+  {
+    size_t st = sel.find_first_of('[');
+    size_t en = sel.find_first_of(']');
+    size_t mi = sel.find_first_of('=');
+
+    if (sel[mi-1] == '|')
+    {
+      std::string tag = sel.substr(0, st);
+      std::string att = sel.substr(st+1, mi-2-st);
+      std::string val = sel.substr(mi+1, en-mi-1);
+
+      if (std::find(val_att.begin(), val_att.end(), att) == val_att.end())
+        throw XhtmlException_c(std::string("attribute selector on invalid attribute ") + att);
+
+      if (std::find(val_tag.begin(), val_tag.end(), tag) == val_tag.end())
+        throw XhtmlException_c(std::string("attribute selector on invalid tag ") + tag);
+    }
+    else
+    {
+      throw XhtmlException_c(std::string("attribute selector selector only with |= syntax supported"));
+    }
+  }
+  else
+  {
+    // selection on tags
+    if (std::find(val_tag.begin(), val_tag.end(), sel) == val_tag.end())
+      throw XhtmlException_c(std::string("attribute selector on invalid tag ") + sel);
+  }
+}
+
 void textStyleSheet_c::addRule(const std::string sel, const std::string attr, const std::string val)
 {
+  checkSelectorValidity(sel);
+
   if (!isValidAttribute(attr))
     throw XhtmlException_c(std::string("attribute not supported: ") + attr);
+
+  checkValueFormat(attr, val);
 
   rule r;
   r.selector = sel;
