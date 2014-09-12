@@ -170,23 +170,16 @@ static uint8_t hex2byte(char c1, char c2)
  *  \param g green value of the color
  *  \param b blue value of the color
  */
-static void evalColor(const std::string & col, color_c & c)
+static color_c evalColor(const std::string & col)
 {
   if (col == "transparent")
   {
-    c = color_c();
-    return;
-  }
-
-  if (col.length() != 7)
-    throw XhtmlException_c("color string must be 7 characters long");
-
-  if (col[0] == '#')
-  {
-    c = color_c(hex2byte(col[1], col[2]), hex2byte(col[3], col[4]), hex2byte(col[5], col[6]));
+    return color_c();
   }
   else
-    throw XhtmlException_c("only the # color scheme is supported and keyword transparent");
+  {
+    return color_c(hex2byte(col[1], col[2]), hex2byte(col[3], col[4]), hex2byte(col[5], col[6]));
+  }
 }
 
 class szFunctor
@@ -269,7 +262,7 @@ static std::vector<codepointAttributes::shadow> evalShadows(const std::string & 
     while (v[spos] == ' ' && spos < v.length()) spos++;
     if (spos >= v.length()) throw XhtmlException_c("Format of shadow invalid");
 
-    evalColor(v.substr(spos, v.find(',', spos)-spos), sh.c);
+    sh.c = evalColor(v.substr(spos, v.find(',', spos)-spos));
 
     s.push_back(sh);
 
@@ -458,7 +451,7 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
     std::string color = rules.getValue(xml, "border-color");
     if (rules.getValue(xml, "border-top-color") != "") color = rules.getValue(xml, "border-top-color");
     if (color == "")                                   color = rules.getValue(xml, "color");
-    evalColor(color, c.c);
+    c.c = evalColor(color);
 
     if (c.c.a() != 0)
     {
@@ -475,7 +468,7 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
     std::string color = rules.getValue(xml, "border-color");
     if (rules.getValue(xml, "border-bottom-color") != "") color = rules.getValue(xml, "border-bottom-color");
     if (color == "")                                      color = rules.getValue(xml, "color");
-    evalColor(color, c.c);
+    c.c = evalColor(color);
 
     if (c.c.a() != 0)
     {
@@ -492,7 +485,7 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
     std::string color = rules.getValue(xml, "border-color");
     if (rules.getValue(xml, "border-right-color") != "") color = rules.getValue(xml, "border-right-color");
     if (color == "")                                     color = rules.getValue(xml, "color");
-    evalColor(color, c.c);
+    c.c = evalColor(color);
 
     if (c.c.a() != 0)
     {
@@ -509,7 +502,7 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
     std::string color = rules.getValue(xml, "border-color");
     if (rules.getValue(xml, "border-left-color") != "") color = rules.getValue(xml, "border-left-color");
     if (color == "")                                    color = rules.getValue(xml, "color");
-    evalColor(color, c.c);
+    c.c = evalColor(color);
 
     if (c.c.a() != 0)
     {
@@ -521,7 +514,7 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
     }
   }
 
-  evalColor(rules.getValue(xml, "background-color"), c.c);
+  c.c = evalColor(rules.getValue(xml, "background-color"));
 
   if (c.c.a() != 0)
   {
@@ -592,7 +585,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
 
       codepointAttributes a;
 
-      evalColor(rules.getValue(xml, "color"), a.c);
+      a.c = evalColor(rules.getValue(xml, "color"));
       a.font = getFontForNode(xml, rules);
       a.lang = getHTMLAttribute(xml, "lang");
       a.flags = 0;
@@ -653,7 +646,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
       {
         a.flags |= codepointAttributes::FL_UNDERLINE;
         a.font = getFontForNode(xml, rules);
-        evalColor(rules.getValue(xml, "color"), a.c);
+        a.c = evalColor(rules.getValue(xml, "color"));
       }
       txt += U'\u00A0';
       attr.set(txt.length()-1, a);
@@ -732,7 +725,7 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleShee
       auto y = l.getHeight();
 
       codepointAttributes a;
-      evalColor(rules.getValue(xml, "color"), a.c);
+      a.c = evalColor(rules.getValue(xml, "color"));
       a.font = font;
       a.lang = "";
       a.flags = 0;
