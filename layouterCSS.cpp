@@ -462,6 +462,9 @@ static void checkSelectorValidity(const std::string & sel)
     size_t en = sel.find_first_of(']');
     size_t mi = sel.find_first_of('=');
 
+    if (en == sel.npos || mi == sel.npos)
+      throw XhtmlException_c(std::string("attribute selector on attribute with wrong syntax ") + sel);
+
     if (sel[mi-1] == '|')
     {
       std::string tag = sel.substr(0, st);
