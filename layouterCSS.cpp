@@ -313,37 +313,38 @@ static void checkShadowFormat(const std::string & value)
     {
       case '-':
         if      (state == 0)                 state = 1;
-        else if (state == 4)                 state = 5;
+        else if (state == 5)                 state = 6;
         else                                 state = 0xff;        break;
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
         if      (state == 0 || state == 1 || state == 2)   state = 2;
-        else if (state == 4 || state == 5 || state == 6)   state = 6;
-        else if (state >= 9 && state <= 14)  state++;
+        else if (state == 5 || state == 6 || state == 7)   state = 7;
+        else if (state >= 11 && state <= 16) state++;
         else                                 state = 0xff;        break;
       case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
       case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-        if      (state >= 9 && state <= 14)  state++;
+        if      (state >= 11 && state <= 16)  state++;
         else                                 state = 0xff;        break;
       case ' ':
         if      (state == 0)                 state = 0;
-        else if (state == 4)                 state = 4;
-        else if (state == 8)                 state = 8;
+        else if (state == 4 || state == 5)   state = 5;
+        else if (state == 9 || state == 10)  state = 10;
         else if (state == 15)                state = 15;
+        else if (state == 16)                state = 16;
         else                                 state = 0xff;        break;
       case 'p':
         if      (state == 2)                 state = 3;
-        else if (state == 6)                 state = 7;
+        else if (state == 7)                 state = 8;
         else                                 state = 0xff;        break;
       case 'x':
         if      (state == 3)                 state = 4;
-        else if (state == 7)                 state = 8;
+        else if (state == 8)                 state = 9;
         else                                 state = 0xff;        break;
       case '#':
-        if      (state == 8)                 state = 9;
+        if      (state == 10)                state = 11;
         else                                 state = 0xff;        break;
       case ',':
-        if      (state == 15)                state = 0;
+        if      (state == 17)                state = 0;
         else                                 state = 0xff;        break;
       default:                               state = 0xff;        break;
     }
@@ -352,7 +353,7 @@ static void checkShadowFormat(const std::string & value)
       throw XhtmlException_c(std::string("format for shadow string not correct ") + value);
   }
 
-  if (value != "" && state != 15)
+  if (value != "" && state != 17)
     throw XhtmlException_c(std::string("format for shadow string not correct: no proper end ") + value);
 }
 
