@@ -866,7 +866,7 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
             throw XhtmlException_c("malformed 'span' attribute (" + getNodePath(j) + ")");
           }
 
-          uint32_t width = atoi(rules.getValue(j, "width").c_str());
+          uint32_t width = evalSize(rules.getValue(j, "width"));
 
           while (span > 0)
           {
