@@ -243,6 +243,22 @@ class fontCache_c
      */
     std::shared_ptr<fontFace_c> getFont(const fontResource_c & res, uint32_t size);
 
+    /** Get the font resource for a font inside the cache (or empty resource, if the
+     * font is not within
+     *
+     * \param f font to look for
+     * \return the resource that was used to create the font
+     */
+    fontResource_c getFontResource(std::shared_ptr<fontFace_c> f) const;
+
+    /** Get the font size for a font inside the cache (or zero, if the
+     * font is not within
+     *
+     * \param f font to look for
+     * \return the size used to create the font
+     */
+    uint32_t getFontSize(std::shared_ptr<fontFace_c> f) const;
+
   private:
 
     class fontFaceParameter_c

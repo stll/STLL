@@ -199,4 +199,22 @@ fontResource_c::fontResource_c(std::pair<std::shared_ptr<uint8_t>, size_t> data,
   pathname = 0;
 }
 
+fontResource_c fontCache_c::getFontResource(std::shared_ptr<fontFace_c> f) const
+{
+  for (const auto a : fonts)
+    if (a.second.lock() == f)
+      return a.first.res;
+
+  return fontResource_c();
+}
+
+uint32_t fontCache_c::getFontSize(std::shared_ptr<fontFace_c> f) const
+{
+  for (const auto a : fonts)
+    if (a.second.lock() == f)
+      return a.first.size;
+
+  return 0;
+}
+
 }
