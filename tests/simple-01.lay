@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<fonts>
+	<font file="/usr/share/fonts/freefont/FreeSans.ttf" size="1024" />
+</fonts>
+<commands>
+	<glyph x="0" y="14" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
+	<glyph x="10" y="14" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" />
+	<glyph x="18" y="14" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" />
+	<glyph x="25" y="14" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" />
+	<glyph x="33" y="14" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
+	<glyph x="43" y="14" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" />
+	<glyph x="51" y="14" glyphIndex="91" font="0" r="255" g="255" b="255" a="255" />
+	<glyph x="58" y="14" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" />
+</commands>
