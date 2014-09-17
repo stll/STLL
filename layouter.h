@@ -308,7 +308,7 @@ class attributeIndex_c
       attr += std::make_pair(boost::icl::interval<size_t>::closed(0, SIZE_MAX), a);
     }
 
-    /** \brief set attributes for a singe of indices
+    /** \brief set attributes for a single indices
      *  \param i index that will have the attribute
      *  \param a the attribute
      */
