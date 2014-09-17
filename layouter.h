@@ -137,6 +137,8 @@ class textLayout_c
         data.push_back(a);
 
       height = std::max(height, l.height);
+      left = std::min(left, l.left);
+      right = std::max(right, l.right);
     }
 
     /** \brief move assignment
@@ -145,6 +147,8 @@ class textLayout_c
     {
       data.swap(l.data);
       height = l.height;
+      left = l.left;
+      right = l.right;
     }
 
     /** \brief copy assignment
@@ -153,13 +157,15 @@ class textLayout_c
     {
       data = l.data;
       height = l.height;
+      left = l.left;
+      right = l.right;
     }
 
     ~textLayout_c(void) { }
 
     /** \brief create empty layout
      */
-    textLayout_c(void) : height(0) { }
+    textLayout_c(void) : height(0), left(0), right(0) { }
 
     /** \brief copy constructor
      */
