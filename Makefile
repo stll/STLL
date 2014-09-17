@@ -25,13 +25,16 @@ LIBS=\
 # so as not to have to use LD_LIBRARY_PATH when prefix is custom
 LDFLAGS=-Wl,-rpath -Wl,$(PREFIX)/lib
 
-all: test main
+all: main viewer test
 
-main: main.o layouter.o layouterSDL.o layouterFont.o utf-8.o layouterCSS.o layouterXHTML.o
-	$(CC) -o main main.o layouter.o layouterSDL.o layouterFont.o utf-8.o layouterCSS.o layouterXHTML.o $(LIBS)
+main: main.o layouter.o layouterSDL.o layouterFont.o utf-8.o layouterCSS.o layouterXHTML.o layouterXMLSaveLoad.o
+	$(CC) -o main main.o layouter.o layouterSDL.o layouterFont.o utf-8.o layouterCSS.o layouterXHTML.o layouterXMLSaveLoad.o $(LIBS)
 
-test: test.o layouter.o layouterSDL.o layouterFont.o utf-8.o layouterCSS.o layouterXHTML.o
-	$(CC) -o test test.o layouter.o layouterSDL.o layouterFont.o utf-8.o layouterCSS.o layouterXHTML.o $(LIBS) -lboost_unit_test_framework
+viewer: viewer.o layouter.o layouterSDL.o layouterFont.o utf-8.o layouterCSS.o layouterXHTML.o layouterXMLSaveLoad.o
+	$(CC) -o viewer viewer.o layouter.o layouterSDL.o layouterFont.o utf-8.o layouterCSS.o layouterXHTML.o layouterXMLSaveLoad.o $(LIBS)
+
+test: test.o layouter.o layouterSDL.o layouterFont.o utf-8.o layouterCSS.o layouterXHTML.o layouterXMLSaveLoad.o
+	$(CC) -o test test.o layouter.o layouterFont.o utf-8.o layouterCSS.o layouterXHTML.o layouterXMLSaveLoad.o $(LIBS) -lboost_unit_test_framework
 	rm -f *.gcov
 	rm -f *.gcda
 	./test

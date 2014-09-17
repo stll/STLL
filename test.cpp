@@ -26,9 +26,15 @@
 #include "layouterCSS.h"
 #include "layouterXHTML.h"
 #include "layouterFont.h"
+#include "layouterXMLSaveLoad.h"
 
-static bool compare(const STLL::textLayout_c & l, const pugi::xml_document & doc, std::shared_ptr<STLL::fontCache_c> c)
+#include <pugixml.hpp>
+
+static bool compare(const STLL::textLayout_c & l, const pugi::xml_node & doc, std::shared_ptr<STLL::fontCache_c> c)
 {
+  if (l.getHeight() != atoi(doc.attribute("height").value())) return false;
+  if (l.getLeft() != atoi(doc.attribute("left").value())) return false;
+  if (l.getRight() != atoi(doc.attribute("right").value())) return false;
 
   // get the fonts from the file
   auto fonts = doc.child("fonts");
@@ -78,58 +84,6 @@ static bool compare(const STLL::textLayout_c & l, const pugi::xml_document & doc
   return i == l.data.size();
 }
 
-static void layoutToXML(const STLL::textLayout_c & l, pugi::xml_document & doc, std::shared_ptr<STLL::fontCache_c> c)
-{
-  doc.reset();
-
-  // output fonts;
-  auto fonts = doc.append_child();
-  fonts.set_name("fonts");
-
-  std::vector<std::shared_ptr<STLL::fontFace_c>> found;
-
-  for (const auto & a : l.data)
-  {
-    if (std::find(found.begin(), found.end(), a.font) == found.end())
-    {
-      found.push_back(a.font);
-
-      auto fnt = fonts.append_child();
-      fnt.set_name("font");
-      fnt.append_attribute("file").set_value(c->getFontResource(a.font).pathname);
-      fnt.append_attribute("size").set_value(c->getFontSize(a.font));
-    }
-  }
-
-  // output commands
-  auto commands = doc.append_child();
-  commands.set_name("commands");
-
-  for (const auto & a : l.data)
-  {
-    switch (a.command)
-    {
-      case STLL::textLayout_c::commandData::CMD_GLYPH:
-        {
-          auto n = commands.append_child();
-          n.set_name("glyph");
-          n.append_attribute("x").set_value(a.x);
-          n.append_attribute("y").set_value(a.y);
-          n.append_attribute("glyphIndex").set_value(a.glyphIndex);
-          n.append_attribute("font").set_value((int)std::distance(found.begin(), std::find(found.begin(), found.end(), a.font)));
-          n.append_attribute("r").set_value(a.c.r());
-          n.append_attribute("g").set_value(a.c.g());
-          n.append_attribute("b").set_value(a.c.b());
-          n.append_attribute("a").set_value(a.c.a());
-        }
-        break;
-      case STLL::textLayout_c::commandData::CMD_RECT:
-        break;
-      case STLL::textLayout_c::commandData::CMD_IMAGE:
-        break;
-    }
-  }
-}
 
 static boost::test_tools::predicate_result layouts_identical(const  STLL::textLayout_c & l,
                                                              const std::string & file,
@@ -139,9 +93,10 @@ static boost::test_tools::predicate_result layouts_identical(const  STLL::textLa
 
   auto res = doc.load_file(file.c_str());
 
-  if (!res || !compare(l, doc, c))
+  if (!res || !compare(l, doc.child("layout"), c))
   {
-    layoutToXML(l, doc, c);
+    doc.reset();
+    saveLayoutToXML(l, doc, c);
     doc.save_file((file+"new").c_str());
 
     return false;
