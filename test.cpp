@@ -29,15 +29,16 @@
 
 static bool compare(const STLL::textLayout_c & l, const pugi::xml_document & doc, std::shared_ptr<STLL::fontCache_c> c)
 {
+  auto layout = doc.child("layout");
 
   // get the fonts from the file
-  auto fonts = doc.child("fonts");
+  auto fonts = layout.child("fonts");
   std::vector<std::pair<std::string, uint32_t>> found;
 
   for (const auto a : fonts.children())
     found.push_back(std::make_pair(a.attribute("file").value(), (uint32_t)atoi(a.attribute("size").value())));
 
-  auto commands = doc.child("commands");
+  auto commands = layout.child("commands");
 
   size_t i = 0;
 
@@ -81,9 +82,11 @@ static bool compare(const STLL::textLayout_c & l, const pugi::xml_document & doc
 static void layoutToXML(const STLL::textLayout_c & l, pugi::xml_document & doc, std::shared_ptr<STLL::fontCache_c> c)
 {
   doc.reset();
+  auto layout = doc.append_child();
+  layout.set_name("layout");
 
   // output fonts;
-  auto fonts = doc.append_child();
+  auto fonts = layout.append_child();
   fonts.set_name("fonts");
 
   std::vector<std::shared_ptr<STLL::fontFace_c>> found;
@@ -102,7 +105,7 @@ static void layoutToXML(const STLL::textLayout_c & l, pugi::xml_document & doc, 
   }
 
   // output commands
-  auto commands = doc.append_child();
+  auto commands = layout.append_child();
   commands.set_name("commands");
 
   for (const auto & a : l.data)
