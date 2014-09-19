@@ -46,7 +46,7 @@ target_link_libraries(stll PUBLIC
   ${SDL_LIBRARY}
 )
 
-add_executable(runtests test.cpp)
+add_executable(runtests runtest.cpp)
 target_compile_options(runtests PRIVATE -std=c++11)
 target_link_libraries(runtests PRIVATE stll ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 add_test(test1 runtests)
