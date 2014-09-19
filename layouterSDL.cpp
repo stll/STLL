@@ -112,7 +112,7 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
     {
       case textLayout_c::commandData::CMD_GLYPH:
 
-        span.pixels = (uint32_t *)(((uint8_t *) s->pixels) + (sy+i.y) * s->pitch) + (sx+i.x);
+        span.pixels = (uint32_t *)(((uint8_t *) s->pixels) + (sy+i.y/64) * s->pitch) + (sx+i.x/64);
         span.c = i.c;
 
         i.font->outlineRender(i.glyphIndex, &ftr_params);
@@ -121,10 +121,10 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
 
       case textLayout_c::commandData::CMD_RECT:
 
-        r.x = i.x+sx;
-        r.y = i.y+sy;
-        r.w = i.w;
-        r.h = i.h;
+        r.x = i.x/64+sx;
+        r.y = i.y/64+sy;
+        r.w = i.w/64;
+        r.h = i.h/64;
         SDL_FillRect(s, &r, SDL_MapRGBA(s->format, i.c.r(), i.c.g(), i.c.b(), i.c.a()));
         break;
 
@@ -132,8 +132,8 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
 
         // TODO this is just a placeholder for now
 
-        r.x = i.x+sx;
-        r.y = i.y+sy;
+        r.x = i.x/64+sx;
+        r.y = i.y/64+sy;
         r.w = 10;
         r.h = 10;
         SDL_FillRect(s, &r, SDL_MapRGBA(s->format, 255, 255, 255, SDL_ALPHA_OPAQUE));

@@ -84,11 +84,26 @@ static FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32,
   return max_level;
 }
 
+static int32_t roundToDivisible(int32_t r, int32_t d)
+{
+  if (d > 1)
+  {
+    int32_t a = r%d;
+
+    if (a > d/2)
+      return r+d-a;
+    else
+      return r+a;
+  }
+  return r;
+}
+
 // use harfbuzz to layout runs of text
 static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
                                            const attributeIndex_c & attr,
                                            const std::vector<FriBidiLevel> & embedding_levels,
-                                           const std::vector<char> & linebreaks
+                                           const std::vector<char> & linebreaks,
+                                           uint32_t round
                                           )
 {
   // Get our harfbuzz font structs
@@ -207,8 +222,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     }
     else
     {
-      run.ascender = run.font->getAscender()/64+attr.get(runstart).baseline_shift;
-      run.descender = run.font->getDescender()/64+attr.get(runstart).baseline_shift;
+      run.ascender = run.font->getAscender()+attr.get(runstart).baseline_shift;
+      run.descender = run.font->getDescender()+attr.get(runstart).baseline_shift;
     }
 #ifdef _DEBUG_
     run.text = txt32.substr(runstart, spos-runstart);
@@ -238,9 +253,9 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
           g.command = textLayout_c::commandData::CMD_RECT;
           g.x = run.dx;
-          g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2)/64);
+          g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2));
           g.w = a.inlay->getRight();
-          g.h = std::max(1, a.font->getUnderlineThickness()/64);
+          g.h = std::max(64, a.font->getUnderlineThickness());
 
           for (size_t j = 0; j < a.shadows.size(); j++)
           {
@@ -271,8 +286,11 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         g.glyphIndex = glyph_info[j].codepoint;
         g.font = attr.get(runstart).font;
 
-        g.x = run.dx + (glyph_pos[j].x_offset/64);
-        g.y = run.dy - (glyph_pos[j].y_offset/64)-attr.get(runstart).baseline_shift;
+        g.x = run.dx + (glyph_pos[j].x_offset);
+        g.y = run.dy - (glyph_pos[j].y_offset)-attr.get(runstart).baseline_shift;
+
+        g.x = roundToDivisible(g.x, round);
+        g.y = roundToDivisible(g.y, round);
 
         for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
         {
@@ -287,8 +305,11 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           g.y -= attr.get(runstart).shadows[j].dy;
         }
 
-        run.dx += glyph_pos[j].x_advance/64;
-        run.dy -= glyph_pos[j].y_advance/64;
+        run.dx += glyph_pos[j].x_advance;
+        run.dy -= glyph_pos[j].y_advance;
+
+        run.dx = roundToDivisible(run.dx, round);
+        run.dy = roundToDivisible(run.dy, round);
 
         g.c = a.c;
 
@@ -297,9 +318,9 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         if (a.flags & codepointAttributes::FL_UNDERLINE)
         {
           g.command = textLayout_c::commandData::CMD_RECT;
-          g.h = std::max(1, a.font->getUnderlineThickness()/64);
-          g.w = glyph_pos[j].x_advance/64+1;
-          g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2)/64);
+          g.h = std::max(64, a.font->getUnderlineThickness());
+          g.w = glyph_pos[j].x_advance+64;
+          g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2));
 
           for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
           {
@@ -576,7 +597,7 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
                   && (cc.second.command == textLayout_c::commandData::CMD_RECT)
                  )
               {
-                cc.second.w+= spaceadder;
+                cc.second.w += spaceadder;
                 cc.second.x += xpos2+spaceadder*numSpace;
                 cc.second.y += ypos;
                 l.addCommand(cc.second);
@@ -650,7 +671,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_
 
   // create runs of layout text. Each run is a cohesive set, e.g. a word with a single
   // font, ...
-  std::vector<runInfo> runs = createTextRuns(txt32, attr, embedding_levels, linebreaks);
+  std::vector<runInfo> runs = createTextRuns(txt32, attr, embedding_levels, linebreaks, prop.round);
 
   // layout the runs into lines
   return breakLines(runs, shape, max_level, prop, ystart);

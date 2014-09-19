@@ -183,29 +183,27 @@ class textLayout_c
     }
 
     /** \brief the height of the layout. This is supposed to be the vertical
-     *  space that this layout takes up
+     *  space that this layout takes up in 1/64th pixels
      */
     uint32_t getHeight(void) const { return height; }
 
-    /** \brief set the height
+    /** \brief set the height in 1/64th pixels
      */
     void setHeight(uint32_t h) { height = h; }
 
-    /** \brief the width of the layout. This is supposed to be the horizontal
-     *  space that this layout takes up
+    /** \brief get the left edge of the layout in 1/64th pixels
      */
     int32_t getLeft(void) const { return left; }
 
-    /** \brief set the width
+    /** \brief set the left edge  in 1/64th pixels
      */
     void setLeft(int32_t l) { left = l; }
 
-    /** \brief the width of the layout. This is supposed to be the horizontal
-     *  space that this layout takes up
+    /** \brief get the right edge of the layout in 1/64th pixels
      */
     int32_t getRight(void) const { return right; }
 
-    /** \brief set the width
+    /** \brief get the right edge in 1/64th pixels
      */
     void setRight(int32_t r) { right = r; }
 };
@@ -351,28 +349,28 @@ class shape_c
     /** \brief get the left edge
      *  \param top top limit of the area to get the edge for
      *  \param bottom bottom limit
-     *  \return the left edge usable for this section of the y-axis
+     *  \return the left edge usable for this section of the y-axis in 1/64th pixels
      */
     virtual int32_t getLeft(int32_t top, int32_t bottom) const = 0;
 
     /** \brief get the right edge
      *  \param top top limit of the area to get the edge for
      *  \param bottom bottom limit
-     *  \return the right edge usable for this section of the y-axis
+     *  \return the right edge usable for this section of the y-axis in 1/64th pixels
      */
     virtual int32_t getRight(int32_t top, int32_t bottom) const = 0;
 
     /** \brief get the left edge
      *  \param top top limit of the area to get the edge for
      *  \param bottom bottom limit
-     *  \return the left outer edge for this section of the y-axis
+     *  \return the left outer edge for this section of the y-axis in 1/64th pixels
      */
     virtual int32_t getLeft2(int32_t top, int32_t bottom) const = 0;
 
     /** \brief get the right edge
      *  \param top top limit of the area to get the edge for
      *  \param bottom bottom limit
-     *  \return the right outer edge for this section of the y-axis
+     *  \return the right outer edge for this section of the y-axis in 1/64th pixels
      */
     virtual int32_t getRight2(int32_t top, int32_t bottom) const = 0;
 };
@@ -387,7 +385,7 @@ class rectangleShape_c : public shape_c
 
   public:
     /** \brief construct the shape such that the area goes from 0 to width on the x-axis
-     *  \param width width of the rectangle
+     *  \param width width of the rectangle in 1/64th pixels
      */
     rectangleShape_c(int32_t width) : w(width) { }
 
@@ -412,6 +410,8 @@ typedef struct {
 
   bool ltr;            ///< is the base direction of the text left to right?
 
+  uint32_t round;      ///< round the position of glyphs to the nearest 1/round position
+
 } layoutProperties;
 
 
@@ -422,7 +422,7 @@ typedef struct {
  * \param shape the shape that the final result is supposed to have
  * \param prop some parameters that the line breaking algorithm needs to give the result the expected
  *             shape (center or justified, ...)
- * \param ystart the vertical starting point of your output, the baseline of the first line
+ * \param ystart the vertical starting point (in 1/64th pixels) of your output, the baseline of the first line
  *               of text will be shifted down from this position by the ascender of the line
  * \return the resulting layout
  */

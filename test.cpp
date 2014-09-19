@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE( Stylesheet_Resource_Tests )
 BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
 {
   STLL::textStyleSheet_c s;
-  STLL::rectangleShape_c r(200);
+  STLL::rectangleShape_c r(200*64);
 
   s.addRule("p", "font-size", "16px");
   s.font("sans", STLL::fontResource_c("/usr/share/fonts/freefont/FreeSans.ttf"));

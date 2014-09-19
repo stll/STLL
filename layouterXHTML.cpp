@@ -200,7 +200,7 @@ static double evalSize(const std::string & sz, szFunctor * f = nullptr)
 
   if (sz[l-2] == 'p' && sz[l-1] == 'x')
   {
-    return atof(sz.c_str());
+    return 64*atof(sz.c_str());
   }
   else if (f && sz[l-1] == '%')
   {
@@ -311,7 +311,7 @@ static std::shared_ptr<fontFace_c> getFontForNode(const pugi::xml_node & xml, co
   parentFunctor fkt("font-size", xml.parent(), rules);
   double fontSize = evalSize(rules.getValue(xml, "font-size"), &fkt);
 
-  auto f = rules.findFamily(fontFamily)->getFont(64*fontSize, fontStyle, fontVariant, fontWeight);
+  auto f = rules.findFamily(fontFamily)->getFont(fontSize, fontStyle, fontVariant, fontWeight);
 
   if (!f)
   {
@@ -376,7 +376,7 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
   int32_t borderwidth_top = 0;
   int32_t borderwidth_bottom = 0;
 
-  borderwidth_left = borderwidth_right = borderwidth_top =borderwidth_bottom = evalSize(rules.getValue(xml, "border-width"));
+  borderwidth_left = borderwidth_right = borderwidth_top = borderwidth_bottom = evalSize(rules.getValue(xml, "border-width"));
 
   if (rules.getValue(xml, "border-left-width") != "")   borderwidth_left   = evalSize(rules.getValue(xml, "border-left-width"));
   if (rules.getValue(xml, "border-right-width") != "")  borderwidth_right  = evalSize(rules.getValue(xml, "border-right-width"));
@@ -613,7 +613,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
     {
       auto font = getFontForNode(i, rules);
 
-      layoutXML_text(i, rules, txt, attr, baseline-font->getAscender()/128);
+      layoutXML_text(i, rules, txt, attr, baseline-font->getAscender()/2);
     }
     else if (   (i.type() == pugi::node_element)
              && (std::string("sup") == i.name())
@@ -621,7 +621,7 @@ static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & 
     {
       auto font = getFontForNode(xml, rules);
 
-      layoutXML_text(i, rules, txt, attr, baseline+font->getAscender()/128);
+      layoutXML_text(i, rules, txt, attr, baseline+font->getAscender()/2);
     }
     else if ((i.type() == pugi::node_element) && (std::string("br") == i.name()))
     {
@@ -703,6 +703,7 @@ static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet
 
   lprop.indent = evalSize(rules.getValue(xml, "text-indent"));
   lprop.ltr = rules.getValue(xml, "direction") == "ltr";
+  lprop.round = 3;
 
   return layoutParagraph(txt, attr, shape, lprop, ystart);
 }
@@ -732,7 +733,7 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleShee
       a.shadows = evalShadows(rules.getValue(xml, "text-shadow"));
 
       int32_t padding = evalSize(rules.getValue(i, "padding"));
-      int32_t listIndent = font->getAscender()/64;
+      int32_t listIndent = font->getAscender();
 
       auto direction = rules.getValue(xml, "direction");
 
