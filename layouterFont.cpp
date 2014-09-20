@@ -86,7 +86,20 @@ void fontFace_c::outlineRender(uint32_t idx, FT_Raster_Params* params)
 FT_Face freeTypeLibrary_c::newFace(const fontResource_c & res, uint32_t size)
 {
   FT_Face f;
-  if (FT_Open_Face(lib, &res, 0, &f))
+  FT_Open_Args a;
+  if (res.getDatasize() == 0) {
+      a.flags = FT_OPEN_PATHNAME;
+      a.pathname = (FT_String*)res.getDescription().c_str();  // TODO const correctness is not given
+      a.num_params = 0;
+      a.params = nullptr;
+  } else {
+      a.flags = FT_OPEN_MEMORY;
+      a.memory_base = res.getData().get();
+      a.memory_size = res.getDatasize();
+      a.num_params = 0;
+      a.params = nullptr;
+  }
+  if (FT_Open_Face(lib, &a, 0, &f))
   {
     throw FreetypeException_c(std::string("Could not open Font '") + res.getDescription() + "' maybe "
                               "file is spelled wrong or file is broken");
@@ -176,27 +189,6 @@ std::shared_ptr<fontFace_c> fontFamily_c::getFont(uint32_t size, const std::stri
   {
     return cache->getFont(i->second, size);
   }
-}
-
-fontResource_c::fontResource_c(const std::string& fname)
-{
-  flags = FT_OPEN_PATHNAME;
-  v = fname;
-  pathname = (FT_String*)v.c_str();  // TODO const correctness is not given
-
-  memory_base = 0;
-  memory_size = 0;
-}
-
-fontResource_c::fontResource_c(std::pair<std::shared_ptr<uint8_t>, size_t> data, const std::string& descr) : v(descr), dat(data.first)
-{
-  flags = FT_OPEN_MEMORY;
-
-  memory_base = data.first.get();
-  memory_size = data.second;
-
-  v = descr;
-  pathname = 0;
 }
 
 fontResource_c fontCache_c::getFontResource(std::shared_ptr<fontFace_c> f) const
