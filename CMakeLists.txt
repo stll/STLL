@@ -22,6 +22,7 @@ pkg_check_modules(FRIBIDI REQUIRED fribidi)
 find_library(LINEBREAK_LIBRARY NAMES linebreak)
 find_library(PUGIXML_LIBRARY NAMES pugixml)
 
+# STLL library
 set(stll_SOURCES
   layouter.cpp
   layouterCSS.cpp
@@ -52,11 +53,13 @@ target_link_libraries(stll PUBLIC
   ${SDL_LIBRARY}
 )
 
+# Tests
 add_executable(runtests runtests.cpp)
 target_compile_options(runtests PRIVATE -std=c++11)
 target_link_libraries(runtests PRIVATE stll ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 add_test(test1 runtests)
 
+# Example programs
 if(SDL_FOUND)
   add_executable(example example.cpp)
   target_compile_options(example PRIVATE -std=c++11)
