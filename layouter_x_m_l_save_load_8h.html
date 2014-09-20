@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.5"/>
-<title>STLL: layouterSDL.h File Reference</title>
+<title>STLL: layouterXMLSaveLoad.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -61,7 +61,7 @@
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('layouter_s_d_l_8h.html','');});
+$(document).ready(function(){initNavTree('layouter_x_m_l_save_load_8h.html','');});
 </script>
 <div id="doc-content">
 <div class="header">
@@ -69,14 +69,14 @@ $(document).ready(function(){initNavTree('layouter_s_d_l_8h.html','');});
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">layouterSDL.h File Reference</div>  </div>
+<div class="title">layouterXMLSaveLoad.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>SDL output driver.  
+<p>Module simple load and save functions to store a layout into an XML file.  
 <a href="#details">More...</a></p>
 
-<p><a href="layouter_s_d_l_8h_source.html">Go to the source code of this file.</a></p>
+<p><a href="layouter_x_m_l_save_load_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
@@ -86,16 +86,19 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:af81e2752c270c924d3bd1051966080a2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#af81e2752c270c924d3bd1051966080a2">STLL::showLayoutSDL</a> (const textLayout_c &amp;l, int sx, int sy, SDL_Surface *s)</td></tr>
-<tr class="memdesc:af81e2752c270c924d3bd1051966080a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">display a single layout  <a href="#af81e2752c270c924d3bd1051966080a2">More...</a><br/></td></tr>
-<tr class="separator:af81e2752c270c924d3bd1051966080a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f1846ef1e31f0cea6484992829f5da1"><td class="memItemLeft" align="right" valign="top">textLayout_c&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#a5f1846ef1e31f0cea6484992829f5da1">STLL::loadLayoutFromXML</a> (const pugi::xml_node &amp;doc, std::shared_ptr&lt; fontCache_c &gt; c)</td></tr>
+<tr class="memdesc:a5f1846ef1e31f0cea6484992829f5da1"><td class="mdescLeft">&#160;</td><td class="mdescRight">load a layout from a XML node, the node must point to the "layout" node to load  <a href="#a5f1846ef1e31f0cea6484992829f5da1">More...</a><br/></td></tr>
+<tr class="separator:a5f1846ef1e31f0cea6484992829f5da1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa809e90acd7d17703455fd69074b7c89"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#aa809e90acd7d17703455fd69074b7c89">STLL::saveLayoutToXML</a> (const textLayout_c &amp;l, pugi::xml_node &amp;doc, std::shared_ptr&lt; fontCache_c &gt; c)</td></tr>
+<tr class="memdesc:aa809e90acd7d17703455fd69074b7c89"><td class="mdescLeft">&#160;</td><td class="mdescRight">store the layout into the diven XML node. A new layout node is created and the date is inserted into that node  <a href="#aa809e90acd7d17703455fd69074b7c89">More...</a><br/></td></tr>
+<tr class="separator:aa809e90acd7d17703455fd69074b7c89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="layouter_s_d_l_8h.html">layouterSDL.h</a></li>
+    <li class="navelem"><a class="el" href="layouter_x_m_l_save_load_8h.html">layouterXMLSaveLoad.h</a></li>
     <li class="footer">Generated on Sat Sep 20 2014 15:45:11 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>

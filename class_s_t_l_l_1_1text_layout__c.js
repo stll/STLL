@@ -10,8 +10,12 @@ var class_s_t_l_l_1_1text_layout__c =
     [ "addCommandVector", "class_s_t_l_l_1_1text_layout__c.html#aafab1b2e7dd0a71d38623d3d32f4a4bb", null ],
     [ "append", "class_s_t_l_l_1_1text_layout__c.html#a5aa41bf9ef9ceb810e4fdaf591f12109", null ],
     [ "getHeight", "class_s_t_l_l_1_1text_layout__c.html#a461d1946b913f6d7d4ec1c469120cfa9", null ],
+    [ "getLeft", "class_s_t_l_l_1_1text_layout__c.html#a62466a40227936c35532bb1dfd5bbad5", null ],
+    [ "getRight", "class_s_t_l_l_1_1text_layout__c.html#a970090043af3e2f8f44d34ee367ecffb", null ],
     [ "operator=", "class_s_t_l_l_1_1text_layout__c.html#a3ef87c2d1661946cbc8d690086f429d9", null ],
     [ "operator=", "class_s_t_l_l_1_1text_layout__c.html#a88c8f4abff8b6aac8613ac0bf7f2b1f5", null ],
     [ "setHeight", "class_s_t_l_l_1_1text_layout__c.html#a65badea992e1885d29ad42a656c9b027", null ],
+    [ "setLeft", "class_s_t_l_l_1_1text_layout__c.html#a6a9f96ddd8ec79a4bd47187746836234", null ],
+    [ "setRight", "class_s_t_l_l_1_1text_layout__c.html#a6132e6848335451756e0b4b734e66f9c", null ],
     [ "data", "class_s_t_l_l_1_1text_layout__c.html#abad273c3d4df2cabea8e47935eb41487", null ]
 ];

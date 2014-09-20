@@ -96,6 +96,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad3067acf446a0fd30fa118c5e00dff37"><td class="memItemLeft" align="right" valign="top">virtual int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1shape__c.html#ad3067acf446a0fd30fa118c5e00dff37">getRight</a> (int32_t top, int32_t bottom) const =0</td></tr>
 <tr class="memdesc:ad3067acf446a0fd30fa118c5e00dff37"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the right edge  <a href="#ad3067acf446a0fd30fa118c5e00dff37">More...</a><br/></td></tr>
 <tr class="separator:ad3067acf446a0fd30fa118c5e00dff37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04697b8c4beea0ad67e54c252eb51e8a"><td class="memItemLeft" align="right" valign="top">virtual int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1shape__c.html#a04697b8c4beea0ad67e54c252eb51e8a">getLeft2</a> (int32_t top, int32_t bottom) const =0</td></tr>
+<tr class="memdesc:a04697b8c4beea0ad67e54c252eb51e8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the left edge  <a href="#a04697b8c4beea0ad67e54c252eb51e8a">More...</a><br/></td></tr>
+<tr class="separator:a04697b8c4beea0ad67e54c252eb51e8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d210ce2b247261c857159de67ae8fd1"><td class="memItemLeft" align="right" valign="top">virtual int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1shape__c.html#a1d210ce2b247261c857159de67ae8fd1">getRight2</a> (int32_t top, int32_t bottom) const =0</td></tr>
+<tr class="memdesc:a1d210ce2b247261c857159de67ae8fd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the right edge  <a href="#a1d210ce2b247261c857159de67ae8fd1">More...</a><br/></td></tr>
+<tr class="separator:a1d210ce2b247261c857159de67ae8fd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The layouting works line-wise, this class will give the left and right edge of the available space for a line of text. As the line has a vertical size the functions in this class will get the top and bottom of the y-area that the line is supposed to be in. The function then need to check where the left and right edges are for this area, e.g. they must take care that they return the smallest area. </p>
@@ -138,9 +144,53 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the left edge usable for this section of the y-axis </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the left edge usable for this section of the y-axis in 1/64th pixels </dd></dl>
 
 <p>Implemented in <a class="el" href="class_s_t_l_l_1_1rectangle_shape__c.html#a3065b971bf52c4208e4d23e78feb3ab1">STLL::rectangleShape_c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a04697b8c4beea0ad67e54c252eb51e8a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int32_t STLL::shape_c::getLeft2 </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>top</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>bottom</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">top</td><td>top limit of the area to get the edge for </td></tr>
+    <tr><td class="paramname">bottom</td><td>bottom limit </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the left outer edge for this section of the y-axis in 1/64th pixels </dd></dl>
+
+<p>Implemented in <a class="el" href="class_s_t_l_l_1_1rectangle_shape__c.html#a2c3263b903b3a3e5b4acb5ac10149513">STLL::rectangleShape_c</a>.</p>
 
 </div>
 </div>
@@ -182,9 +232,53 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the right edge usable for this section of the y-axis </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the right edge usable for this section of the y-axis in 1/64th pixels </dd></dl>
 
 <p>Implemented in <a class="el" href="class_s_t_l_l_1_1rectangle_shape__c.html#a56e104e97ea28149afa680d1e6a5ec0b">STLL::rectangleShape_c</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a1d210ce2b247261c857159de67ae8fd1"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual int32_t STLL::shape_c::getRight2 </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>top</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>bottom</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">top</td><td>top limit of the area to get the edge for </td></tr>
+    <tr><td class="paramname">bottom</td><td>bottom limit </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the right outer edge for this section of the y-axis in 1/64th pixels </dd></dl>
+
+<p>Implemented in <a class="el" href="class_s_t_l_l_1_1rectangle_shape__c.html#a45a8bb1644e3d75a60b1f5533039a1f7">STLL::rectangleShape_c</a>.</p>
 
 </div>
 </div>
@@ -197,7 +291,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1shape__c.html">shape_c</a></li>
-    <li class="footer">Generated on Wed Aug 27 2014 21:24:18 for STLL by
+    <li class="footer">Generated on Sat Sep 20 2014 15:45:11 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>

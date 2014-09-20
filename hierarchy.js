@@ -2,12 +2,11 @@ var hierarchy =
 [
     [ "STLL::attributeIndex_c", "class_s_t_l_l_1_1attribute_index__c.html", null ],
     [ "STLL::codepointAttributes", "class_s_t_l_l_1_1codepoint_attributes.html", null ],
+    [ "STLL::color_c", "class_s_t_l_l_1_1color__c.html", null ],
     [ "STLL::textLayout_c::commandData", "struct_s_t_l_l_1_1text_layout__c_1_1command_data.html", null ],
     [ "STLL::fontCache_c", "class_s_t_l_l_1_1font_cache__c.html", null ],
     [ "STLL::fontFamily_c", "class_s_t_l_l_1_1font_family__c.html", null ],
-    [ "FT_Open_Args", null, [
-      [ "STLL::fontResource_c", "class_s_t_l_l_1_1font_resource__c.html", null ]
-    ] ],
+    [ "STLL::fontResource_c", "class_s_t_l_l_1_1font_resource__c.html", null ],
     [ "STLL::layoutProperties", "struct_s_t_l_l_1_1layout_properties.html", null ],
     [ "noncopyable", null, [
       [ "STLL::fontFace_c", "class_s_t_l_l_1_1font_face__c.html", null ],

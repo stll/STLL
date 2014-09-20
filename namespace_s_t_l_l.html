@@ -74,11 +74,13 @@ $(document).ready(function(){initNavTree('namespace_s_t_l_l.html','');});
 </div><!--header-->
 <div class="contents">
 
-<p>The namespace for the library. Every function and class is within this namespace.  
-</p>
+<p>a little class representing an rgba colour value, an a value of 255 is assumed to be opaque  
+<a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1color__c.html">color_c</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html">textLayout_c</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">encapsulates a finished layout.  <a href="class_s_t_l_l_1_1text_layout__c.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -135,6 +137,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a8db1b81ac03964f6242c185e9a9afc3c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html">textLayout_c</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#a8db1b81ac03964f6242c185e9a9afc3c">layoutXML</a> (const pugi::xml_document &amp;xml, const <a class="el" href="class_s_t_l_l_1_1text_style_sheet__c.html">textStyleSheet_c</a> &amp;rules, const <a class="el" href="class_s_t_l_l_1_1shape__c.html">shape_c</a> &amp;shape)</td></tr>
 <tr class="memdesc:a8db1b81ac03964f6242c185e9a9afc3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">layout the given preparsed XML tree as an HTML dom tree  <a href="#a8db1b81ac03964f6242c185e9a9afc3c">More...</a><br/></td></tr>
 <tr class="separator:a8db1b81ac03964f6242c185e9a9afc3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f1846ef1e31f0cea6484992829f5da1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html">textLayout_c</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#a5f1846ef1e31f0cea6484992829f5da1">loadLayoutFromXML</a> (const pugi::xml_node &amp;doc, std::shared_ptr&lt; <a class="el" href="class_s_t_l_l_1_1font_cache__c.html">fontCache_c</a> &gt; c)</td></tr>
+<tr class="memdesc:a5f1846ef1e31f0cea6484992829f5da1"><td class="mdescLeft">&#160;</td><td class="mdescRight">load a layout from a XML node, the node must point to the "layout" node to load  <a href="#a5f1846ef1e31f0cea6484992829f5da1">More...</a><br/></td></tr>
+<tr class="separator:a5f1846ef1e31f0cea6484992829f5da1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa809e90acd7d17703455fd69074b7c89"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#aa809e90acd7d17703455fd69074b7c89">saveLayoutToXML</a> (const <a class="el" href="class_s_t_l_l_1_1text_layout__c.html">textLayout_c</a> &amp;l, pugi::xml_node &amp;doc, std::shared_ptr&lt; <a class="el" href="class_s_t_l_l_1_1font_cache__c.html">fontCache_c</a> &gt; c)</td></tr>
+<tr class="memdesc:aa809e90acd7d17703455fd69074b7c89"><td class="mdescLeft">&#160;</td><td class="mdescRight">store the layout into the diven XML node. A new layout node is created and the date is inserted into that node  <a href="#aa809e90acd7d17703455fd69074b7c89">More...</a><br/></td></tr>
+<tr class="separator:aa809e90acd7d17703455fd69074b7c89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac26c09972a47271ccb7d010c8e1c2b1e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#ac26c09972a47271ccb7d010c8e1c2b1e">u8_isValid</a> (const std::string &amp;str)</td></tr>
 <tr class="memdesc:ac26c09972a47271ccb7d010c8e1c2b1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check, if a given string is a valid utf-8 string.  <a href="#ac26c09972a47271ccb7d010c8e1c2b1e">More...</a><br/></td></tr>
 <tr class="separator:ac26c09972a47271ccb7d010c8e1c2b1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -142,7 +150,9 @@ Functions</h2></td></tr>
 <tr class="memdesc:aa4ad1e8136e42d987cbdfe41a946a95e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert an utf-8 string to utf-32. No checking is done here, if the string might come from an unsafe source, check it first.  <a href="#aa4ad1e8136e42d987cbdfe41a946a95e">More...</a><br/></td></tr>
 <tr class="separator:aa4ad1e8136e42d987cbdfe41a946a95e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Function Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>The namespace for the library. Every function and class is within this namespace. </p>
+</div><h2 class="groupheader">Function Documentation</h2>
 <a class="anchor" id="adcb36725cfe35eacfcddad0a2a06ced8"></a>
 <div class="memitem">
 <div class="memproto">
@@ -191,7 +201,7 @@ Functions</h2></td></tr>
     <tr><td class="paramname">attr</td><td>the attributes (colors, ...) for all the characters in the text </td></tr>
     <tr><td class="paramname">shape</td><td>the shape that the final result is supposed to have </td></tr>
     <tr><td class="paramname">prop</td><td>some parameters that the line breaking algorithm needs to give the result the expected shape (center or justified, ...) </td></tr>
-    <tr><td class="paramname">ystart</td><td>the vertical starting point of your output, the baseline of the first line of text will be shifted down from this position by the ascender of the line </td></tr>
+    <tr><td class="paramname">ystart</td><td>the vertical starting point (in 1/64th pixels) of your output, the baseline of the first line of text will be shifted down from this position by the ascender of the line </td></tr>
   </table>
   </dd>
 </dl>
@@ -280,6 +290,80 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a5f1846ef1e31f0cea6484992829f5da1"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html">textLayout_c</a> STLL::loadLayoutFromXML </td>
+          <td>(</td>
+          <td class="paramtype">const pugi::xml_node &amp;&#160;</td>
+          <td class="paramname"><em>doc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::shared_ptr&lt; fontCache_c &gt;&#160;</td>
+          <td class="paramname"><em>c</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">doc</td><td>the XML node to load </td></tr>
+    <tr><td class="paramname">c</td><td>the font cache to use to get the fonts from </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="aa809e90acd7d17703455fd69074b7c89"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void STLL::saveLayoutToXML </td>
+          <td>(</td>
+          <td class="paramtype">const textLayout_c &amp;&#160;</td>
+          <td class="paramname"><em>l</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">pugi::xml_node &amp;&#160;</td>
+          <td class="paramname"><em>doc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::shared_ptr&lt; fontCache_c &gt;&#160;</td>
+          <td class="paramname"><em>c</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">l</td><td>the layout to save </td></tr>
+    <tr><td class="paramname">doc</td><td>the XML node to add the layout to </td></tr>
+    <tr><td class="paramname">c</td><td>the cache that was used to create the fonts of the layout </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section attention"><dt>Attention</dt><dd>this only works, when the fonts in the layout are all inside the cache and all the used fonts are created using file names (and not RAM pointers) </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="af81e2752c270c924d3bd1051966080a2"></a>
 <div class="memitem">
 <div class="memproto">
@@ -318,8 +402,8 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">l</td><td>layout to draw </td></tr>
-    <tr><td class="paramname">sx</td><td>x position on the target surface </td></tr>
-    <tr><td class="paramname">sy</td><td>y position on the target surface </td></tr>
+    <tr><td class="paramname">sx</td><td>x position on the target surface in 1/64th pixels </td></tr>
+    <tr><td class="paramname">sy</td><td>y position on the target surface in 1/64th pixels </td></tr>
     <tr><td class="paramname">s</td><td>target surface </td></tr>
   </table>
   </dd>
@@ -379,7 +463,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li>
-    <li class="footer">Generated on Wed Aug 27 2014 21:24:18 for STLL by
+    <li class="footer">Generated on Sat Sep 20 2014 15:45:11 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>

@@ -2,6 +2,7 @@ var NAVTREE =
 [
   [ "STLL", "index.html", [
     [ "Introduction", "index.html#into_sec", null ],
+    [ "Getting started", "index.html#build_sec", null ],
     [ "Design of the library", "index.html#design_sec", [
       [ "Freetype wrapper", "index.html#freetype_wrapper_sec", null ],
       [ "Paragraph Layouter", "index.html#layouter_sec", null ],

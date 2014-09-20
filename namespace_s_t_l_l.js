@@ -1,5 +1,6 @@
 var namespace_s_t_l_l =
 [
+    [ "color_c", "class_s_t_l_l_1_1color__c.html", "class_s_t_l_l_1_1color__c" ],
     [ "textLayout_c", "class_s_t_l_l_1_1text_layout__c.html", "class_s_t_l_l_1_1text_layout__c" ],
     [ "codepointAttributes", "class_s_t_l_l_1_1codepoint_attributes.html", "class_s_t_l_l_1_1codepoint_attributes" ],
     [ "attributeIndex_c", "class_s_t_l_l_1_1attribute_index__c.html", "class_s_t_l_l_1_1attribute_index__c" ],

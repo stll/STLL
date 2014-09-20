@@ -69,81 +69,94 @@ $(document).ready(function(){initNavTree('layouter_c_s_s_8h_source.html','');});
 <div class="title">layouterCSS.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<a href="layouter_c_s_s_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef __LAYOUTER_CSS_H__</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define __LAYOUTER_CSS_H__</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;ft2build.h&gt;</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include FT_FREETYPE_H</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#include FT_GLYPH_H</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#include FT_OUTLINE_H</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="layouter_font_8h.html">layouterFont.h</a>&quot;</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &lt;boost/utility.hpp&gt;</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &lt;pugixml.hpp&gt;</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#include &lt;assert.h&gt;</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">#include &lt;map&gt;</span></div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">namespace </span>STLL {</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;</div>
-<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1_xhtml_exception__c.html">   29</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_s_t_l_l_1_1_xhtml_exception__c.html">XhtmlException_c</a> : <span class="keyword">public</span> std::runtime_error</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;{</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1_xhtml_exception__c.html#a7b19bc689a11ee26657902b4de13d2fa">   32</a></span>&#160;    <span class="keyword">explicit</span> <a class="code" href="class_s_t_l_l_1_1_xhtml_exception__c.html#a7b19bc689a11ee26657902b4de13d2fa">XhtmlException_c</a>(<span class="keyword">const</span> std::string &amp; what_arg) : std::runtime_error(what_arg) {}</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;};</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;</div>
-<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1text_style_sheet__c.html">   42</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html">textStyleSheet_c</a></div>
+<a href="layouter_c_s_s_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * STLL Simple Text Layouting Library</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * STLL is the legal property of its developers, whose</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> * names are listed in the COPYRIGHT file, which is included</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * within the source distribution.</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment"> * modify it under the terms of the GNU Lesser General Public License</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment"> * as published by the Free Software Foundation; either version 2.1</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment"> * of the License, or (at your option) any later version.</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> * GNU General Public License for more details.</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment"> * along with this program; if not, write to the Free Software</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment"> * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">#ifndef __LAYOUTER_CSS_H__</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define __LAYOUTER_CSS_H__</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="layouter_font_8h.html">layouterFont.h</a>&quot;</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &lt;pugixml.hpp&gt;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &lt;map&gt;</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">namespace </span>STLL {</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
+<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1_xhtml_exception__c.html">   42</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_s_t_l_l_1_1_xhtml_exception__c.html">XhtmlException_c</a> : <span class="keyword">public</span> std::runtime_error</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keyword">typedef</span> <span class="keyword">struct</span></div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    {</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;      std::string selector;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;      std::string attribute;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;      std::string value;</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    } rule;</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html#a0ca0454b4588940bbb35bd6c7af49b77">textStyleSheet_c</a>(std::shared_ptr&lt;fontCache_c&gt; c = 0);</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html#a5c98383f14703487258beb95b49c86b3">font</a>(<span class="keyword">const</span> std::string &amp; family, <span class="keyword">const</span> <a class="code" href="class_s_t_l_l_1_1font_resource__c.html">fontResource_c</a> &amp; res,</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                 <span class="keyword">const</span> std::string &amp; style = <span class="stringliteral">&quot;normal&quot;</span>,</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                 <span class="keyword">const</span> std::string &amp; variant = <span class="stringliteral">&quot;normal&quot;</span>,</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                 <span class="keyword">const</span> std::string &amp; weight = <span class="stringliteral">&quot;normal&quot;</span>,</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                 <span class="keyword">const</span> std::string &amp; stretch = <span class="stringliteral">&quot;normal&quot;</span>);</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
-<div class="line"><a name="l00088"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1text_style_sheet__c.html#ae0b3b84b25545e48602c87eaab1731d6">   88</a></span>&#160;    std::shared_ptr&lt;fontFamily_c&gt; <a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html#ae0b3b84b25545e48602c87eaab1731d6">findFamily</a>(<span class="keyword">const</span> std::string &amp; family)<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;      <span class="keywordflow">return</span> families.find(family)-&gt;second;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    }</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html#a3e5a6d462e84b3e2c3cb0e72978af288">addRule</a>(<span class="keyword">const</span> std::string sel, <span class="keyword">const</span> std::string attr, <span class="keyword">const</span> std::string val);</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    <span class="keyword">const</span> std::string &amp; <a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html#a3e292c4e0db27bbfe16d685b131072b7">getValue</a>(pugi::xml_node node, <span class="keyword">const</span> std::string &amp; attribute) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;  <span class="keyword">private</span>:</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    std::vector&lt;rule&gt; rules;</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    std::map&lt;std::string, std::shared_ptr&lt;fontFamily_c&gt; &gt; families;</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    std::shared_ptr&lt;fontCache_c&gt; cache;</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;};</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;}</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1_xhtml_exception__c.html#a7b19bc689a11ee26657902b4de13d2fa">   45</a></span>&#160;    <span class="keyword">explicit</span> <a class="code" href="class_s_t_l_l_1_1_xhtml_exception__c.html#a7b19bc689a11ee26657902b4de13d2fa">XhtmlException_c</a>(<span class="keyword">const</span> std::string &amp; what_arg) : std::runtime_error(what_arg) {}</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;};</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
+<div class="line"><a name="l00055"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1text_style_sheet__c.html">   55</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html">textStyleSheet_c</a></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;{</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keyword">typedef</span> <span class="keyword">struct</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    {</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;      std::string selector;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;      std::string attribute;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;      std::string value;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    } rule;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    <a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html#a0ca0454b4588940bbb35bd6c7af49b77">textStyleSheet_c</a>(std::shared_ptr&lt;fontCache_c&gt; c = 0);</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html#a5c98383f14703487258beb95b49c86b3">font</a>(<span class="keyword">const</span> std::string &amp; family, <span class="keyword">const</span> <a class="code" href="class_s_t_l_l_1_1font_resource__c.html">fontResource_c</a> &amp; res,</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                 <span class="keyword">const</span> std::string &amp; style = <span class="stringliteral">&quot;normal&quot;</span>,</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                 <span class="keyword">const</span> std::string &amp; variant = <span class="stringliteral">&quot;normal&quot;</span>,</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;                 <span class="keyword">const</span> std::string &amp; weight = <span class="stringliteral">&quot;normal&quot;</span>,</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;                 <span class="keyword">const</span> std::string &amp; stretch = <span class="stringliteral">&quot;normal&quot;</span>);</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;</div>
+<div class="line"><a name="l00101"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1text_style_sheet__c.html#ae0b3b84b25545e48602c87eaab1731d6">  101</a></span>&#160;    std::shared_ptr&lt;fontFamily_c&gt; <a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html#ae0b3b84b25545e48602c87eaab1731d6">findFamily</a>(<span class="keyword">const</span> std::string &amp; family)<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;      <span class="keywordflow">return</span> families.find(family)-&gt;second;</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    }</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html#a3e5a6d462e84b3e2c3cb0e72978af288">addRule</a>(<span class="keyword">const</span> std::string sel, <span class="keyword">const</span> std::string attr, <span class="keyword">const</span> std::string val);</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;</div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    <span class="keyword">const</span> std::string &amp; <a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html#a3e292c4e0db27bbfe16d685b131072b7">getValue</a>(pugi::xml_node node, <span class="keyword">const</span> std::string &amp; attribute) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;  <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    std::vector&lt;rule&gt; rules;</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    std::map&lt;std::string, std::shared_ptr&lt;fontFamily_c&gt; &gt; families;</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    std::shared_ptr&lt;fontCache_c&gt; cache;</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;};</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;}</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html_a3e292c4e0db27bbfe16d685b131072b7"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html#a3e292c4e0db27bbfe16d685b131072b7">STLL::textStyleSheet_c::getValue</a></div><div class="ttdeci">const std::string &amp; getValue(pugi::xml_node node, const std::string &amp;attribute) const </div><div class="ttdoc">get the value for an attribute for a given xml-node </div></div>
-<div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html">STLL::textStyleSheet_c</a></div><div class="ttdoc">this class encapsulates information for how to format a text, just like the style sheets in html are ...</div><div class="ttdef"><b>Definition:</b> layouterCSS.h:42</div></div>
+<div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html">STLL::textStyleSheet_c</a></div><div class="ttdoc">this class encapsulates information for how to format a text, just like the style sheets in html are ...</div><div class="ttdef"><b>Definition:</b> layouterCSS.h:55</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html_a0ca0454b4588940bbb35bd6c7af49b77"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html#a0ca0454b4588940bbb35bd6c7af49b77">STLL::textStyleSheet_c::textStyleSheet_c</a></div><div class="ttdeci">textStyleSheet_c(std::shared_ptr&lt; fontCache_c &gt; c=0)</div><div class="ttdoc">create an empty style sheet only with default rules </div></div>
-<div class="ttc" id="class_s_t_l_l_1_1_xhtml_exception__c_html_a7b19bc689a11ee26657902b4de13d2fa"><div class="ttname"><a href="class_s_t_l_l_1_1_xhtml_exception__c.html#a7b19bc689a11ee26657902b4de13d2fa">STLL::XhtmlException_c::XhtmlException_c</a></div><div class="ttdeci">XhtmlException_c(const std::string &amp;what_arg)</div><div class="ttdef"><b>Definition:</b> layouterCSS.h:32</div></div>
-<div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html_ae0b3b84b25545e48602c87eaab1731d6"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html#ae0b3b84b25545e48602c87eaab1731d6">STLL::textStyleSheet_c::findFamily</a></div><div class="ttdeci">std::shared_ptr&lt; fontFamily_c &gt; findFamily(const std::string &amp;family) const </div><div class="ttdoc">Get a font family from the CSS. </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:88</div></div>
+<div class="ttc" id="class_s_t_l_l_1_1_xhtml_exception__c_html_a7b19bc689a11ee26657902b4de13d2fa"><div class="ttname"><a href="class_s_t_l_l_1_1_xhtml_exception__c.html#a7b19bc689a11ee26657902b4de13d2fa">STLL::XhtmlException_c::XhtmlException_c</a></div><div class="ttdeci">XhtmlException_c(const std::string &amp;what_arg)</div><div class="ttdef"><b>Definition:</b> layouterCSS.h:45</div></div>
+<div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html_ae0b3b84b25545e48602c87eaab1731d6"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html#ae0b3b84b25545e48602c87eaab1731d6">STLL::textStyleSheet_c::findFamily</a></div><div class="ttdeci">std::shared_ptr&lt; fontFamily_c &gt; findFamily(const std::string &amp;family) const </div><div class="ttdoc">Get a font family from the CSS. </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:101</div></div>
 <div class="ttc" id="layouter_font_8h_html"><div class="ttname"><a href="layouter_font_8h.html">layouterFont.h</a></div><div class="ttdoc">a freetype wrapper </div></div>
-<div class="ttc" id="class_s_t_l_l_1_1_xhtml_exception__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1_xhtml_exception__c.html">STLL::XhtmlException_c</a></div><div class="ttdoc">exception thrown on XHTML and CSS problems </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:29</div></div>
+<div class="ttc" id="class_s_t_l_l_1_1_xhtml_exception__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1_xhtml_exception__c.html">STLL::XhtmlException_c</a></div><div class="ttdoc">exception thrown on XHTML and CSS problems </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:42</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html_a5c98383f14703487258beb95b49c86b3"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html#a5c98383f14703487258beb95b49c86b3">STLL::textStyleSheet_c::font</a></div><div class="ttdeci">void font(const std::string &amp;family, const fontResource_c &amp;res, const std::string &amp;style=&quot;normal&quot;, const std::string &amp;variant=&quot;normal&quot;, const std::string &amp;weight=&quot;normal&quot;, const std::string &amp;stretch=&quot;normal&quot;)</div><div class="ttdoc">Add a font to a family. </div></div>
-<div class="ttc" id="class_s_t_l_l_1_1font_resource__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1font_resource__c.html">STLL::fontResource_c</a></div><div class="ttdoc">This class represents a font resource. </div><div class="ttdef"><b>Definition:</b> layouterFont.h:43</div></div>
+<div class="ttc" id="class_s_t_l_l_1_1font_resource__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1font_resource__c.html">STLL::fontResource_c</a></div><div class="ttdoc">This class represents a font resource. </div><div class="ttdef"><b>Definition:</b> layouterFont.h:60</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html_a3e5a6d462e84b3e2c3cb0e72978af288"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html#a3e5a6d462e84b3e2c3cb0e72978af288">STLL::textStyleSheet_c::addRule</a></div><div class="ttdeci">void addRule(const std::string sel, const std::string attr, const std::string val)</div><div class="ttdoc">add a rule to the stylesheet </div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -151,7 +164,7 @@ $(document).ready(function(){initNavTree('layouter_c_s_s_8h_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="layouter_c_s_s_8h.html">layouterCSS.h</a></li>
-    <li class="footer">Generated on Wed Aug 27 2014 21:24:18 for STLL by
+    <li class="footer">Generated on Sat Sep 20 2014 15:45:11 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>

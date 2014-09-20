@@ -90,6 +90,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a7bad22cee52162ed938709c7079b058c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4680d30a355cd90214fd8bbc20dd4c2"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="class_s_t_l_l_1_1font_face__c.html">fontFace_c</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1font_cache__c.html#af4680d30a355cd90214fd8bbc20dd4c2">getFont</a> (const <a class="el" href="class_s_t_l_l_1_1font_resource__c.html">fontResource_c</a> &amp;res, uint32_t size)</td></tr>
 <tr class="separator:af4680d30a355cd90214fd8bbc20dd4c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae34073db9012bc8005f3f51bfcd5ca98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_s_t_l_l_1_1font_resource__c.html">fontResource_c</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1font_cache__c.html#ae34073db9012bc8005f3f51bfcd5ca98">getFontResource</a> (std::shared_ptr&lt; <a class="el" href="class_s_t_l_l_1_1font_face__c.html">fontFace_c</a> &gt; f) const </td></tr>
+<tr class="separator:ae34073db9012bc8005f3f51bfcd5ca98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f2ceedb29786e3c92520b0bc6aabd05"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1font_cache__c.html#a6f2ceedb29786e3c92520b0bc6aabd05">getFontSize</a> (std::shared_ptr&lt; <a class="el" href="class_s_t_l_l_1_1font_face__c.html">fontFace_c</a> &gt; f) const </td></tr>
+<tr class="separator:a6f2ceedb29786e3c92520b0bc6aabd05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a6abcbcb944773cad310fe310699f6ba8"></a>
@@ -179,6 +183,54 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ae34073db9012bc8005f3f51bfcd5ca98"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_s_t_l_l_1_1font_resource__c.html">fontResource_c</a> STLL::fontCache_c::getFontResource </td>
+          <td>(</td>
+          <td class="paramtype">std::shared_ptr&lt; <a class="el" href="class_s_t_l_l_1_1font_face__c.html">fontFace_c</a> &gt;&#160;</td>
+          <td class="paramname"><em>f</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the font resource for a font inside the cache (or empty resource, if the font is not within</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">f</td><td>font to look for </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the resource that was used to create the font </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a6f2ceedb29786e3c92520b0bc6aabd05"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t STLL::fontCache_c::getFontSize </td>
+          <td>(</td>
+          <td class="paramtype">std::shared_ptr&lt; <a class="el" href="class_s_t_l_l_1_1font_face__c.html">fontFace_c</a> &gt;&#160;</td>
+          <td class="paramname"><em>f</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get the font size for a font inside the cache (or zero, if the font is not within</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">f</td><td>font to look for </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the size used to create the font </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="layouter_font_8h_source.html">layouterFont.h</a></li>
 </ul>
@@ -188,7 +240,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1font_cache__c.html">fontCache_c</a></li>
-    <li class="footer">Generated on Wed Aug 27 2014 21:24:18 for STLL by
+    <li class="footer">Generated on Sat Sep 20 2014 15:45:11 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>
