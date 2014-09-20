@@ -30,18 +30,20 @@
 
 #include <pugixml.hpp>
 
+#include <string>
+
 static bool compare(const STLL::textLayout_c & l, const pugi::xml_node & doc, std::shared_ptr<STLL::fontCache_c> c)
 {
-  if (l.getHeight() != atoi(doc.attribute("height").value())) return false;
-  if (l.getLeft() != atoi(doc.attribute("left").value())) return false;
-  if (l.getRight() != atoi(doc.attribute("right").value())) return false;
+  if (l.getHeight() != std::stoi(doc.attribute("height").value())) return false;
+  if (l.getLeft() != std::stoi(doc.attribute("left").value())) return false;
+  if (l.getRight() != std::stoi(doc.attribute("right").value())) return false;
 
   // get the fonts from the file
   auto fonts = doc.child("fonts");
   std::vector<std::pair<std::string, uint32_t>> found;
 
   for (const auto a : fonts.children())
-    found.push_back(std::make_pair(a.attribute("file").value(), (uint32_t)atoi(a.attribute("size").value())));
+      found.push_back(std::make_pair(a.attribute("file").value(), std::stoul(a.attribute("size").value())));
 
   auto commands = doc.child("commands");
 
@@ -54,18 +56,18 @@ static bool compare(const STLL::textLayout_c & l, const pugi::xml_node & doc, st
     if (a.name() == std::string("glyph"))
     {
       if (l.data[i].command != STLL::textLayout_c::commandData::CMD_GLYPH) return false;
-      if (l.data[i].x != atoi(a.attribute("x").value())) return false;
-      if (l.data[i].y != atoi(a.attribute("y").value())) return false;
-      if (l.data[i].glyphIndex != atoi(a.attribute("glyphIndex").value())) return false;
+      if (l.data[i].x != std::stoi(a.attribute("x").value())) return false;
+      if (l.data[i].y != std::stoi(a.attribute("y").value())) return false;
+      if (l.data[i].glyphIndex != std::stoi(a.attribute("glyphIndex").value())) return false;
 
-      int f = atoi(a.attribute("font").value());
+      int f = std::stoi(a.attribute("font").value());
       if (c->getFontResource(l.data[i].font).getDescription() != found[f].first) return false;
       if (c->getFontSize(l.data[i].font) != found[f].second) return false;
 
-      if (l.data[i].c.r() != atoi(a.attribute("r").value())) return false;
-      if (l.data[i].c.g() != atoi(a.attribute("g").value())) return false;
-      if (l.data[i].c.b() != atoi(a.attribute("b").value())) return false;
-      if (l.data[i].c.a() != atoi(a.attribute("a").value())) return false;
+      if (l.data[i].c.r() != std::stoi(a.attribute("r").value())) return false;
+      if (l.data[i].c.g() != std::stoi(a.attribute("g").value())) return false;
+      if (l.data[i].c.b() != std::stoi(a.attribute("b").value())) return false;
+      if (l.data[i].c.a() != std::stoi(a.attribute("a").value())) return false;
     }
     else if (a.name() == std::string("rect"))
     {

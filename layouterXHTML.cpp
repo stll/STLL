@@ -23,6 +23,7 @@
 
 #include "utf-8.h"
 
+#include <string>
 #include <vector>
 
 #include <boost/lexical_cast.hpp>
@@ -805,11 +806,11 @@ static void layoutXML_TR(const pugi::xml_node & xml, uint32_t row, const textSty
       {
         if (std::string("rowspan") == a.name())
         {
-          c.rowspan = atoi(a.value());
+          c.rowspan = std::stoi(a.value());
         }
         if (std::string("colspan") == a.name())
         {
-          c.colspan = atoi(a.value());
+          c.colspan = std::stoi(a.value());
         }
       }
 
@@ -859,7 +860,7 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
           auto a = j.attribute("span");
           if (a)
           {
-            span = atoi(a.value());
+            span = std::stoi(a.value());
           }
 
           if (span == 0)
