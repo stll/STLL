@@ -216,25 +216,47 @@ class codepointAttributes
 {
   public:
 
-  /// colour of the letter
+  /** \brief colour of the letter
+   */
   color_c c;
 
-  /// font of the letter
+  /** \brief font of the letter
+   */
   std::shared_ptr<fontFace_c> font;
 
-  /// current language at this letter
+  /** \brief current language at this letter
+   */
   std::string lang;
 
+  /** \brief bit for the flags variable, if set the glyph will be underlined
+   */
   static const uint8_t FL_UNDERLINE = 1;
 
+  /** \brief some flags for the glyph, use FL_xxx constants to change the value
+   */
   uint8_t flags;
 
+  /** \brief one element of the shadow
+   */
   typedef struct shadow
   {
+
+    /** \brief the colour to use for this shadow element
+     */
     color_c c;
+
+    /** \brief offset of the shadow in 1/64th pixels relative to the
+     * position of the normal glyph
+     */
     int8_t dx;
+
+    /** \brief offset of the shadow in 1/64th pixels relative to the
+     * position of the normal glyph
+     */
     int8_t dy;
 
+    /** \brief comparison operator for one shadow
+     */
     bool operator==(const struct shadow & rhs) const
     {
       return c == rhs.c && dx == rhs.dx && dy == rhs.dy;
@@ -242,24 +264,38 @@ class codepointAttributes
 
   } shadow;
 
+  /** \brief the shadows to draw behind the real glyph. The shadows are drawn in the
+   * order within this vector and on top of that the real glyph will be drawn
+   * inlays will have no shadow
+   */
   std::vector<shadow> shadows;
 
-
-  /// a layout of to be placed instead of the actual character, when empty it is a normal
-  /// glyp that needs to be placed, if you set the layout, the font information will be ignored
-  /// how the image interacts with line breaks depends on the character that is given
-  /// as the placeholder. Linebreaks are done as if there was the given placeholder
-  /// character and not the image
-  /// the vertial alignment is controlled by baseline_shift, the usual behavior is
-  /// that the inlay is ON the baseline.
+  /** \brief sometimes you want to place something different instead of a glyph (e.g. an image).
+   * This can be done with an inlay.
+   *
+   * The inlay is a layout that will be placed instead of an actual glyph.
+   * If you define the inlay, the font information will be ignored.
+   * How the inlay interacts with line breaks depends on the character that is given
+   * as the placeholder. Linebreaks are done as if there was the given placeholder
+   * character and not the inlay.
+   *
+   * The vertical alignment of the inlay is controlled by baseline_shift. If
+   * baseline_shift is 0 the inlay is placed on the baseline.
+   */
   std::shared_ptr<textLayout_c> inlay;
 
-  /// do you want to move the baseline of this character or inlay relative to the
-  /// baseline of the line? A positive value means to move it up
+  /** \brief  do you want to move the baseline of this character or inlay relative to the
+   * baseline of the line? A positive value means to move it up. It is given in units
+   * of 1/64th pixel.
+   */
   int32_t baseline_shift;
 
+  /** \brief create an empty attribute, no font, no language, no flags, no inlay, no baseline shift
+   */
   codepointAttributes(void) : font(0), lang(""), flags(0), inlay(0), baseline_shift(0) { }
 
+  /** \brief comparison operator
+   */
   bool operator==(const codepointAttributes & rhs) const
   {
     return c == rhs.c && font == rhs.font && lang == rhs.lang
@@ -268,6 +304,11 @@ class codepointAttributes
       && inlay == rhs.inlay && baseline_shift == rhs.baseline_shift;
   }
 
+  /** \brief this operator is required for the intervall container within the
+   * attributeIndex_c class, do not use it
+   * \note the intervall container wants to accumulate information but
+   * as we can not do that here, we simply replace the old values
+   */
   codepointAttributes operator += (const codepointAttributes & rhs)
   {
     // when someone tries to overwrite the attributes, we take over the new ones
