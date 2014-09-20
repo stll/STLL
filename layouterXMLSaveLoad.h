@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef __LAYOUTER_XML_SAVELOAD_H__
-#define __LAYOUTER_XML_SAVELOAD_H__
+
+#pragma once
 
 /** \file
  *  \brief Module simple load and save functions to store a layout into an XML file
@@ -50,5 +50,3 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
 void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & doc, std::shared_ptr<fontCache_c> c);
 
 }
-
-#endif

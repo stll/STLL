@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef __LAYOUTER_XHTML_H__
-#define __LAYOUTER_XHTML_H__
+
+#pragma once
 
 /** \file
  *  \brief This module contains the XHTML parser and layouter
@@ -52,5 +52,3 @@ textLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules
 textLayout_c layoutXML(const pugi::xml_document & xml, const textStyleSheet_c & rules, const shape_c & shape);
 
 }
-
-#endif

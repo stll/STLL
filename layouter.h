@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef __LAYOUTER_H__
-#define __LAYOUTER_H__
+
+#pragma once
 
 /** \file
  *  \brief the paragraph layouter and its helpers
@@ -432,5 +432,3 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_
                              const shape_c & shape, const layoutProperties & prop, int32_t ystart = 0);
 
 }
-
-#endif

@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef __LAYOUTER_SDL__
-#define __LAYOUTER_SDL__
+
+#pragma once
 
 /** \file
  *  \brief SDL output driver
@@ -41,5 +41,3 @@ class textLayout_c;
 void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s);
 
 }
-
-#endif
