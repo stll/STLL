@@ -93,12 +93,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a881f9e7fe93657764ed50e08586595ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63315737f2c8dfdc727c5a1a6913ce8a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1font_face__c.html#a63315737f2c8dfdc727c5a1a6913ce8a">~fontFace_c</a> ()</td></tr>
 <tr class="separator:a63315737f2c8dfdc727c5a1a6913ce8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa7e720d4756d3ae40758b9e3c28d8c51"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1font_face__c.html#aa7e720d4756d3ae40758b9e3c28d8c51">outlineRender</a> (uint32_t idx, FT_Raster_Params *params)</td></tr>
-<tr class="memdesc:aa7e720d4756d3ae40758b9e3c28d8c51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform an outline rendering of a glyph of this font.  <a href="#aa7e720d4756d3ae40758b9e3c28d8c51">More...</a><br/></td></tr>
-<tr class="separator:aa7e720d4756d3ae40758b9e3c28d8c51"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af29ca316868f4c1862c232ff0cb271f3"><td class="memItemLeft" align="right" valign="top">FT_Face&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1font_face__c.html#af29ca316868f4c1862c232ff0cb271f3">getFace</a> (void) const </td></tr>
-<tr class="memdesc:af29ca316868f4c1862c232ff0cb271f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the freetype structure for this font.  <a href="#af29ca316868f4c1862c232ff0cb271f3">More...</a><br/></td></tr>
-<tr class="separator:af29ca316868f4c1862c232ff0cb271f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1d35f98b19267a8b6a0751e32dc8d47"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1font_face__c.html#aa1d35f98b19267a8b6a0751e32dc8d47">outlineRender</a> (uint32_t idx, FT_Raster_Params_ *params)</td></tr>
+<tr class="memdesc:aa1d35f98b19267a8b6a0751e32dc8d47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform an outline rendering of a glyph of this font.  <a href="#aa1d35f98b19267a8b6a0751e32dc8d47">More...</a><br/></td></tr>
+<tr class="separator:aa1d35f98b19267a8b6a0751e32dc8d47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04a41f826ab38fde989a1e82cf354ac1"><td class="memItemLeft" align="right" valign="top">FT_FaceRec_ *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1font_face__c.html#a04a41f826ab38fde989a1e82cf354ac1">getFace</a> (void) const </td></tr>
+<tr class="memdesc:a04a41f826ab38fde989a1e82cf354ac1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the freetype structure for this font.  <a href="#a04a41f826ab38fde989a1e82cf354ac1">More...</a><br/></td></tr>
+<tr class="separator:a04a41f826ab38fde989a1e82cf354ac1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Functions to get font metrics</div></td></tr>
 <tr class="memitem:ab400183f583ce7f840a942d24271d05a"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1font_face__c.html#ab400183f583ce7f840a942d24271d05a">getHeight</a> (void) const </td></tr>
 <tr class="memdesc:ab400183f583ce7f840a942d24271d05a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the height of the font with multiplication factor of 64.  <a href="#ab400183f583ce7f840a942d24271d05a">More...</a><br/></td></tr>
@@ -168,9 +168,6 @@ Public Member Functions</h2></td></tr>
 <a class="anchor" id="a8dba9fb92d02f6925f4c27ecc7002ec0"></a>
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">int32_t STLL::fontFace_c::getAscender </td>
@@ -180,11 +177,6 @@ Public Member Functions</h2></td></tr>
           <td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>ascender of font </dd></dl>
 
@@ -193,9 +185,6 @@ Public Member Functions</h2></td></tr>
 <a class="anchor" id="a98d78349848d45985393884d3140bd26"></a>
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">int32_t STLL::fontFace_c::getDescender </td>
@@ -205,17 +194,12 @@ Public Member Functions</h2></td></tr>
           <td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>descender of font </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="af29ca316868f4c1862c232ff0cb271f3"></a>
+<a class="anchor" id="a04a41f826ab38fde989a1e82cf354ac1"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -223,7 +207,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">FT_Face STLL::fontFace_c::getFace </td>
+          <td class="memname">FT_FaceRec_* STLL::fontFace_c::getFace </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -236,16 +220,13 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>This is required for example for harfbuzz. You normally don't need this when using <a class="el" href="namespace_s_t_l_l.html" title="a little class representing an rgba colour value, an a value of 255 is assumed to be opaque ...">STLL</a> </p>
+<p>This is required for example for harfbuzz. You normally don't need this when using <a class="el" href="namespace_s_t_l_l.html" title="The namespace for the library. Every function and class is within this namespace. ...">STLL</a> </p>
 
 </div>
 </div>
 <a class="anchor" id="ab400183f583ce7f840a942d24271d05a"></a>
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">uint32_t STLL::fontFace_c::getHeight </td>
@@ -255,11 +236,6 @@ Public Member Functions</h2></td></tr>
           <td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>height of font </dd></dl>
 
@@ -268,9 +244,6 @@ Public Member Functions</h2></td></tr>
 <a class="anchor" id="a45617e8d2cdfba175304692e25c1b5f0"></a>
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">int32_t STLL::fontFace_c::getUnderlinePosition </td>
@@ -280,11 +253,6 @@ Public Member Functions</h2></td></tr>
           <td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>centre position of the underline relative to baseline </dd></dl>
 
@@ -293,9 +261,6 @@ Public Member Functions</h2></td></tr>
 <a class="anchor" id="a19dfa387fa2045fdd4d0dafe639c7e26"></a>
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">int32_t STLL::fontFace_c::getUnderlineThickness </td>
@@ -305,17 +270,12 @@ Public Member Functions</h2></td></tr>
           <td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>thickness around the underline position </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="aa7e720d4756d3ae40758b9e3c28d8c51"></a>
+<a class="anchor" id="aa1d35f98b19267a8b6a0751e32dc8d47"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -328,7 +288,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">FT_Raster_Params *&#160;</td>
+          <td class="paramtype">FT_Raster_Params_ *&#160;</td>
           <td class="paramname"><em>params</em>&#160;</td>
         </tr>
         <tr>
@@ -358,7 +318,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1font_face__c.html">fontFace_c</a></li>
-    <li class="footer">Generated on Sat Sep 20 2014 15:45:11 for STLL by
+    <li class="footer">Generated on Sat Sep 20 2014 16:01:56 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>
