@@ -385,7 +385,7 @@ static void checkValueFormat(const std::string & attribute, const std::string & 
   if (attribute == "border-left-width") checkFormatSize(value, SZ_PX);
   if (attribute == "border-right-width") checkFormatSize(value, SZ_PX);
   if (attribute == "border-top-width") checkFormatSize(value, SZ_PX);
-  if (attribute == "border-bottom-width")checkFormatSize(value, SZ_PX);
+  if (attribute == "border-bottom-width") checkFormatSize(value, SZ_PX);
   if (attribute == "border-color") checkFormatColor(value);
   if (attribute == "border-left-color") checkFormatColor(value);
   if (attribute == "border-right-color") checkFormatColor(value);
