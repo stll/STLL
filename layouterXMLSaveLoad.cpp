@@ -69,7 +69,7 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
   std::vector<std::shared_ptr<fontFace_c>> found;
 
   for (const auto a : fonts.children())
-    found.push_back(c->getFont(fontResource_c(a.attribute("file").value()), atoi(a.attribute("size").value())));
+    found.push_back(c->getFont(fontResource_c(a.attribute("file").value()), std::stoi(a.attribute("size").value())));
 
   auto commands = doc.child("commands");
 
@@ -82,12 +82,12 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
       textLayout_c::commandData c;
 
       c.command = textLayout_c::commandData::CMD_GLYPH;
-      c.x = atoi(a.attribute("x").value());
-      c.y = atoi(a.attribute("y").value());
-      c.glyphIndex = atoi(a.attribute("glyphIndex").value());
-      c.font = found[atoi(a.attribute("font").value())];
-      c.c = color_c(atoi(a.attribute("r").value()), atoi(a.attribute("g").value()),
-                    atoi(a.attribute("b").value()), atoi(a.attribute("a").value()));
+      c.x = std::stoi(a.attribute("x").value());
+      c.y = std::stoi(a.attribute("y").value());
+      c.glyphIndex = std::stoi(a.attribute("glyphIndex").value());
+      c.font = found[std::stoi(a.attribute("font").value())];
+      c.c = color_c(std::stoi(a.attribute("r").value()), std::stoi(a.attribute("g").value()),
+                    std::stoi(a.attribute("b").value()), std::stoi(a.attribute("a").value()));
 
       l.data.push_back(c);
     }
@@ -99,9 +99,9 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
     }
   }
 
-  l.setHeight(atoi(doc.attribute("height").value()));
-  l.setLeft(atoi(doc.attribute("left").value()));
-  l.setRight(atoi(doc.attribute("right").value()));
+  l.setHeight(std::stoi(doc.attribute("height").value()));
+  l.setLeft(std::stoi(doc.attribute("left").value()));
+  l.setRight(std::stoi(doc.attribute("right").value()));
 
   return l;
 }
