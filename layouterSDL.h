@@ -26,8 +26,6 @@
  *  \brief SDL output driver
  */
 
-#ifdef HAVE_SDL
-
 #include <SDL.h>
 
 namespace STLL {
@@ -43,7 +41,5 @@ class textLayout_c;
 void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s);
 
 }
-
-#endif
 
 #endif
