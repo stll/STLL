@@ -116,7 +116,7 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
     {
       case textLayout_c::commandData::CMD_GLYPH:
 
-        span.pixels = (uint32_t *)(((uint8_t *) s->pixels) + ((sy+i.y)/64) * s->pitch) + ((sx+i.x)/64);
+        span.pixels = reinterpret_cast<uint32_t*>(reinterpret_cast<uint8_t*>(s->pixels) + ((sy+i.y)/64) * s->pitch) + ((sx+i.x)/64);
         span.c = i.c;
 
         i.font->outlineRender(i.glyphIndex, &ftr_params);
