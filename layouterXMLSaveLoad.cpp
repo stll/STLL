@@ -45,7 +45,7 @@ void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_
           n.set_name("glyph");
           n.append_attribute("x").set_value(a.x);
           n.append_attribute("y").set_value(a.y);
-          n.append_attribute("glyphIndex").set_value(a.glyphIndex);
+          n.append_attribute("glyphIndex").set_value(static_cast<unsigned int>(a.glyphIndex));
           n.append_attribute("font").set_value((int)std::distance(found.begin(), std::find(found.begin(), found.end(), a.font)));
           n.append_attribute("r").set_value(a.c.r());
           n.append_attribute("g").set_value(a.c.g());
