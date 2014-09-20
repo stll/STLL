@@ -141,7 +141,7 @@ class fontFace_c : boost::noncopyable
     /** \brief Get the height of the font with multiplication factor of 64
      * \return height of font
      */
-    uint32_t getHeigt(void) const { return f->size->metrics.height; }
+    uint32_t getHeight(void) const { return f->size->metrics.height; }
 
     /** \brief Get the ascender of the font with multiplication factor of 64
      * \return ascender of font
