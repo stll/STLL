@@ -86,7 +86,7 @@ void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
   SDL_FillRect(screen, NULL, 0 );
 
   for (auto & a : data)
-    showLayoutSDL(a.layout, a.sx, a.sy, screen);
+    showLayoutSDL(a.layout, a.sx*64, a.sy*64, screen);
 
   SDL_Flip(screen);
 

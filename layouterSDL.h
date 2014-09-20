@@ -34,8 +34,8 @@ class textLayout_c;
 
 /** \brief display a single layout
  *  \param l layout to draw
- *  \param sx x position on the target surface
- *  \param sy y position on the target surface
+ *  \param sx x position on the target surface in 1/64th pixels
+ *  \param sy y position on the target surface in 1/64th pixels
  *  \param s target surface
  */
 void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s);
