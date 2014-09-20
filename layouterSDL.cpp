@@ -20,8 +20,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifdef HAVE_SDL
-
 #include "layouterSDL.h"
 
 #include "layouter.h"
@@ -146,5 +144,3 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
 }
 
 }
-
-#endif
