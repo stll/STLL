@@ -41,6 +41,9 @@
 #include <stdint.h>
 #include <stdexcept>
 
+struct FT_FaceRec_;
+struct FT_Raster_Params_;
+
 namespace STLL {
 
 /** \brief This class is thrown on problems with the freetype library
@@ -127,13 +130,13 @@ class fontFace_c : boost::noncopyable
      *
      * TODO wrap FT_Raster_Params
      */
-    void outlineRender(uint32_t idx, FT_Raster_Params * params);
+    void outlineRender(uint32_t idx, FT_Raster_Params_ * params);
 
     /** \brief Get the freetype structure for this font
      *
      * This is required for example for harfbuzz. You normally don't need this when using STLL
      */
-    FT_Face getFace(void) const { return f; }
+    FT_FaceRec_ * getFace(void) const { return f; }
 
     /** \name Functions to get font metrics
      *  @{ */
@@ -141,30 +144,30 @@ class fontFace_c : boost::noncopyable
     /** \brief Get the height of the font with multiplication factor of 64
      * \return height of font
      */
-    uint32_t getHeight(void) const { return f->size->metrics.height; }
+    uint32_t getHeight(void) const;
 
     /** \brief Get the ascender of the font with multiplication factor of 64
      * \return ascender of font
      */
-    int32_t getAscender(void) const { return f->size->metrics.ascender; }
+    int32_t getAscender(void) const;
 
     /** \brief Get the descender of the font with multiplication factor of 64
      * \return descender of font
      */
-    int32_t getDescender(void) const { return f->size->metrics.descender; }
+    int32_t getDescender(void) const;
 
     /** \brief Get the underline position of the font with multiplication factor of 64
      * \return centre position of the underline relative to baseline
      */
-    int32_t getUnderlinePosition(void) const { return (int64_t)f->underline_position*f->size->metrics.y_scale / 65536; }
+    int32_t getUnderlinePosition(void) const;
 
     /** \brief Get the underline thickness of the font with multiplication factor of 64
      * \return thickness around the underline position
      */
-    int32_t getUnderlineThickness(void) const { return (int64_t)f->underline_thickness*f->size->metrics.y_scale / 65536; }
+    int32_t getUnderlineThickness(void) const;
     /** @} */
   private:
-    FT_Face f;
+    FT_FaceRec_ *f;
     std::shared_ptr<freeTypeLibrary_c> lib;
 };
 

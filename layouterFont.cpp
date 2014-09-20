@@ -42,6 +42,31 @@ fontFace_c::~fontFace_c()
   lib->doneFace(f);
 }
 
+uint32_t fontFace_c::getHeight(void) const
+{
+  return f->size->metrics.height;
+}
+
+int32_t fontFace_c::getAscender(void) const
+{
+  return f->size->metrics.ascender;
+}
+
+int32_t fontFace_c::getDescender(void) const
+{
+  return f->size->metrics.descender;
+}
+
+int32_t fontFace_c::getUnderlinePosition(void) const
+{
+  return (int64_t)f->underline_position*f->size->metrics.y_scale / 65536;
+}
+
+int32_t fontFace_c::getUnderlineThickness(void) const
+{
+  return (int64_t)f->underline_thickness*f->size->metrics.y_scale / 65536;
+}
+
 std::shared_ptr<fontFace_c> fontCache_c::getFont(const fontResource_c & res, uint32_t size)
 {
   fontFaceParameter_c ffp(res, size);
