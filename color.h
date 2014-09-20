@@ -28,11 +28,11 @@
  *  \brief this file contains just a little helper class for a 4-value color
  */
 
+namespace STLL {
+
 /** \brief a little class representing an rgba colour value, an a value of 255 is
  *  assumed to be opaque
  */
-namespace STLL {
-
 class color_c
 {
   private:
