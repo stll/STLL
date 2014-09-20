@@ -95,12 +95,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3ea2cd46a5506cdb32b509649f390016"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1free_type_library__c.html#a3ea2cd46a5506cdb32b509649f390016">~freeTypeLibrary_c</a> ()</td></tr>
 <tr class="memdesc:a3ea2cd46a5506cdb32b509649f390016"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy the library instance.  <a href="#a3ea2cd46a5506cdb32b509649f390016">More...</a><br/></td></tr>
 <tr class="separator:a3ea2cd46a5506cdb32b509649f390016"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5164428f32d53777f8cec7c8ededc64"><td class="memItemLeft" align="right" valign="top">FT_Face&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1free_type_library__c.html#aa5164428f32d53777f8cec7c8ededc64">newFace</a> (const <a class="el" href="class_s_t_l_l_1_1font_resource__c.html">fontResource_c</a> &amp;res, uint32_t size)</td></tr>
-<tr class="separator:aa5164428f32d53777f8cec7c8ededc64"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0fa2a069612798d8fb1b707075fe4294"><td class="memItemLeft" align="right" valign="top">FT_Error&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1free_type_library__c.html#a0fa2a069612798d8fb1b707075fe4294">outlineRender</a> (FT_Outline *o, FT_Raster_Params *params)</td></tr>
-<tr class="separator:a0fa2a069612798d8fb1b707075fe4294"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad38a650490e50b93e8b70ab605462496"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1free_type_library__c.html#ad38a650490e50b93e8b70ab605462496">doneFace</a> (FT_Face f)</td></tr>
-<tr class="separator:ad38a650490e50b93e8b70ab605462496"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77254d32e3d1a07a208f15e37edadecd"><td class="memItemLeft" align="right" valign="top">FT_FaceRec_ *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1free_type_library__c.html#a77254d32e3d1a07a208f15e37edadecd">newFace</a> (const <a class="el" href="class_s_t_l_l_1_1font_resource__c.html">fontResource_c</a> &amp;res, uint32_t size)</td></tr>
+<tr class="separator:a77254d32e3d1a07a208f15e37edadecd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65466b6a07e3f2adde21d85eb6baa524"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1free_type_library__c.html#a65466b6a07e3f2adde21d85eb6baa524">outlineRender</a> (FT_Outline_ *o, FT_Raster_Params_ *params)</td></tr>
+<tr class="separator:a65466b6a07e3f2adde21d85eb6baa524"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acefd7044e66f15fd1cf636cd0c57dbf3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1free_type_library__c.html#acefd7044e66f15fd1cf636cd0c57dbf3">doneFace</a> (FT_FaceRec_ *f)</td></tr>
+<tr class="separator:acefd7044e66f15fd1cf636cd0c57dbf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The class exposes the functions of the freetype library instance that are required by <a class="el" href="namespace_s_t_l_l.html" title="The namespace for the library. Every function and class is within this namespace. ...">STLL</a>. You normally don't need to use this interface at all.</p>
@@ -137,26 +137,18 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="ad38a650490e50b93e8b70ab605462496"></a>
+<a class="anchor" id="acefd7044e66f15fd1cf636cd0c57dbf3"></a>
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void STLL::freeTypeLibrary_c::doneFace </td>
           <td>(</td>
-          <td class="paramtype">FT_Face&#160;</td>
+          <td class="paramtype">FT_FaceRec_ *&#160;</td>
           <td class="paramname"><em>f</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 <p>Make the library destroy a font</p>
 <p>Usually you don't use this function directly but you use the <a class="el" href="class_s_t_l_l_1_1font_face__c.html" title="This class represents one font, made out of one resource and with a certain size. ...">fontFace_c</a> class</p>
@@ -169,12 +161,12 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aa5164428f32d53777f8cec7c8ededc64"></a>
+<a class="anchor" id="a77254d32e3d1a07a208f15e37edadecd"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">FT_Face STLL::freeTypeLibrary_c::newFace </td>
+          <td class="memname">FT_FaceRec_* STLL::freeTypeLibrary_c::newFace </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="class_s_t_l_l_1_1font_resource__c.html">fontResource_c</a> &amp;&#160;</td>
           <td class="paramname"><em>res</em>, </td>
@@ -205,23 +197,20 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a0fa2a069612798d8fb1b707075fe4294"></a>
+<a class="anchor" id="a65466b6a07e3f2adde21d85eb6baa524"></a>
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">FT_Error STLL::freeTypeLibrary_c::outlineRender </td>
+          <td class="memname">int STLL::freeTypeLibrary_c::outlineRender </td>
           <td>(</td>
-          <td class="paramtype">FT_Outline *&#160;</td>
+          <td class="paramtype">FT_Outline_ *&#160;</td>
           <td class="paramname"><em>o</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">FT_Raster_Params *&#160;</td>
+          <td class="paramtype">FT_Raster_Params_ *&#160;</td>
           <td class="paramname"><em>params</em>&#160;</td>
         </tr>
         <tr>
@@ -230,11 +219,6 @@ Public Member Functions</h2></td></tr>
           <td></td><td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 <p>Make the library render an outline of a glyph</p>
 <p>Usually you don't use this function directly but you use the <a class="el" href="class_s_t_l_l_1_1font_face__c.html" title="This class represents one font, made out of one resource and with a certain size. ...">fontFace_c</a> class</p>
@@ -258,7 +242,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1free_type_library__c.html">freeTypeLibrary_c</a></li>
-    <li class="footer">Generated on Sat Sep 20 2014 16:01:56 for STLL by
+    <li class="footer">Generated on Sat Sep 20 2014 16:16:09 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>
