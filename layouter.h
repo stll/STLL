@@ -37,6 +37,8 @@
 #include <vector>
 #include <memory>
 
+#include <stdint.h>
+
 /** \brief The namespace for the library.
  *  Every function and class is within this namespace.
  */

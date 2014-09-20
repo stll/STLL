@@ -19,9 +19,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "layouterSDL.h"
 
 #ifdef HAVE_SDL
+
+#include "layouterSDL.h"
+
+#include "layouter.h"
 
 // TODO we need some kind of caching here...
 

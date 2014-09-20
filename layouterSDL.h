@@ -28,13 +28,11 @@
 
 #ifdef HAVE_SDL
 
-#include "layouter.h"
-
 #include <SDL.h>
 
-#include <vector>
-
 namespace STLL {
+
+class textLayout_c;
 
 /** \brief display a single layout
  *  \param l layout to draw

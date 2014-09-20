@@ -33,8 +33,6 @@
 
 #include <string>
 
-#include <stdexcept>
-
 namespace STLL {
 
 /** \brief layout the given XHTML code

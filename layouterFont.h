@@ -30,19 +30,15 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include FT_GLYPH_H
 #include FT_OUTLINE_H
 
 #include <boost/utility.hpp>
 
 #include <string>
 #include <memory>
-#include <assert.h>
-#include <vector>
 #include <map>
 
 #include <stdint.h>
-
 #include <stdexcept>
 
 namespace STLL {
