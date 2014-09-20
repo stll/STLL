@@ -63,12 +63,12 @@ int32_t fontFace_c::getDescender(void) const
 
 int32_t fontFace_c::getUnderlinePosition(void) const
 {
-  return (int64_t)f->underline_position*f->size->metrics.y_scale / 65536;
+  return static_cast<int64_t>(f->underline_position*f->size->metrics.y_scale) / 65536;
 }
 
 int32_t fontFace_c::getUnderlineThickness(void) const
 {
-  return (int64_t)f->underline_thickness*f->size->metrics.y_scale / 65536;
+  return static_cast<int64_t>(f->underline_thickness*f->size->metrics.y_scale) / 65536;
 }
 
 std::shared_ptr<fontFace_c> fontCache_c::getFont(const fontResource_c & res, uint32_t size)
@@ -118,7 +118,7 @@ FT_Face freeTypeLibrary_c::newFace(const fontResource_c & res, uint32_t size)
   FT_Open_Args a;
   if (res.getDatasize() == 0) {
       a.flags = FT_OPEN_PATHNAME;
-      a.pathname = (FT_String*)res.getDescription().c_str();  // TODO const correctness is not given
+      a.pathname = const_cast<FT_String*>(res.getDescription().c_str());  // TODO const correctness is not given
       a.num_params = 0;
       a.params = nullptr;
   } else {

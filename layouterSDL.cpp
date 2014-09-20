@@ -52,7 +52,7 @@ typedef struct
 
 void spanner(int y, int count, const FT_Span* spans, void *user)
 {
-  spanInfo *baton = (spanInfo *)user;
+  spanInfo *baton = reinterpret_cast<spanInfo*>(user);
 
   uint32_t *scanline = baton->pixels - y * baton->pitch;
 
@@ -91,8 +91,8 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
   /* set up rendering via spanners */
   spanInfo span;
   span.pixels = NULL;
-  span.first_pixel = (uint32_t*)s->pixels;
-  span.last_pixel = (uint32_t *) (((uint8_t *) s->pixels) + s->pitch*s->h);
+  span.first_pixel = reinterpret_cast<uint32_t*>(s->pixels);
+  span.last_pixel = reinterpret_cast<uint32_t*>(reinterpret_cast<uint8_t*>(s->pixels) + s->pitch*s->h);
   span.pitch = s->pitch/4;
   span.rshift = s->format->Rshift;
   span.gshift = s->format->Gshift;
@@ -116,7 +116,7 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
     {
       case textLayout_c::commandData::CMD_GLYPH:
 
-        span.pixels = (uint32_t *)(((uint8_t *) s->pixels) + ((sy+i.y)/64) * s->pitch) + ((sx+i.x)/64);
+        span.pixels = reinterpret_cast<uint32_t*>(reinterpret_cast<uint8_t*>(s->pixels) + ((sy+i.y)/64) * s->pitch) + ((sx+i.x)/64);
         span.c = i.c;
 
         i.font->outlineRender(i.glyphIndex, &ftr_params);

@@ -51,7 +51,7 @@ std::pair<std::shared_ptr<uint8_t>, size_t> loadFile(const std::string & fn)
 
   f.seekg(0, std::ios_base::beg);
 
-  f.read((char*)dat, size);
+  f.read(reinterpret_cast<char*>(dat), size);
 
   return std::make_pair(std::shared_ptr<uint8_t>(dat, std::default_delete<uint8_t[]>()), size);
 }
