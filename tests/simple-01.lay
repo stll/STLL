@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <layout height="1088" left="0" right="64000">
 	<fonts>
-		<font file="/usr/share/fonts/freefont/FreeSans.ttf" size="1024" />
+		<font file="tests/FreeSans.ttf" size="1024" />
 	</fonts>
 	<commands>
 		<glyph x="0" y="896" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
