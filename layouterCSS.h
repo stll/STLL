@@ -26,14 +26,7 @@
  *  \brief Module containing CSS functionality
  */
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_GLYPH_H
-#include FT_OUTLINE_H
-
 #include "layouterFont.h"
-
-#include <boost/utility.hpp>
 
 #include <pugixml.hpp>
 
