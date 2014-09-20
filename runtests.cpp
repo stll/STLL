@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
   STLL::rectangleShape_c r(200*64);
 
   s.addRule("p", "font-size", "16px");
-  s.font("sans", STLL::fontResource_c("/usr/share/fonts/freefont/FreeSans.ttf"));
+  s.font("sans", STLL::fontResource_c("tests/FreeSans.ttf"));
 
   // not properly closing tag
   BOOST_CHECK_THROW(layoutXHTML("<html><body><p>Text</p></body></htm>", s, r), STLL::XhtmlException_c);
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   auto c = std::make_shared<STLL::fontCache_c>();
   STLL::textStyleSheet_c s(c);
 
-  s.font("sans", STLL::fontResource_c("/usr/share/fonts/freefont/FreeSans.ttf"));
+  s.font("sans", STLL::fontResource_c("tests/FreeSans.ttf"));
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#ffffff");
 
