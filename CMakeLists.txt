@@ -22,19 +22,19 @@ pkg_check_modules(FRIBIDI REQUIRED fribidi)
 find_library(LINEBREAK_LIBRARY NAMES linebreak)
 find_library(PUGIXML_LIBRARY NAMES pugixml)
 
-add_library(stll SHARED
+set(stll_SOURCES
   layouter.cpp
   layouterCSS.cpp
   layouterFont.cpp
-  layouterSDL.cpp
   layouterXHTML.cpp
   layouterXMLSaveLoad.cpp
   utf-8.cpp
 )
-target_compile_options(stll PRIVATE -std=c++11)
 if(SDL_FOUND)
-  target_compile_definitions(stll PRIVATE HAVE_SDL=1)
+  list(APPEND stll_SOURCES layouterSDL.cpp)
 endif()
+add_library(stll SHARED ${stll_SOURCES})
+target_compile_options(stll PRIVATE -std=c++11)
 target_include_directories(stll PUBLIC
   ${FREETYPE_INCLUDE_DIRS}
 )
