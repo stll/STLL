@@ -153,7 +153,7 @@ std::u32string u8_convertToU32(const std::string & in)
   {
     char32_t ch = 0;
 
-    int extraBytesToRead = trailingBytesForUTF8[(uint8_t)in[pos]];
+    int extraBytesToRead = trailingBytesForUTF8[static_cast<uint8_t>(in[pos])];
 
     if (pos + extraBytesToRead >= len)
     {
@@ -165,12 +165,12 @@ std::u32string u8_convertToU32(const std::string & in)
      * The cases all fall through. See "Note A" below.
      */
     switch (extraBytesToRead) {
-      case 5: ch += (uint8_t)in[pos]; pos++; ch <<= 6;
-      case 4: ch += (uint8_t)in[pos]; pos++; ch <<= 6;
-      case 3: ch += (uint8_t)in[pos]; pos++; ch <<= 6;
-      case 2: ch += (uint8_t)in[pos]; pos++; ch <<= 6;
-      case 1: ch += (uint8_t)in[pos]; pos++; ch <<= 6;
-      case 0: ch += (uint8_t)in[pos]; pos++;
+      case 5: ch += static_cast<uint8_t>(in[pos]); pos++; ch <<= 6;
+      case 4: ch += static_cast<uint8_t>(in[pos]); pos++; ch <<= 6;
+      case 3: ch += static_cast<uint8_t>(in[pos]); pos++; ch <<= 6;
+      case 2: ch += static_cast<uint8_t>(in[pos]); pos++; ch <<= 6;
+      case 1: ch += static_cast<uint8_t>(in[pos]); pos++; ch <<= 6;
+      case 0: ch += static_cast<uint8_t>(in[pos]); pos++;
     }
     ch -= offsetsFromUTF8[extraBytesToRead];
 
