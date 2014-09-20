@@ -57,19 +57,19 @@ class freeTypeLibrary_c;
  *
  *  Right now a file name or a memory pointer are supported resource types
  */
-class fontResource_c : public FT_Open_Args
+class fontResource_c
 {
   private:
-    std::string v;
-    std::shared_ptr<uint8_t> dat;
+    std::shared_ptr<uint8_t> data;
+    size_t datasize;
+    std::string descr;
 
   public:
-
     /** Create a font resource for a file given its path.
      *
-     * \param fname File name of the file to use as font
+     * \param pathname File name of the file to use as font
      */
-    fontResource_c(const std::string & fname);
+    fontResource_c(const std::string & pathname): data(nullptr), datasize(0), descr(pathname) {};
 
     /** Create a font resource from memory.
      *
@@ -77,23 +77,38 @@ class fontResource_c : public FT_Open_Args
      * \param descr description string, will be used to describe the font when an exception is thrown
      *              (e.g. problems loading the font)
      */
-    fontResource_c(std::pair<std::shared_ptr<uint8_t>, size_t> data, const std::string & descr);
+    fontResource_c(std::pair<std::shared_ptr<uint8_t>, size_t> data, const std::string & descr): data(data.first), datasize(data.second), descr(descr) {};
 
     /** Create an empty resource
      *
      * This constructor is required by the STL containers, don't use it
      */
-    fontResource_c(void)
-    {
-      flags = 0;
-    }
+    fontResource_c(void): data(nullptr), datasize(0), descr("") {}
 
     /** Get the description of the font resource.
      *
      * \return the description. This will be either the path to the font file, or the description
      * given when creating a memory resource
      */
-    const std::string & getDescription(void) const { return v; }
+    const std::string & getDescription(void) const { return descr; }
+
+    std::shared_ptr<uint8_t> getData() const { return data; }
+
+    size_t getDatasize() const { return datasize; }
+
+    bool operator<(const fontResource_c & b) const
+    {
+      if (data < b.data) return true;
+      if (data > b.data) return false;
+
+      if (datasize < b.datasize) return true;
+      if (datasize > b.datasize) return false;
+
+      if (descr < b.descr) return true;
+      return false;
+    }
+
+    bool operator>(const fontResource_c & b) const { return b < *this; }
 };
 
 /** \brief This class represents one font, made out of one resource and with a certain size.
@@ -267,14 +282,8 @@ class fontCache_c
 
       bool operator<(const fontFaceParameter_c & b) const
       {
-        if (res.flags < b.res.flags) return true;
-        if (res.flags > b.res.flags) return false;
-
-        if (res.memory_base < b.res.memory_base) return true;
-        if (res.memory_base > b.res.memory_base) return false;
-
-        if (res.pathname < b.res.pathname) return true;
-        if (res.pathname > b.res.pathname) return false;
+        if (res < b.res) return true;
+        if (res > b.res) return false;
 
         if (size < b.size) return true;
         return false;
