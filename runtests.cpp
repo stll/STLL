@@ -249,5 +249,5 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#ffffff");
 
-  BOOST_CHECK(layouts_identical(STLL::layoutXHTML("<html><body><p lang='en'>Test Text</p></body></html>", s, STLL::rectangleShape_c(1000)), "tests/simple-01.lay", c));
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML("<html><body><p lang='en'>Test Text</p></body></html>", s, STLL::rectangleShape_c(1000*64)), "tests/simple-01.lay", c));
 }

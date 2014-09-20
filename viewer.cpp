@@ -51,7 +51,7 @@ int main(int argv, char ** args)
     return 1;
   }
 
-  SDL_Surface *screen = SDL_SetVideoMode(l.getRight(), l.getHeight(), 32, SDL_SWSURFACE | SDL_DOUBLEBUF);
+  SDL_Surface *screen = SDL_SetVideoMode(l.getRight()/64, l.getHeight()/64, 32, SDL_SWSURFACE | SDL_DOUBLEBUF);
 
   if(!screen)
   {

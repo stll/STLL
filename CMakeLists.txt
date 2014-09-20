@@ -46,7 +46,23 @@ target_link_libraries(stll PUBLIC
   ${SDL_LIBRARY}
 )
 
-add_executable(runtests runtest.cpp)
+add_executable(runtests runtests.cpp)
 target_compile_options(runtests PRIVATE -std=c++11)
 target_link_libraries(runtests PRIVATE stll ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 add_test(test1 runtests)
+
+if(SDL_FOUND)
+  add_executable(example example.cpp)
+  target_compile_options(example PRIVATE -std=c++11)
+  target_compile_definitions(example PRIVATE HAVE_SDL=1)
+  target_include_directories(example PRIVATE ${SDL_INCLUDE_DIR})
+  target_link_libraries(example PRIVATE stll SDL)
+endif()
+
+if(SDL_FOUND)
+  add_executable(viewer viewer.cpp)
+  target_compile_options(viewer PRIVATE -std=c++11)
+  target_compile_definitions(viewer PRIVATE HAVE_SDL=1)
+  target_include_directories(viewer PRIVATE ${SDL_INCLUDE_DIR})
+  target_link_libraries(viewer PRIVATE stll SDL)
+endif()

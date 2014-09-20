@@ -261,7 +261,7 @@ int main ()
     // das eigentliche Layout
     // layoutXHTML macht die Arbeit, übergeben wird der Text, das Stylesheet und eine Klasse,
     // die die Form des Textes beinhaltet (für nicht rechteckiges Layout
-    l.emplace_back(layoutInfo_c(layoutXHTML(text, styleSheet, rectangleShape_c(TXT_WIDTH)),
+    l.emplace_back(layoutInfo_c(layoutXHTML(text, styleSheet, rectangleShape_c(64*TXT_WIDTH)),
                                 (WIN_WIDTH-TXT_WIDTH)/2, 10));
 
     l[0].layout.data[0].h = l[1].layout.getHeight();
