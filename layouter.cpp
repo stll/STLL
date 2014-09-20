@@ -76,7 +76,7 @@ static FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32,
                                            FriBidiParType base_dir)
 {
   std::vector<FriBidiCharType> bidiTypes(txt32.length());
-  fribidi_get_bidi_types((uint32_t*)txt32.c_str(), txt32.length(), bidiTypes.data());
+  fribidi_get_bidi_types(reinterpret_cast<const uint32_t*>(txt32.c_str()), txt32.length(), bidiTypes.data());
   embedding_levels.resize(txt32.length());
   FriBidiLevel max_level = fribidi_get_par_embedding_levels(bidiTypes.data(), txt32.length(),
                                                             &base_dir, embedding_levels.data());
@@ -191,9 +191,9 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     }
 
     if (!run.shy)
-      hb_buffer_add_utf32(buf, ((uint32_t*)txt32.c_str())+runstart, spos-runstart, 0, spos-runstart);
+      hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(txt32.c_str())+runstart, spos-runstart, 0, spos-runstart);
     else
-      hb_buffer_add_utf32(buf, (uint32_t*)U"\u2010", 1, 0, 1);
+      hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(U"\u2010"), 1, 0, 1);
 
     if (embedding_levels[runstart] % 2 == 0)
     {
@@ -649,7 +649,7 @@ static std::vector<char> getLinebreaks(const std::u32string & txt32, const attri
       runpos++;
     }
 
-    set_linebreaks_utf32((const utf32_t*)txt32.c_str()+runstart, runpos-runstart,
+    set_linebreaks_utf32(reinterpret_cast<const utf32_t*>(txt32.c_str())+runstart, runpos-runstart,
                          attr.get(runstart).lang.c_str(), linebreaks.data()+runstart);
 
     runstart = runpos;
