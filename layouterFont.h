@@ -42,6 +42,8 @@
 #include <stdexcept>
 
 struct FT_FaceRec_;
+struct FT_LibraryRec_;
+struct FT_Outline_;
 struct FT_Raster_Params_;
 
 namespace STLL {
@@ -196,7 +198,7 @@ class freeTypeLibrary_c : boost::noncopyable
      * \param size The requested font size
      * \return The FT_Face value
      */
-    FT_Face newFace(const fontResource_c & res, uint32_t size);
+    FT_FaceRec_ * newFace(const fontResource_c & res, uint32_t size);
 
     /** Make the library render an outline of a glyph
      *
@@ -206,10 +208,7 @@ class freeTypeLibrary_c : boost::noncopyable
      * \param params The rendering parameters
      * \return Error code
      */
-    FT_Error outlineRender(FT_Outline * o, FT_Raster_Params * params)
-    {
-      return FT_Outline_Render(lib, o, params);
-    }
+    int outlineRender(FT_Outline_ * o, FT_Raster_Params_ * params);
 
     /** Make the library destroy a font
      *
@@ -217,11 +216,11 @@ class freeTypeLibrary_c : boost::noncopyable
      *
      * \param f the font to destroy
      */
-    void doneFace(FT_Face f) { FT_Done_Face(f); }
+    void doneFace(FT_FaceRec_ * f);
 
   private:
 
-    FT_Library lib;
+    FT_LibraryRec_ *lib;
 };
 
 /** \brief this class encapsulates open fonts of a single library, it makes

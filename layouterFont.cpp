@@ -169,6 +169,16 @@ FT_Face freeTypeLibrary_c::newFace(const fontResource_c & res, uint32_t size)
                             res.getDescription() + "'. Maybe the font doesn't have one?");
 }
 
+FT_Error freeTypeLibrary_c::outlineRender(FT_Outline * o, FT_Raster_Params * params)
+{
+  return FT_Outline_Render(lib, o, params);
+}
+
+void freeTypeLibrary_c::doneFace(FT_Face f)
+{
+  FT_Done_Face(f);
+}
+
 freeTypeLibrary_c::~freeTypeLibrary_c()
 {
   FT_Done_FreeType(lib);
