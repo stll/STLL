@@ -1,6 +1,13 @@
+*.gcda
+*.gcno
+*.o
+*.so
 /CMakeCache.txt
 /CMakeFiles/
 /CTestTestfile.cmake
 /Makefile
 /Testing/
 /cmake_install.cmake
+/example
+/runtests
+/viewer
