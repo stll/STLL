@@ -24,6 +24,9 @@
 
 #include "layouter.h"
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 // TODO we need some kind of caching here...
 
 namespace STLL {

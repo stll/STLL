@@ -36,10 +36,8 @@ if(SDL_FOUND)
 endif()
 add_library(stll SHARED ${stll_SOURCES})
 target_compile_options(stll PRIVATE -std=c++11)
-target_include_directories(stll PUBLIC
-  ${FREETYPE_INCLUDE_DIRS}
-)
 target_include_directories(stll PRIVATE
+  ${FREETYPE_INCLUDE_DIRS}
   ${FRIBIDI_INCLUDE_DIRS}
   ${HARFBUZZ_INCLUDE_DIRS}
   ${SDL_INCLUDE_DIR}

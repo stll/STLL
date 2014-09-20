@@ -28,10 +28,6 @@
  * You normally don't need to use the stuff in this header
  */
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_OUTLINE_H
-
 #include <boost/utility.hpp>
 
 #include <string>
