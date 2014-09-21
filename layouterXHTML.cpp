@@ -349,13 +349,13 @@ static const pugi::char_t * getHTMLAttribute(pugi::xml_node xml, const std::stri
   }
 }
 
-typedef textLayout_c (*ParseFunction)(const pugi::xml_node & xml, const textStyleSheet_c & rules,
+typedef textLayout_c (*ParseFunction)(pugi::xml_node & xml, const textStyleSheet_c & rules,
                                       const shape_c & shape, int32_t ystart);
 
 
 // handles padding, margin and border, all in one, it takes the text returned from the
 // ParseFunction and boxes it
-static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & rules,
+static textLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, const textStyleSheet_c & rules,
                           const shape_c & shape, int32_t ystart, ParseFunction fkt,
                           const pugi::xml_node & above, const pugi::xml_node & left,
                           bool collapseBorder = false, uint32_t minHeight = 0)
@@ -438,7 +438,7 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
     borderwidth_left = std::max(borderElementLeft, borderwidth_left)-borderElementLeft;
   }
 
-  auto l2 = fkt(xml, rules,
+  auto l2 = fkt(xml2, rules,
                 indentShape_c(shape, padding_left+borderwidth_left+margin_left, padding_right+borderwidth_right+margin_right),
                 ystart+padding_top+borderwidth_top+margin_top);
   l2.setHeight(std::max(minHeight, l2.getHeight()+padding_bottom+borderwidth_bottom+margin_bottom));
@@ -552,7 +552,7 @@ static textLayout_c boxIt(const pugi::xml_node & xml, const textStyleSheet_c & r
   return l2;
 }
 
-static textLayout_c layoutXML_IMG(const pugi::xml_node & xml, const textStyleSheet_c & rules,
+static textLayout_c layoutXML_IMG(pugi::xml_node & xml, const textStyleSheet_c & rules,
                                   const shape_c & shape, int32_t ystart)
 {
   textLayout_c l;
@@ -570,103 +570,116 @@ static textLayout_c layoutXML_IMG(const pugi::xml_node & xml, const textStyleShe
   return l;
 }
 
-static void layoutXML_text(const pugi::xml_node & xml, const textStyleSheet_c & rules, std::u32string & txt,
+// this function is different from all the other layout functions as it
+// will take the first XML-node to layout and work along with the siblings
+// instead of looking at the children
+// this function will also return a new node where it stopped working
+pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, std::u32string & txt,
                attributeIndex_c & attr, int32_t baseline = 0)
 {
-  for (const auto & i : xml)
+  while (xml)
   {
-    if (i.type() == pugi::node_pcdata)
+    if (xml.type() == pugi::node_pcdata)
     {
       size_t s = txt.length();
 
       if (txt.length() == 0)
-        txt = u8_convertToU32(normalizeHTML(i.value(), ' '));
+        txt = u8_convertToU32(normalizeHTML(xml.value(), ' '));
       else
-        txt += u8_convertToU32(normalizeHTML(i.value(), txt[txt.length()-1]));
+        txt += u8_convertToU32(normalizeHTML(xml.value(), txt[txt.length()-1]));
 
       codepointAttributes a;
 
-      a.c = evalColor(rules.getValue(xml, "color"));
-      a.font = getFontForNode(xml, rules);
-      a.lang = getHTMLAttribute(xml, "lang");
+      a.c = evalColor(rules.getValue(xml.parent(), "color"));
+      a.font = getFontForNode(xml.parent(), rules);
+      a.lang = getHTMLAttribute(xml.parent(), "lang");
       a.flags = 0;
-      if (rules.getValue(xml, "text-decoration") == "underline")
+      if (rules.getValue(xml.parent(), "text-decoration") == "underline")
       {
         a.flags |= codepointAttributes::FL_UNDERLINE;
       }
-      a.shadows = evalShadows(rules.getValue(xml, "text-shadow"));
+      a.shadows = evalShadows(rules.getValue(xml.parent(), "text-shadow"));
 
       a.baseline_shift = baseline;
 
       attr.set(s, txt.length()-1, a);
     }
-    else if (   (i.type() == pugi::node_element)
-             && (   (std::string("i") == i.name())
-                 || (std::string("div") == i.name())
+    else if (   (xml.type() == pugi::node_element)
+             && (   (std::string("i") == xml.name())
+                 || (std::string("span") == xml.name())
                 )
             )
     {
-      layoutXML_text(i, rules, txt, attr);
+      if (layoutXML_text(xml.first_child(), rules, txt, attr))
+      {
+        throw XhtmlException_c("something unexpected happend in a phrasing segment (" + getNodePath(xml) + ")");
+      }
     }
-    else if (   (i.type() == pugi::node_element)
-             && (std::string("sub") == i.name())
-            )
-    {
-      auto font = getFontForNode(i, rules);
-
-      layoutXML_text(i, rules, txt, attr, baseline-font->getAscender()/2);
-    }
-    else if (   (i.type() == pugi::node_element)
-             && (std::string("sup") == i.name())
+    else if (   (xml.type() == pugi::node_element)
+             && (std::string("sub") == xml.name())
             )
     {
       auto font = getFontForNode(xml, rules);
 
-      layoutXML_text(i, rules, txt, attr, baseline+font->getAscender()/2);
+      if (layoutXML_text(xml.first_child(), rules, txt, attr, baseline-font->getAscender()/2))
+      {
+        throw XhtmlException_c("something unexpected happend in a phrasing segment (" + getNodePath(xml) + ")");
+      }
     }
-    else if ((i.type() == pugi::node_element) && (std::string("br") == i.name()))
+    else if (   (xml.type() == pugi::node_element)
+             && (std::string("sup") == xml.name())
+            )
+    {
+      auto font = getFontForNode(xml.parent(), rules);
+
+      layoutXML_text(xml, rules, txt, attr, baseline+font->getAscender()/2);
+    }
+    else if ((xml.type() == pugi::node_element) && (std::string("br") == xml.name()))
     {
       txt += U'\n';
       codepointAttributes a;
       a.flags = 0;
-      a.font = getFontForNode(xml, rules);
-      a.lang = getHTMLAttribute(xml, "lang");
+      a.font = getFontForNode(xml.parent(), rules);
+      a.lang = getHTMLAttribute(xml.parent(), "lang");
       attr.set(txt.length()-1, a);
     }
-    else if ((i.type() == pugi::node_element) && (std::string("img") == i.name()))
+    else if ((xml.type() == pugi::node_element) && (std::string("img") == xml.name()))
     {
       codepointAttributes a;
-      a.inlay = std::make_shared<textLayout_c>(boxIt(i, rules, rectangleShape_c(10000), 0,
+      a.inlay = std::make_shared<textLayout_c>(boxIt(xml, xml, rules, rectangleShape_c(10000), 0,
                                                      layoutXML_IMG, pugi::xml_node(), pugi::xml_node()));
       a.baseline_shift = 0;
-      a.shadows = evalShadows(rules.getValue(xml, "text-shadow"));
+      a.shadows = evalShadows(rules.getValue(xml.parent(), "text-shadow"));
 
       // if we want underlines, we add the font so that the layouter
       // can find the position of the underline
-      if (rules.getValue(xml, "text-decoration") == "underline")
+      if (rules.getValue(xml.parent(), "text-decoration") == "underline")
       {
         a.flags |= codepointAttributes::FL_UNDERLINE;
-        a.font = getFontForNode(xml, rules);
-        a.c = evalColor(rules.getValue(xml, "color"));
+        a.font = getFontForNode(xml.parent(), rules);
+        a.c = evalColor(rules.getValue(xml.parent(), "color"));
       }
       txt += U'\u00A0';
       attr.set(txt.length()-1, a);
     }
     else
     {
-      throw XhtmlException_c("Within paragraph environments only text and 'i' and 'div' "
-                             "tags are allowed (" + getNodePath(i) + ")");
+      break;
     }
+
+    xml = xml.next_sibling();
   }
+  return xml;
 }
 
-// this whole stuff is a recursive descending parser of the XHTML stuff
-static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+// this function is different from all other layout functions usable in the boxIt
+// function, as it will change the xml node and return a new one
+static textLayout_c layoutXML_Phrasing(pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
   std::u32string txt;
   attributeIndex_c attr;
 
-  layoutXML_text(xml, rules, txt, attr);
+  auto xml2 = layoutXML_text(xml, rules, txt, attr);
 
   layoutProperties lprop;
   std::string s = rules.getValue(xml, "text-align");
@@ -706,14 +719,18 @@ static textLayout_c layoutXML_P(const pugi::xml_node & xml, const textStyleSheet
   lprop.ltr = rules.getValue(xml, "direction") == "ltr";
   lprop.round = 3;
 
+  xml = xml2;
+
   return layoutParagraph(txt, attr, shape, lprop, ystart);
 }
 
-static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+static textLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart);
+
+static textLayout_c layoutXML_UL(pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
   textLayout_c l;
   l.setHeight(ystart);
-  for (const auto & i : xml)
+  for (auto & i : xml)
   {
     if (   (i.type() == pugi::node_element)
         && (std::string("li") == i.name())
@@ -747,13 +764,13 @@ static textLayout_c layoutXML_UL(const pugi::xml_node & xml, const textStyleShee
       {
         l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
                                  stripLeftShape_c(shape, padding, padding+listIndent), prop, y+padding));
-        l.append(boxIt(i, rules, indentShape_c(shape, listIndent, 0), y, layoutXML_P, i.previous_sibling(), pugi::xml_node()));
+        l.append(boxIt(i, i, rules, indentShape_c(shape, listIndent, 0), y, layoutXML_Flow, i.previous_sibling(), pugi::xml_node()));
       }
       else
       {
         l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
                                  stripRightShape_c(shape, padding+listIndent, padding), prop, y+padding));
-        l.append(boxIt(i, rules, indentShape_c(shape, 0, listIndent), y, layoutXML_P, i.previous_sibling(), pugi::xml_node()));
+        l.append(boxIt(i, i, rules, indentShape_c(shape, 0, listIndent), y, layoutXML_Flow, i.previous_sibling(), pugi::xml_node()));
       }
 
       l.setLeft(shape.getLeft2(ystart, l.getHeight()));
@@ -781,7 +798,7 @@ typedef struct
 
 } tableCell;
 
-static void layoutXML_TR(const pugi::xml_node & xml, uint32_t row, const textStyleSheet_c & /* rules */,
+static void layoutXML_TR(pugi::xml_node & xml, uint32_t row, const textStyleSheet_c & /* rules */,
                          std::vector<tableCell> & cells, vector2d<pugi::xml_node> & cellarray)
 {
   uint32_t col = 0;
@@ -832,7 +849,7 @@ static void layoutXML_TR(const pugi::xml_node & xml, uint32_t row, const textSty
   }
 }
 
-static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+static textLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
   std::vector<tableCell> cells;
   std::vector<uint32_t> widths;
@@ -844,7 +861,7 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
   int left = rtl ? 1 : -1;
 
   // collect all cells of the table
-  for (const auto & i : xml)
+  for (auto & i : xml)
   {
     if (   (i.type() == pugi::node_element)
         && (std::string("colgroup") == i.name())
@@ -913,8 +930,8 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
   // hight for each cell
   for (auto & c : cells)
   {
-    c.l = boxIt(c.xml, rules, rectangleShape_c(colStart[c.col+c.colspan]-colStart[c.col]),
-                0, layoutXML_P, cellarray.get(c.col+1, c.row), cellarray.get(c.col+(1+left)*c.colspan, c.row+1),
+    c.l = boxIt(c.xml, c.xml, rules, rectangleShape_c(colStart[c.col+c.colspan]-colStart[c.col]),
+                0, layoutXML_Flow, cellarray.get(c.col+1, c.row), cellarray.get(c.col+(1+left)*c.colspan, c.row+1),
                 rules.getValue(xml, "border-collapse") == "collapse");
   }
 
@@ -979,8 +996,8 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
       rh += rowheights[r];
 
     if (rh != c.l.getHeight())
-      c.l = boxIt(c.xml, rules, rectangleShape_c(colStart[c.col+c.colspan]-colStart[c.col]),
-                  0, layoutXML_P, cellarray.get(c.col+1, c.row), cellarray.get(c.col+(1+left)*c.colspan, c.row+1),
+      c.l = boxIt(c.xml, c.xml, rules, rectangleShape_c(colStart[c.col+c.colspan]-colStart[c.col]),
+                  0, layoutXML_Flow, cellarray.get(c.col+1, c.row), cellarray.get(c.col+(1+left)*c.colspan, c.row+1),
                   rules.getValue(xml, "border-collapse") == "collapse", rh);
 
     if (rtl)
@@ -1000,12 +1017,14 @@ static textLayout_c layoutXML_TABLE(const pugi::xml_node & xml, const textStyleS
   return l;
 }
 
-static textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+static textLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
   textLayout_c l;
   l.setHeight(ystart);
 
-  for (const auto & i : txt)
+  auto i = txt.first_child();
+
+  while (i)
   {
     if (   (i.type() == pugi::node_element)
         && (   (std::string("p") == i.name())
@@ -1018,22 +1037,51 @@ static textLayout_c layoutXML_BODY(const pugi::xml_node & txt, const textStyleSh
            )
        )
     {
-      l.append(boxIt(i, rules, shape, l.getHeight(), layoutXML_P, i.previous_sibling(), pugi::xml_node()));
+      // these element start a phrasing context
+      auto j = i.first_child();
+      l.append(boxIt(i, j, rules, shape, l.getHeight(), layoutXML_Phrasing, i.previous_sibling(), pugi::xml_node()));
+      if (j)
+      {
+        throw XhtmlException_c("There was an unexpected tag within a phrasing context (" + getNodePath(i) + ")");
+      }
+      i = i.next_sibling();
+    }
+    else if (  (i.type() == pugi::node_pcdata )
+             ||(  (i.type() == pugi::node_element)
+                &&(std::string("span") == i.name())
+               )
+            )
+    {
+      // these elements make the current node into a phrasing node
+      // after parsing, we assume right now, i will be changed to point to the next node
+      // not taken up by the Phrasing environment, so we don't want
+      // i to be set to the next sibling as in all other cases
+      l.append(layoutXML_Phrasing(i, rules, shape, l.getHeight()));
     }
     else if (i.type() == pugi::node_element && std::string("table") == i.name())
     {
-      l.append(boxIt(i, rules, shape, l.getHeight(), layoutXML_TABLE, i.previous_sibling(), pugi::xml_node()));
+      l.append(boxIt(i, i, rules, shape, l.getHeight(), layoutXML_TABLE, i.previous_sibling(), pugi::xml_node()));
+      i = i.next_sibling();
     }
     else if (i.type() == pugi::node_element && std::string("ul") == i.name())
     {
-      l.append(boxIt(i, rules, shape, l.getHeight(), layoutXML_UL, i.previous_sibling(), pugi::xml_node()));
+      l.append(boxIt(i, i, rules, shape, l.getHeight(), layoutXML_UL, i.previous_sibling(), pugi::xml_node()));
+      i = i.next_sibling();
+    }
+    else if (i.type() == pugi::node_element && std::string("div") == i.name())
+    {
+      l.append(boxIt(i, i, rules, shape, l.getHeight(), layoutXML_Flow, i.previous_sibling(), pugi::xml_node()));
+      i = i.next_sibling();
     }
     else
     {
-      throw XhtmlException_c("Only 'p', 'h1'-'h6', 'ul' and 'table' tag is allowed within a "
-                             "body tag (" + getNodePath(i) + ")");
+      throw XhtmlException_c("Only 'p', 'h1'-'h6', 'ul' and 'table' tag and prasing context is "
+                             "is allowed within flow environment (" + getNodePath(i) + ")");
     }
   }
+
+  l.setLeft(shape.getLeft(ystart, l.getHeight()));
+  l.setRight(shape.getRight(ystart, l.getHeight()));
 
   return l;
 }
@@ -1045,7 +1093,7 @@ static textLayout_c layoutXML_HTML(const pugi::xml_node & txt, const textStyleSh
   bool headfound = false;
   bool bodyfound = false;
 
-  for (const auto & i : txt)
+  for (auto & i : txt)
   {
     if (i.type() == pugi::node_element && std::string("head") == i.name() && !headfound)
     {
@@ -1054,7 +1102,7 @@ static textLayout_c layoutXML_HTML(const pugi::xml_node & txt, const textStyleSh
     else if (i.type() == pugi::node_element && std::string("body") == i.name() && !bodyfound)
     {
       bodyfound = true;
-      l = boxIt(i, rules, shape, 0, layoutXML_BODY, i.previous_sibling(), pugi::xml_node());
+      l = boxIt(i, i, rules, shape, 0, layoutXML_Flow, i.previous_sibling(), pugi::xml_node());
     }
     else
     {
