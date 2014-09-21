@@ -20,7 +20,9 @@ void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_
 
   for (const auto & a : l.data)
   {
-    if (std::find(found.begin(), found.end(), a.font) == found.end())
+    if (  (a.command == textLayout_c::commandData::CMD_GLYPH)
+        &&(std::find(found.begin(), found.end(), a.font) == found.end())
+       )
     {
       found.push_back(a.font);
 
@@ -54,8 +56,27 @@ void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_
         }
         break;
       case STLL::textLayout_c::commandData::CMD_RECT:
+        {
+          auto n = commands.append_child();
+          n.set_name("rect");
+          n.append_attribute("x").set_value(a.x);
+          n.append_attribute("y").set_value(a.y);
+          n.append_attribute("w").set_value(a.w);
+          n.append_attribute("h").set_value(a.h);
+          n.append_attribute("r").set_value(a.c.r());
+          n.append_attribute("g").set_value(a.c.g());
+          n.append_attribute("b").set_value(a.c.b());
+          n.append_attribute("a").set_value(a.c.a());
+        }
         break;
       case STLL::textLayout_c::commandData::CMD_IMAGE:
+        {
+          auto n = commands.append_child();
+          n.set_name("image");
+          n.append_attribute("x").set_value(a.x);
+          n.append_attribute("y").set_value(a.y);
+          n.append_attribute("url").set_value(a.imageURL.c_str());
+        }
         break;
     }
   }
@@ -93,9 +114,28 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
     }
     else if (a.name() == std::string("rect"))
     {
+      textLayout_c::commandData c;
+
+      c.command = textLayout_c::commandData::CMD_RECT;
+      c.x = std::stoi(a.attribute("x").value());
+      c.y = std::stoi(a.attribute("y").value());
+      c.w = std::stoi(a.attribute("w").value());
+      c.h = std::stoi(a.attribute("h").value());
+      c.c = color_c(std::stoi(a.attribute("r").value()), std::stoi(a.attribute("g").value()),
+                    std::stoi(a.attribute("b").value()), std::stoi(a.attribute("a").value()));
+
+      l.data.push_back(c);
     }
     else if (a.name() == std::string("image"))
     {
+      textLayout_c::commandData c;
+
+      c.command = textLayout_c::commandData::CMD_IMAGE;
+      c.x = std::stoi(a.attribute("x").value());
+      c.y = std::stoi(a.attribute("y").value());
+      c.imageURL = a.attribute("url").value();
+
+      l.data.push_back(c);
     }
   }
 
