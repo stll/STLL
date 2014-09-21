@@ -1138,7 +1138,7 @@ textLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules
 {
   pugi::xml_document doc;
 
-  auto res = doc.load_buffer(txt.c_str(), txt.length(), pugi::parse_ws_pcdata);
+  auto res = doc.load_buffer(txt.c_str(), txt.length(), pugi::parse_ws_pcdata | pugi::parse_escapes);
 
   if (res)
     return layoutXML(doc, rules, shape);
