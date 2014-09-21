@@ -502,6 +502,14 @@ void textStyleSheet_c::addRule(const std::string sel, const std::string attr, co
 
   checkValueFormat(attr, val);
 
+  // check, if a rule already exists, and if so, just change the value
+  for (auto & a : rules)
+    if (a.selector == sel && a.attribute == attr)
+    {
+      a.value = val;
+      return;
+    }
+
   rule r;
   r.selector = sel;
   r.attribute = attr;
