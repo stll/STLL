@@ -67,6 +67,22 @@ int main(int argv, char ** args)
   /* Clear our surface */
   SDL_FillRect(screen, NULL, 0 );
 
+  /* draw a grid with 10x10 pixel squares */
+  {
+    SDL_Rect r;
+    for (int x = 0; x < 1+l.getRight()/640; x++)
+      for (int y = 0; y < 1+l.getHeight()/640; y++)
+      {
+        if ((x + y) % 2)
+        {
+          r.x = x*10;
+          r.y = y*10;
+          r.w = r.h = 10;
+          SDL_FillRect(screen, &r, SDL_MapRGBA(screen->format, 50, 50, 50, 255));
+        }
+      }
+  }
+
   showLayoutSDL(l, 0, 0, screen);
 
   SDL_Flip(screen);
