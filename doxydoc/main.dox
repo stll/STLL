@@ -17,25 +17,30 @@
  * Current home of the library is at <a href="https://github.com/stll/STLL">github</a>.
  *
  * \section build_sec Getting started
- * Install all required libraries and tools.
- * On Debian, you can accomplish this via:
+ * First, install all required libraries and tools.
+ *
+ * On Debian/Wheezy, you can accomplish this via:
  * \code{.sh}
- * aptitude install libsdl1.2-dev libfreetype6-dev libharfbuzz-dev libglib2.0-dev libfribidi-dev libboost-test-dev libpugixml-dev liblinebreak2-dev fonts-freefont-ttf lcov doxygen
- * \endcode
+aptitude install libsdl1.2-dev libfreetype6-dev libharfbuzz-dev libglib2.0-dev libfribidi-dev libboost-test-dev libpugixml-dev liblinebreak2-dev lcov doxygen
+\endcode
+ * On Debian/Jessie and above, you can accomplish this via:
+ * \code{.sh}
+aptitude install libsdl1.2-dev libfreetype6-dev libharfbuzz-dev libglib2.0-dev libfribidi-dev libboost-test-dev libpugixml-dev libunibreak-dev lcov doxygen
+\endcode
  * Clone the Git repository:
  * \code{.sh}
- * git clone https://github.com/stll/STLL.git
- * cd STLL
- * \endcode
+git clone https://github.com/stll/STLL.git
+cd STLL
+\endcode
  * Build the library via CMake:
  * \code{.sh}
- * cmake .
- * make
- * \endcode
+cmake .
+make
+\endcode
  * You may want to run the test suite afterwards:
  * \code{.sh}
- * make test
- * \endcode
+make test
+\endcode
  *
  * \section design_sec Design of the library
  * The library is split into some parts that can be used independently and that are
