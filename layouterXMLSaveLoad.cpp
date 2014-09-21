@@ -26,7 +26,7 @@ void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_
 
       auto fnt = fonts.append_child();
       fnt.set_name("font");
-      fnt.append_attribute("descr").set_value(c->getFontResource(a.font).getDescription().c_str());
+      fnt.append_attribute("file").set_value(c->getFontResource(a.font).getDescription().c_str());
       fnt.append_attribute("size").set_value(c->getFontSize(a.font));
     }
   }
