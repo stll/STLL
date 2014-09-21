@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<layout height="2048" left="0" right="64000">
+	<fonts>
+		<font file="tests/Amiri.ttf" size="1024" />
+	</fonts>
+	<commands>
+		<glyph x="59991" y="1280" glyphIndex="2168" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="60528" y="1280" glyphIndex="2171" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="60927" y="1280" glyphIndex="2847" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="61278" y="1280" glyphIndex="2839" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="61587" y="1280" glyphIndex="384" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="62111" y="1280" glyphIndex="396" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="63128" y="1280" glyphIndex="4603" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="63398" y="1280" glyphIndex="4513" font="0" r="255" g="255" b="255" a="255" />
+	</commands>
+</layout>

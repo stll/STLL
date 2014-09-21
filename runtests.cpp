@@ -43,7 +43,7 @@ static bool compare(const STLL::textLayout_c & l, const pugi::xml_node & doc, st
   std::vector<std::pair<std::string, uint32_t>> found;
 
   for (const auto a : fonts.children())
-      found.push_back(std::make_pair(a.attribute("file").value(), std::stoul(a.attribute("size").value())));
+    found.push_back(std::make_pair(a.attribute("file").value(), std::stoul(a.attribute("size").value())));
 
   auto commands = doc.child("commands");
 
@@ -71,9 +71,22 @@ static bool compare(const STLL::textLayout_c & l, const pugi::xml_node & doc, st
     }
     else if (a.name() == std::string("rect"))
     {
+      if (l.data[i].command != STLL::textLayout_c::commandData::CMD_RECT) return false;
+      if (l.data[i].x != std::stoi(a.attribute("x").value())) return false;
+      if (l.data[i].y != std::stoi(a.attribute("y").value())) return false;
+      if (l.data[i].w != std::stoi(a.attribute("w").value())) return false;
+      if (l.data[i].h != std::stoi(a.attribute("h").value())) return false;
+      if (l.data[i].c.r() != std::stoi(a.attribute("r").value())) return false;
+      if (l.data[i].c.g() != std::stoi(a.attribute("g").value())) return false;
+      if (l.data[i].c.b() != std::stoi(a.attribute("b").value())) return false;
+      if (l.data[i].c.a() != std::stoi(a.attribute("a").value())) return false;
     }
     else if (a.name() == std::string("image"))
     {
+      if (l.data[i].command != STLL::textLayout_c::commandData::CMD_IMAGE) return false;
+      if (l.data[i].x != std::stoi(a.attribute("x").value())) return false;
+      if (l.data[i].y != std::stoi(a.attribute("y").value())) return false;
+      if (l.data[i].imageURL != a.attribute("url").value()) return false;
     }
     else
     {
@@ -251,5 +264,114 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#ffffff");
 
-  BOOST_CHECK(layouts_identical(STLL::layoutXHTML("<html><body><p lang='en'>Test Text</p></body></html>", s, STLL::rectangleShape_c(1000*64)), "tests/simple-01.lay", c));
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test Text</p></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/simple-01.lay", c));
+
+  // check text indent
+  s.addRule("body", "text-indent", "10px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test Text</p></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/simple-02.lay", c));
+  s.addRule("body", "text-indent", "0px");
+
+  // a language with script and at the same time right to left: arabic
+  s.font("sans-ar", STLL::fontResource_c("tests/Amiri.ttf"));
+  s.addRule("p[lang|=ar]", "direction", "rtl");
+  s.addRule("p[lang|=ar]", "font-family", "sans-ar");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='ar-arab'>كأس الأمم</p></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/simple-03.lay", c));
+
+  // usage of soft hyphen
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test&#173;Text&#173;Textwithaverylongadditiontomakeitlong</p></body></html>",
+    s, STLL::rectangleShape_c(300*64)), "tests/simple-04.lay", c));
+
+  // a simple inlay
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Te<img width='10px' height='10px' src='a' />st</p></body></html>",
+    s, STLL::rectangleShape_c(300*64)), "tests/simple-05.lay", c));
+
+  // a simple underline test
+  s.addRule("p", "text-decoration", "underline");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test</p></body></html>",
+    s, STLL::rectangleShape_c(300*64)), "tests/simple-06.lay", c));
+  s.addRule("p", "text-decoration", "");
+
+  // more complex underline with inlay and only partially
+  s.addRule("span", "text-decoration", "underline");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>T<span>e<img width='10px' height='10px' src='a' />s</span>t</p></body></html>",
+    s, STLL::rectangleShape_c(300*64)), "tests/simple-07.lay", c));
+  s.addRule("span", "text-decoration", "");
+
+  // more complex underline with inlay and only partially and additionally a shadow
+  s.addRule("body", "padding", "3px");  // make a bit space around to actually see something
+  s.addRule("span", "text-decoration", "underline");
+  s.addRule("p", "text-shadow", "1px 1px #FF0000, -1px -1px #00FF00");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>T<span>e<img width='10px' height='10px' src='a' />s</span>t</p></body></html>",
+    s, STLL::rectangleShape_c(300*64)), "tests/simple-08.lay", c));
+  s.addRule("span", "text-decoration", "");
+  s.addRule("p", "text-shadow", "");
+
+  // a simple underline test with spaces to underline
+  s.addRule("p", "text-decoration", "underline");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Text with spaces</p></body></html>",
+    s, STLL::rectangleShape_c(300*64)), "tests/simple-09.lay", c));
+  s.addRule("p", "text-decoration", "");
+
+  // centered text
+  s.addRule("p", "text-align", "center");
+  s.addRule("body", "text-indent", "10px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p>A longer text that will give us some lines of text in the output</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-10.lay", c));
+
+  // left adjusted text
+  s.addRule("p", "text-align", "left");
+  s.addRule("body", "text-indent", "10px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p>A longer text that will give us some lines of text in the output</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-11.lay", c));
+
+  // right adjusted text
+  s.addRule("p", "text-align", "right");
+  s.addRule("body", "text-indent", "10px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p>A longer text that will give us some lines of text in the output</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-12.lay", c));
+
+  // justified text
+  s.addRule("p", "text-align", "justify");
+  s.addRule("p", "text-align-last", "left");
+  s.addRule("body", "text-indent", "10px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p>A longer text that will give us some lines of text in the output</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-13.lay", c));
+
+  // justified text
+  s.addRule("p", "text-align", "justify");
+  s.addRule("p", "text-align-last", "right");
+  s.addRule("body", "text-indent", "10px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p>A longer text that will give us some lines of text in the output</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-14.lay", c));
+  s.addRule("p", "text-align", "left");
+  s.addRule("p", "text-align-last", "");
+  s.addRule("body", "text-indent", "0px");
+
+  // must break
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p>A longer<br />text<br />that will give<br />us some lines<br />of text</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-15.lay", c));
+
+  // must break with centered text
+  s.addRule("p", "text-align", "center");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p>A longer<br />text<br />that will give<br />us some lines<br />of text</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-16.lay", c));
 }

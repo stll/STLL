@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<layout height="1472" left="0" right="19200">
+	<fonts>
+		<font file="tests/FreeSans.ttf" size="1024" />
+	</fonts>
+	<commands>
+		<glyph x="256" y="1152" glyphIndex="55" font="0" r="255" g="0" b="0" a="255" />
+		<glyph x="904" y="1152" glyphIndex="72" font="0" r="255" g="0" b="0" a="255" />
+		<rect x="904" y="1332" w="610" h="64" r="255" g="0" b="0" a="255" />
+		<rect x="1450" y="1332" w="640" h="64" r="255" g="0" b="0" a="255" />
+		<glyph x="2090" y="1152" glyphIndex="86" font="0" r="255" g="0" b="0" a="255" />
+		<rect x="2090" y="1332" w="569" h="64" r="255" g="0" b="0" a="255" />
+		<glyph x="2597" y="1152" glyphIndex="87" font="0" r="255" g="0" b="0" a="255" />
+		<glyph x="128" y="1024" glyphIndex="55" font="0" r="0" g="255" b="0" a="255" />
+		<glyph x="776" y="1024" glyphIndex="72" font="0" r="0" g="255" b="0" a="255" />
+		<rect x="776" y="1204" w="610" h="64" r="0" g="255" b="0" a="255" />
+		<rect x="1322" y="1204" w="640" h="64" r="0" g="255" b="0" a="255" />
+		<glyph x="1962" y="1024" glyphIndex="86" font="0" r="0" g="255" b="0" a="255" />
+		<rect x="1962" y="1204" w="569" h="64" r="0" g="255" b="0" a="255" />
+		<glyph x="2469" y="1024" glyphIndex="87" font="0" r="0" g="255" b="0" a="255" />
+		<glyph x="192" y="1088" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="840" y="1088" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" />
+		<rect x="840" y="1268" w="610" h="64" r="255" g="255" b="255" a="255" />
+		<image x="1386" y="449" url="a" />
+		<rect x="1386" y="1268" w="640" h="64" r="255" g="255" b="255" a="255" />
+		<glyph x="2026" y="1088" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" />
+		<rect x="2026" y="1268" w="569" h="64" r="255" g="255" b="255" a="255" />
+		<glyph x="2533" y="1088" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" />
+	</commands>
+</layout>
