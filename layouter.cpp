@@ -649,7 +649,13 @@ static std::vector<char> getLinebreaks(const std::u32string & txt32, const attri
       runpos++;
     }
 
-    set_linebreaks_utf32(reinterpret_cast<const utf32_t*>(txt32.c_str())+runstart, runpos-runstart,
+    // when calculating the length for the function call below, we need to keep in mind
+    // that the function will always force a linebreak at the end of the string, to avoid
+    // this when the string really goes on, we include the next character in the string
+    // to linebreak (except of course when the string really ends here), that way we get
+    // a real linebreak and the wrongly written break is overwritten in the next call
+    set_linebreaks_utf32(reinterpret_cast<const utf32_t*>(txt32.c_str())+runstart,
+                         runpos-runstart+(runpos < length ? 1 : 0),
                          attr.get(runstart).lang.c_str(), linebreaks.data()+runstart);
 
     runstart = runpos;
