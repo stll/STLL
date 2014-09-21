@@ -19,7 +19,7 @@ pkg_check_modules(HARFBUZZ REQUIRED harfbuzz)
 pkg_check_modules(FRIBIDI REQUIRED fribidi)
 
 # Dependencies without support for neither CMake nor pkg-config
-find_library(LINEBREAK_LIBRARY NAMES linebreak)
+find_library(UNIBREAK_LIBRARY NAMES unibreak linebreak)
 find_library(PUGIXML_LIBRARY NAMES pugixml)
 
 # STLL library
@@ -46,7 +46,7 @@ target_link_libraries(stll PUBLIC
   ${FREETYPE_LIBRARIES}
   ${FRIBIDI_LIBRARIES}
   ${HARFBUZZ_LIBRARIES}
-  ${LINEBREAK_LIBRARY}
+  ${UNIBREAK_LIBRARY}
   ${PUGIXML_LIBRARY}
   ${SDL_LIBRARY}
 )
