@@ -399,6 +399,48 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
     "<html><body><ul><li>Test Text<ul><li>One nested item</li><li>And another one</li>"
     "</ul></li><li>More Text</li></ul></body></html>",
     s, STLL::rectangleShape_c(1000*64)), "tests/simple-19.lay", c));
+
+  // nested unordered list right to left
+  s.addRule(".rtl", "direction", "rtl");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><ul class='rtl'><li>Test Text<ul><li>One nested item</li><li>And another one</li>"
+    "</ul></li><li>More Text</li></ul></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/simple-20.lay", c));
+
+  // justified text with no align last value -> information comes from direction
+  s.addRule("p", "text-align", "justify");
+  s.addRule("p", "text-align-last", "");
+  s.addRule("body", "text-indent", "10px");
+  s.addRule(".rtl", "direction", "rtl");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body>"
+    "<p>A longer text that will give us some lines of text in the output</p>"
+    "<p class='rtl'>A longer text that will give us some lines of text in the output</p>"
+    "</body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-21.lay", c));
+
+  // no text align at all -> comes from direction
+  s.addRule("p", "text-align", "");
+  s.addRule("body", "text-indent", "10px");
+  s.addRule(".rtl", "direction", "rtl");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body>"
+    "<p>A longer text that will give us some lines of text in the output</p>"
+    "<p class='rtl'>A longer text that will give us some lines of text in the output</p>"
+    "</body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-22.lay", c));
+
+  // sub and sup
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test<sub>1</sub> Text<sup>2</sup></p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-23.lay", c));
+
+  // sub and sup with relatively smaller font size
+  s.addRule("sub", "font-size", "70%");
+  s.addRule("sup", "font-size", "50%");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test<sub>1</sub> Text<sup>2</sup></p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-24.lay", c));
 }
 
 BOOST_AUTO_TEST_CASE( Table_Layouts )
@@ -416,4 +458,30 @@ BOOST_AUTO_TEST_CASE( Table_Layouts )
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td>Test</td><td>T</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
     s, STLL::rectangleShape_c(1000*64)), "tests/table-01.lay", c));
+
+  // basic table with 2x2 cells, right to left direction
+  s.addRule("table", "direction", "rtl");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
+    "<tr><td>Test</td><td>T</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/table-02.lay", c));
+  s.addRule("table", "direction", "ltr");
+
+  // basic table with 2x2 cells with one multi line cell
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
+    "<tr><td>Test with some more text</td><td>T</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/table-03.lay", c));
+
+  // basic table with 2x2 cells with one multi line cell
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
+    "<tr><td rowspan='2'>Test with some more text</td><td>T</td></tr><tr><td>Table</td></tr></table></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/table-04.lay", c));
+
+  // basic table with 2x2 cells with one multi columns cell
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
+    "<tr><td colspan='2'>Test with some more text</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/table-05.lay", c));
 }
