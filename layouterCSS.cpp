@@ -377,7 +377,7 @@ static void checkValueFormat(const std::string & attribute, const std::string & 
   if (attribute == "margin-right") checkFormatSize(value, SZ_PX);
   if (attribute == "margin-top") checkFormatSize(value, SZ_PX);
   if (attribute == "margin-bottom") checkFormatSize(value, SZ_PX);
-  if (attribute == "text-align") checkValues(value, {"left", "right", "center", "justify"}, "text-align");
+  if (attribute == "text-align") checkValues(value, {"left", "right", "center", "justify", ""}, "text-align");
   if (attribute == "text-align-last") checkValues(value, {"left", "right", ""}, "text-align-last");
   if (attribute == "text-indent") checkFormatSize(value, SZ_PX);
   if (attribute == "direction") checkValues(value, {"ltr", "rtl"}, "direction");
