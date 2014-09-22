@@ -45,21 +45,6 @@ class indentShape_c : public shape_c
     virtual int32_t getRight2(int32_t top, int32_t bottom) const { return outside.getRight2(top, bottom)-ind_right; }
 };
 
-class shiftShape_c : public shape_c
-{
-  private:
-    const shape_c & outside;
-    int32_t shift;
-
-  public:
-    shiftShape_c(const shape_c & s, int32_t sh) : outside(s), shift(sh) { }
-
-    virtual int32_t getLeft(int32_t top, int32_t bottom) const { return outside.getLeft(top+shift, bottom+shift); }
-    virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top+shift, bottom+shift); }
-    virtual int32_t getLeft2(int32_t top, int32_t bottom) const { return outside.getLeft2(top+shift, bottom+shift); }
-    virtual int32_t getRight2(int32_t top, int32_t bottom) const { return outside.getRight2(top+shift, bottom+shift); }
-};
-
 class stripLeftShape_c : public shape_c
 {
   private:
@@ -575,7 +560,7 @@ static textLayout_c layoutXML_IMG(pugi::xml_node & xml, const textStyleSheet_c &
 // instead of looking at the children
 // this function will also return a new node where it stopped working
 pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, std::u32string & txt,
-               attributeIndex_c & attr, int32_t baseline = 0)
+               attributeIndex_c & attr, int32_t baseline = 0, bool exitOnError = false)
 {
   while (xml)
   {
@@ -610,10 +595,7 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
                 )
             )
     {
-      if (layoutXML_text(xml.first_child(), rules, txt, attr))
-      {
-        throw XhtmlException_c("something unexpected happend in a phrasing segment (" + getNodePath(xml) + ")");
-      }
+      layoutXML_text(xml.first_child(), rules, txt, attr);
     }
     else if (   (xml.type() == pugi::node_element)
              && (std::string("sub") == xml.name())
@@ -621,10 +603,7 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
     {
       auto font = getFontForNode(xml, rules);
 
-      if (layoutXML_text(xml.first_child(), rules, txt, attr, baseline-font->getAscender()/2))
-      {
-        throw XhtmlException_c("something unexpected happend in a phrasing segment (" + getNodePath(xml) + ")");
-      }
+      layoutXML_text(xml.first_child(), rules, txt, attr, baseline-font->getAscender()/2);
     }
     else if (   (xml.type() == pugi::node_element)
              && (std::string("sup") == xml.name())
@@ -632,10 +611,7 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
     {
       auto font = getFontForNode(xml.parent(), rules);
 
-      if (layoutXML_text(xml.first_child(), rules, txt, attr, baseline+font->getAscender()/2))
-      {
-        throw XhtmlException_c("something unexpected happend in a phrasing segment (" + getNodePath(xml) + ")");
-      }
+      layoutXML_text(xml.first_child(), rules, txt, attr, baseline+font->getAscender()/2);
     }
     else if ((xml.type() == pugi::node_element) && (std::string("br") == xml.name()))
     {
@@ -667,7 +643,10 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
     }
     else
     {
-      break;
+      if (exitOnError)
+        break;
+      else
+        throw XhtmlException_c("Found non phrasing element in phrasing context (" + getNodePath(xml) + ")" );
     }
 
     xml = xml.next_sibling();
@@ -682,7 +661,7 @@ static textLayout_c layoutXML_Phrasing(pugi::xml_node & xml, const textStyleShee
   std::u32string txt;
   attributeIndex_c attr;
 
-  auto xml2 = layoutXML_text(xml, rules, txt, attr);
+  auto xml2 = layoutXML_text(xml, rules, txt, attr, 0, true);
 
   layoutProperties lprop;
   std::string s = rules.getValue(xml, "text-align");
