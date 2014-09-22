@@ -224,6 +224,7 @@ BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
 
   s.addRule("p", "font-size", "16px");
   s.font("sans", STLL::fontResource_c("tests/FreeSans.ttf"));
+  s.addRule(".font", "font-family", "snas");
 
   // not properly closing tag
   BOOST_CHECK_THROW(layoutXHTML("<html><body><p>Text</p></body></htm>", s, r), STLL::XhtmlException_c);
@@ -253,6 +254,11 @@ BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
   BOOST_CHECK_THROW(layoutXHTML("<html><body><table><tr></tr></table><p>Text</p></body></html>", s, r), STLL::XhtmlException_c);
   // table with column group but invalid span value
   BOOST_CHECK_THROW(layoutXHTML("<html><body><table><colgroup><col span='0' /></colgroup></table><p>Text</p></body></html>", s, r), STLL::XhtmlException_c);
+  // invalid tag in flow context
+  BOOST_CHECK_THROW(layoutXHTML("<html><body><colgroup /></body></html>", s, r), STLL::XhtmlException_c);
+  // invalid / undefined font
+  s.addRule("p", "color", "#FFFFFF");
+  BOOST_CHECK_THROW(layoutXHTML("<html><body><p class='font'>Test</p></body></html>", s, r), STLL::XhtmlException_c);
 }
 
 BOOST_AUTO_TEST_CASE( Simple_Layouts )
@@ -264,6 +270,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#ffffff");
 
+  // simple text
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
     "<html><body><p lang='en'>Test Text</p></body></html>",
     s, STLL::rectangleShape_c(1000*64)), "tests/simple-01.lay", c));
@@ -374,4 +381,39 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
     "<html><body><p>A longer<br />text<br />that will give<br />us some lines<br />of text</p></body></html>",
     s, STLL::rectangleShape_c(200*64)), "tests/simple-16.lay", c));
+  s.addRule("p", "text-align", "left");
+
+  // test of division with a style
+  s.addRule(".tt", "color", "#80FF80");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><div class='tt'><p>Test Text</p></div></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/simple-17.lay", c));
+
+  // unordered list
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><ul><li>Test Text</li><li>More Text</li></ul></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/simple-18.lay", c));
+
+  // nested unordered list
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><ul><li>Test Text<ul><li>One nested item</li><li>And another one</li>"
+    "</ul></li><li>More Text</li></ul></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/simple-19.lay", c));
+}
+
+BOOST_AUTO_TEST_CASE( Table_Layouts )
+{
+  auto c = std::make_shared<STLL::fontCache_c>();
+  STLL::textStyleSheet_c s(c);
+
+  s.font("sans", STLL::fontResource_c("tests/FreeSans.ttf"));
+  s.addRule("body", "font-size", "16px");
+  s.addRule("body", "color", "#ffffff");
+  s.addRule(".tc", "width", "100px");
+
+  // basic table with 2x2 cells
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
+    "<tr><td>Test</td><td>T</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/table-01.lay", c));
 }
