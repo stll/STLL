@@ -86,15 +86,12 @@ static FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32,
 
 static int32_t roundToDivisible(int32_t r, int32_t d)
 {
-  if (d > 1)
+  if (d > 0 && d < 64)
   {
-    int32_t a = r%d;
-
-    if (a > d/2)
-      return r+d-a;
-    else
-      return r+a;
+    r = ( d*r + 32 ) / 64;
+    r = (64*r + d/2) / d;
   }
+
   return r;
 }
 

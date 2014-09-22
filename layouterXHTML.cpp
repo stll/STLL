@@ -717,7 +717,7 @@ static textLayout_c layoutXML_Phrasing(pugi::xml_node & xml, const textStyleShee
 
   lprop.indent = evalSize(rules.getValue(xml, "text-indent"));
   lprop.ltr = rules.getValue(xml, "direction") == "ltr";
-  lprop.round = 3;
+  lprop.round = rules.getRound();
 
   xml = xml2;
 
@@ -759,6 +759,7 @@ static textLayout_c layoutXML_UL(pugi::xml_node & xml, const textStyleSheet_c & 
       prop.indent = 0;
       prop.ltr = true;
       prop.align = layoutProperties::ALG_CENTER;
+      prop.round = rules.getRound();
 
       if (direction == "ltr")
       {
