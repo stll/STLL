@@ -632,7 +632,10 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
     {
       auto font = getFontForNode(xml.parent(), rules);
 
-      layoutXML_text(xml, rules, txt, attr, baseline+font->getAscender()/2);
+      if (layoutXML_text(xml.first_child(), rules, txt, attr, baseline+font->getAscender()/2))
+      {
+        throw XhtmlException_c("something unexpected happend in a phrasing segment (" + getNodePath(xml) + ")");
+      }
     }
     else if ((xml.type() == pugi::node_element) && (std::string("br") == xml.name()))
     {
