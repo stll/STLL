@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<layout height="1728" left="0" right="12800">
+	<fonts>
+		<font file="tests/FreeSans.ttf" size="1024" />
+	</fonts>
+	<commands>
+		<rect x="0" y="640" w="12800" h="1088" r="0" g="0" b="64" a="255" />
+		<rect x="0" y="0" w="12800" h="640" r="255" g="255" b="0" a="255" />
+		<glyph x="0" y="1536" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="640" y="1536" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="1216" y="1536" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="1728" y="1536" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="2240" y="1536" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="2880" y="1536" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="3456" y="1536" glyphIndex="91" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="3968" y="1536" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" />
+	</commands>
+</layout>

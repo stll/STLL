@@ -259,6 +259,20 @@ BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
   // invalid / undefined font
   s.addRule("p", "color", "#FFFFFF");
   BOOST_CHECK_THROW(layoutXHTML("<html><body><p class='font'>Test</p></body></html>", s, r), STLL::XhtmlException_c);
+
+  // put something undefined in prasing context
+  BOOST_CHECK_THROW(layoutXHTML("<html><body><p>Test<i><div /></i></p></body></html>", s, r), STLL::XhtmlException_c);
+
+  // image with non-pixel size attrib
+  BOOST_CHECK_THROW(layoutXHTML(
+    "<html><body><p lang='en'>Te<img width='10' height='10' src='a' />st</p></body></html>",
+    s, STLL::rectangleShape_c(300*64)), STLL::XhtmlException_c);
+
+  // relative font size and no parent for
+  s.addRule("p", "font-size", "80%");
+  BOOST_CHECK_THROW(layoutXHTML(
+    "<html><body><p lang='en'>Test</p></body></html>",
+    s, STLL::rectangleShape_c(300*64)), STLL::XhtmlException_c);
 }
 
 BOOST_AUTO_TEST_CASE( Simple_Layouts )
@@ -441,6 +455,17 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
     "<html><body><p lang='en'>Test<sub>1</sub> Text<sup>2</sup></p></body></html>",
     s, STLL::rectangleShape_c(200*64)), "tests/simple-24.lay", c));
+
+  // check HTML normalization: all paragraphs must look the same
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body>"
+    "<p>Test Text</p>"
+    "<p>Test  Text</p>"
+    "<p>Test       Text</p>"
+    "<p>Test\nText</p>"
+    "<p>Test \n Text</p>"
+    "</body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/simple-25.lay", c));
 }
 
 BOOST_AUTO_TEST_CASE( Table_Layouts )
@@ -484,4 +509,90 @@ BOOST_AUTO_TEST_CASE( Table_Layouts )
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td colspan='2'>Test with some more text</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
     s, STLL::rectangleShape_c(1000*64)), "tests/table-05.lay", c));
+}
+
+BOOST_AUTO_TEST_CASE( Frames_Layouts )
+{
+  auto c = std::make_shared<STLL::fontCache_c>();
+  STLL::textStyleSheet_c s(c);
+
+  s.font("sans", STLL::fontResource_c("tests/FreeSans.ttf"));
+
+  s.addRule("body", "font-size", "16px");
+  s.addRule("body", "color", "#FFFFFF");
+  s.addRule("body", "border-color", "#FFFF00");
+  s.addRule("body", "background-color", "#000040");
+
+  // top border
+  s.addRule("body", "border-top-width", "10px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test Text</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/border-01.lay", c));
+  s.addRule("body", "border-top-width", "0px");
+
+  // bottom border
+  s.addRule("body", "border-bottom-width", "10px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test Text</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/border-02.lay", c));
+  s.addRule("body", "border-bottom-width", "0px");
+
+  // left border
+  s.addRule("body", "border-left-width", "10px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test Text</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/border-03.lay", c));
+  s.addRule("body", "border-left-width", "0px");
+
+  // right border
+  s.addRule("body", "border-right-width", "10px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test Text</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/border-04.lay", c));
+  s.addRule("body", "border-right-width", "0px");
+
+  // check margin collapsing
+  s.addRule("p", "margin", "10px");
+  s.addRule("p", "margin-bottom", "5px");
+  s.addRule("body", "margin", "2px");
+  s.addRule("p", "border-width", "1px");
+  s.addRule("p", "border-color", "#FFFF00");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test Text</p><p>Text Test</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/border-05.lay", c));
+  s.addRule("p", "border-width", "0px");
+
+  // table with 2x3 cells with one multiline and one multirow cell with bordercollapse
+  s.addRule(".tc", "width", "100px");
+  s.addRule("td", "border-width", "1px");
+  s.addRule("table", "border-collapse", "collapse");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
+    "<tr><td colspan='2'>Test with some more text</td></tr><tr><td rowspan='2'>T</td><td>Table</td></tr><tr><td>Oops</td></tr></table></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/border-06.lay", c));
+
+  // table with 2x3 cells with one multiline and one multirow cell with bordercollapse but margins and extra right margin
+  s.addRule(".tc", "width", "100px");
+  s.addRule("td", "border-width", "1px");
+  s.addRule("td", "margin", "1px");
+  s.addRule("td", "border-right-width", "2px");
+  s.addRule("td", "margin-right", "2px");
+  s.addRule("table", "border-collapse", "collapse");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
+    "<tr><td colspan='2'>Test with some more text</td></tr><tr><td rowspan='2'>T</td><td>Table</td></tr><tr><td>Oops</td></tr></table></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/border-07.lay", c));
+
+  // table with 2x3 cells with one multiline and one multirow cell with bordercollapse not margins, extra right border
+  s.addRule(".tc", "width", "100px");
+  s.addRule("td", "border-width", "1px");
+  s.addRule("td", "margin", "0px");
+  s.addRule("td", "border-right-width", "2px");
+  s.addRule("td", "border-bottom-width", "2px");
+  s.addRule("td", "margin-right", "0px");
+  s.addRule("table", "border-collapse", "collapse");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
+    "<tr><td colspan='2'>Test with some more text</td></tr><tr><td rowspan='2'>T</td><td>Table</td></tr><tr><td>Oops</td></tr></table></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/border-08.lay", c));
 }
