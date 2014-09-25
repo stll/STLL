@@ -269,10 +269,21 @@ BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
     s, STLL::rectangleShape_c(300*64)), STLL::XhtmlException_c);
 
   // relative font size and no parent for
+  s.addRule("html", "font-size", "80%");
   s.addRule("p", "font-size", "80%");
   BOOST_CHECK_THROW(layoutXHTML(
     "<html><body><p lang='en'>Test</p></body></html>",
     s, STLL::rectangleShape_c(300*64)), STLL::XhtmlException_c);
+
+  // wrong symbols in universal escapes, dec
+  BOOST_CHECK_THROW(layoutXHTML(
+    "<html><body><p>&#1a63</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), STLL::XhtmlException_c);
+
+  // wrong symbols in universal escapes, hex
+  BOOST_CHECK_THROW(layoutXHTML(
+    "<html><body><p>&#xAg3;</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), STLL::XhtmlException_c);
 }
 
 BOOST_AUTO_TEST_CASE( Simple_Layouts )
@@ -472,12 +483,18 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   // first: Test, 2nd hebrew word, Text, 1st hebrew word Three
   // second: Test, 1st hebrew word, Text, 2nd hebrew word Three
   s.addRule("body", "text-indent", "0px");
+  s.addRule("span[lang|=he]", "direction", "rtl");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
     "<html><body>"
     "<p lang='en'>Test <span lang='he'>אברהם<span lang='en'> Text </span>שמואל</span> Three</p>"
     "<p lang='en'>Test <span lang='he'>אברהם</span> Text <span lang='he'>שמואל</span> Three</p>"
     "</body></html>",
     s, STLL::rectangleShape_c(250*64)), "tests/simple-26.lay", c));
+
+  // some named symbols
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p>&amp;amp;&sect;&#163;&#xA3;&#xa3;&unknown;</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-27.lay", c));
 }
 
 BOOST_AUTO_TEST_CASE( Table_Layouts )
