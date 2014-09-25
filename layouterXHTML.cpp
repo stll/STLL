@@ -728,7 +728,7 @@ static textLayout_c layoutXML_UL(pugi::xml_node & xml, const textStyleSheet_c & 
       while (j.type() != pugi::node_pcdata)
         j = j.first_child();
 
-      auto font = getFontForNode(j, rules);
+      auto font = getFontForNode(i, rules);
       auto y = l.getHeight();
 
       codepointAttributes a;
@@ -751,6 +751,8 @@ static textLayout_c layoutXML_UL(pugi::xml_node & xml, const textStyleSheet_c & 
 
       if (direction == "ltr")
       {
+        // TODO solve problem, that the bullet needs to be aligned with the baseline of the
+        // first line of the paragraph that we add...
         l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
                                  stripLeftShape_c(shape, padding, padding+listIndent), prop, y+padding));
         l.append(boxIt(i, i, rules, indentShape_c(shape, listIndent, 0), y, layoutXML_Flow, i.previous_sibling(), pugi::xml_node()));
