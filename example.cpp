@@ -121,13 +121,15 @@ int main ()
   textStyleSheet_c styleSheet;
 
   // alle Fonts, die so genutzt werden: familie heißt sans, und dann der bold Font dazu
-  styleSheet.font("sans", fontResource_c("/usr/share/fonts/freefont/FreeSans.ttf"));
+  styleSheet.font("sans", fontResource_c("tests/FreeSans.ttf"));
   styleSheet.font("sans", fontResource_c("/usr/share/fonts/freefont/FreeSansBold.ttf"), "normal", "normal", "bold");
-  styleSheet.font("sans-ar", fontResource_c(loadFile("fonts/amiri-0.104/amiri-regular.ttf"), "arabic"));
+  styleSheet.font("sans-ar", fontResource_c(loadFile("tests/Amiri.ttf"), "arabic"));
 
   // CSS regeln, immer Selector, attribut, wert
   styleSheet.addRule("body", "color", "#ffffff");
   styleSheet.addRule("body", "font-size", "16px");
+  styleSheet.addRule("sub", "font-size", "80%");
+  styleSheet.addRule("sup", "font-size", "80%");
   styleSheet.addRule("body", "text-align", "justify");
   styleSheet.addRule("p", "text-indent", "10px");
   styleSheet.addRule("body", "padding", "10px");
@@ -179,7 +181,7 @@ int main ()
   styleSheet.addRule("table", "padding", "1px");
   styleSheet.addRule("table", "text-indent", "0px");
   styleSheet.addRule("table", "text-align", "center");
-  styleSheet.addRule("table", "direction", "rtl");
+//  styleSheet.addRule("table", "direction", "rtl");
 
   styleSheet.addRule("td", "padding", "00px");
   styleSheet.addRule("td", "padding-left", "00px");
@@ -195,10 +197,10 @@ int main ()
 
   // der zu formatierende text
   std::string text = u8"<html><body>"
-    "<h1 lang='de'>Überschrift mit</h1>"
+    "<h1 lang='de'>&iexcl;Überschrift mit</h1>"
     "<p class='und'>Test <i class='BigFont' class='und'>Text</i> more and somme ii "
-    "<div class='BoldFont' class='und'>more text so</div> that the pa\u00ADra\u00ADgraph iiiiii is at least "
-    "<div>long</div> enough to span some lines on the screen "
+    "<span class='BoldFont' class='und'>more text so</span> that the pa\u00ADra\u00ADgraph iiiiii is at least "
+    "<span>long</span> enough to span some lines on the screen "
     "<img class='pframed' src='i1' width='30px' height='30px'/> <img class='pframed' src='i1' width='10px' height='10px'/>"
     "<img src='i1' width='10px' height='10px'/> "
     "let us "
@@ -212,18 +214,18 @@ int main ()
     "אבולעפיה חיבר עשרות ספרי קבלה, שזכו להתייחסות נרחבת גם בקרב קהיליית החוקרים המדעית. חלקם יצאו "
     "לאור לאחרונה במהדורות מחודשות.</p>"
     "<p lang='ar-arab'>كأس الأمم الأفريقية لكرة القدم 2008، ,عرفت أيضاً باسم إم.تي.إن كأس الأمم الأفريقية "
-"لكرة <div class='und'>القدم بسبب الشركة</div> القدم بسبب الشركة الراعية للبطولة إم.تي.إن، كانت النسخة السادسة والعشرون من كأس الأمم الأفريقية، "
+"لكرة <span class='und'>القدم بسبب الشركة</span> القدم بسبب الشركة الراعية للبطولة إم.تي.إن، كانت النسخة السادسة والعشرون من كأس الأمم الأفريقية، "
     "وهي البطولة الرئيسية لمنتخبات الاتحاد الأفريقي لكرة القدم (كاف) والتي تقام كل سنتين منذ سنة "
     "1957. نظمت المسابقة في أربعة مدن في جميع أنحاء غانا بين 20 يناير و 10 فبراير 2008. وبحضور 16 منتخبا "
     "أفريقيا مقسمين على 4 مجموعات ويتأهل أول فريقين لكل مجموعة إلى دور الثمانية حيث الأدوار الإقصائية، "
     "وكانت مباراة الأفتتاح بين غانا وغينيا والتي انتهت بفوز غانا 2-1، وانتهت البطولة بفوز مصر بالبطولة "
     "القارية، بعد أن هزمت الكاميرون 1–0 في النهائي الذي أقيم علي ملعب أوهين دجان بمدينة أكرا، بينما فاز "
     "منخب غانا بالمركز الثالث عقب تغلبه على فريق ساحل العاج بأربعة أهداف مقابل هدفين. (تابع القراءة)</p>"
-    "<p>2nd Paragraph<div class='BigFont'> with <div class='BoldFont'>a\ndivision</div>"
-    "</div>.</p>"
+    "<p>2nd Paragraph<span class='BigFont'> with <span class='BoldFont'>a\ndivision</span>"
+    "</span>.</p>"
     "<p class='und'>a b c andnowone<i>very</i>longwordthatdoesntfitononelineandmight d e f °C</p>"
-    "<ul class='framed'><li>First <div class='und'>long</div> text in an ul list of html sdfsd fsd fs dfsd f gobble di gock and "
-    "even more</li><li>Second with just a bit</li></ul>"
+    "<ul class='framed'><li><sub>Test</sub>First <span class='und'>long</span> text in an ul list of html sdfsd fsd fs dfsd f gobble di gock and "
+    "even more</li><li>asd<ul><li><sup>Text</sup>One</li><li>Two</li></ul>fgh</li><li>Second with just a bit</li></ul>"
     "<ul lang='he' class='framed'><li>First long text in an ul list of html sdfsd fsd fs dfsd f gobble di gock and "
     "even more</li><li>Second with just a bit</li></ul>"
     "<p>Margaret­Are­You­Grieving­Over­Goldengrove­Unleaving­Leaves­Like­The­Things­Of­Man­You­With­Your­F"

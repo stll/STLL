@@ -100,6 +100,61 @@ static bool compare(const STLL::textLayout_c & l, const pugi::xml_node & doc, st
 }
 
 
+bool operator==(const STLL::textLayout_c a, const STLL::textLayout_c b)
+{
+  if (a.getHeight() != b.getHeight()) return false;
+  if (a.getLeft() != b.getLeft()) return false;
+  if (a.getRight() != b.getRight()) return false;
+  if (a.data.size() != b.data.size()) return false;
+
+  for (size_t i = 0; i < a.data.size(); i++)
+  {
+    if (a.data[i].command != b.data[i].command) return false;
+
+    switch (a.data[i].command)
+    {
+      case STLL::textLayout_c::commandData::CMD_GLYPH:
+        if (a.data[i].x != b.data[i].x) return false;
+        if (a.data[i].y != b.data[i].y) return false;
+        if (a.data[i].glyphIndex != b.data[i].glyphIndex) return false;
+
+        // TODO we can not compare fonts...
+
+        if (a.data[i].c.r() != b.data[i].c.r()) return false;
+        if (a.data[i].c.g() != b.data[i].c.g()) return false;
+        if (a.data[i].c.b() != b.data[i].c.b()) return false;
+        if (a.data[i].c.a() != b.data[i].c.a()) return false;
+
+        break;
+
+      case STLL::textLayout_c::commandData::CMD_RECT:
+        if (a.data[i].x != b.data[i].x) return false;
+        if (a.data[i].y != b.data[i].y) return false;
+        if (a.data[i].w != b.data[i].w) return false;
+        if (a.data[i].h != b.data[i].h) return false;
+
+        if (a.data[i].c.r() != b.data[i].c.r()) return false;
+        if (a.data[i].c.g() != b.data[i].c.g()) return false;
+        if (a.data[i].c.b() != b.data[i].c.b()) return false;
+        if (a.data[i].c.a() != b.data[i].c.a()) return false;
+
+        break;
+
+      case STLL::textLayout_c::commandData::CMD_IMAGE:
+        if (a.data[i].x != b.data[i].x) return false;
+        if (a.data[i].y != b.data[i].y) return false;
+        if (a.data[i].imageURL != b.data[i].imageURL) return false;
+
+        break;
+
+      default:
+        return false;
+    }
+  }
+
+  return true;
+}
+
 static boost::test_tools::predicate_result layouts_identical(const  STLL::textLayout_c & l,
                                                              const std::string & file,
                                                              std::shared_ptr<STLL::fontCache_c> c)
@@ -624,4 +679,30 @@ BOOST_AUTO_TEST_CASE( Frames_Layouts )
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td colspan='2'>Test with some more text</td></tr><tr><td rowspan='2'>T</td><td>Table</td></tr><tr><td>Oops</td></tr></table></body></html>",
     s, STLL::rectangleShape_c(1000*64)), "tests/border-08.lay", c));
+}
+
+BOOST_AUTO_TEST_CASE( Save_Load_Layouts )
+{
+  auto c = std::make_shared<STLL::fontCache_c>();
+  STLL::textStyleSheet_c s(c);
+
+  s.font("sans", STLL::fontResource_c("tests/FreeSans.ttf"));
+
+  s.addRule("body", "font-size", "16px");
+  s.addRule("body", "color", "#FFFFFF");
+  s.addRule("body", "border-color", "#FFFF00");
+  s.addRule("body", "background-color", "#000040");
+
+  // top border
+  s.addRule("body", "border-top-width", "10px");
+  auto l = STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test <img src='A' width='10px' height='10px' /> Text</p></body></html>",
+    s, STLL::rectangleShape_c(200*64));
+
+  pugi::xml_document doc;
+  saveLayoutToXML(l, doc, c);
+  auto c2 = std::make_shared<STLL::fontCache_c>();
+  auto l2 = loadLayoutFromXML(doc.child("layout"), c2);
+
+  BOOST_CHECK(l == l2);
 }
