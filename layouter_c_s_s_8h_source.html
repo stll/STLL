@@ -139,24 +139,31 @@ $(document).ready(function(){initNavTree('layouter_c_s_s_8h_source.html','');});
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;</div>
 <div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    <span class="keyword">const</span> std::string &amp; <a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html#a3e292c4e0db27bbfe16d685b131072b7">getValue</a>(pugi::xml_node node, <span class="keyword">const</span> std::string &amp; attribute) <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;  <span class="keyword">private</span>:</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    std::vector&lt;rule&gt; rules;</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    std::map&lt;std::string, std::shared_ptr&lt;fontFamily_c&gt; &gt; families;</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    std::shared_ptr&lt;fontCache_c&gt; cache;</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;};</div>
+<div class="line"><a name="l00131"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1text_style_sheet__c.html#ac00f570f40b29cd8d9b3227615fb178e">  131</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html#ac00f570f40b29cd8d9b3227615fb178e">setRound</a>(uint32_t val) { round = val; }</div>
 <div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;}</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00135"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1text_style_sheet__c.html#a22e290d81ca6285a70d1c9fe78a1bbff">  135</a></span>&#160;    uint32_t <a class="code" href="class_s_t_l_l_1_1text_style_sheet__c.html#a22e290d81ca6285a70d1c9fe78a1bbff">getRound</a>(<span class="keywordtype">void</span>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> round; }</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;  <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;    std::vector&lt;rule&gt; rules;</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    std::map&lt;std::string, std::shared_ptr&lt;fontFamily_c&gt; &gt; families;</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;    std::shared_ptr&lt;fontCache_c&gt; cache;</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;    uint32_t round;</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;};</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;}</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html_a3e292c4e0db27bbfe16d685b131072b7"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html#a3e292c4e0db27bbfe16d685b131072b7">STLL::textStyleSheet_c::getValue</a></div><div class="ttdeci">const std::string &amp; getValue(pugi::xml_node node, const std::string &amp;attribute) const </div><div class="ttdoc">get the value for an attribute for a given xml-node </div></div>
 <div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html">STLL::textStyleSheet_c</a></div><div class="ttdoc">this class encapsulates information for how to format a text, just like the style sheets in html are ...</div><div class="ttdef"><b>Definition:</b> layouterCSS.h:55</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html_a0ca0454b4588940bbb35bd6c7af49b77"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html#a0ca0454b4588940bbb35bd6c7af49b77">STLL::textStyleSheet_c::textStyleSheet_c</a></div><div class="ttdeci">textStyleSheet_c(std::shared_ptr&lt; fontCache_c &gt; c=0)</div><div class="ttdoc">create an empty style sheet only with default rules </div></div>
 <div class="ttc" id="class_s_t_l_l_1_1_xhtml_exception__c_html_a7b19bc689a11ee26657902b4de13d2fa"><div class="ttname"><a href="class_s_t_l_l_1_1_xhtml_exception__c.html#a7b19bc689a11ee26657902b4de13d2fa">STLL::XhtmlException_c::XhtmlException_c</a></div><div class="ttdeci">XhtmlException_c(const std::string &amp;what_arg)</div><div class="ttdef"><b>Definition:</b> layouterCSS.h:45</div></div>
+<div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html_a22e290d81ca6285a70d1c9fe78a1bbff"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html#a22e290d81ca6285a70d1c9fe78a1bbff">STLL::textStyleSheet_c::getRound</a></div><div class="ttdeci">uint32_t getRound(void) const </div><div class="ttdoc">get the rounding factor. See layoutProperties.round for the details. </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:135</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html_ae0b3b84b25545e48602c87eaab1731d6"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html#ae0b3b84b25545e48602c87eaab1731d6">STLL::textStyleSheet_c::findFamily</a></div><div class="ttdeci">std::shared_ptr&lt; fontFamily_c &gt; findFamily(const std::string &amp;family) const </div><div class="ttdoc">Get a font family from the CSS. </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:101</div></div>
 <div class="ttc" id="layouter_font_8h_html"><div class="ttname"><a href="layouter_font_8h.html">layouterFont.h</a></div><div class="ttdoc">a freetype wrapper </div></div>
 <div class="ttc" id="class_s_t_l_l_1_1_xhtml_exception__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1_xhtml_exception__c.html">STLL::XhtmlException_c</a></div><div class="ttdoc">exception thrown on XHTML and CSS problems </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:42</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html_a5c98383f14703487258beb95b49c86b3"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html#a5c98383f14703487258beb95b49c86b3">STLL::textStyleSheet_c::font</a></div><div class="ttdeci">void font(const std::string &amp;family, const fontResource_c &amp;res, const std::string &amp;style=&quot;normal&quot;, const std::string &amp;variant=&quot;normal&quot;, const std::string &amp;weight=&quot;normal&quot;, const std::string &amp;stretch=&quot;normal&quot;)</div><div class="ttdoc">Add a font to a family. </div></div>
 <div class="ttc" id="class_s_t_l_l_1_1font_resource__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1font_resource__c.html">STLL::fontResource_c</a></div><div class="ttdoc">This class represents a font resource. </div><div class="ttdef"><b>Definition:</b> layouterFont.h:61</div></div>
+<div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html_ac00f570f40b29cd8d9b3227615fb178e"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html#ac00f570f40b29cd8d9b3227615fb178e">STLL::textStyleSheet_c::setRound</a></div><div class="ttdeci">void setRound(uint32_t val)</div><div class="ttdoc">set the rounding factor. See layoutProperties.round for the details. </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:131</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1text_style_sheet__c_html_a3e5a6d462e84b3e2c3cb0e72978af288"><div class="ttname"><a href="class_s_t_l_l_1_1text_style_sheet__c.html#a3e5a6d462e84b3e2c3cb0e72978af288">STLL::textStyleSheet_c::addRule</a></div><div class="ttdeci">void addRule(const std::string sel, const std::string attr, const std::string val)</div><div class="ttdoc">add a rule to the stylesheet </div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -164,7 +171,7 @@ $(document).ready(function(){initNavTree('layouter_c_s_s_8h_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="layouter_c_s_s_8h.html">layouterCSS.h</a></li>
-    <li class="footer">Generated on Sun Sep 21 2014 18:03:47 for STLL by
+    <li class="footer">Generated on Thu Sep 25 2014 21:36:30 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>

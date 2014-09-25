@@ -97,6 +97,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3e292c4e0db27bbfe16d685b131072b7"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1text_style_sheet__c.html#a3e292c4e0db27bbfe16d685b131072b7">getValue</a> (pugi::xml_node node, const std::string &amp;attribute) const </td></tr>
 <tr class="memdesc:a3e292c4e0db27bbfe16d685b131072b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the value for an attribute for a given xml-node  <a href="#a3e292c4e0db27bbfe16d685b131072b7">More...</a><br/></td></tr>
 <tr class="separator:a3e292c4e0db27bbfe16d685b131072b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac00f570f40b29cd8d9b3227615fb178e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1text_style_sheet__c.html#ac00f570f40b29cd8d9b3227615fb178e">setRound</a> (uint32_t val)</td></tr>
+<tr class="memdesc:ac00f570f40b29cd8d9b3227615fb178e"><td class="mdescLeft">&#160;</td><td class="mdescRight">set the rounding factor. See <a class="el" href="struct_s_t_l_l_1_1layout_properties.html#a892f45b053f29e5dda3045900f567f49" title="This value tells the layouter how to round the positions of glyph and other commands. ">layoutProperties.round</a> for the details.  <a href="#ac00f570f40b29cd8d9b3227615fb178e">More...</a><br/></td></tr>
+<tr class="separator:ac00f570f40b29cd8d9b3227615fb178e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22e290d81ca6285a70d1c9fe78a1bbff"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1text_style_sheet__c.html#a22e290d81ca6285a70d1c9fe78a1bbff">getRound</a> (void) const </td></tr>
+<tr class="memdesc:a22e290d81ca6285a70d1c9fe78a1bbff"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the rounding factor. See <a class="el" href="struct_s_t_l_l_1_1layout_properties.html#a892f45b053f29e5dda3045900f567f49" title="This value tells the layouter how to round the positions of glyph and other commands. ">layoutProperties.round</a> for the details.  <a href="#a22e290d81ca6285a70d1c9fe78a1bbff">More...</a><br/></td></tr>
+<tr class="separator:a22e290d81ca6285a70d1c9fe78a1bbff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This class contains a list of normal CSS rules as well as a list of font families to use for outputting text. </p>
@@ -255,6 +261,30 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a22e290d81ca6285a70d1c9fe78a1bbff"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t STLL::textStyleSheet_c::getRound </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a3e292c4e0db27bbfe16d685b131072b7"></a>
 <div class="memitem">
 <div class="memproto">
@@ -289,6 +319,31 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ac00f570f40b29cd8d9b3227615fb178e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void STLL::textStyleSheet_c::setRound </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>val</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>This tells the HTML layouter, which value to tell the paragraph layouter </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="layouter_c_s_s_8h_source.html">layouterCSS.h</a></li>
 </ul>
@@ -298,7 +353,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1text_style_sheet__c.html">textStyleSheet_c</a></li>
-    <li class="footer">Generated on Sun Sep 21 2014 18:03:47 for STLL by
+    <li class="footer">Generated on Thu Sep 25 2014 21:36:30 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>

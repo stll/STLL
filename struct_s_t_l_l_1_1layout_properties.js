@@ -8,5 +8,5 @@ var struct_s_t_l_l_1_1layout_properties =
     [ "align", "struct_s_t_l_l_1_1layout_properties.html#a3f3c6314860a3793d8d17b068bd43301", null ],
     [ "indent", "struct_s_t_l_l_1_1layout_properties.html#adc13305b04f1cc38089935b12fa4f828", null ],
     [ "ltr", "struct_s_t_l_l_1_1layout_properties.html#af3f75d8564a52e8960c8c449e260c590", null ],
-    [ "round", "struct_s_t_l_l_1_1layout_properties.html#a71b9ea607172b0fe6bfbbf84b196b830", null ]
+    [ "round", "struct_s_t_l_l_1_1layout_properties.html#a892f45b053f29e5dda3045900f567f49", null ]
 ];

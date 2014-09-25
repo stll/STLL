@@ -104,9 +104,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:af3f75d8564a52e8960c8c449e260c590"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_s_t_l_l_1_1layout_properties.html#af3f75d8564a52e8960c8c449e260c590">ltr</a></td></tr>
 <tr class="memdesc:af3f75d8564a52e8960c8c449e260c590"><td class="mdescLeft">&#160;</td><td class="mdescRight">is the base direction of the text left to right?  <a href="#af3f75d8564a52e8960c8c449e260c590">More...</a><br/></td></tr>
 <tr class="separator:af3f75d8564a52e8960c8c449e260c590"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a71b9ea607172b0fe6bfbbf84b196b830"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_s_t_l_l_1_1layout_properties.html#a71b9ea607172b0fe6bfbbf84b196b830">round</a></td></tr>
-<tr class="memdesc:a71b9ea607172b0fe6bfbbf84b196b830"><td class="mdescLeft">&#160;</td><td class="mdescRight">round the position of glyphs to the nearest 1/round position  <a href="#a71b9ea607172b0fe6bfbbf84b196b830">More...</a><br/></td></tr>
-<tr class="separator:a71b9ea607172b0fe6bfbbf84b196b830"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a892f45b053f29e5dda3045900f567f49"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_s_t_l_l_1_1layout_properties.html#a892f45b053f29e5dda3045900f567f49">round</a></td></tr>
+<tr class="memdesc:a892f45b053f29e5dda3045900f567f49"><td class="mdescLeft">&#160;</td><td class="mdescRight">This value tells the layouter how to round the positions of glyph and other commands.  <a href="#a892f45b053f29e5dda3045900f567f49">More...</a><br/></td></tr>
+<tr class="separator:a892f45b053f29e5dda3045900f567f49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Enumeration Documentation</h2>
 <a class="anchor" id="ab92298997ed04bdbfa851a2e8e2a81a0"></a>
@@ -175,15 +175,18 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a71b9ea607172b0fe6bfbbf84b196b830"></a>
+<a class="anchor" id="a892f45b053f29e5dda3045900f567f49"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint32_t STLL::layoutProperties::round</td>
+          <td class="memname">int32_t STLL::layoutProperties::round</td>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>All positions are given in 1/64 pixel precision. But this can lead to strange artifacts if you can place the objects only with 1 pixel precision. For example the spacing of several consecutive letters will be uneven, resulting in an uneven distribution of the glyphs.</p>
+<p>The right solution in that case would be to round the values to whole pixels. Or in the case you can place objects with subpixel accuracy to round to 1/3 of a pixel.</p>
+<p>The value 1 rounds to whole piexels, 3 to 1/3 pixel, 64 does not round at all: So only values between 1 and 63 actually do something everything else leads to no rounding </p>
 
 </div>
 </div>
@@ -196,7 +199,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="struct_s_t_l_l_1_1layout_properties.html">layoutProperties</a></li>
-    <li class="footer">Generated on Sun Sep 21 2014 18:03:47 for STLL by
+    <li class="footer">Generated on Thu Sep 25 2014 21:36:30 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>
