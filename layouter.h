@@ -481,6 +481,11 @@ typedef struct {
  * \param ystart the vertical starting point (in 1/64th pixels) of your output, the baseline of the first line
  *               of text will be shifted down from this position by the ascender of the line
  * \return the resulting layout
+ *
+ * \note: bidi control characters supported, are RLE, RLE, PDF, those don't need to have a valid attribute entry
+ * all other characters in txt32 need to have one, or the function will behave wrongly
+ *
+ * TODO: instead of crashing, rather throw an exception in that case.
  */
 textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
                              const shape_c & shape, const layoutProperties & prop, int32_t ystart = 0);

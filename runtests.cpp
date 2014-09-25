@@ -466,6 +466,18 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
     "<p>Test \n Text</p>"
     "</body></html>",
     s, STLL::rectangleShape_c(1000*64)), "tests/simple-25.lay", c));
+
+  // several inlaid rtl and lrt texts, the 2 lines must look different even though
+  // they look similar in the html text
+  // first: Test, 2nd hebrew word, Text, 1st hebrew word Three
+  // second: Test, 1st hebrew word, Text, 2nd hebrew word Three
+  s.addRule("body", "text-indent", "0px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body>"
+    "<p lang='en'>Test <span lang='he'>אברהם<span lang='en'> Text </span>שמואל</span> Three</p>"
+    "<p lang='en'>Test <span lang='he'>אברהם</span> Text <span lang='he'>שמואל</span> Three</p>"
+    "</body></html>",
+    s, STLL::rectangleShape_c(250*64)), "tests/simple-26.lay", c));
 }
 
 BOOST_AUTO_TEST_CASE( Table_Layouts )

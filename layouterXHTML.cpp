@@ -601,7 +601,16 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
                 )
             )
     {
+      if (rules.getValue(xml, "direction") == "rtl")
+      {
+        txt += U"\U0000202B";
+      }
+      else
+      {
+        txt += U"\U0000202A";
+      }
       layoutXML_text(xml.first_child(), rules, txt, attr);
+      txt += U"\U0000202C";
     }
     else if (   (xml.type() == pugi::node_element)
              && (std::string("sub") == xml.name())

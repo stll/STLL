@@ -95,6 +95,14 @@ static int32_t roundToDivisible(int32_t r, int32_t d)
   return r;
 }
 
+static bool isBidiCharacter(char32_t c)
+{
+  if (c == U'\U0000202A' || c == U'\U0000202B' || c == U'\U0000202C')
+    return true;
+  else
+    return false;
+}
+
 // use harfbuzz to layout runs of text
 static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
                                            const attributeIndex_c & attr,
@@ -111,21 +119,25 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
   for (size_t i = 0; i < txt32.length(); i++)
   {
-    auto a = attr.get(i);
-
-    if (a.font && (hb_ft_fonts.find(a.font) == hb_ft_fonts.end()))
+    if (!isBidiCharacter(txt32[i]))
     {
-      hb_ft_fonts[a.font] = hb_ft_font_create(a.font->getFace(), NULL);
-    }
+      auto a = attr.get(i);
 
-    normalLayer = std::max(normalLayer, attr.get(i).shadows.size());
+      if (a.font && (hb_ft_fonts.find(a.font) == hb_ft_fonts.end()))
+      {
+        hb_ft_fonts[a.font] = hb_ft_font_create(a.font->getFace(), NULL);
+      }
+
+      normalLayer = std::max(normalLayer, attr.get(i).shadows.size());
+    }
   }
 
   // Create a buffer for harfbuzz to use
   hb_buffer_t *buf = hb_buffer_create();
 
-
   size_t runstart = 0;
+
+  while (runstart < txt32.length() && isBidiCharacter(txt32[runstart])) runstart++;
 
   std::vector<runInfo> runs;
 
@@ -134,19 +146,22 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     size_t spos = runstart+1;
     // find end of current run
     while (   (spos < txt32.length())
-           && (embedding_levels[runstart] == embedding_levels[spos])
-           && (attr.get(runstart).lang == attr.get(spos).lang)
-           && (attr.get(runstart).font == attr.get(spos).font)
-           && (attr.get(runstart).baseline_shift == attr.get(spos).baseline_shift)
-           && (!attr.get(spos).inlay)
-           && (   (linebreaks[spos-1] == LINEBREAK_NOBREAK)
-               || (linebreaks[spos-1] == LINEBREAK_INSIDEACHAR)
-              )
-           && (txt32[spos] != U' ')
-           && (txt32[spos-1] != U' ')
-           && (txt32[spos] != U'\n')
-           && (txt32[spos-1] != U'\n')
-           && (txt32[spos] != U'\u00AD')
+           && (   isBidiCharacter(txt32[spos])
+               || (  (embedding_levels[runstart] == embedding_levels[spos])
+                  && (attr.get(runstart).lang == attr.get(spos).lang)
+                  && (attr.get(runstart).font == attr.get(spos).font)
+                  && (attr.get(runstart).baseline_shift == attr.get(spos).baseline_shift)
+                  && (!attr.get(spos).inlay)
+                  && (   (linebreaks[spos-1] == LINEBREAK_NOBREAK)
+                      || (linebreaks[spos-1] == LINEBREAK_INSIDEACHAR)
+                     )
+                  && (txt32[spos] != U' ')
+                  && (txt32[spos-1] != U' ')
+                  && (txt32[spos] != U'\n')
+                  && (txt32[spos-1] != U'\n')
+                  && (txt32[spos] != U'\u00AD')
+                  )
+               )
           )
     {
       spos++;
@@ -228,6 +243,9 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
     for (size_t j=0; j < glyph_count; ++j)
     {
+      if (isBidiCharacter(txt32[glyph_info[j].cluster + runstart]))
+        continue;
+
       auto a = attr.get(glyph_info[j].cluster + runstart);
 
       if (a.inlay)
@@ -341,6 +359,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
     runs.push_back(run);
     runstart = spos;
+
+    while (runstart < txt32.length() && isBidiCharacter(txt32[runstart])) runstart++;
 
     hb_buffer_reset(buf);
   }
@@ -637,11 +657,13 @@ static std::vector<char> getLinebreaks(const std::u32string & txt32, const attri
 
   size_t runstart = 0;
 
+  while (runstart < length && isBidiCharacter(txt32[runstart])) runstart++;
+
   while (runstart < length)
   {
     size_t runpos = runstart+1;
 
-    while (runpos < length && attr.get(runstart).lang == attr.get(runpos).lang)
+    while (runpos < length && (isBidiCharacter(txt32[runpos]) || attr.get(runstart).lang == attr.get(runpos).lang))
     {
       runpos++;
     }
@@ -656,6 +678,7 @@ static std::vector<char> getLinebreaks(const std::u32string & txt32, const attri
                          attr.get(runstart).lang.c_str(), linebreaks.data()+runstart);
 
     runstart = runpos;
+    while ((runstart < length) && isBidiCharacter(txt32[runstart])) runstart++;
   }
 
   return linebreaks;
