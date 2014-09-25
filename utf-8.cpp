@@ -21,6 +21,8 @@
  */
 #include "utf-8.h"
 
+#include <assert.h>
+
 namespace STLL {
 
 #define UNI_MAX_LEGAL_UTF32 (char32_t)0x0010FFFF
@@ -179,5 +181,37 @@ std::u32string u8_convertToU32(const std::string & in)
 
   return out;
 }
+
+std::string U32ToUTF8(char32_t ch)
+{
+  std::string result;
+
+  if (ch < 0x80)
+  {
+    result += static_cast<char>(ch);
+  }
+  // U+0080..U+07FF
+  else if (ch < 0x800)
+  {
+    result += static_cast<char>(0xC0 | (ch >> 6));
+    result += static_cast<char>(0x80 | (ch & 0x3F));
+  }
+  // U+0800..U+FFFF
+  else if (ch < 0x10000)
+  {
+    result += static_cast<char>(0xE0 | (ch >> 12));
+    result += static_cast<char>(0x80 | ((ch >> 6) & 0x3F));
+    result += static_cast<char>(0x80 | (ch & 0x3F));
+  }
+  else
+  {
+    // not supported, yet
+    assert(0);
+  }
+
+  return result;
+}
+
+
 
 }

@@ -45,6 +45,12 @@ bool u8_isValid(const std::string & str);
  */
 std::u32string u8_convertToU32(const std::string & in);
 
+/** \brief Convert a single unicode character to an utf-8 string
+ * \param ch the character to Convert
+ * \return the corresponding utf-8 string
+ */
+std::string U32ToUTF8(char32_t ch);
+
 }
 
 #endif
