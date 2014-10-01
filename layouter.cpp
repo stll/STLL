@@ -386,7 +386,7 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
   size_t runstart = 0;
   int32_t ypos = ystart;
   textLayout_c l;
-  bool firstline = true;
+  enum { FL_FIRST, FL_BREAK, FL_NORMAL } firstline = FL_FIRST;
   bool forcebreak = false;
 
   // while there are runs left to do
@@ -411,7 +411,7 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
     forcebreak = false;
 
     // if it is a first line, we add the indent first
-    if (firstline && prop.align != layoutProperties::ALG_CENTER) curWidth = prop.indent;
+    if ((firstline != FL_NORMAL) && prop.align != layoutProperties::ALG_CENTER) curWidth = prop.indent;
 
     // now go through the remaining runs and add them
     while (spos < runs.size())
@@ -537,7 +537,7 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
       default:
       case layoutProperties::ALG_LEFT:
         xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
-        if (firstline) xpos += prop.indent;
+        if (firstline != FL_NORMAL) xpos += prop.indent;
         break;
 
       case layoutProperties::ALG_RIGHT:
@@ -554,7 +554,7 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
         if (numSpace > 1 && spos < runs.size() && !forcebreak)
           spaceadder = 1.0 * spaceLeft / numSpace;
 
-        if (firstline) xpos += prop.indent;
+        if (firstline != FL_NORMAL) xpos += prop.indent;
 
         break;
 
@@ -631,15 +631,23 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
       }
     }
 
+    if (firstline == FL_FIRST)
+    {
+      l.setFirstBaseline(ypos);
+    }
+
     // go the the top of the next line
     ypos -= curDescend;
 
     // set the runstart at the next run and skip space runs
     runstart = spos;
 
-    // if we have a forces break, the next line will be like the first
+    // if we have a forced break, the next line will be like the first
     // in the way that is will be indented
-    firstline = forcebreak;
+    if (forcebreak)
+      firstline = FL_BREAK;
+    else
+      firstline = FL_NORMAL;
   }
 
   l.setHeight(ypos);

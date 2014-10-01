@@ -53,6 +53,7 @@ class textLayout_c
   private:
     uint32_t height; // position where you can add additional text after this ...
     int32_t left, right;
+    int32_t firstBaseline; // vertical position of the very first baseline in this layout
 
   public:
 
@@ -131,12 +132,25 @@ class textLayout_c
 
     /** \brief append a layout to this layout, which means that the drawing
      *         commands of the 2nd layout are copied into this layout
+     *
+     *  The height, left and right border are adjusted to completely accommodate
+     *  all of the new layout, the firstBaseline is copied over, when this layout
+     *  is currently empty, else it is left untouched
      *  \param l the layout to append
+     *  \param dx x-offset to apply when appending the layout
+     *  \param dy y-offset to apply when appending the layout
      */
-    void append(const textLayout_c & l)
+    void append(const textLayout_c & l, int dx = 0, int dy = 0)
     {
-      for (auto & a : l.data)
+      if (data.size() == 0)
+        firstBaseline = l.firstBaseline + dy;
+
+      for (auto a : l.data)
+      {
+        a.x += dx;
+        a.y += dy;
         data.push_back(a);
+      }
 
       height = std::max(height, l.height);
       left = std::min(left, l.left);
@@ -151,6 +165,7 @@ class textLayout_c
       height = l.height;
       left = l.left;
       right = l.right;
+      firstBaseline = l.firstBaseline;
     }
 
     /** \brief copy assignment
@@ -161,18 +176,20 @@ class textLayout_c
       height = l.height;
       left = l.left;
       right = l.right;
+      firstBaseline = l.firstBaseline;
     }
 
     ~textLayout_c(void) { }
 
     /** \brief create empty layout
      */
-    textLayout_c(void) : height(0), left(0), right(0) { }
+    textLayout_c(void) : height(0), left(0), right(0), firstBaseline(0) { }
 
     /** \brief copy constructor
      */
     textLayout_c(const textLayout_c & src) : height(src.height), left(src.left),
-                                             right(src.right), data(src.data)  {  }
+                                             right(src.right), data(src.data),
+                                             firstBaseline(src.firstBaseline) {  }
 
     /** \brief move constructor
      */
@@ -182,6 +199,7 @@ class textLayout_c
       height = src.height;
       left = src.left;
       right = src.right;
+      firstBaseline = src.firstBaseline;
     }
 
     /** \brief the height of the layout. This is supposed to be the vertical
@@ -208,6 +226,14 @@ class textLayout_c
     /** \brief get the right edge in 1/64th pixels
      */
     void setRight(int32_t r) { right = r; }
+
+    /** \brief set the y position of the first baseline
+     */
+    void setFirstBaseline(int32_t r) { firstBaseline = r; }
+
+    /** \brief get the y position of the first baseline
+     */
+    int32_t getFirstBaseline(void) const { return firstBaseline; }
 };
 
 /** \brief this structure contains all attributes that a single glyph can get assigned

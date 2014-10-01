@@ -899,20 +899,26 @@ static textLayout_c layoutXML_UL(pugi::xml_node & xml, const textStyleSheet_c & 
       prop.align = layoutProperties::ALG_CENTER;
       prop.round = rules.getRound();
 
+      std::unique_ptr<shape_c> bulletshape;
+
       if (direction == "ltr")
       {
-        // TODO solve problem, that the bullet needs to be aligned with the baseline of the
-        // first line of the paragraph that we add...
-        l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
-                                 stripLeftShape_c(shape, padding, padding+listIndent), prop, y+padding));
-        l.append(boxIt(i, i, rules, indentShape_c(shape, listIndent, 0), y, layoutXML_Flow, i.previous_sibling(), pugi::xml_node()));
+        bulletshape.reset(new stripLeftShape_c(shape, padding, padding+listIndent));
       }
       else
       {
-        l.append(layoutParagraph(U"\u2022", attributeIndex_c(a),
-                                 stripRightShape_c(shape, padding+listIndent, padding), prop, y+padding));
-        l.append(boxIt(i, i, rules, indentShape_c(shape, 0, listIndent), y, layoutXML_Flow, i.previous_sibling(), pugi::xml_node()));
+        bulletshape.reset(new stripRightShape_c(shape, padding+listIndent, padding));
       }
+
+      indentShape_c textshape(shape, direction == "ltr" ? listIndent : 0, direction == "ltr" ? 0: listIndent);
+
+      textLayout_c bullet = layoutParagraph(U"\u2022", attributeIndex_c(a), *bulletshape.get(), prop, y+padding);
+      textLayout_c text = boxIt(i, i, rules, textshape, y, layoutXML_Flow, i.previous_sibling(), pugi::xml_node());
+
+      // append the bullet first and then the text, adjusting the bullet so that its baseline
+      // is at the same vertical position as the first baseline in the text
+      l.append(bullet, 0, text.getFirstBaseline() - bullet.getFirstBaseline());
+      l.append(text);
 
       l.setLeft(shape.getLeft2(ystart, l.getHeight()));
       l.setRight(shape.getRight2(ystart, l.getHeight()));
@@ -1140,6 +1146,9 @@ static textLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c
       c.l = boxIt(c.xml, c.xml, rules, rectangleShape_c(colStart[c.col+c.colspan]-colStart[c.col]),
                   0, layoutXML_Flow, cellarray.get(c.col+1, c.row), cellarray.get(c.col+(1+left)*c.colspan, c.row+1),
                   rules.getValue(xml, "border-collapse") == "collapse", rh);
+
+    if (l.data.size() == 0)
+      l.setFirstBaseline(c.l.getFirstBaseline()+ystart);
 
     if (rtl)
     {
