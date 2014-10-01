@@ -98,9 +98,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aafab1b2e7dd0a71d38623d3d32f4a4bb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html#aafab1b2e7dd0a71d38623d3d32f4a4bb">addCommandVector</a> (const std::vector&lt; <a class="el" href="struct_s_t_l_l_1_1text_layout__c_1_1command_data.html">commandData</a> &gt; &amp;d, int dx, int dy)</td></tr>
 <tr class="memdesc:aafab1b2e7dd0a71d38623d3d32f4a4bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">add whole vector of commands to the layout, the commands are offset by a certain amount to shift everything that is drawn  <a href="#aafab1b2e7dd0a71d38623d3d32f4a4bb">More...</a><br/></td></tr>
 <tr class="separator:aafab1b2e7dd0a71d38623d3d32f4a4bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5aa41bf9ef9ceb810e4fdaf591f12109"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html#a5aa41bf9ef9ceb810e4fdaf591f12109">append</a> (const <a class="el" href="class_s_t_l_l_1_1text_layout__c.html">textLayout_c</a> &amp;l)</td></tr>
-<tr class="memdesc:a5aa41bf9ef9ceb810e4fdaf591f12109"><td class="mdescLeft">&#160;</td><td class="mdescRight">append a layout to this layout, which means that the drawing commands of the 2nd layout are copied into this layout  <a href="#a5aa41bf9ef9ceb810e4fdaf591f12109">More...</a><br/></td></tr>
-<tr class="separator:a5aa41bf9ef9ceb810e4fdaf591f12109"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17b58d7b870088add73d990f15cbb553"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html#a17b58d7b870088add73d990f15cbb553">append</a> (const <a class="el" href="class_s_t_l_l_1_1text_layout__c.html">textLayout_c</a> &amp;l, int dx=0, int dy=0)</td></tr>
+<tr class="memdesc:a17b58d7b870088add73d990f15cbb553"><td class="mdescLeft">&#160;</td><td class="mdescRight">append a layout to this layout, which means that the drawing commands of the 2nd layout are copied into this layout  <a href="#a17b58d7b870088add73d990f15cbb553">More...</a><br/></td></tr>
+<tr class="separator:a17b58d7b870088add73d990f15cbb553"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ef87c2d1661946cbc8d690086f429d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html#a3ef87c2d1661946cbc8d690086f429d9">operator=</a> (<a class="el" href="class_s_t_l_l_1_1text_layout__c.html">textLayout_c</a> &amp;&amp;l)</td></tr>
 <tr class="memdesc:a3ef87c2d1661946cbc8d690086f429d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">move assignment  <a href="#a3ef87c2d1661946cbc8d690086f429d9">More...</a><br/></td></tr>
 <tr class="separator:a3ef87c2d1661946cbc8d690086f429d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -136,6 +136,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6132e6848335451756e0b4b734e66f9c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html#a6132e6848335451756e0b4b734e66f9c">setRight</a> (int32_t r)</td></tr>
 <tr class="memdesc:a6132e6848335451756e0b4b734e66f9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the right edge in 1/64th pixels  <a href="#a6132e6848335451756e0b4b734e66f9c">More...</a><br/></td></tr>
 <tr class="separator:a6132e6848335451756e0b4b734e66f9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27ded139c9f7ed14b29d21c0c9fe07bf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html#a27ded139c9f7ed14b29d21c0c9fe07bf">setFirstBaseline</a> (int32_t r)</td></tr>
+<tr class="memdesc:a27ded139c9f7ed14b29d21c0c9fe07bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">set the y position of the first baseline  <a href="#a27ded139c9f7ed14b29d21c0c9fe07bf">More...</a><br/></td></tr>
+<tr class="separator:a27ded139c9f7ed14b29d21c0c9fe07bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d239fdd4eef9c7098cd1332ecdee2f9"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html#a8d239fdd4eef9c7098cd1332ecdee2f9">getFirstBaseline</a> (void) const </td></tr>
+<tr class="memdesc:a8d239fdd4eef9c7098cd1332ecdee2f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the y position of the first baseline  <a href="#a8d239fdd4eef9c7098cd1332ecdee2f9">More...</a><br/></td></tr>
+<tr class="separator:a8d239fdd4eef9c7098cd1332ecdee2f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -350,7 +356,7 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a5aa41bf9ef9ceb810e4fdaf591f12109"></a>
+<a class="anchor" id="a17b58d7b870088add73d990f15cbb553"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -361,8 +367,24 @@ Public Attributes</h2></td></tr>
           <td class="memname">void STLL::textLayout_c::append </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="class_s_t_l_l_1_1text_layout__c.html">textLayout_c</a> &amp;&#160;</td>
-          <td class="paramname"><em>l</em></td><td>)</td>
+          <td class="paramname"><em>l</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dx</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dy</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -371,12 +393,39 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>The height, left and right border are adjusted to completely accommodate all of the new layout, the firstBaseline is copied over, when this layout is currently empty, else it is left untouched </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">l</td><td>the layout to append </td></tr>
+    <tr><td class="paramname">dx</td><td>x-offset to apply when appending the layout </td></tr>
+    <tr><td class="paramname">dy</td><td>y-offset to apply when appending the layout </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a class="anchor" id="a8d239fdd4eef9c7098cd1332ecdee2f9"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t STLL::textLayout_c::getFirstBaseline </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -500,6 +549,30 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a27ded139c9f7ed14b29d21c0c9fe07bf"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void STLL::textLayout_c::setFirstBaseline </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>r</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a65badea992e1885d29ad42a656c9b027"></a>
 <div class="memitem">
 <div class="memproto">
@@ -594,7 +667,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1text_layout__c.html">textLayout_c</a></li>
-    <li class="footer">Generated on Thu Sep 25 2014 21:36:30 for STLL by
+    <li class="footer">Generated on Wed Oct 1 2014 21:16:34 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>
