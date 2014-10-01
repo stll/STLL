@@ -550,6 +550,37 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
     "<html><body><p>&amp;amp;&sect;&#163;&#xA3;&#xa3;&unknown;</p></body></html>",
     s, STLL::rectangleShape_c(200*64)), "tests/simple-27.lay", c));
+
+  // a layout with some ul bullets with different lines with different ascenders and descenders
+  s.addRule("sup", "font-size", "90%");
+  s.addRule("sub", "font-size", "90%");
+  s.addRule(".tc", "width", "100px");
+  s.addRule("td", "padding", "10px");
+  s.addRule("td", "background-color", "#202020");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><ul>"
+    "<li>Test</li>"
+    "<li>T<sup>2</sup></li>"
+    "<li>T<sup>2<sup>2<sup>2<sup>2</sup></sup></sup></sup></li>"
+    "<li>T<sub>2<sub>2<sub>2<sub>2</sub></sub></sub></sub></li>"
+    "<li>T<img width='10px' height='20px' /></li>"
+    "<li><img width='10px' height='20px' /></li>"
+    "<li><table><colgroup><col class='tc' /></colgroup><tr><td>Test</td></tr></table></li>"
+    "<li><ul><li>T<sup>2</sup></li><li>T<sup>2</sup></li></ul></li>"
+    "<li>Tst<ul><li>T<sup>2</sup></li><li>T<sup>2</sup></li></ul></li>"
+    "</ul></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-28.lay", c));
+
+  // a simple image and text but without the paragraph environment
+  s.addRule("body", "padding", "0px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body>Te<img width='10px' height='10px' src='a' />st</body></html>",
+    s, STLL::rectangleShape_c(300*64)), "tests/simple-05.lay", c));
+
+  // just an image but without paragraph environment
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><img width='10px' height='10px' src='a' /></body></html>",
+    s, STLL::rectangleShape_c(300*64)), "tests/simple-29.lay", c));
 }
 
 BOOST_AUTO_TEST_CASE( Table_Layouts )
