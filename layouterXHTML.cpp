@@ -1199,6 +1199,7 @@ static textLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c 
                    ||(std::string("strong") == i.name())
                    ||(std::string("sub") == i.name())
                    ||(std::string("sup") == i.name())
+                   ||(std::string("img") == i.name())
                   )
                )
             )
