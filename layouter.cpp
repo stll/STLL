@@ -108,7 +108,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
                                            const attributeIndex_c & attr,
                                            const std::vector<FriBidiLevel> & embedding_levels,
                                            const std::vector<char> & linebreaks,
-                                           uint32_t round
+                                           uint32_t round,
+                                           const std::shared_ptr<fontFace_c> underlinefont
                                           )
 {
   // Get our harfbuzz font structs
@@ -268,9 +269,18 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
           g.command = textLayout_c::commandData::CMD_RECT;
           g.x = run.dx;
-          g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2));
           g.w = a.inlay->getRight();
-          g.h = std::max(64, a.font->getUnderlineThickness());
+
+          if (underlinefont)
+          {
+            g.y = -((underlinefont->getUnderlinePosition()+underlinefont->getUnderlineThickness()/2));
+            g.h = std::max(64, underlinefont->getUnderlineThickness());
+          }
+          else
+          {
+            g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2));
+            g.h = std::max(64, a.font->getUnderlineThickness());
+          }
 
           for (size_t j = 0; j < a.shadows.size(); j++)
           {
@@ -333,9 +343,18 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         if (a.flags & codepointAttributes::FL_UNDERLINE)
         {
           g.command = textLayout_c::commandData::CMD_RECT;
-          g.h = std::max(64, a.font->getUnderlineThickness());
           g.w = glyph_pos[j].x_advance+64;
-          g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2));
+
+          if (underlinefont)
+          {
+            g.h = std::max(64, underlinefont->getUnderlineThickness());
+            g.y = -((underlinefont->getUnderlinePosition()+underlinefont->getUnderlineThickness()/2));
+          }
+          else
+          {
+            g.h = std::max(64, a.font->getUnderlineThickness());
+            g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2));
+          }
 
           for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
           {
@@ -705,7 +724,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_
 
   // create runs of layout text. Each run is a cohesive set, e.g. a word with a single
   // font, ...
-  std::vector<runInfo> runs = createTextRuns(txt32, attr, embedding_levels, linebreaks, prop.round);
+  std::vector<runInfo> runs = createTextRuns(txt32, attr, embedding_levels, linebreaks, prop.round, prop.underlineFont);
 
   // layout the runs into lines
   return breakLines(runs, shape, max_level, prop, ystart);

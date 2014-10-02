@@ -581,6 +581,14 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
     "<html><body><img width='10px' height='10px' src='a' /></body></html>",
     s, STLL::rectangleShape_c(300*64)), "tests/simple-29.lay", c));
+
+  // check underline of sup and images... they must use the same underline
+  s.addRule("body", "padding", "5px");
+  s.addRule("p", "text-decoration", "underline");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p><img width='10px' height='10px' src='a' />T<sup>est</sup></p></body></html>",
+    s, STLL::rectangleShape_c(300*64)), "tests/simple-30.lay", c));
+  s.addRule("p", "text-decoration", "");
 }
 
 BOOST_AUTO_TEST_CASE( Table_Layouts )

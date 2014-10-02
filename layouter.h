@@ -494,6 +494,15 @@ typedef struct {
    */
   int32_t round;
 
+  /** \brief The font that defines the underline parameters.
+   *
+   * When underlines need to be placed they will be placed according to this font. That way
+   * you get the same font, regardless of size of text or font.
+   *
+   * When not set, the underline will use the parameters of the font of each glyph.
+   */
+  std::shared_ptr<fontFace_c> underlineFont;
+
 } layoutProperties;
 
 

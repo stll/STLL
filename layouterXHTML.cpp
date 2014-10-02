@@ -860,6 +860,7 @@ static textLayout_c layoutXML_Phrasing(pugi::xml_node & xml, const textStyleShee
   lprop.indent = evalSize(rules.getValue(xml, "text-indent"));
   lprop.ltr = rules.getValue(xml, "direction") == "ltr";
   lprop.round = rules.getRound();
+  lprop.underlineFont = getFontForNode(xml.parent(), rules);
 
   xml = xml2;
 
