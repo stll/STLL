@@ -12,7 +12,7 @@ fontCache_c fc;
 // we also use the English language
 codepointAttributes attr;
 attr.font = fc->getFont("FreeSans.ttf", 20);
-attr.r = attr.g = attr.b = attr.a = 255;
+attr.c(255, 255, 255, 255);
 attr.lang = "en";
 
 // setup the attribute index. This index assigns attributes to
@@ -48,8 +48,8 @@ showLayoutSDL(layout, 20, 20, videoSurface);
 textStyleSheet_c styleSheet;
 
 // add the fonts that are required
-styleSheet.font("sans", "/usr/share/fonts/freefont/FreeSans.ttf");
-styleSheet.font("sans", "/usr/share/fonts/freefont/FreeSansBold.ttf", "normal", "normal", "bold");
+styleSheet.font("sans", fontResource_c("/usr/share/fonts/freefont/FreeSans.ttf"));
+styleSheet.font("sans", fontResource_c("/usr/share/fonts/freefont/FreeSansBold.ttf"), "normal", "normal", "bold");
 
 // add the CSS rules you need
 styleSheet.addRule("body", "color", "#ffffff");

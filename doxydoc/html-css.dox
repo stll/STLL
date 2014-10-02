@@ -14,16 +14,21 @@
  *
  * \section html_sec HTML
  *
- *  The following tags are supported:
+ *  The following tags are supported (but keep in mind that you have to specify proper
+ *  CSS to actually see proper results
  *  - html
  *  - header, the content is ignored
  *  - body
  *  - p
  *  - h1 - h6
- *  - i
+ *  - i, small, strong, sub, sup, q, em, code, b
  *  - ul, li
- *  - div
+ *  - div, span
  *  - br
+ *  - img (only within phrasing, no floating, image size must be specified and in pixel size)
+ *  - table, td, tr, th (column sizes must be specified in colgroup tags, colspan and rowspan is supported)
+ *
+ *  All named characters and the universal named characters are supported.
  *
  *  Global attributes:
  *  - lang, the value is inherited by subtags, it may be used for language dependent CSS rules
@@ -51,5 +56,6 @@
  *   is used
  * - background-color, only #-synatax and "transparent", default is transparent
  * - text-decoration, only the underline attribute, everything else means nothing
- * - text-shadow, multpile shadows are possible, no blurr, underline doesn't have a shadow
+ * - text-shadow, multiple shadows are possible, no blurr, underline doesn't have a shadow
+ * - border-collapse
  */
