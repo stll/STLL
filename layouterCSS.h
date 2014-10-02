@@ -98,8 +98,14 @@ class textStyleSheet_c
      * \param family The family you want to get
      * \returns The family of nullptr
      */
-    std::shared_ptr<fontFamily_c> findFamily(const std::string & family) const {
-      return families.find(family)->second;
+    std::shared_ptr<fontFamily_c> findFamily(const std::string & family) const
+    {
+      auto i = families.find(family);
+
+      if (i != families.end())
+        return families.find(family)->second;
+      else
+        return 0;
     }
 
     /** \brief add a rule to the stylesheet

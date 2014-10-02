@@ -438,17 +438,21 @@ static std::shared_ptr<fontFace_c> getFontForNode(const pugi::xml_node & xml, co
   parentFunctor fkt("font-size", xml.parent(), rules);
   double fontSize = evalSize(rules.getValue(xml, "font-size"), &fkt);
 
-  auto f = rules.findFamily(fontFamily)->getFont(fontSize, fontStyle, fontVariant, fontWeight);
+  auto fam = rules.findFamily(fontFamily);
 
-  if (!f)
+  if (fam)
   {
-    throw XhtmlException_c(std::string("Requested font not found (family:'") + fontFamily +
-                                       "', style: '" + fontStyle +
-                                       "', variant: '" + fontVariant +
-                                       "', weight: '" + fontWeight + ") required here: " + getNodePath(xml));
+    auto f = fam->getFont(fontSize, fontStyle, fontVariant, fontWeight);
+
+    if (f) return f;
   }
 
-  return f;
+  throw XhtmlException_c(std::string("Requested font not found (family:'") + fontFamily +
+                                     "', style: '" + fontStyle +
+                                     "', variant: '" + fontVariant +
+                                     "', weight: '" + fontWeight + ") required here: " + getNodePath(xml));
+
+  return 0;
 }
 
 static const pugi::char_t * getHTMLAttribute(pugi::xml_node xml, const std::string attr)
