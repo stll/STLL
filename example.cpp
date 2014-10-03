@@ -21,6 +21,7 @@
  */
 #include "layouterXHTML.h"
 #include "layouterSDL.h"
+#include "layouterXMLSaveLoad.h"
 #include <boost/concept_check.hpp>
 
 #include <fstream>
@@ -118,7 +119,8 @@ void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
 
 int main ()
 {
-  textStyleSheet_c styleSheet;
+  auto fc = std::make_shared<fontCache_c>();
+  textStyleSheet_c styleSheet(fc);
 
   // alle Fonts, die so genutzt werden: familie heißt sans, und dann der bold Font dazu
   styleSheet.font("sans", fontResource_c("tests/FreeSans.ttf"));
@@ -197,7 +199,7 @@ int main ()
 
   // der zu formatierende text
   std::string text = u8"<html><body>"
-    "<h1 lang='de'>&iexcl;Überschrift mit</h1>"
+    "<h1 lang='de'>&iexcl;Ü<sup>2</sup>berschrift mit</h1>"
     "<p class='und'>Test <i class='BigFont' class='und'>Text</i> more and somme ii "
     "<span class='BoldFont' class='und'>more text so</span> that the pa\u00ADra\u00ADgraph iiiiii is at least "
     "<span>long</span> enough to span some lines on the screen "
@@ -267,6 +269,11 @@ int main ()
                                 (WIN_WIDTH-TXT_WIDTH)/2, 10));
 
     l[0].layout.data[0].h = l[1].layout.getHeight();
+
+    pugi::xml_document doc;
+    saveLayoutToXML(l[1].layout, doc, fc);
+    doc.save_file("example.lay");
+
 
     // Ausgabe mittels SDL
     showLayoutsSelf(WIN_WIDTH, 1000, l);
