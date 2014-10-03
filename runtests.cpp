@@ -339,6 +339,21 @@ BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
   BOOST_CHECK_THROW(layoutXHTML(
     "<html><body><p>&#xAg3;</p></body></html>",
     s, STLL::rectangleShape_c(200*64)), STLL::XhtmlException_c);
+
+  // more columns in table than specified
+  s.addRule(".tc", "width", "100px");
+  s.addRule("body", "color", "#FFFFFF");
+  s.addRule("body", "font-size", "12px");
+  BOOST_CHECK_THROW(layoutXHTML(
+    "<html><body><table>"
+      "<colgroup><col span='2' class='tc' /></colgroup>"
+      "<tr>"
+        "<td>Test1</td>"
+        "<td>Test2</td>"
+        "<td>Test3</td>"
+      "</tr>"
+    "</table></body></html>",
+    s, STLL::rectangleShape_c(200*64)), STLL::XhtmlException_c);
 }
 
 BOOST_AUTO_TEST_CASE( Simple_Layouts )

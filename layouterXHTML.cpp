@@ -960,7 +960,8 @@ typedef struct
 } tableCell;
 
 static void layoutXML_TR(pugi::xml_node & xml, uint32_t row, const textStyleSheet_c & /* rules */,
-                         std::vector<tableCell> & cells, vector2d<pugi::xml_node> & cellarray)
+                         std::vector<tableCell> & cells, vector2d<pugi::xml_node> & cellarray,
+                         size_t columns)
 {
   uint32_t col = 0;
   while (!cellarray.get(col+1, row+1).empty()) col++;
@@ -1002,6 +1003,11 @@ static void layoutXML_TR(pugi::xml_node & xml, uint32_t row, const textStyleShee
           cellarray.set(x+1, y+1, i);
 
       col += c.colspan;
+
+      if (col > columns)
+      {
+        throw XhtmlException_c("You must not use more columns that specified in the colgroup tag (" + getNodePath(i) + ")");
+      }
     }
     else
     {
@@ -1070,7 +1076,7 @@ static textLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c
         throw XhtmlException_c("You must define columns and widths in a table (" + getNodePath(i) + ")");
       }
 
-      layoutXML_TR(i, row, rules, cells, cellarray);
+      layoutXML_TR(i, row, rules, cells, cellarray, widths.size());
       row++;
     }
     else
