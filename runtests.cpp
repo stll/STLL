@@ -617,6 +617,15 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
 
   BOOST_CHECK(layouts_identical(STLL::layoutParagraph(U"TestITest", attr, STLL::rectangleShape_c(300*64), l),
                                 "tests/simple-31.lay", c));
+
+  // a simple underline test with spaces to underline and a linebreak in between to
+  // check that justification spaces properly work
+  s.addRule("p", "text-decoration", "underline");
+  s.addRule("p", "text-align", "justify");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Text with spaces and moreandlongerwords</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/simple-32.lay", c));
+  s.addRule("p", "text-decoration", "");
 }
 
 BOOST_AUTO_TEST_CASE( Table_Layouts )
