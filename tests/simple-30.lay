@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<layout height="2112" left="0" right="19200">
+	<fonts>
+		<font file="tests/FreeSans.ttf" size="1024" />
+		<font file="tests/FreeSans.ttf" size="921" />
+	</fonts>
+	<commands>
+		<image x="320" y="961" url="a" />
+		<rect x="320" y="1780" w="640" h="64" r="255" g="255" b="255" a="255" />
+		<glyph x="960" y="1600" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
+		<rect x="960" y="1780" w="711" h="64" r="255" g="255" b="255" a="255" />
+		<glyph x="1600" y="1216" glyphIndex="72" font="1" r="255" g="255" b="255" a="255" />
+		<rect x="1600" y="1780" w="542" h="64" r="255" g="255" b="255" a="255" />
+		<glyph x="2048" y="1216" glyphIndex="86" font="1" r="255" g="255" b="255" a="255" />
+		<rect x="2048" y="1780" w="506" h="64" r="255" g="255" b="255" a="255" />
+		<glyph x="2496" y="1216" glyphIndex="87" font="1" r="255" g="255" b="255" a="255" />
+		<rect x="2496" y="1780" w="315" h="64" r="255" g="255" b="255" a="255" />
+	</commands>
+</layout>

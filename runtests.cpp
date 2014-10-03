@@ -589,6 +589,34 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
     "<html><body><p><img width='10px' height='10px' src='a' />T<sup>est</sup></p></body></html>",
     s, STLL::rectangleShape_c(300*64)), "tests/simple-30.lay", c));
   s.addRule("p", "text-decoration", "");
+
+  // check the underline feature where each letter has its own way
+  STLL::attributeIndex_c attr;
+  STLL::codepointAttributes a;
+
+  a.c = STLL::color_c(255, 255, 255, 255);
+  a.font = c->getFont(STLL::fontResource_c("tests/FreeSans.ttf"), 16*64);
+  a.flags = STLL::codepointAttributes::FL_UNDERLINE;
+  attr.set(0, 3, a);
+
+  a.font = c->getFont(STLL::fontResource_c("tests/FreeSans.ttf"), 2*16*64);
+  attr.set(5, 8, a);
+
+  a.inlay = std::make_shared<STLL::textLayout_c>();
+  a.inlay->setLeft(0);
+  a.inlay->setRight(10*64);
+  a.inlay->setHeight(10*64);
+  attr.set(4, a);
+
+  STLL::layoutProperties l;
+
+  l.align = STLL::layoutProperties::ALG_JUSTIFY_LEFT;
+  l.round = 1;
+  l.ltr = true;
+  l.indent = 0;
+
+  BOOST_CHECK(layouts_identical(STLL::layoutParagraph(U"TestITest", attr, STLL::rectangleShape_c(300*64), l),
+                                "tests/simple-31.lay", c));
 }
 
 BOOST_AUTO_TEST_CASE( Table_Layouts )

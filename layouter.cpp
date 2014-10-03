@@ -153,6 +153,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
                   && (attr.get(runstart).font == attr.get(spos).font)
                   && (attr.get(runstart).baseline_shift == attr.get(spos).baseline_shift)
                   && (!attr.get(spos).inlay)
+                  && (!attr.get(spos-1).inlay)
                   && (   (linebreaks[spos-1] == LINEBREAK_NOBREAK)
                       || (linebreaks[spos-1] == LINEBREAK_INSIDEACHAR)
                      )
