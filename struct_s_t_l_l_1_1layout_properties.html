@@ -107,6 +107,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a892f45b053f29e5dda3045900f567f49"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_s_t_l_l_1_1layout_properties.html#a892f45b053f29e5dda3045900f567f49">round</a></td></tr>
 <tr class="memdesc:a892f45b053f29e5dda3045900f567f49"><td class="mdescLeft">&#160;</td><td class="mdescRight">This value tells the layouter how to round the positions of glyph and other commands.  <a href="#a892f45b053f29e5dda3045900f567f49">More...</a><br/></td></tr>
 <tr class="separator:a892f45b053f29e5dda3045900f567f49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaaaf0af189231e65465a5df703e4468c"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="class_s_t_l_l_1_1font_face__c.html">fontFace_c</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_s_t_l_l_1_1layout_properties.html#aaaaf0af189231e65465a5df703e4468c">underlineFont</a></td></tr>
+<tr class="memdesc:aaaaf0af189231e65465a5df703e4468c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The font that defines the underline parameters.  <a href="#aaaaf0af189231e65465a5df703e4468c">More...</a><br/></td></tr>
+<tr class="separator:aaaaf0af189231e65465a5df703e4468c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Enumeration Documentation</h2>
 <a class="anchor" id="ab92298997ed04bdbfa851a2e8e2a81a0"></a>
@@ -190,6 +193,20 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aaaaf0af189231e65465a5df703e4468c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::shared_ptr&lt;<a class="el" href="class_s_t_l_l_1_1font_face__c.html">fontFace_c</a>&gt; STLL::layoutProperties::underlineFont</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>When underlines need to be placed they will be placed according to this font. That way you get the same font, regardless of size of text or font.</p>
+<p>When not set, the underline will use the parameters of the font of each glyph. </p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li><a class="el" href="layouter_8h_source.html">layouter.h</a></li>
 </ul>
@@ -199,7 +216,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="struct_s_t_l_l_1_1layout_properties.html">layoutProperties</a></li>
-    <li class="footer">Generated on Wed Oct 1 2014 21:16:34 for STLL by
+    <li class="footer">Generated on Sat Oct 4 2014 00:26:50 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>

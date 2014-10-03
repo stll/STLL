@@ -76,7 +76,7 @@ Using the Paragraph Layouter</h1>
 <div class="line"><span class="comment">// we also use the English language</span></div>
 <div class="line">codepointAttributes attr;</div>
 <div class="line">attr.font = fc-&gt;getFont(<span class="stringliteral">&quot;FreeSans.ttf&quot;</span>, 20);</div>
-<div class="line">attr.r = attr.g = attr.b = attr.a = 255;</div>
+<div class="line">attr.c(255, 255, 255, 255);</div>
 <div class="line">attr.lang = <span class="stringliteral">&quot;en&quot;</span>;</div>
 <div class="line"></div>
 <div class="line"><span class="comment">// setup the attribute index. This index assigns attributes to</span></div>
@@ -110,8 +110,8 @@ Using the XHTML Layouter</h1>
 <div class="line">textStyleSheet_c styleSheet;</div>
 <div class="line"></div>
 <div class="line"><span class="comment">// add the fonts that are required</span></div>
-<div class="line">styleSheet.font(<span class="stringliteral">&quot;sans&quot;</span>, <span class="stringliteral">&quot;/usr/share/fonts/freefont/FreeSans.ttf&quot;</span>);</div>
-<div class="line">styleSheet.font(<span class="stringliteral">&quot;sans&quot;</span>, <span class="stringliteral">&quot;/usr/share/fonts/freefont/FreeSansBold.ttf&quot;</span>, <span class="stringliteral">&quot;normal&quot;</span>, <span class="stringliteral">&quot;normal&quot;</span>, <span class="stringliteral">&quot;bold&quot;</span>);</div>
+<div class="line">styleSheet.font(<span class="stringliteral">&quot;sans&quot;</span>, fontResource_c(<span class="stringliteral">&quot;/usr/share/fonts/freefont/FreeSans.ttf&quot;</span>));</div>
+<div class="line">styleSheet.font(<span class="stringliteral">&quot;sans&quot;</span>, fontResource_c(<span class="stringliteral">&quot;/usr/share/fonts/freefont/FreeSansBold.ttf&quot;</span>), <span class="stringliteral">&quot;normal&quot;</span>, <span class="stringliteral">&quot;normal&quot;</span>, <span class="stringliteral">&quot;bold&quot;</span>);</div>
 <div class="line"></div>
 <div class="line"><span class="comment">// add the CSS rules you need</span></div>
 <div class="line">styleSheet.addRule(<span class="stringliteral">&quot;body&quot;</span>, <span class="stringliteral">&quot;color&quot;</span>, <span class="stringliteral">&quot;#ffffff&quot;</span>);</div>
@@ -135,7 +135,7 @@ Using the XHTML Layouter</h1>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Oct 1 2014 21:16:34 for STLL by
+    <li class="footer">Generated on Sat Oct 4 2014 00:26:50 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>

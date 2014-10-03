@@ -70,18 +70,21 @@ $(document).ready(function(){initNavTree('_h_t_m_l__c_s_s_pg.html','');});
 <p>The following 2 sections will try to detail the supported subset of HTML and CSS.</p>
 <h1><a class="anchor" id="html_sec"></a>
 HTML</h1>
-<p>The following tags are supported:</p>
+<p>The following tags are supported (but keep in mind that you have to specify proper CSS to actually see proper results</p>
 <ul>
 <li>html</li>
 <li>header, the content is ignored</li>
 <li>body</li>
 <li>p</li>
 <li>h1 - h6</li>
-<li>i</li>
+<li>i, small, strong, sub, sup, q, em, code, b</li>
 <li>ul, li</li>
-<li>div</li>
+<li>div, span</li>
 <li>br</li>
+<li>img (only within phrasing, no floating, image size must be specified and in pixel size)</li>
+<li>table, td, tr, th (column sizes must be specified in colgroup tags, colspan and rowspan is supported)</li>
 </ul>
+<p>All named characters and the universal named characters are supported.</p>
 <p>Global attributes:</p>
 <ul>
 <li>lang, the value is inherited by subtags, it may be used for language dependent CSS rules and it is used by the text output for language dependent shaping</li>
@@ -108,14 +111,15 @@ CSS</h1>
 <li>border-color only #-syntax and "transparent", when "" then the normal color attribute is used</li>
 <li>background-color, only #-synatax and "transparent", default is transparent</li>
 <li>text-decoration, only the underline attribute, everything else means nothing</li>
-<li>text-shadow, multpile shadows are possible, no blurr, underline doesn't have a shadow </li>
+<li>text-shadow, multiple shadows are possible, no blurr, underline doesn't have a shadow</li>
+<li>border-collapse </li>
 </ul>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Oct 1 2014 21:16:34 for STLL by
+    <li class="footer">Generated on Sat Oct 4 2014 00:26:50 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
   </ul>

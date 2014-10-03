@@ -19,5 +19,6 @@ var class_s_t_l_l_1_1text_layout__c =
     [ "setHeight", "class_s_t_l_l_1_1text_layout__c.html#a65badea992e1885d29ad42a656c9b027", null ],
     [ "setLeft", "class_s_t_l_l_1_1text_layout__c.html#a6a9f96ddd8ec79a4bd47187746836234", null ],
     [ "setRight", "class_s_t_l_l_1_1text_layout__c.html#a6132e6848335451756e0b4b734e66f9c", null ],
+    [ "shift", "class_s_t_l_l_1_1text_layout__c.html#ad44170ef33f5525eb7301a53752589eb", null ],
     [ "data", "class_s_t_l_l_1_1text_layout__c.html#abad273c3d4df2cabea8e47935eb41487", null ]
 ];
