@@ -660,6 +660,21 @@ BOOST_AUTO_TEST_CASE( Table_Layouts )
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td colspan='2'>Test with some more text</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
     s, STLL::rectangleShape_c(1000*64)), "tests/table-05.lay", c));
+
+  // basic table with 4 columns, first column is relatively high, the others with
+  // different vertical alignment
+  s.addRule(".va-top", "vertical-align", "top");
+  s.addRule(".va-mid", "vertical-align", "middle");
+  s.addRule(".va-bot", "vertical-align", "bottom");
+  s.addRule("td", "border-width", "1px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><table><colgroup><col span='4' class='tc' /></colgroup>"
+    "<tr><td>Test with some more text to actually have a linebreak in that column</td>"
+    "<td class='va-top'>Test1</td>"
+    "<td class='va-mid'>Test2</td>"
+    "<td class='va-bot'>Test3</td>"
+    "</tr></table></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/table-06.lay", c));
 }
 
 BOOST_AUTO_TEST_CASE( Frames_Layouts )

@@ -571,7 +571,16 @@ static textLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
   auto l2 = fkt(xml2, rules,
                 indentShape_c(shape, padding_left+borderwidth_left+margin_left, padding_right+borderwidth_right+margin_right),
                 ystart+padding_top+borderwidth_top+margin_top);
+
+  int space = minHeight - (l2.getHeight()+padding_bottom+borderwidth_bottom+margin_bottom);
   l2.setHeight(std::max(minHeight, l2.getHeight()+padding_bottom+borderwidth_bottom+margin_bottom));
+
+  if (space > 0)
+  {
+    // TODO baseline is missing
+         if (rules.getValue(xml, "vertical-align") == "bottom") l2.shift(0, space);
+    else if (rules.getValue(xml, "vertical-align") == "middle") l2.shift(0, space/2);
+  }
 
   textLayout_c::commandData c;
 

@@ -115,13 +115,14 @@ static bool isInheriting(const std::string & attribute)
   if (attribute == "text-shadow") return true;
 //  if (attribute == "width") return false;
   if (attribute == "border-collapse") return true;
+//  if (attribute == "vertical-align") return false;
 
   return false;
 }
 
 static const std::string & getDefault(const std::string & attribute)
 {
-  static std::string defaults[]= { "sans", "normal", "0px", "", "ltr", "transparent", "separate" };
+  static std::string defaults[]= { "sans", "normal", "0px", "", "ltr", "transparent", "separate", "baseline" };
 
   if (attribute == "color") throw XhtmlException_c("You must specify the required colors, there is no default");
   if (attribute == "font-family") return defaults[0];
@@ -158,6 +159,7 @@ static const std::string & getDefault(const std::string & attribute)
 //  if (attribute == "text-shadow") return defaults[3];
   if (attribute == "width") throw XhtmlException_c("You must specify the width, there is no default");
   if (attribute == "border-collapse") return defaults[6];
+  if (attribute == "vertical-align") return defaults[7];
 
   return defaults[3];
 }
@@ -199,6 +201,7 @@ static bool isValidAttribute(const std::string & attribute)
   if (attribute == "text-shadow") return true;
   if (attribute == "width") return true;
   if (attribute == "border-collapse") return true;
+  if (attribute == "vertical-align") return true;
 
   return false;
 }
@@ -396,6 +399,7 @@ static void checkValueFormat(const std::string & attribute, const std::string & 
   if (attribute == "text-shadow") checkShadowFormat(value);
   if (attribute == "width") checkFormatSize(value, SZ_PX);
   if (attribute == "border-collapse") checkValues(value, {"collapse", "separate"}, "border-collapse");
+  if (attribute == "vertical-align") checkValues(value, {"baseline", "top", "middle", "bottom"}, "vertical-align");
 }
 
 const std::string & textStyleSheet_c::getValue(pugi::xml_node node, const std::string & attribute) const

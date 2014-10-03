@@ -202,6 +202,20 @@ class textLayout_c
       firstBaseline = src.firstBaseline;
     }
 
+    /** \brief shift all the commands within the layout by the given amount
+     *
+     * \param dx x-offset in 1/64th pixels
+     * \param dy y-offset in 1/64th pixels
+     */
+    void shift(int32_t dx, int32_t dy)
+    {
+      for (auto & a : data)
+      {
+        a.x += dx;
+        a.y += dy;
+      }
+    }
+
     /** \brief the height of the layout. This is supposed to be the vertical
      *  space that this layout takes up in 1/64th pixels
      */
