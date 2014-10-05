@@ -241,7 +241,7 @@ class fontCache_c
      */
     fontCache_c(void) : lib(std::make_shared<freeTypeLibrary_c>()) {}
 
-    /** Get a font face from this cache with the given resource and size.
+    /** \brief Get a font face from this cache with the given resource and size.
      *
      * If there is already one instance of this font open, it will be used
      * otherwise a new one will be opened.
@@ -252,21 +252,31 @@ class fontCache_c
      */
     std::shared_ptr<fontFace_c> getFont(const fontResource_c & res, uint32_t size);
 
-    /** Get the font resource for a font inside the cache (or empty resource, if the
+    /** \brief Get the font resource for a font inside the cache (or empty resource, if the
      * font is not within
      *
      * \param f font to look for
      * \return the resource that was used to create the font
+     *
+     * \note The returned value is undefined, when the font doesn't exist in the cache
      */
     fontResource_c getFontResource(std::shared_ptr<fontFace_c> f) const;
 
-    /** Get the font size for a font inside the cache (or zero, if the
+    /** \brief Get the font size for a font inside the cache (or zero, if the
      * font is not within
      *
      * \param f font to look for
      * \return the size used to create the font
+     *
+     * \note The returned value is undefined, when the font doesn't exist in the cache
      */
     uint32_t getFontSize(std::shared_ptr<fontFace_c> f) const;
+
+    /** \brief Find out, if a given font is handled inside this cache
+     *
+     * \return true, when the font is inside this cache
+     */
+    bool containsFont(std::shared_ptr<fontFace_c> f) const;
 
   private:
 

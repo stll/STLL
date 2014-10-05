@@ -26,6 +26,9 @@ void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_
     {
       found.push_back(a.font);
 
+      if (!c->containsFont(a.font))
+        throw SaveLoadException_c("Font not found in cache, maybe wrong cache?");
+
       auto fnt = fonts.append_child();
       fnt.set_name("font");
       fnt.append_attribute("file").set_value(c->getFontResource(a.font).getDescription().c_str());

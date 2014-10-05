@@ -248,4 +248,13 @@ uint32_t fontCache_c::getFontSize(std::shared_ptr<fontFace_c> f) const
   return 0;
 }
 
+bool fontCache_c::containsFont(std::shared_ptr<fontFace_c> f) const
+{
+  for (const auto a : fonts)
+    if (a.second.lock() == f)
+      return true;
+
+  return false;
+}
+
 }

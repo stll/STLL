@@ -311,9 +311,12 @@ BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
   BOOST_CHECK_THROW(layoutXHTML("<html><body><table><colgroup><col span='0' /></colgroup></table><p>Text</p></body></html>", s, r), STLL::XhtmlException_c);
   // invalid tag in flow context
   BOOST_CHECK_THROW(layoutXHTML("<html><body><colgroup /></body></html>", s, r), STLL::XhtmlException_c);
-  // invalid / undefined font
+  // invalid / undefined font family
   s.addRule("p", "color", "#FFFFFF");
   BOOST_CHECK_THROW(layoutXHTML("<html><body><p class='font'>Test</p></body></html>", s, r), STLL::XhtmlException_c);
+  // invalid / undefined font type
+  s.addRule(".bold", "font-weight", "bold");
+  BOOST_CHECK_THROW(layoutXHTML("<html><body><p><span class='bold'>Test</span></p></body></html>", s, r), STLL::XhtmlException_c);
 
   // put something undefined in prasing context
   BOOST_CHECK_THROW(layoutXHTML("<html><body><p>Test<i><div /></i></p></body></html>", s, r), STLL::XhtmlException_c);
@@ -811,4 +814,10 @@ BOOST_AUTO_TEST_CASE( Save_Load_Layouts )
   auto l2 = loadLayoutFromXML(doc.child("layout"), c2);
 
   BOOST_CHECK(l == l2);
+
+
+  // use wrong cache for saving
+  auto c3 = std::make_shared<STLL::fontCache_c>();
+
+  BOOST_CHECK_THROW(saveLayoutToXML(l, doc, c3), STLL::SaveLoadException_c);
 }

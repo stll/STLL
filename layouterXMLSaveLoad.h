@@ -33,6 +33,15 @@
 
 namespace STLL {
 
+/** \brief exception thrown when something went wrong with loading or saving
+ */
+class SaveLoadException_c : public std::runtime_error
+{
+  public:
+    explicit SaveLoadException_c(const std::string & what_arg) : std::runtime_error(what_arg) {}
+
+};
+
 /** \brief load a layout from a XML node, the node must point to the "layout" node to load
  *  \param doc the XML node to load
  *  \param c the font cache to use to get the fonts from
