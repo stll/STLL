@@ -26,6 +26,8 @@
  *  \brief SDL output driver
  */
 
+#include "layouterFont.h"
+
 #include <SDL.h>
 
 namespace STLL {
@@ -38,7 +40,7 @@ class textLayout_c;
  *  \param sy y position on the target surface in 1/64th pixels
  *  \param s target surface
  */
-void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s);
+void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s, SubPixelArrangement sp);
 
 }
 

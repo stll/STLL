@@ -39,10 +39,21 @@
 
 struct FT_FaceRec_;
 struct FT_LibraryRec_;
-struct FT_Outline_;
-struct FT_Raster_Params_;
+struct FT_GlyphSlotRec_;
 
 namespace STLL {
+
+/** \brief define, which sub-pixel arrangement you want to use for
+ *  sub-pixel output
+ */
+typedef enum
+{
+  SUBP_NONE,   ///< don't use suppixel output (e.g. non LCD)
+  SUBP_RGB,    ///< use horizontal RGB
+  SUBP_BGR,    ///< use horizontal BGR
+  SUBP_RGB_V,  ///< use vertical RGB (top to bottom)
+  SUBP_BGR_V   ///< use vertical BGR (top to bottom)
+} SubPixelArrangement;
 
 /** \brief This class is thrown on problems with the freetype library
  */
@@ -121,15 +132,6 @@ class fontFace_c : boost::noncopyable
     fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const fontResource_c & res, uint32_t size);
     ~fontFace_c();
 
-    /** \brief Perform an outline rendering of a glyph of this font
-     *
-     * \param idx the index to the glyp to render (you get this from the textLayout_c class
-     * \param params the rendering structure. It contains information where to render too (mainly callbacks)
-     *
-     * TODO wrap FT_Raster_Params
-     */
-    void outlineRender(uint32_t idx, FT_Raster_Params_ * params);
-
     /** \brief Get the freetype structure for this font
      *
      * This is required for example for harfbuzz. You normally don't need this when using STLL
@@ -164,6 +166,13 @@ class fontFace_c : boost::noncopyable
      */
     int32_t getUnderlineThickness(void) const;
     /** @} */
+
+    /** \brief render a glyph of this font
+     * \param glyphIndex the index of the glyph to render (take it from the layout)
+     * \param sp the requested subpixel arrangement to apply to the rendering
+     * \note glyphs are always rendered unhinted 8-bit FreeType bitmaps
+     */
+    FT_GlyphSlotRec_ * renderGlyph(uint64_t glyphIndex, SubPixelArrangement sp);
   private:
     FT_FaceRec_ *f;
     std::shared_ptr<freeTypeLibrary_c> lib;
@@ -195,16 +204,6 @@ class freeTypeLibrary_c : boost::noncopyable
      * \return The FT_Face value
      */
     FT_FaceRec_ * newFace(const fontResource_c & res, uint32_t size);
-
-    /** Make the library render an outline of a glyph
-     *
-     * Usually you don't use this function directly but you use the fontFace_c class
-     *
-     * \param o The outline to render
-     * \param params The rendering parameters
-     * \return Error code
-     */
-    int outlineRender(FT_Outline_ * o, FT_Raster_Params_ * params);
 
     /** Make the library destroy a font
      *

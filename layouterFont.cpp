@@ -24,6 +24,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_OUTLINE_H
+#include FT_LCD_FILTER_H
 
 #include <hb.h>
 #include <hb-ft.h>
@@ -94,22 +95,32 @@ std::shared_ptr<fontFace_c> fontCache_c::getFont(const fontResource_c & res, uin
   return f;
 }
 
-void fontFace_c::outlineRender(uint32_t idx, FT_Raster_Params* params)
+FT_GlyphSlotRec_ * fontFace_c::renderGlyph(uint64_t glyphIndex, SubPixelArrangement sp)
 {
-  if (FT_Load_Glyph(f, idx, FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING))
+  FT_Render_Mode rm;
+
+  switch(sp)
   {
-    throw FreetypeException_c("A font doesn't contain a required glyph");
+    case SUBP_RGB:
+    case SUBP_BGR:
+      rm = FT_RENDER_MODE_LCD;
+      break;
+
+    case SUBP_RGB_V:
+    case SUBP_BGR_V:
+      rm = FT_RENDER_MODE_LCD_V;
+      break;
+
+    default:
+      rm = FT_RENDER_MODE_NORMAL;
+      break;
   }
 
-  if (f->glyph->format != FT_GLYPH_FORMAT_OUTLINE)
-  {
-    throw FreetypeException_c("This text library can only handle outline fonts");
-  }
+  /* load glyph image into the slot (erase previous one) */
+  if (FT_Load_Glyph(f, glyphIndex, FT_LOAD_NO_HINTING)) return 0;
+  if (FT_Render_Glyph(f->glyph, rm)) return 0;
 
-  if (lib->outlineRender(&f->glyph->outline, params))
-  {
-    throw FreetypeException_c("The rendering of a glyph failed");
-  }
+  return f->glyph;
 }
 
 FT_Face freeTypeLibrary_c::newFace(const fontResource_c & res, uint32_t size)
@@ -173,11 +184,6 @@ FT_Face freeTypeLibrary_c::newFace(const fontResource_c & res, uint32_t size)
                             res.getDescription() + "'. Maybe the font doesn't have one?");
 }
 
-FT_Error freeTypeLibrary_c::outlineRender(FT_Outline * o, FT_Raster_Params * params)
-{
-  return FT_Outline_Render(lib, o, params);
-}
-
 void freeTypeLibrary_c::doneFace(FT_Face f)
 {
   FT_Done_Face(f);
@@ -194,6 +200,8 @@ freeTypeLibrary_c::freeTypeLibrary_c()
   {
     throw FreetypeException_c("Could not initialize font rendering library instance");
   }
+
+  FT_Library_SetLcdFilter(lib, FT_LCD_FILTER_DEFAULT);
 }
 
 void fontFamily_c::addFont(const fontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)

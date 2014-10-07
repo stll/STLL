@@ -23,6 +23,7 @@
 #include "layouterSDL.h"
 
 #include "layouter.h"
+#include "color.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -31,82 +32,190 @@
 
 namespace STLL {
 
-typedef struct
+
+static Uint32 getpixel(SDL_Surface *surface, int x, int y)
 {
-  // set to the origin of the pixel
-  uint32_t *pixels;
+  int bpp = surface->format->BytesPerPixel;
+  /* Here p is the address to the pixel we want to retrieve */
+  Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
 
-  // final bounding check
-  uint32_t *first_pixel, *last_pixel;
+  switch(bpp) {
+    case 1:
+      return *p;
+      break;
 
-  // format information
-  int32_t pitch;
-  uint32_t rshift;
-  uint32_t gshift;
-  uint32_t bshift;
-  uint32_t ashift;
+    case 2:
+      return *(Uint16 *)p;
+      break;
 
-  color_c c;
+    case 3:
+      if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+        return p[0] << 16 | p[1] << 8 | p[2];
+      else
+        return p[0] | p[1] << 8 | p[2] << 16;
+      break;
 
-} spanInfo;
+    case 4:
+      return *(Uint32 *)p;
+      break;
 
-void spanner(int y, int count, const FT_Span* spans, void *user)
-{
-  spanInfo *baton = reinterpret_cast<spanInfo*>(user);
-
-  uint32_t *scanline = baton->pixels - y * baton->pitch;
-
-  if (scanline >= baton->first_pixel)
-  {
-    for (int i = 0; i < count; i++)
-    {
-      uint32_t *start = scanline + spans[i].x;
-
-      if (start + spans[i].len >= baton->last_pixel)
-        return;
-
-      uint8_t alpha = (spans[i].coverage * baton->c.a()) / 255;
-
-      for (int x = 0; x < spans[i].len; x++)
-      {
-        uint8_t pr = *start >> baton->rshift;
-        uint8_t pg = *start >> baton->gshift;
-        uint8_t pb = *start >> baton->bshift;
-
-        pr = ((255-alpha)*pr + (alpha*baton->c.r()))/255;
-        pg = ((255-alpha)*pg + (alpha*baton->c.g()))/255;
-        pb = ((255-alpha)*pb + (alpha*baton->c.b()))/255;
-
-        *start = (pr << baton->rshift) | (pg << baton->gshift) | (pb << baton->bshift);
-        start++;
-
-        if (start >= baton->last_pixel) return;
-      }
-    }
+    default:
+      return 0;       /* shouldn't happen, but avoids warnings */
   }
 }
 
-void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
+static void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
+{
+  int bpp = surface->format->BytesPerPixel;
+  /* Here p is the address to the pixel we want to set */
+  Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+
+  switch(bpp) {
+    case 1:
+      *p = pixel;
+      break;
+
+    case 2:
+      *(Uint16 *)p = pixel;
+      break;
+
+    case 3:
+      if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+        p[0] = (pixel >> 16) & 0xff;
+        p[1] = (pixel >> 8) & 0xff;
+        p[2] = pixel & 0xff;
+      } else {
+        p[0] = pixel & 0xff;
+        p[1] = (pixel >> 8) & 0xff;
+        p[2] = (pixel >> 16) & 0xff;
+      }
+      break;
+
+    case 4:
+      *(Uint32 *)p = pixel;
+      break;
+  }
+}
+
+static uint8_t blend(uint8_t a1, uint8_t a2, uint8_t b)
+{
+  return a1 + (a2-a1) * b / 255;
+}
+
+static void outputGlyph_NONE_Fallback(int sx, int sy, FT_GlyphSlot img, color_c c, SDL_Surface * s)
+{
+  int stx = (sx+32)/64 + img->bitmap_left;
+  int sty = (sy+32)/64 - img->bitmap_top;
+
+  int yp = sty;
+
+  for (int y = 0; y < img->bitmap.rows; y++)
+  {
+    if (yp >= 0 && yp < s->h)
+    {
+      int xp = stx;
+
+      for (int x = 0; x < img->bitmap.width; x++)
+      {
+        if (xp >= 0 && xp < s->w )
+        {
+          uint8_t a = (c.a()*img->bitmap.buffer[y*img->bitmap.pitch+x]+128)/255;
+          auto p = getpixel(s, xp, yp);
+
+          Uint8 r, g, b;
+          SDL_GetRGB(p, s->format, &r, &g, &b);
+
+          r = blend(r, c.r(), a);
+          g = blend(g, c.g(), a);
+          b = blend(b, c.b(), a);
+
+          putpixel(s, xp, yp, SDL_MapRGBA(s->format, r, g, b, SDL_ALPHA_OPAQUE));
+
+        }
+        xp++;
+      }
+    }
+    yp++;
+  }
+}
+
+static void outputGlyph_Horizontal_Fallback(int sx, int sy, FT_GlyphSlot img, color_c c, SDL_Surface * s)
+{
+  int stx = sx/64 + img->bitmap_left;
+  int sty = sy/64 - img->bitmap_top;
+  int stc = (3*sx/64) % 3;
+
+  int yp = sty;
+
+  for (int y = 0; y < img->bitmap.rows; y++)
+  {
+    if (yp >= 0 && yp < s->h)
+    {
+      int xp = stx;
+      int col = stc;
+
+      for (int x = 0; x < img->bitmap.width; x++)
+      {
+        if (xp >= 0 && xp < s->w )
+        {
+          auto p = getpixel(s, xp, yp);
+
+          Uint8 r, g, b;
+          SDL_GetRGB(p, s->format, &r, &g, &b);
+
+          // blend values
+          switch (col)
+          {
+            case 0: r = blend(r, c.r(), (img->bitmap.buffer[y*img->bitmap.pitch+x] * c.a() + 128) / 255); break;
+            case 1: g = blend(g, c.g(), (img->bitmap.buffer[y*img->bitmap.pitch+x] * c.a() + 128) / 255); break;
+            case 2: b = blend(b, c.b(), (img->bitmap.buffer[y*img->bitmap.pitch+x] * c.a() + 128) / 255); break;
+          }
+
+          putpixel(s, xp, yp, SDL_MapRGBA(s->format, r, g, b, SDL_ALPHA_OPAQUE));
+        }
+
+        col++;
+        if (col >= 3)
+        {
+          col = 0;
+          xp++;
+        }
+      }
+    }
+    yp++;
+  }
+}
+
+static void outputGlyph(int sx, int sy, FT_GlyphSlot img, SubPixelArrangement sp, color_c c, SDL_Surface * s)
+{
+  // check for the right image format
+  if (!img) return;
+  if (img->format != FT_GLYPH_FORMAT_BITMAP) return;
+  if (sp == SUBP_NONE && img->bitmap.pixel_mode != FT_PIXEL_MODE_GRAY) return;
+  if ((sp == SUBP_RGB || sp == SUBP_BGR) && img->bitmap.pixel_mode != FT_PIXEL_MODE_LCD) return;
+  if ((sp == SUBP_RGB_V || sp == SUBP_BGR_V) && img->bitmap.pixel_mode != FT_PIXEL_MODE_LCD_V) return;
+
+  // hub code to decide which function to use for output, there are fast functions
+  // for some of the output functions and fallbacks that always work
+
+  switch (sp)
+  {
+    case SUBP_NONE:
+      // no suppixels
+      outputGlyph_NONE_Fallback(sx, sy, img, c, s);
+      break;
+
+    case SUBP_RGB:
+
+      outputGlyph_Horizontal_Fallback(sx, sy, img, c, s);
+      break;
+  }
+}
+
+
+void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s, SubPixelArrangement sp)
 {
   /* set up rendering via spanners */
-  spanInfo span;
-  span.pixels = NULL;
-  span.first_pixel = reinterpret_cast<uint32_t*>(s->pixels);
-  span.last_pixel = reinterpret_cast<uint32_t*>(reinterpret_cast<uint8_t*>(s->pixels) + s->pitch*s->h);
-  span.pitch = s->pitch/4;
-  span.rshift = s->format->Rshift;
-  span.gshift = s->format->Gshift;
-  span.bshift = s->format->Bshift;
-
-  FT_Raster_Params ftr_params;
-  ftr_params.target = 0;
-  ftr_params.flags = FT_RASTER_FLAG_DIRECT | FT_RASTER_FLAG_AA;
-  ftr_params.user = &span;
-  ftr_params.black_spans = 0;
-  ftr_params.bit_set = 0;
-  ftr_params.bit_test = 0;
-  ftr_params.gray_spans = spanner;
-
   SDL_Rect r;
 
   /* render */
@@ -116,11 +225,7 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s)
     {
       case textLayout_c::commandData::CMD_GLYPH:
 
-        span.pixels = reinterpret_cast<uint32_t*>(reinterpret_cast<uint8_t*>(s->pixels) + ((sy+i.y+32)/64) * s->pitch) + ((sx+i.x+32)/64);
-        span.c = i.c;
-
-        i.font->outlineRender(i.glyphIndex, &ftr_params);
-
+        outputGlyph(sx+i.x, sy+i.y, i.font->renderGlyph(i.glyphIndex, sp), sp, i.c, s);
         break;
 
       case textLayout_c::commandData::CMD_RECT:
