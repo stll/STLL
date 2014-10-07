@@ -134,7 +134,7 @@ FT_Face freeTypeLibrary_c::newFace(const fontResource_c & res, uint32_t size)
                               "file is spelled wrong or file is broken");
   }
 
-  if (FT_Set_Char_Size(f, 0, size, 72, 72))
+  if (FT_Set_Pixel_Sizes(f, (size+32)/64, (size+32)/64))
   {
     doneFace(f);
 
