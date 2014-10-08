@@ -139,7 +139,41 @@ static void outputGlyph_NONE_Fallback(int sx, int sy, FT_GlyphSlot img, color_c 
   }
 }
 
-static void outputGlyph_Horizontal_Fallback(int sx, int sy, FT_GlyphSlot img, color_c c, SDL_Surface * s)
+static void outputGlyph_NONE_RGBx(int sx, int sy, FT_GlyphSlot img, color_c c, SDL_Surface * s)
+{
+  int stx = (sx+32)/64 + img->bitmap_left;
+  int sty = (sy+32)/64 - img->bitmap_top;
+
+  int yp = sty;
+
+  for (int y = 0; y < img->bitmap.rows; y++)
+  {
+    if (yp >= 0 && yp < s->h)
+    {
+      int xp = stx;
+
+      uint8_t * dst = (uint8_t*)s->pixels + yp * s->pitch + 4*xp;
+      uint8_t * src = img->bitmap.buffer + y*img->bitmap.pitch;
+
+      for (int x = 0; x < img->bitmap.width; x++)
+      {
+        if (xp >= 0 && xp < s->w )
+        {
+          uint8_t a = (c.a()*img->bitmap.buffer[y*img->bitmap.pitch+x]+128)/255;
+
+          *dst = blend(*dst, c.b(), a); dst++;
+          *dst = blend(*dst, c.g(), a); dst++;
+          *dst = blend(*dst, c.r(), a); dst++;
+          dst++;
+        }
+        xp++;
+      }
+    }
+    yp++;
+  }
+}
+
+static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, FT_GlyphSlot img, color_c c, SDL_Surface * s)
 {
   int stx = sx/64 + img->bitmap_left;
   int sty = sy/64 - img->bitmap_top;
@@ -186,6 +220,60 @@ static void outputGlyph_Horizontal_Fallback(int sx, int sy, FT_GlyphSlot img, co
   }
 }
 
+static void outputGlyph_HorizontalRGB_RGBx(int sx, int sy, FT_GlyphSlot img, color_c c, SDL_Surface * s)
+{
+  int stx = sx/64 + img->bitmap_left;
+  int sty = (sy+32)/64 - img->bitmap_top;
+  int stc = (3*sx/64) % 3;
+
+  int yp = sty;
+
+  assert(img->bitmap.width % 3 == 0);
+
+  for (int y = 0; y < img->bitmap.rows; y++)
+  {
+    if (yp >= 0 && yp < s->h)
+    {
+      int xp = stx;
+      int col = stc;
+
+      uint8_t * dst = (uint8_t*)s->pixels + yp * s->pitch + 4*xp + 2 - col;
+      uint8_t * src = img->bitmap.buffer + y*img->bitmap.pitch;
+
+      for (int x = 0; x < img->bitmap.width; x++)
+      {
+        if (xp >= 0 && xp < s->w )
+        {
+          switch(col)
+          {
+            case 0: *dst = blend(*dst, c.r(), (*src*c.a()+128)/255); break;
+            case 1: *dst = blend(*dst, c.g(), (*src*c.a()+128)/255); break;
+            case 2: *dst = blend(*dst, c.b(), (*src*c.a()+128)/255); break;
+          }
+        }
+
+        col++;
+        dst--;
+        src++;
+        if (col >= 3)
+        {
+          col = 0;
+          xp++;
+          dst+=7;
+        }
+      }
+    }
+    yp++;
+  }
+}
+
+static bool isRGBxSurface(SDL_Surface * s)
+{
+  auto f = s->format;
+
+  return f->BytesPerPixel == 4 && f->Rmask == 0xFF0000 && f->Gmask == 0xFF00 && f->Bmask == 0xFF;
+}
+
 static void outputGlyph(int sx, int sy, FT_GlyphSlot img, SubPixelArrangement sp, color_c c, SDL_Surface * s)
 {
   // check for the right image format
@@ -202,12 +290,18 @@ static void outputGlyph(int sx, int sy, FT_GlyphSlot img, SubPixelArrangement sp
   {
     case SUBP_NONE:
       // no suppixels
-      outputGlyph_NONE_Fallback(sx, sy, img, c, s);
+      if (isRGBxSurface(s))
+        outputGlyph_NONE_RGBx(sx, sy, img, c, s);
+      else
+        outputGlyph_NONE_Fallback(sx, sy, img, c, s);
       break;
 
     case SUBP_RGB:
 
-      outputGlyph_Horizontal_Fallback(sx, sy, img, c, s);
+      if (isRGBxSurface(s))
+        outputGlyph_HorizontalRGB_RGBx(sx, sy, img, c, s);
+      else
+        outputGlyph_HorizontalRGB_Fallback(sx, sy, img, c, s);
       break;
   }
 }
@@ -224,12 +318,10 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s, SubP
     switch (i.command)
     {
       case textLayout_c::commandData::CMD_GLYPH:
-
         outputGlyph(sx+i.x, sy+i.y, i.font->renderGlyph(i.glyphIndex, sp), sp, i.c, s);
         break;
 
       case textLayout_c::commandData::CMD_RECT:
-
         r.x = (i.x+sx+32)/64;
         r.y = (i.y+sy+32)/64;
         r.w = (i.x+sx+i.w+32)/64-r.x;
@@ -238,7 +330,6 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s, SubP
         break;
 
       case textLayout_c::commandData::CMD_IMAGE:
-
         // TODO this is just a placeholder for now
 
         r.x = (i.x+sx+32)/64;
