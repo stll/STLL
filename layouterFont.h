@@ -390,6 +390,39 @@ class fontFamily_c
     std::shared_ptr<fontCache_c> cache;
 };
 
+/** \brief This class can be used as the key in glyph caches, it describes the
+ *  exact rendering of the glyph
+ */
+class glyphKey_c
+{
+  public:
+
+  glyphKey_c(std::shared_ptr<fontFace_c> f, uint32_t idx, SubPixelArrangement s) : font((intptr_t)f.get()), glyphIndex(idx), sp(s) { }
+
+  intptr_t font;
+  uint32_t glyphIndex;
+  SubPixelArrangement sp;
+
+  bool operator==(const glyphKey_c & a) const
+  {
+    return font == a.font && glyphIndex == a.glyphIndex && sp == a.sp;
+  }
+};
+
+}
+
+namespace std {
+
+template <>
+class hash<STLL::glyphKey_c>
+{
+  public :
+  size_t operator()(const STLL::glyphKey_c & name ) const
+  {
+    return (size_t)name.font ^ (size_t)name.glyphIndex ^ (size_t)name.sp;
+  }
+};
+
 }
 
 #endif

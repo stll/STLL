@@ -28,10 +28,11 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-// TODO we need some kind of caching here...
+#include <unordered_map>
 
 namespace STLL {
 
+static std::unordered_map<glyphKey_c, FT_GlyphSlotRec_ *> glyhCache;
 
 static Uint32 getpixel(SDL_Surface *surface, int x, int y)
 {
@@ -306,6 +307,28 @@ static void outputGlyph(int sx, int sy, FT_GlyphSlot img, SubPixelArrangement sp
   }
 }
 
+static FT_GlyphSlotRec_ * getGlyph(std::shared_ptr<fontFace_c> face, int32_t glyph, SubPixelArrangement sp)
+{
+  glyphKey_c k(face, glyph, sp);
+
+  auto i = glyhCache.find(k);
+
+  if (i == glyhCache.end())
+  {
+    auto g = face->renderGlyph(glyph, sp);
+
+    FT_GlyphSlotRec_ * h = new FT_GlyphSlotRec;
+
+    memcpy(h, g, sizeof(FT_GlyphSlotRec));
+    h->bitmap.buffer = new uint8_t [g->bitmap.rows*g->bitmap.pitch];
+    memcpy(h->bitmap.buffer, g->bitmap.buffer, g->bitmap.rows*g->bitmap.pitch);
+
+    i = glyhCache.insert(std::make_pair(k, h)).first;
+  }
+
+  return i->second;
+}
+
 
 void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s, SubPixelArrangement sp)
 {
@@ -318,7 +341,7 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s, SubP
     switch (i.command)
     {
       case textLayout_c::commandData::CMD_GLYPH:
-        outputGlyph(sx+i.x, sy+i.y, i.font->renderGlyph(i.glyphIndex, sp), sp, i.c, s);
+        outputGlyph(sx+i.x, sy+i.y, getGlyph(i.font, i.glyphIndex, sp), sp, i.c, s);
         break;
 
       case textLayout_c::commandData::CMD_RECT:
