@@ -31,8 +31,6 @@
 
 #include <algorithm>
 
-#define _DEBUG_
-
 namespace STLL {
 
 typedef struct
