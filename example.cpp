@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "layouterXHTML.h"
+#include "layouter.h"
 #include "layouterSDL.h"
 #include "layouterXMLSaveLoad.h"
 #include <boost/concept_check.hpp>
@@ -61,10 +62,25 @@ class layoutInfo_c
 {
   public:
 
-    layoutInfo_c(textLayout_c l, int x, int y) : layout(l), sx(x), sy(y) { }
+    layoutInfo_c(textLayout_c l, int x, int y, SubPixelArrangement s) : layout(l), sx(x), sy(y), sp(s) { }
 
     textLayout_c layout;
     int sx, sy;
+    SubPixelArrangement sp;
+};
+
+class myImageDrawer_c : public imageDrawer_c
+{
+  void draw(int32_t x, int32_t y, uint32_t w, uint32_t h, SDL_Surface * s, const std::string & url)
+  {
+    SDL_Rect r;
+
+    r.x = (x + 32)/64;
+    r.y = (y + 32)/64;
+    r.w = w/64;
+    r.h = h/64;
+    SDL_FillRect(s, &r, SDL_MapRGBA(s->format, 255, 255, 255, SDL_ALPHA_OPAQUE));
+  }
 };
 
 void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
@@ -86,8 +102,10 @@ void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
   /* Clear our surface */
   SDL_FillRect(screen, NULL, 0 );
 
+  myImageDrawer_c id;
+
   for (auto & a : data)
-    showLayoutSDL(a.layout, a.sx*64, a.sy*64, screen);
+    showLayoutSDL(a.layout, a.sx, a.sy, screen, a.sp, &id);
 
   SDL_Flip(screen);
 
@@ -122,9 +140,11 @@ int main ()
   auto fc = std::make_shared<fontCache_c>();
   textStyleSheet_c styleSheet(fc);
 
+  styleSheet.setRound(64);
+
   // alle Fonts, die so genutzt werden: familie heißt sans, und dann der bold Font dazu
-  styleSheet.font("sans", fontResource_c("tests/FreeSans.ttf"));
-  styleSheet.font("sans", fontResource_c("/usr/share/fonts/freefont/FreeSansBold.ttf"), "normal", "normal", "bold");
+  styleSheet.font("sans", fontResource_c("/usr/share/fonts/freefont/FreeSerif.ttf"));
+  styleSheet.font("sans", fontResource_c("/usr/share/fonts/freefont/FreeSerifBold.ttf"), "normal", "normal", "bold");
   styleSheet.font("sans-ar", fontResource_c(loadFile("tests/Amiri.ttf"), "arabic"));
 
   // CSS regeln, immer Selector, attribut, wert
@@ -259,14 +279,14 @@ int main ()
   c.h = 600;
   c.c = color_c(50, 50, 50);
   la.addCommand(c);
-  l.emplace_back(layoutInfo_c(la, (WIN_WIDTH-TXT_WIDTH)/2, 10));
+  l.emplace_back(layoutInfo_c(la, (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_NONE));
 
   try {
     // das eigentliche Layout
     // layoutXHTML macht die Arbeit, übergeben wird der Text, das Stylesheet und eine Klasse,
     // die die Form des Textes beinhaltet (für nicht rechteckiges Layout
     l.emplace_back(layoutInfo_c(layoutXHTML(text, styleSheet, rectangleShape_c(64*TXT_WIDTH)),
-                                (WIN_WIDTH-TXT_WIDTH)/2, 10));
+                                (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_RGB));
 
     l[0].layout.data[0].h = l[1].layout.getHeight();
 
@@ -282,4 +302,75 @@ int main ()
   {
     printf("Xhtml Exception: %s\n", e.what());
   }
+
+  return 0;
+
+  // another example:
+  {
+
+  layoutProperties prop;
+
+  prop.align = layoutProperties::ALG_LEFT;
+  prop.ltr = true;
+  prop.round = 3;
+
+  textLayout_c l2;
+
+  attributeIndex_c attr;
+  codepointAttributes a;
+  a.c = color_c(255, 255, 255, 255);
+  a.font = fc->getFont(fontResource_c("tests/FreeSans.ttf"), 16*64);
+  a.lang = "en";
+  a.flags = 0;
+  attr.set(0, 100, a);
+
+  for (int row = 0; row < 20; row++)
+  {
+    prop.indent = (64*row)/3;
+    l2.append(layoutParagraph(U"The quick brown fox iiiiiiiiiiiii", attr, rectangleShape_c(400*64), prop, l2.getHeight()));
+  }
+
+  // Ausgabe mittels SDL
+  l.clear();
+  l.push_back(layoutInfo_c(l2, 0, 0, SUBP_NONE));
+  l.push_back(layoutInfo_c(l2, 0, l2.getHeight(), SUBP_RGB));
+  showLayoutsSelf(WIN_WIDTH, 1000, l);
+  }
+
+  {
+  layoutProperties prop;
+
+  prop.align = layoutProperties::ALG_LEFT;
+  prop.ltr = true;
+  prop.round = 64;
+  prop.indent = 0;
+
+  textLayout_c l2;
+
+  int ypos = 0;
+  l.clear();
+
+  for (int row = 0; row < 20; row++)
+  {
+    attributeIndex_c attr;
+    codepointAttributes a;
+    a.c = color_c(155, 155, 255, 055);
+    a.font = fc->getFont(fontResource_c("/usr/share/fonts/corefonts/georgiai.ttf"), (6+row)*64);
+    a.lang = "en";
+    a.flags = 0;
+    attr.set(0, 100, a);
+
+    prop.round = 1;
+    l2 = layoutParagraph(U"A quick brown fox jumps over the lazy dog", attr, rectangleShape_c(400*64), prop, ypos);
+    l.push_back(layoutInfo_c(l2, 0, 0, SUBP_NONE));
+    prop.round = 64;
+    l2 = layoutParagraph(U"A quick brown fox jumps over the lazy dog", attr, rectangleShape_c(400*64), prop, ypos);
+    ypos = l2.getHeight();
+    l.push_back(layoutInfo_c(l2, WIN_WIDTH*32, 0, SUBP_RGB));
+  }
+
+  // Ausgabe mittels SDL
+  showLayoutsSelf(WIN_WIDTH, 1000, l);
+  }
+
 }
