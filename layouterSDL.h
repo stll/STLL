@@ -34,13 +34,39 @@ namespace STLL {
 
 class textLayout_c;
 
+/** \brief class used to encapsulate image drawing
+ *
+ * When the showLayoutSDL routine needs to draw an image it will call the draw function in this
+ * class to do the job. This allows you to do your own image loading and caching and such stuff.
+ *
+ * Derive from this function and implement the draw function to handle image drawing in your application
+ */
+class imageDrawerSDL_c
+{
+  public:
+    /** \brief function called to draw an image
+     *
+     * \param x x-position to draw the image in 1/64 pixels
+     * \param y y-position to draw the image in 1/64 pixels
+     * \param w width of the image to draw
+     * \param h height of the image to draw
+     * \param s the SDL-Surface to draw the image on
+     * \param url the url of the image to draw
+     */
+    virtual void draw(int32_t x, int32_t y, uint32_t w, uint32_t h, SDL_Surface * s, const std::string & url) = 0;
+};
+
 /** \brief display a single layout
  *  \param l layout to draw
  *  \param sx x position on the target surface in 1/64th pixels
  *  \param sy y position on the target surface in 1/64th pixels
  *  \param s target surface
+ *  \param sp which kind of sub-pixel positioning do you want?
+ *  \param images a pointer to an image drawer class that is used to draw the images, when you give
+ *                a nullptr here, no images will be drawn
  */
-void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s, SubPixelArrangement sp);
+void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s,
+                   SubPixelArrangement sp, imageDrawer_c * images);
 
 }
 

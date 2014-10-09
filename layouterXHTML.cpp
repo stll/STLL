@@ -700,11 +700,13 @@ static textLayout_c layoutXML_IMG(pugi::xml_node & xml, const textStyleSheet_c &
   c.command = textLayout_c::commandData::CMD_IMAGE;
   c.x = shape.getLeft(ystart, ystart);
   c.y = ystart;
+  c.w = evalSize(xml.attribute("width").value());
+  c.h = evalSize(xml.attribute("height").value());
   c.imageURL = xml.attribute("src").value();
   l.addCommand(c);
-  l.setHeight(ystart+evalSize(xml.attribute("height").value()));
+  l.setHeight(ystart+c.h);
   l.setLeft(c.x);
-  l.setRight(c.x+evalSize(xml.attribute("width").value()));
+  l.setRight(c.x+c.w);
 
   return l;
 }

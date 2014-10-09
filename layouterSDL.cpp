@@ -330,7 +330,8 @@ static FT_GlyphSlotRec_ * getGlyph(std::shared_ptr<fontFace_c> face, int32_t gly
 }
 
 
-void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s, SubPixelArrangement sp)
+void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s,
+                   SubPixelArrangement sp, imageDrawer_c * images)
 {
   /* set up rendering via spanners */
   SDL_Rect r;
@@ -353,13 +354,8 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s, SubP
         break;
 
       case textLayout_c::commandData::CMD_IMAGE:
-        // TODO this is just a placeholder for now
-
-        r.x = (i.x+sx+32)/64;
-        r.y = (i.y+sy+32)/64;
-        r.w = 10;
-        r.h = 10;
-        SDL_FillRect(s, &r, SDL_MapRGBA(s->format, 255, 255, 255, SDL_ALPHA_OPAQUE));
+        if (images)
+          images->draw(i.x+sx, i.y+sy, i.w, i.h, s, i.imageURL);
         break;
     }
   }

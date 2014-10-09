@@ -83,7 +83,7 @@ int main(int argv, char ** args)
       }
   }
 
-  showLayoutSDL(l, 0, 0, screen, SUBP_NONE);
+  showLayoutSDL(l, 0, 0, screen, SUBP_NONE, nullptr);
 
   SDL_Flip(screen);
 
