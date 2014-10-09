@@ -331,7 +331,7 @@ static FT_GlyphSlotRec_ * getGlyph(std::shared_ptr<fontFace_c> face, int32_t gly
 
 
 void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s,
-                   SubPixelArrangement sp, imageDrawer_c * images)
+                   SubPixelArrangement sp, imageDrawerSDL_c * images)
 {
   /* set up rendering via spanners */
   SDL_Rect r;

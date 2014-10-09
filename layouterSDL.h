@@ -66,7 +66,7 @@ class imageDrawerSDL_c
  *                a nullptr here, no images will be drawn
  */
 void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s,
-                   SubPixelArrangement sp, imageDrawer_c * images);
+                   SubPixelArrangement sp, imageDrawerSDL_c * images);
 
 }
 

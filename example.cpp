@@ -69,7 +69,7 @@ class layoutInfo_c
     SubPixelArrangement sp;
 };
 
-class myImageDrawer_c : public imageDrawer_c
+class myImageDrawer_c : public imageDrawerSDL_c
 {
   void draw(int32_t x, int32_t y, uint32_t w, uint32_t h, SDL_Surface * s, const std::string & url)
   {
@@ -216,6 +216,8 @@ int main ()
   styleSheet.addRule(".pframed", "padding", "2px");
   styleSheet.addRule(".pframed", "border-color", "#ff00ff");
   styleSheet.addRule(".cent", "text-align", "center");
+  styleSheet.addRule("a", "text-decoration", "underline");
+  styleSheet.addRule("a", "text-color", "#8080FF");
 
   // der zu formatierende text
   std::string text = u8"<html><body>"
