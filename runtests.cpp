@@ -866,4 +866,9 @@ BOOST_AUTO_TEST_CASE( Links )
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td><a href='l1'>Test</a></td><td>T</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
     s, STLL::rectangleShape_c(1000*64)), "tests/link-06.lay", c));
+
+  // simple two link layout where the links directly touch
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test <a href='u1'>Text</a><a href='u2'>Link 2</a></p></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/link-07.lay", c));
 }
