@@ -43,6 +43,13 @@ struct FT_GlyphSlotRec_;
 
 namespace STLL {
 
+/** \brief type used for all glyph indices. Right now there is no
+ * font with more than 2^16 fonts, so 2^32 should be on the safe side.
+ * Also HarfBuzz also uses only 2^32 codepoints.
+ */
+typedef uint32_t glyphIndex_t;
+
+
 /** \brief define, which sub-pixel arrangement you want to use for
  *  sub-pixel output
  */
@@ -172,7 +179,8 @@ class fontFace_c : boost::noncopyable
      * \param sp the requested subpixel arrangement to apply to the rendering
      * \note glyphs are always rendered unhinted 8-bit FreeType bitmaps
      */
-    FT_GlyphSlotRec_ * renderGlyph(uint64_t glyphIndex, SubPixelArrangement sp);
+    FT_GlyphSlotRec_ * renderGlyph(glyphIndex_t glyphIndex, SubPixelArrangement sp);
+
   private:
     FT_FaceRec_ *f;
     std::shared_ptr<freeTypeLibrary_c> lib;
@@ -397,10 +405,10 @@ class glyphKey_c
 {
   public:
 
-  glyphKey_c(std::shared_ptr<fontFace_c> f, uint32_t idx, SubPixelArrangement s) : font((intptr_t)f.get()), glyphIndex(idx), sp(s) { }
+  glyphKey_c(std::shared_ptr<fontFace_c> f, glyphIndex_t idx, SubPixelArrangement s) : font((intptr_t)f.get()), glyphIndex(idx), sp(s) { }
 
   intptr_t font;
-  uint32_t glyphIndex;
+  glyphIndex_t glyphIndex;
   SubPixelArrangement sp;
 
   bool operator==(const glyphKey_c & a) const

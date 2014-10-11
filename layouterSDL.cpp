@@ -307,7 +307,7 @@ static void outputGlyph(int sx, int sy, FT_GlyphSlot img, SubPixelArrangement sp
   }
 }
 
-static FT_GlyphSlotRec_ * getGlyph(std::shared_ptr<fontFace_c> face, int32_t glyph, SubPixelArrangement sp)
+static FT_GlyphSlotRec_ * getGlyph(std::shared_ptr<fontFace_c> face, glyphIndex_t glyph, SubPixelArrangement sp)
 {
   glyphKey_c k(face, glyph, sp);
 

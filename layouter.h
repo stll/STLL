@@ -75,7 +75,7 @@ class textLayout_c
       /** @} */
 
       /** \brief which glyph to draw */
-      uint64_t glyphIndex;
+      glyphIndex_t glyphIndex;
 
       /** \brief which front to take the glyph from */
       std::shared_ptr<fontFace_c> font;

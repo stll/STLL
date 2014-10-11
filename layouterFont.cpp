@@ -95,7 +95,7 @@ std::shared_ptr<fontFace_c> fontCache_c::getFont(const fontResource_c & res, uin
   return f;
 }
 
-FT_GlyphSlotRec_ * fontFace_c::renderGlyph(uint64_t glyphIndex, SubPixelArrangement sp)
+FT_GlyphSlotRec_ * fontFace_c::renderGlyph(glyphIndex_t glyphIndex, SubPixelArrangement sp)
 {
   FT_Render_Mode rm;
 
