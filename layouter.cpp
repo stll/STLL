@@ -33,6 +33,9 @@
 
 namespace STLL {
 
+// TODO better error checking, throw our own exceptions, e.g. when a link was not properly
+// specified
+
 typedef struct
 {
   // the commands to output this run
@@ -59,6 +62,9 @@ typedef struct
 
   // ascender and descender of this run
   int32_t ascender, descender;
+
+  // link boxes for this run
+  std::vector<textLayout_c::linkInformation> links;
 
 #ifdef _DEBUG_
   // the text of this run, useful for debugging to see what is going on
@@ -106,8 +112,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
                                            const attributeIndex_c & attr,
                                            const std::vector<FriBidiLevel> & embedding_levels,
                                            const std::vector<char> & linebreaks,
-                                           uint32_t round,
-                                           const std::shared_ptr<fontFace_c> underlinefont
+                                           const layoutProperties & prop
                                           )
 {
   // Get our harfbuzz font structs
@@ -241,12 +246,21 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     run.text = txt32.substr(runstart, spos-runstart);
 #endif
 
+    size_t curLink = 0;
+    textLayout_c::rectangle_c linkRect;
+    int linkStart;
+
     for (size_t j=0; j < glyph_count; ++j)
     {
       if (isBidiCharacter(txt32[glyph_info[j].cluster + runstart]))
         continue;
 
       auto a = attr.get(glyph_info[j].cluster + runstart);
+
+      if (!curLink && a.link || curLink != a.link)
+      {
+        linkStart = run.dx;
+      }
 
       if (a.inlay)
       {
@@ -270,10 +284,10 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           g.x = run.dx;
           g.w = a.inlay->getRight();
 
-          if (underlinefont)
+          if (prop.underlineFont)
           {
-            g.y = -((underlinefont->getUnderlinePosition()+underlinefont->getUnderlineThickness()/2));
-            g.h = std::max(64, underlinefont->getUnderlineThickness());
+            g.y = -((prop.underlineFont->getUnderlinePosition()+prop.underlineFont->getUnderlineThickness()/2));
+            g.h = std::max(64, prop.underlineFont->getUnderlineThickness());
           }
           else
           {
@@ -313,8 +327,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         g.x = run.dx + (glyph_pos[j].x_offset);
         g.y = run.dy - (glyph_pos[j].y_offset)-attr.get(runstart).baseline_shift;
 
-        g.x = roundToDivisible(g.x, round);
-        g.y = roundToDivisible(g.y, round);
+        g.x = roundToDivisible(g.x, prop.round);
+        g.y = roundToDivisible(g.y, prop.round);
 
         for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
         {
@@ -332,8 +346,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         run.dx += glyph_pos[j].x_advance;
         run.dy -= glyph_pos[j].y_advance;
 
-        run.dx = roundToDivisible(run.dx, round);
-        run.dy = roundToDivisible(run.dy, round);
+        run.dx = roundToDivisible(run.dx, prop.round);
+        run.dy = roundToDivisible(run.dy, prop.round);
 
         g.c = a.c;
 
@@ -344,10 +358,10 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           g.command = textLayout_c::commandData::CMD_RECT;
           g.w = glyph_pos[j].x_advance+64;
 
-          if (underlinefont)
+          if (prop.underlineFont)
           {
-            g.h = std::max(64, underlinefont->getUnderlineThickness());
-            g.y = -((underlinefont->getUnderlinePosition()+underlinefont->getUnderlineThickness()/2));
+            g.h = std::max(64, prop.underlineFont->getUnderlineThickness());
+            g.y = -((prop.underlineFont->getUnderlinePosition()+prop.underlineFont->getUnderlineThickness()/2));
           }
           else
           {
@@ -373,6 +387,41 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           run.run.push_back(std::make_pair(normalLayer, g));
         }
       }
+
+      if (a.link)
+      {
+        if (curLink && curLink != a.link)
+        {
+          textLayout_c::linkInformation l;
+          l.url = prop.links[curLink-1];
+          l.areas.push_back(linkRect);
+          run.links.push_back(l);
+          curLink = 0;
+        }
+
+        if (!curLink)
+        {
+          linkRect.x = linkStart;
+          linkRect.y = -run.ascender;
+          linkRect.w = run.dx-linkStart;
+          linkRect.h = run.ascender-run.descender;
+          curLink = a.link;
+        }
+        else
+        {
+          linkRect.w = run.dx-linkStart;
+        }
+      }
+    }
+
+    // finalize an open link
+    if (curLink)
+    {
+      textLayout_c::linkInformation l;
+      l.url = prop.links[curLink-1];
+      l.areas.push_back(linkRect);
+      run.links.push_back(l);
+      curLink = 0;
     }
 
     runs.push_back(run);
@@ -389,6 +438,36 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     hb_font_destroy(a.second);
 
   return runs;
+}
+
+static void mergeLinks(textLayout_c & txt, const std::vector<textLayout_c::linkInformation> & links, int dx, int dy)
+{
+  for (const auto & l : links)
+  {
+
+    // try to find the link to insert in the already existing links within txt
+    auto i = std::find_if(txt.links.begin(), txt.links.end(),
+                          [&l] (textLayout_c::linkInformation l2) { return l.url == l2.url; }
+                         );
+
+    // when not found create it
+    if (i == txt.links.end())
+    {
+      textLayout_c::linkInformation l2;
+      l2.url = l.url;
+      txt.links.emplace_back(l2);
+      i = txt.links.end()-1;
+    }
+
+    // copy over the rectangles from the link and offset them
+    for (auto r : l.areas)
+    {
+      r.x += dx;
+      r.y += dy;
+
+      i->areas.push_back(r);
+    }
+  }
 }
 
 static textLayout_c breakLines(std::vector<runInfo> & runs,
@@ -638,7 +717,16 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
                 l.addCommand(cc.second);
               }
             }
+
+            // the link rectangle in spaces also needs to get longer
+            if (!runs[runorder[i]].links.empty() && !runs[runorder[i]].links[0].areas.empty())
+            {
+              runs[runorder[i]].links[0].areas[0].w += spaceadder;
+            }
           }
+
+          if (layer == 0)
+            mergeLinks(l, runs[runorder[i]].links, xpos2+spaceadder*numSpace, ypos);
 
           // count the spaces
           if (runs[runorder[i]].space) numSpace++;
@@ -723,7 +811,7 @@ textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_
 
   // create runs of layout text. Each run is a cohesive set, e.g. a word with a single
   // font, ...
-  std::vector<runInfo> runs = createTextRuns(txt32, attr, embedding_levels, linebreaks, prop.round, prop.underlineFont);
+  std::vector<runInfo> runs = createTextRuns(txt32, attr, embedding_levels, linebreaks, prop);
 
   // layout the runs into lines
   return breakLines(runs, shape, max_level, prop, ystart);

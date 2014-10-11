@@ -98,6 +98,21 @@ class textLayout_c
     // TODO find better solution instead of public vector
     std::vector<commandData> data;
 
+    class rectangle_c
+    {
+      public:
+        int x, y, w, h;
+    };
+
+    typedef struct
+    {
+      std::string url;
+
+      std::vector<rectangle_c> areas;
+    } linkInformation;
+
+    std::vector<linkInformation> links;
+
     /** \brief add a single drawing command to the end of the command list
      *  \param d the command to add
      */
@@ -112,22 +127,6 @@ class textLayout_c
     void addCommandStart(const commandData & d)
     {
       data.insert(data.begin(), d);
-    }
-
-    /** \brief add whole vector of commands to the layout, the commands are offset
-     *         by a certain amount to shift everything that is drawn
-     *  \param d the commands to add
-     *  \param dx the x offset
-     *  \param dy the y offset
-     */
-    void addCommandVector(const std::vector<commandData> & d, int dx, int dy)
-    {
-      for (auto a : d)
-      {
-        a.x += dx;
-        a.y += dy;
-        data.emplace_back(a);
-      }
     }
 
     /** \brief append a layout to this layout, which means that the drawing
@@ -152,6 +151,20 @@ class textLayout_c
         data.push_back(a);
       }
 
+      for (auto a : l.links)
+      {
+        size_t i = links.size();
+        linkInformation l;
+        l.url = a.url;
+        links.push_back(l);
+        for (auto b : a.areas)
+        {
+          b.x += dx;
+          b.y += dy;
+          links[i].areas.push_back(b);
+        }
+      }
+
       height = std::max(height, l.height);
       left = std::min(left, l.left);
       right = std::max(right, l.right);
@@ -166,6 +179,7 @@ class textLayout_c
       left = l.left;
       right = l.right;
       firstBaseline = l.firstBaseline;
+      swap(links, l.links);
     }
 
     /** \brief copy assignment
@@ -177,6 +191,7 @@ class textLayout_c
       left = l.left;
       right = l.right;
       firstBaseline = l.firstBaseline;
+      links = l.links;
     }
 
     ~textLayout_c(void) { }
@@ -189,7 +204,8 @@ class textLayout_c
      */
     textLayout_c(const textLayout_c & src) : height(src.height), left(src.left),
                                              right(src.right), data(src.data),
-                                             firstBaseline(src.firstBaseline) {  }
+                                             firstBaseline(src.firstBaseline),
+                                             links(src.links) {  }
 
     /** \brief move constructor
      */
@@ -200,6 +216,7 @@ class textLayout_c
       left = src.left;
       right = src.right;
       firstBaseline = src.firstBaseline;
+      links.swap(src.links);
     }
 
     /** \brief shift all the commands within the layout by the given amount
@@ -330,9 +347,17 @@ class codepointAttributes
    */
   int32_t baseline_shift;
 
+  /** \brief which link does this letter belong to
+   *
+   * To specify the link use the links array in the layoutProperties class. This
+   * value is an index into that vector, the value 0 means no link, all the others
+   * are reduced by one to represent the link
+   */
+  size_t link;
+
   /** \brief create an empty attribute, no font, no language, no flags, no inlay, no baseline shift
    */
-  codepointAttributes(void) : font(0), lang(""), flags(0), inlay(0), baseline_shift(0) { }
+  codepointAttributes(void) : font(0), lang(""), flags(0), inlay(0), baseline_shift(0), link(0) { }
 
   /** \brief comparison operator
    */
@@ -341,7 +366,8 @@ class codepointAttributes
     return c == rhs.c && font == rhs.font && lang == rhs.lang
       && flags == rhs.flags && shadows.size() && rhs.shadows.size()
       && std::equal(shadows.begin(), shadows.end(), rhs.shadows.begin())
-      && inlay == rhs.inlay && baseline_shift == rhs.baseline_shift;
+      && inlay == rhs.inlay && baseline_shift == rhs.baseline_shift
+      && link == rhs.link;
   }
 
   /** \brief this operator is required for the intervall container within the
@@ -359,6 +385,7 @@ class codepointAttributes
     shadows = rhs.shadows;
     inlay = rhs.inlay;
     baseline_shift = rhs.baseline_shift;
+    link = rhs.link;
 
     return *this;
   }
@@ -516,6 +543,9 @@ typedef struct {
    * When not set, the underline will use the parameters of the font of each glyph.
    */
   std::shared_ptr<fontFace_c> underlineFont;
+
+  /** \brief link URLs for the links used in the */
+  std::vector<std::string> links;
 
 } layoutProperties;
 

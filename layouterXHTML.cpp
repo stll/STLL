@@ -715,8 +715,10 @@ static textLayout_c layoutXML_IMG(pugi::xml_node & xml, const textStyleSheet_c &
 // will take the first XML-node to layout and work along with the siblings
 // instead of looking at the children
 // this function will also return a new node where it stopped working
-pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules, std::u32string & txt,
-               attributeIndex_c & attr, int32_t baseline = 0, bool exitOnError = false)
+pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules,
+                              layoutProperties & prop, std::u32string & txt,
+                              attributeIndex_c & attr, int32_t baseline = 0,
+                              const std::string & link = "", bool exitOnError = false)
 {
   while (xml)
   {
@@ -743,6 +745,12 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
 
       a.baseline_shift = baseline;
 
+      if (!link.empty())
+      {
+        prop.links.push_back(link);
+        a.link = prop.links.size();
+      }
+
       attr.set(s, txt.length()-1, a);
     }
     else if (   (xml.type() == pugi::node_element)
@@ -754,6 +762,7 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
                  || (std::string("q") == xml.name())
                  || (std::string("small") == xml.name())
                  || (std::string("strong") == xml.name())
+                 || (std::string("a") == xml.name())
                 )
             )
     {
@@ -765,7 +774,15 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
       {
         txt += U"\U0000202A";
       }
-      layoutXML_text(xml.first_child(), rules, txt, attr);
+
+      if (std::string("a") == xml.name())
+      {
+        layoutXML_text(xml.first_child(), rules, prop, txt, attr, baseline, xml.attribute("href").value());
+      }
+      else
+      {
+        layoutXML_text(xml.first_child(), rules, prop, txt, attr, baseline, link);
+      }
       txt += U"\U0000202C";
     }
     else if (   (xml.type() == pugi::node_element)
@@ -774,7 +791,7 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
     {
       auto font = getFontForNode(xml, rules);
 
-      layoutXML_text(xml.first_child(), rules, txt, attr, baseline-font->getAscender()/2);
+      layoutXML_text(xml.first_child(), rules, prop, txt, attr, baseline-font->getAscender()/2, link);
     }
     else if (   (xml.type() == pugi::node_element)
              && (std::string("sup") == xml.name())
@@ -782,7 +799,7 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
     {
       auto font = getFontForNode(xml.parent(), rules);
 
-      layoutXML_text(xml.first_child(), rules, txt, attr, baseline+font->getAscender()/2);
+      layoutXML_text(xml.first_child(), rules, prop, txt, attr, baseline+font->getAscender()/2, link);
     }
     else if ((xml.type() == pugi::node_element) && (std::string("br") == xml.name()))
     {
@@ -809,6 +826,13 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
         a.font = getFontForNode(xml.parent(), rules);
         a.c = evalColor(rules.getValue(xml.parent(), "color"));
       }
+
+      if (!link.empty())
+      {
+        prop.links.push_back(link);
+        a.link = prop.links.size();
+      }
+
       txt += U'\u00A0';
       attr.set(txt.length()-1, a);
     }
@@ -831,10 +855,10 @@ static textLayout_c layoutXML_Phrasing(pugi::xml_node & xml, const textStyleShee
 {
   std::u32string txt;
   attributeIndex_c attr;
-
-  auto xml2 = layoutXML_text(xml, rules, txt, attr, 0, true);
-
   layoutProperties lprop;
+
+  auto xml2 = layoutXML_text(xml, rules, lprop, txt, attr, 0, "", true);
+
   std::string s = rules.getValue(xml, "text-align");
 
   if      (s == "left")   lprop.align = layoutProperties::ALG_LEFT;
@@ -1174,11 +1198,11 @@ static textLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c
 
     if (rtl)
     {
-      l.addCommandVector(c.l.data, xindent+*colStart.rbegin()-colStart[1]+colStart[0]-colStart[c.col+c.colspan-1], ystart);
+      l.append(c.l, xindent+*colStart.rbegin()-colStart[1]+colStart[0]-colStart[c.col+c.colspan-1], ystart);
     }
     else
     {
-      l.addCommandVector(c.l.data, colStart[c.col]+xindent, ystart);
+      l.append(c.l, colStart[c.col]+xindent, ystart);
     }
   }
 
@@ -1231,6 +1255,7 @@ static textLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c 
                    ||(std::string("sub") == i.name())
                    ||(std::string("sup") == i.name())
                    ||(std::string("img") == i.name())
+                   ||(std::string("a") == i.name())
                   )
                )
             )

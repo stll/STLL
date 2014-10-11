@@ -455,7 +455,7 @@ static void checkSelectorValidity(const std::string & sel)
   static std::vector<std::string> val_att { "lang" };
   static std::vector<std::string> val_tag {
     "p", "html", "body", "ul", "li", "img", "table", "th", "tr", "td",
-    "h1", "h2", "h3", "h4", "h5", "h6", "sub", "sup", "i", "p", "span"
+    "h1", "h2", "h3", "h4", "h5", "h6", "sub", "sup", "i", "p", "span", "a"
   };
 
   if (sel[0] == '.')

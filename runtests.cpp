@@ -805,7 +805,7 @@ BOOST_AUTO_TEST_CASE( Save_Load_Layouts )
   // top border
   s.addRule("body", "border-top-width", "10px");
   auto l = STLL::layoutXHTML(
-    "<html><body><p lang='en'>Test <img src='A' width='10px' height='10px' /> Text</p></body></html>",
+    "<html><body><p lang='en'>Test <img src='A' width='10px' height='10px' /> Text <a href='u1'>link</a></p></body></html>",
     s, STLL::rectangleShape_c(200*64));
 
   pugi::xml_document doc;
@@ -820,4 +820,50 @@ BOOST_AUTO_TEST_CASE( Save_Load_Layouts )
   auto c3 = std::make_shared<STLL::fontCache_c>();
 
   BOOST_CHECK_THROW(saveLayoutToXML(l, doc, c3), STLL::SaveLoadException_c);
+}
+
+BOOST_AUTO_TEST_CASE( Links )
+{
+  auto c = std::make_shared<STLL::fontCache_c>();
+  STLL::textStyleSheet_c s(c);
+
+  s.font("sans", STLL::fontResource_c("tests/FreeSans.ttf"));
+  s.addRule("body", "font-size", "16px");
+  s.addRule("body", "color", "#ffffff");
+
+  // simple one link layout
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test <a href='u1'>Text</a></p></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/link-01.lay", c));
+
+  // simple two link layout
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test <a href='u1'>Text</a> <a href='u2'>Link 2</a></p></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/link-02.lay", c));
+
+  // link in a stretched line an linebreak (check that spaces are stretched properly)
+  s.addRule("p", "text-align", "justify");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test <a href='u1'>Text</a> <a href='u2'>Link 2 with spaces</a> asdkjh asd eru</p></body></html>",
+    s, STLL::rectangleShape_c(200*64)), "tests/link-03.lay", c));
+
+  // link with an image inside
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test <a href='u1'>Pre <img src='a' width='20px' height='20px' /> Post</a> <a href='u2'>Link 2</a></p></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/link-04.lay", c));
+
+  // link with an image inside a box
+  s.addRule("img", "border-width", "2px");
+  s.addRule("img", "border-color", "transparent");
+  s.addRule("img", "padding", "3px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><p lang='en'>Test <a href='u1'>Pre <img src='a' width='20px' height='20px' /> Post</a> <a href='u2'>Link 2</a></p></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/link-05.lay", c));
+
+  // link inside a table cell
+  s.addRule(".tc", "width", "100px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
+    "<tr><td><a href='l1'>Test</a></td><td>T</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/link-06.lay", c));
 }

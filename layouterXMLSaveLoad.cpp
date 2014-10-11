@@ -83,6 +83,30 @@ void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_
         break;
     }
   }
+
+  // output links
+  if (!l.links.empty())
+  {
+    auto links = doc.append_child();
+    links.set_name("links");
+
+    for (const auto & l2 : l.links)
+    {
+      auto link = links.append_child();
+      link.set_name("link");
+      link.append_attribute("url").set_value(l2.url.c_str());
+
+      for (const auto & a : l2.areas)
+      {
+        auto area = link.append_child();
+        area.set_name("area");
+        area.append_attribute("x").set_value(a.x);
+        area.append_attribute("y").set_value(a.y);
+        area.append_attribute("w").set_value(a.w);
+        area.append_attribute("h").set_value(a.h);
+      }
+    }
+  }
 }
 
 
@@ -145,6 +169,35 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
   l.setHeight(std::stoi(doc.attribute("height").value()));
   l.setLeft(std::stoi(doc.attribute("left").value()));
   l.setRight(std::stoi(doc.attribute("right").value()));
+
+  // load links
+  // output links
+  auto links = doc.child("links");
+  if (links)
+  {
+    for (const auto l2 : links.children())
+    {
+      textLayout_c::linkInformation link;
+
+      link.url = l2.attribute("url").value();
+
+      for (const auto a : l2.children())
+      {
+        if (a.name() == std::string("area"))
+        {
+          textLayout_c::rectangle_c r;
+          r.x = std::stoi(a.attribute("x").value());
+          r.y = std::stoi(a.attribute("y").value());
+          r.w = std::stoi(a.attribute("w").value());
+          r.h = std::stoi(a.attribute("h").value());
+
+          link.areas.push_back(r);
+        }
+      }
+
+      l.links.push_back(link);
+    }
+  }
 
   return l;
 }
