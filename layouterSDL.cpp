@@ -336,6 +336,25 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s,
   /* set up rendering via spanners */
   SDL_Rect r;
 
+#ifndef NDEBUG
+  int cnt = 1;
+  for (auto & i : l.links)
+  {
+    int c2 = 10;
+    for (auto & j : i.areas)
+    {
+      r.x = (j.x+sx+32)/64;
+      r.y = (j.y+sy+32)/64;
+      r.w = (j.w+63)/64;
+      r.h = (j.h+63)/64;
+      SDL_FillRect(s, &r, SDL_MapRGBA(s->format, 10*(uint8_t)(123*cnt)/c2, 10*(uint8_t)(183*cnt)/c2, 10*(uint8_t)(421*cnt)/c2, 128));
+
+      c2++;
+    }
+    cnt++;
+  }
+#endif
+
   /* render */
   for (auto & i : l.data)
   {

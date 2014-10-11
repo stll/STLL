@@ -66,7 +66,7 @@ typedef struct
   // link boxes for this run
   std::vector<textLayout_c::linkInformation> links;
 
-#ifdef _DEBUG_
+#ifndef NDEBUG
   // the text of this run, useful for debugging to see what is going on
   std::u32string text;
 #endif
@@ -242,7 +242,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       run.ascender = run.font->getAscender()+attr.get(runstart).baseline_shift;
       run.descender = run.font->getDescender()+attr.get(runstart).baseline_shift;
     }
-#ifdef _DEBUG_
+#ifndef NDEBUG
     run.text = txt32.substr(runstart, spos-runstart);
 #endif
 
