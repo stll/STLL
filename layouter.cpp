@@ -33,6 +33,74 @@
 
 namespace STLL {
 
+TextLayout_c::TextLayout_c(TextLayout_c&& src)
+{
+  swap(data, src.data);
+  height = src.height;
+  left = src.left;
+  right = src.right;
+  firstBaseline = src.firstBaseline;
+  links.swap(src.links);
+}
+
+TextLayout_c::TextLayout_c(const TextLayout_c& src): height(src.height), left(src.left),
+                                            right(src.right), data(src.data),
+                                            firstBaseline(src.firstBaseline),
+                                            links(src.links)
+{
+}
+
+TextLayout_c::TextLayout_c(void): height(0), left(0), right(0), firstBaseline(0)
+{
+}
+
+void TextLayout_c::append(const TextLayout_c & l, int dx, int dy)
+{
+  if (data.empty())
+    firstBaseline = l.firstBaseline + dy;
+
+  for (auto a : l.data)
+  {
+    a.x += dx;
+    a.y += dy;
+    data.push_back(a);
+  }
+
+  for (auto a : l.links)
+  {
+    size_t i = links.size();
+    linkInformation l;
+    l.url = a.url;
+    links.push_back(l);
+    for (auto b : a.areas)
+    {
+      b.x += dx;
+      b.y += dy;
+      links[i].areas.push_back(b);
+    }
+  }
+
+  height = std::max(height, l.height);
+  left = std::min(left, l.left);
+  right = std::max(right, l.right);
+}
+
+void TextLayout_c::shift(int32_t dx, int32_t dy)
+{
+  for (auto & a : data)
+  {
+    a.x += dx;
+    a.y += dy;
+  }
+
+  for (auto & l : links)
+    for (auto & a: l.areas)
+    {
+      a.x += dx;
+      a.y += dy;
+    }
+}
+
 // TODO better error checking, throw our own exceptions, e.g. when a link was not properly
 // specified
 
@@ -790,5 +858,4 @@ TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_
   // layout the runs into lines
   return breakLines(runs, shape, max_level, prop, ystart);
 }
-
 }

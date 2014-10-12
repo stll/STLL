@@ -174,36 +174,7 @@ class TextLayout_c
      *  \param dx x-offset to apply when appending the layout
      *  \param dy y-offset to apply when appending the layout
      */
-    void append(const TextLayout_c & l, int dx = 0, int dy = 0)
-    {
-      if (data.empty())
-        firstBaseline = l.firstBaseline + dy;
-
-      for (auto a : l.data)
-      {
-        a.x += dx;
-        a.y += dy;
-        data.push_back(a);
-      }
-
-      for (auto a : l.links)
-      {
-        size_t i = links.size();
-        linkInformation l;
-        l.url = a.url;
-        links.push_back(l);
-        for (auto b : a.areas)
-        {
-          b.x += dx;
-          b.y += dy;
-          links[i].areas.push_back(b);
-        }
-      }
-
-      height = std::max(height, l.height);
-      left = std::min(left, l.left);
-      right = std::max(right, l.right);
-    }
+    void append(const TextLayout_c & l, int dx = 0, int dy = 0);
 
     /** \brief move assignment
      */
@@ -233,47 +204,22 @@ class TextLayout_c
 
     /** \brief create empty layout
      */
-    TextLayout_c(void) : height(0), left(0), right(0), firstBaseline(0) { }
+    TextLayout_c(void);
 
     /** \brief copy constructor
      */
-    TextLayout_c(const TextLayout_c & src) : height(src.height), left(src.left),
-                                             right(src.right), data(src.data),
-                                             firstBaseline(src.firstBaseline),
-                                             links(src.links) {  }
+    TextLayout_c(const TextLayout_c & src);
 
     /** \brief move constructor
      */
-    TextLayout_c(TextLayout_c && src)
-    {
-      swap(data, src.data);
-      height = src.height;
-      left = src.left;
-      right = src.right;
-      firstBaseline = src.firstBaseline;
-      links.swap(src.links);
-    }
+    TextLayout_c(TextLayout_c && src);
 
     /** \brief shift all the commands within the layout by the given amount
      *
      * \param dx x-offset in 1/64th pixels
      * \param dy y-offset in 1/64th pixels
      */
-    void shift(int32_t dx, int32_t dy)
-    {
-      for (auto & a : data)
-      {
-        a.x += dx;
-        a.y += dy;
-      }
-
-      for (auto & l : links)
-        for (auto & a: l.areas)
-        {
-          a.x += dx;
-          a.y += dy;
-        }
-    }
+    void shift(int32_t dx, int32_t dy);
 
     /** \brief the height of the layout. This is supposed to be the vertical
      *  space that this layout takes up in 1/64th pixels
