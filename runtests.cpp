@@ -32,7 +32,7 @@
 
 #include <string>
 
-static bool compare(const STLL::textLayout_c & l, const pugi::xml_node & doc, std::shared_ptr<STLL::fontCache_c> c)
+static bool compare(const STLL::TextLayout_c & l, const pugi::xml_node & doc, std::shared_ptr<STLL::fontCache_c> c)
 {
   if (l.getHeight() != std::stoi(doc.attribute("height").value())) return false;
   if (l.getLeft() != std::stoi(doc.attribute("left").value())) return false;
@@ -55,7 +55,7 @@ static bool compare(const STLL::textLayout_c & l, const pugi::xml_node & doc, st
 
     if (a.name() == std::string("glyph"))
     {
-      if (l.getData()[i].command != STLL::textLayout_c::commandData::CMD_GLYPH) return false;
+      if (l.getData()[i].command != STLL::TextLayout_c::commandData::CMD_GLYPH) return false;
       if (l.getData()[i].x != std::stoi(a.attribute("x").value())) return false;
       if (l.getData()[i].y != std::stoi(a.attribute("y").value())) return false;
       if (l.getData()[i].glyphIndex != std::stoi(a.attribute("glyphIndex").value())) return false;
@@ -71,7 +71,7 @@ static bool compare(const STLL::textLayout_c & l, const pugi::xml_node & doc, st
     }
     else if (a.name() == std::string("rect"))
     {
-      if (l.getData()[i].command != STLL::textLayout_c::commandData::CMD_RECT) return false;
+      if (l.getData()[i].command != STLL::TextLayout_c::commandData::CMD_RECT) return false;
       if (l.getData()[i].x != std::stoi(a.attribute("x").value())) return false;
       if (l.getData()[i].y != std::stoi(a.attribute("y").value())) return false;
       if (l.getData()[i].w != std::stoi(a.attribute("w").value())) return false;
@@ -83,7 +83,7 @@ static bool compare(const STLL::textLayout_c & l, const pugi::xml_node & doc, st
     }
     else if (a.name() == std::string("image"))
     {
-      if (l.getData()[i].command != STLL::textLayout_c::commandData::CMD_IMAGE) return false;
+      if (l.getData()[i].command != STLL::TextLayout_c::commandData::CMD_IMAGE) return false;
       if (l.getData()[i].x != std::stoi(a.attribute("x").value())) return false;
       if (l.getData()[i].y != std::stoi(a.attribute("y").value())) return false;
       if (l.getData()[i].imageURL != a.attribute("url").value()) return false;
@@ -100,7 +100,7 @@ static bool compare(const STLL::textLayout_c & l, const pugi::xml_node & doc, st
 }
 
 
-bool operator==(const STLL::textLayout_c a, const STLL::textLayout_c b)
+bool operator==(const STLL::TextLayout_c a, const STLL::TextLayout_c b)
 {
   if (a.getHeight() != b.getHeight()) return false;
   if (a.getLeft() != b.getLeft()) return false;
@@ -113,7 +113,7 @@ bool operator==(const STLL::textLayout_c a, const STLL::textLayout_c b)
 
     switch (a.getData()[i].command)
     {
-      case STLL::textLayout_c::commandData::CMD_GLYPH:
+      case STLL::TextLayout_c::commandData::CMD_GLYPH:
         if (a.getData()[i].x != b.getData()[i].x) return false;
         if (a.getData()[i].y != b.getData()[i].y) return false;
         if (a.getData()[i].glyphIndex != b.getData()[i].glyphIndex) return false;
@@ -127,7 +127,7 @@ bool operator==(const STLL::textLayout_c a, const STLL::textLayout_c b)
 
         break;
 
-      case STLL::textLayout_c::commandData::CMD_RECT:
+      case STLL::TextLayout_c::commandData::CMD_RECT:
         if (a.getData()[i].x != b.getData()[i].x) return false;
         if (a.getData()[i].y != b.getData()[i].y) return false;
         if (a.getData()[i].w != b.getData()[i].w) return false;
@@ -140,7 +140,7 @@ bool operator==(const STLL::textLayout_c a, const STLL::textLayout_c b)
 
         break;
 
-      case STLL::textLayout_c::commandData::CMD_IMAGE:
+      case STLL::TextLayout_c::commandData::CMD_IMAGE:
         if (a.getData()[i].x != b.getData()[i].x) return false;
         if (a.getData()[i].y != b.getData()[i].y) return false;
         if (a.getData()[i].imageURL != b.getData()[i].imageURL) return false;
@@ -155,7 +155,7 @@ bool operator==(const STLL::textLayout_c a, const STLL::textLayout_c b)
   return true;
 }
 
-static boost::test_tools::predicate_result layouts_identical(const  STLL::textLayout_c & l,
+static boost::test_tools::predicate_result layouts_identical(const  STLL::TextLayout_c & l,
                                                              const std::string & file,
                                                              std::shared_ptr<STLL::fontCache_c> c)
 {
@@ -620,7 +620,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   a.font = c->getFont(STLL::fontResource_c("tests/FreeSans.ttf"), 2*16*64);
   attr.set(5, 8, a);
 
-  a.inlay = std::make_shared<STLL::textLayout_c>();
+  a.inlay = std::make_shared<STLL::TextLayout_c>();
   a.inlay->setLeft(0);
   a.inlay->setRight(10*64);
   a.inlay->setHeight(10*64);

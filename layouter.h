@@ -48,7 +48,7 @@ namespace STLL {
  *
  * This class encapsulates a layout, it is a list of drawing commands.
  */
-class textLayout_c
+class TextLayout_c
 {
   private:
     // position where you can add additional text after this ...
@@ -146,7 +146,7 @@ class textLayout_c
      *  \param dx x-offset to apply when appending the layout
      *  \param dy y-offset to apply when appending the layout
      */
-    void append(const textLayout_c & l, int dx = 0, int dy = 0)
+    void append(const TextLayout_c & l, int dx = 0, int dy = 0)
     {
       if (data.size() == 0)
         firstBaseline = l.firstBaseline + dy;
@@ -179,7 +179,7 @@ class textLayout_c
 
     /** \brief move assignment
      */
-    void operator=(textLayout_c && l)
+    void operator=(TextLayout_c && l)
     {
       data.swap(l.data);
       height = l.height;
@@ -191,7 +191,7 @@ class textLayout_c
 
     /** \brief copy assignment
      */
-    void operator=(const textLayout_c & l)
+    void operator=(const TextLayout_c & l)
     {
       data = l.data;
       height = l.height;
@@ -201,22 +201,22 @@ class textLayout_c
       links = l.links;
     }
 
-    ~textLayout_c(void) { }
+    ~TextLayout_c(void) { }
 
     /** \brief create empty layout
      */
-    textLayout_c(void) : height(0), left(0), right(0), firstBaseline(0) { }
+    TextLayout_c(void) : height(0), left(0), right(0), firstBaseline(0) { }
 
     /** \brief copy constructor
      */
-    textLayout_c(const textLayout_c & src) : height(src.height), left(src.left),
+    TextLayout_c(const TextLayout_c & src) : height(src.height), left(src.left),
                                              right(src.right), data(src.data),
                                              firstBaseline(src.firstBaseline),
                                              links(src.links) {  }
 
     /** \brief move constructor
      */
-    textLayout_c(textLayout_c && src)
+    TextLayout_c(TextLayout_c && src)
     {
       swap(data, src.data);
       height = src.height;
@@ -346,7 +346,7 @@ class codepointAttributes
    * The vertical alignment of the inlay is controlled by baseline_shift. If
    * baseline_shift is 0 the inlay is placed on the baseline.
    */
-  std::shared_ptr<textLayout_c> inlay;
+  std::shared_ptr<TextLayout_c> inlay;
 
   /** \brief  do you want to move the baseline of this character or inlay relative to the
    * baseline of the line? A positive value means to move it up. It is given in units
@@ -573,7 +573,7 @@ typedef struct {
  *
  * TODO: instead of crashing, rather throw an exception in that case.
  */
-textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
+TextLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
                              const shape_c & shape, const layoutProperties & prop, int32_t ystart = 0);
 
 }

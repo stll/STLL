@@ -4,7 +4,7 @@
 namespace STLL
 {
 
-void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_ptr<fontCache_c> c)
+void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node, std::shared_ptr<fontCache_c> c)
 {
   auto doc = node.append_child();
   doc.set_name("layout");
@@ -20,7 +20,7 @@ void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_
 
   for (const auto & a : l.getData())
   {
-    if (  (a.command == textLayout_c::commandData::CMD_GLYPH)
+    if (  (a.command == TextLayout_c::commandData::CMD_GLYPH)
         &&(std::find(found.begin(), found.end(), a.font) == found.end())
        )
     {
@@ -44,7 +44,7 @@ void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_
   {
     switch (a.command)
     {
-      case STLL::textLayout_c::commandData::CMD_GLYPH:
+      case STLL::TextLayout_c::commandData::CMD_GLYPH:
         {
           auto n = commands.append_child();
           n.set_name("glyph");
@@ -58,7 +58,7 @@ void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_
           n.append_attribute("a").set_value(a.c.a());
         }
         break;
-      case STLL::textLayout_c::commandData::CMD_RECT:
+      case STLL::TextLayout_c::commandData::CMD_RECT:
         {
           auto n = commands.append_child();
           n.set_name("rect");
@@ -72,7 +72,7 @@ void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_
           n.append_attribute("a").set_value(a.c.a());
         }
         break;
-      case STLL::textLayout_c::commandData::CMD_IMAGE:
+      case STLL::TextLayout_c::commandData::CMD_IMAGE:
         {
           auto n = commands.append_child();
           n.set_name("image");
@@ -110,7 +110,7 @@ void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_
 }
 
 
-textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontCache_c> c)
+TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontCache_c> c)
 {
   // get the fonts from the file
   auto fonts = doc.child("fonts");
@@ -121,15 +121,15 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
 
   auto commands = doc.child("commands");
 
-  textLayout_c l;
+  TextLayout_c l;
 
   for (const auto a : commands.children())
   {
     if (a.name() == std::string("glyph"))
     {
-      textLayout_c::commandData c;
+      TextLayout_c::commandData c;
 
-      c.command = textLayout_c::commandData::CMD_GLYPH;
+      c.command = TextLayout_c::commandData::CMD_GLYPH;
       c.x = std::stoi(a.attribute("x").value());
       c.y = std::stoi(a.attribute("y").value());
       c.glyphIndex = std::stoi(a.attribute("glyphIndex").value());
@@ -141,9 +141,9 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
     }
     else if (a.name() == std::string("rect"))
     {
-      textLayout_c::commandData c;
+      TextLayout_c::commandData c;
 
-      c.command = textLayout_c::commandData::CMD_RECT;
+      c.command = TextLayout_c::commandData::CMD_RECT;
       c.x = std::stoi(a.attribute("x").value());
       c.y = std::stoi(a.attribute("y").value());
       c.w = std::stoi(a.attribute("w").value());
@@ -155,9 +155,9 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
     }
     else if (a.name() == std::string("image"))
     {
-      textLayout_c::commandData c;
+      TextLayout_c::commandData c;
 
-      c.command = textLayout_c::commandData::CMD_IMAGE;
+      c.command = TextLayout_c::commandData::CMD_IMAGE;
       c.x = std::stoi(a.attribute("x").value());
       c.y = std::stoi(a.attribute("y").value());
       c.imageURL = a.attribute("url").value();
@@ -177,7 +177,7 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
   {
     for (const auto l2 : links.children())
     {
-      textLayout_c::linkInformation link;
+      TextLayout_c::linkInformation link;
 
       link.url = l2.attribute("url").value();
 
@@ -185,7 +185,7 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
       {
         if (a.name() == std::string("area"))
         {
-          textLayout_c::rectangle_c r;
+          TextLayout_c::rectangle_c r;
           r.x = std::stoi(a.attribute("x").value());
           r.y = std::stoi(a.attribute("y").value());
           r.w = std::stoi(a.attribute("w").value());

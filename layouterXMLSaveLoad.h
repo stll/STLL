@@ -46,7 +46,7 @@ class SaveLoadException_c : public std::runtime_error
  *  \param doc the XML node to load
  *  \param c the font cache to use to get the fonts from
  */
-textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontCache_c> c);
+TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontCache_c> c);
 
 /** \brief store the layout into the diven XML node. A new layout node is created and the date
  *  is inserted into that node
@@ -56,7 +56,7 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
  *  \attention this only works, when the fonts in the layout are all inside the cache
  *  and all the used fonts are created using file names (and not RAM pointers)
  */
-void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & doc, std::shared_ptr<fontCache_c> c);
+void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & doc, std::shared_ptr<fontCache_c> c);
 
 }
 

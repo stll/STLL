@@ -39,7 +39,7 @@ namespace STLL {
 typedef struct
 {
   // the commands to output this run
-  std::vector<std::pair<size_t, textLayout_c::commandData>> run;
+  std::vector<std::pair<size_t, TextLayout_c::commandData>> run;
 
   // the advance information of this run
   int dx, dy;
@@ -64,7 +64,7 @@ typedef struct
   int32_t ascender, descender;
 
   // link boxes for this run
-  std::vector<textLayout_c::linkInformation> links;
+  std::vector<TextLayout_c::linkInformation> links;
 
 #ifndef NDEBUG
   // the text of this run, useful for debugging to see what is going on
@@ -247,7 +247,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 #endif
 
     size_t curLink = 0;
-    textLayout_c::rectangle_c linkRect;
+    TextLayout_c::rectangle_c linkRect;
     int linkStart;
 
     for (size_t j=0; j < glyph_count; ++j)
@@ -278,9 +278,9 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
         if (a.flags & codepointAttributes::FL_UNDERLINE)
         {
-          textLayout_c::commandData g;
+          TextLayout_c::commandData g;
 
-          g.command = textLayout_c::commandData::CMD_RECT;
+          g.command = TextLayout_c::commandData::CMD_RECT;
           g.x = run.dx;
           g.w = a.inlay->getRight();
 
@@ -317,9 +317,9 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       }
       else
       {
-        textLayout_c::commandData g;
+        TextLayout_c::commandData g;
 
-        g.command = textLayout_c::commandData::CMD_GLYPH;
+        g.command = TextLayout_c::commandData::CMD_GLYPH;
 
         g.glyphIndex = glyph_info[j].codepoint;
         g.font = attr.get(runstart).font;
@@ -355,7 +355,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
         if (a.flags & codepointAttributes::FL_UNDERLINE)
         {
-          g.command = textLayout_c::commandData::CMD_RECT;
+          g.command = TextLayout_c::commandData::CMD_RECT;
           g.w = glyph_pos[j].x_advance+64;
 
           if (prop.underlineFont)
@@ -382,7 +382,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
             g.y -= attr.get(runstart).shadows[j].dy;
           }
 
-          g.command = textLayout_c::commandData::CMD_RECT;
+          g.command = TextLayout_c::commandData::CMD_RECT;
           g.c = a.c;
           run.run.push_back(std::make_pair(normalLayer, g));
         }
@@ -392,7 +392,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       {
         if (curLink && curLink != a.link)
         {
-          textLayout_c::linkInformation l;
+          TextLayout_c::linkInformation l;
           l.url = prop.links[curLink-1];
           l.areas.push_back(linkRect);
           run.links.push_back(l);
@@ -417,7 +417,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     // finalize an open link
     if (curLink)
     {
-      textLayout_c::linkInformation l;
+      TextLayout_c::linkInformation l;
       l.url = prop.links[curLink-1];
       l.areas.push_back(linkRect);
       run.links.push_back(l);
@@ -440,20 +440,20 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
   return runs;
 }
 
-static void mergeLinks(textLayout_c & txt, const std::vector<textLayout_c::linkInformation> & links, int dx, int dy)
+static void mergeLinks(TextLayout_c & txt, const std::vector<TextLayout_c::linkInformation> & links, int dx, int dy)
 {
   for (const auto & l : links)
   {
 
     // try to find the link to insert in the already existing links within txt
     auto i = std::find_if(txt.links.begin(), txt.links.end(),
-                          [&l] (textLayout_c::linkInformation l2) { return l.url == l2.url; }
+                          [&l] (TextLayout_c::linkInformation l2) { return l.url == l2.url; }
                          );
 
     // when not found create it
     if (i == txt.links.end())
     {
-      textLayout_c::linkInformation l2;
+      TextLayout_c::linkInformation l2;
       l2.url = l.url;
       txt.links.emplace_back(l2);
       i = txt.links.end()-1;
@@ -470,7 +470,7 @@ static void mergeLinks(textLayout_c & txt, const std::vector<textLayout_c::linkI
   }
 }
 
-static textLayout_c breakLines(std::vector<runInfo> & runs,
+static TextLayout_c breakLines(std::vector<runInfo> & runs,
                                const shape_c & shape,
                                FriBidiLevel max_level,
                                const layoutProperties & prop, int32_t ystart)
@@ -482,7 +482,7 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
   // layout a paragraph line by line
   size_t runstart = 0;
   int32_t ypos = ystart;
-  textLayout_c l;
+  TextLayout_c l;
   enum { FL_FIRST, FL_BREAK, FL_NORMAL } firstline = FL_FIRST;
   bool forcebreak = false;
 
@@ -708,7 +708,7 @@ static textLayout_c breakLines(std::vector<runInfo> & runs,
             for (auto & cc : runs[runorder[i]].run)
             {
               if (   (cc.first == layer)
-                  && (cc.second.command == textLayout_c::commandData::CMD_RECT)
+                  && (cc.second.command == TextLayout_c::commandData::CMD_RECT)
                  )
               {
                 cc.second.w += spaceadder;
@@ -798,7 +798,7 @@ static std::vector<char> getLinebreaks(const std::u32string & txt32, const attri
   return linebreaks;
 }
 
-textLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
+TextLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
                              const shape_c & shape, const layoutProperties & prop, int32_t ystart)
 {
   // calculate embedding types for the text

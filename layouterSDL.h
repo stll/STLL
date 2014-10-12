@@ -32,7 +32,7 @@
 
 namespace STLL {
 
-class textLayout_c;
+class TextLayout_c;
 
 /** \brief class used to encapsulate image drawing
  *
@@ -65,7 +65,7 @@ class imageDrawerSDL_c
  *  \param images a pointer to an image drawer class that is used to draw the images, when you give
  *                a nullptr here, no images will be drawn
  */
-void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s,
+void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
                    SubPixelArrangement sp, imageDrawerSDL_c * images);
 
 }

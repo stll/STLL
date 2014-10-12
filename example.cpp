@@ -62,9 +62,9 @@ class layoutInfo_c
 {
   public:
 
-    layoutInfo_c(textLayout_c l, int x, int y, SubPixelArrangement s) : layout(l), sx(x), sy(y), sp(s) { }
+    layoutInfo_c(TextLayout_c l, int x, int y, SubPixelArrangement s) : layout(l), sx(x), sy(y), sp(s) { }
 
-    textLayout_c layout;
+    TextLayout_c layout;
     int sx, sy;
     SubPixelArrangement sp;
 };
@@ -273,7 +273,7 @@ int main ()
   // grauer Hintergrund, damit ich sehen kann, ob der Text die korrekte Breite hat
   // erzeuge ein künstliches Layout nur mit einem Rechteck drin... so etwas wird später
   // nicht mehr benötigt, ist nur für den Test
-  l.emplace_back(layoutInfo_c(textLayout_c(), (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_NONE));
+  l.emplace_back(layoutInfo_c(TextLayout_c(), (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_NONE));
 
   try {
     // das eigentliche Layout
@@ -282,8 +282,8 @@ int main ()
     l.emplace_back(layoutInfo_c(layoutXHTML(text, styleSheet, rectangleShape_c(64*TXT_WIDTH)),
                                 (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_RGB));
 
-    textLayout_c::commandData c;
-    c.command = textLayout_c::commandData::CMD_RECT;
+    TextLayout_c::commandData c;
+    c.command = TextLayout_c::commandData::CMD_RECT;
     c.x = c.y = 0;
     c.w = TXT_WIDTH*64;
     c.h = l[1].layout.getHeight();
@@ -315,7 +315,7 @@ int main ()
   prop.ltr = true;
   prop.round = 3;
 
-  textLayout_c l2;
+  TextLayout_c l2;
 
   attributeIndex_c attr;
   codepointAttributes a;
@@ -346,7 +346,7 @@ int main ()
   prop.round = 64;
   prop.indent = 0;
 
-  textLayout_c l2;
+  TextLayout_c l2;
 
   int ypos = 0;
   l.clear();

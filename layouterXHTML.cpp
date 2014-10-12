@@ -480,13 +480,13 @@ static const pugi::char_t * getHTMLAttribute(pugi::xml_node xml, const std::stri
   }
 }
 
-typedef textLayout_c (*ParseFunction)(pugi::xml_node & xml, const textStyleSheet_c & rules,
+typedef TextLayout_c (*ParseFunction)(pugi::xml_node & xml, const textStyleSheet_c & rules,
                                       const shape_c & shape, int32_t ystart);
 
 
 // handles padding, margin and border, all in one, it takes the text returned from the
 // ParseFunction and boxes it
-static textLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, const textStyleSheet_c & rules,
+static TextLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, const textStyleSheet_c & rules,
                           const shape_c & shape, int32_t ystart, ParseFunction fkt,
                           const pugi::xml_node & above, const pugi::xml_node & left,
                           bool collapseBorder = false, uint32_t minHeight = 0)
@@ -583,9 +583,9 @@ static textLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
     else if (rules.getValue(xml, "vertical-align") == "middle") l2.shift(0, space/2);
   }
 
-  textLayout_c::commandData c;
+  TextLayout_c::commandData c;
 
-  c.command = textLayout_c::commandData::CMD_RECT;
+  c.command = TextLayout_c::commandData::CMD_RECT;
 
   if (borderwidth_top)
   {
@@ -659,7 +659,7 @@ static textLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
 
   if (c.c.a() != 0)
   {
-    c.command = textLayout_c::commandData::CMD_RECT;
+    c.command = TextLayout_c::commandData::CMD_RECT;
 
     c.x = shape.getLeft(ystart+margin_top, ystart+margin_top)+borderwidth_left+margin_left;
     c.y = ystart+borderwidth_top+margin_top;
@@ -692,13 +692,13 @@ static textLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
   return l2;
 }
 
-static textLayout_c layoutXML_IMG(pugi::xml_node & xml, const textStyleSheet_c & rules,
+static TextLayout_c layoutXML_IMG(pugi::xml_node & xml, const textStyleSheet_c & rules,
                                   const shape_c & shape, int32_t ystart)
 {
-  textLayout_c l;
+  TextLayout_c l;
 
-  textLayout_c::commandData c;
-  c.command = textLayout_c::commandData::CMD_IMAGE;
+  TextLayout_c::commandData c;
+  c.command = TextLayout_c::commandData::CMD_IMAGE;
   c.x = shape.getLeft(ystart, ystart);
   c.y = ystart;
   c.w = evalSize(xml.attribute("width").value());
@@ -814,7 +814,7 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
     else if ((xml.type() == pugi::node_element) && (std::string("img") == xml.name()))
     {
       codepointAttributes a;
-      a.inlay = std::make_shared<textLayout_c>(boxIt(xml, xml, rules, rectangleShape_c(10000), 0,
+      a.inlay = std::make_shared<TextLayout_c>(boxIt(xml, xml, rules, rectangleShape_c(10000), 0,
                                                      layoutXML_IMG, pugi::xml_node(), pugi::xml_node()));
       a.baseline_shift = 0;
       a.shadows = evalShadows(rules.getValue(xml.parent(), "text-shadow"));
@@ -852,7 +852,7 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
 
 // this function is different from all other layout functions usable in the boxIt
 // function, as it will change the xml node and return a new one
-static textLayout_c layoutXML_Phrasing(pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+static TextLayout_c layoutXML_Phrasing(pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
   std::u32string txt;
   attributeIndex_c attr;
@@ -903,11 +903,11 @@ static textLayout_c layoutXML_Phrasing(pugi::xml_node & xml, const textStyleShee
   return layoutParagraph(txt, attr, shape, lprop, ystart);
 }
 
-static textLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart);
+static TextLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart);
 
-static textLayout_c layoutXML_UL(pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+static TextLayout_c layoutXML_UL(pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
-  textLayout_c l;
+  TextLayout_c l;
   l.setHeight(ystart);
   for (auto & i : xml)
   {
@@ -953,8 +953,8 @@ static textLayout_c layoutXML_UL(pugi::xml_node & xml, const textStyleSheet_c & 
 
       indentShape_c textshape(shape, direction == "ltr" ? listIndent : 0, direction == "ltr" ? 0: listIndent);
 
-      textLayout_c bullet = layoutParagraph(U"\u2022", attributeIndex_c(a), *bulletshape.get(), prop, y+padding);
-      textLayout_c text = boxIt(i, i, rules, textshape, y, layoutXML_Flow, i.previous_sibling(), pugi::xml_node());
+      TextLayout_c bullet = layoutParagraph(U"\u2022", attributeIndex_c(a), *bulletshape.get(), prop, y+padding);
+      TextLayout_c text = boxIt(i, i, rules, textshape, y, layoutXML_Flow, i.previous_sibling(), pugi::xml_node());
 
       // append the bullet first and then the text, adjusting the bullet so that its baseline
       // is at the same vertical position as the first baseline in the text
@@ -982,7 +982,7 @@ typedef struct
 
   pugi::xml_node xml;
 
-  textLayout_c l;
+  TextLayout_c l;
 
 } tableCell;
 
@@ -1043,7 +1043,7 @@ static void layoutXML_TR(pugi::xml_node & xml, uint32_t row, const textStyleShee
   }
 }
 
-static textLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+static TextLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
   std::vector<tableCell> cells;
   std::vector<uint32_t> widths;
@@ -1229,7 +1229,7 @@ static textLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c
   if (xindent < 0) xindent = 0;
 
   // layout the table
-  textLayout_c l;
+  TextLayout_c l;
   row = 0;
 
   for (auto & c : cells)
@@ -1269,9 +1269,9 @@ static textLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c
   return l;
 }
 
-static textLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+static TextLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
-  textLayout_c l;
+  TextLayout_c l;
   l.setHeight(ystart);
 
   auto i = txt.first_child();
@@ -1350,9 +1350,9 @@ static textLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c 
   return l;
 }
 
-static textLayout_c layoutXML_HTML(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape)
+static TextLayout_c layoutXML_HTML(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape)
 {
-  textLayout_c l;
+  TextLayout_c l;
 
   bool headfound = false;
   bool bodyfound = false;
@@ -1378,9 +1378,9 @@ static textLayout_c layoutXML_HTML(const pugi::xml_node & txt, const textStyleSh
   return l;
 }
 
-textLayout_c layoutXML(const pugi::xml_document & txt, const textStyleSheet_c & rules, const shape_c & shape)
+TextLayout_c layoutXML(const pugi::xml_document & txt, const textStyleSheet_c & rules, const shape_c & shape)
 {
-  textLayout_c l;
+  TextLayout_c l;
 
   // we must have a HTML root node
   for (const auto & i : txt)
@@ -1398,7 +1398,7 @@ textLayout_c layoutXML(const pugi::xml_document & txt, const textStyleSheet_c & 
   return l;
 }
 
-textLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules, const shape_c & shape)
+TextLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules, const shape_c & shape)
 {
   pugi::xml_document doc;
 
