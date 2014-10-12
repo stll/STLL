@@ -457,7 +457,7 @@ void textStyleSheet_c::font(const std::string& family, const FontResource_c & re
 
   if (i == families.end())
   {
-    i = families.insert(std::make_pair(family, std::make_shared<fontFamily_c>(cache))).first;
+    i = families.insert(std::make_pair(family, std::make_shared<FontFamily_c>(cache))).first;
   }
 
   i->second->addFont(res, style, variant, weight, stretch);

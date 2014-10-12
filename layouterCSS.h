@@ -98,7 +98,7 @@ class textStyleSheet_c
      * \param family The family you want to get
      * \returns The family of nullptr
      */
-    std::shared_ptr<fontFamily_c> findFamily(const std::string & family) const
+    std::shared_ptr<FontFamily_c> findFamily(const std::string & family) const
     {
       auto i = families.find(family);
 
@@ -150,7 +150,7 @@ class textStyleSheet_c
 
   private:
     std::vector<rule> rules;
-    std::map<std::string, std::shared_ptr<fontFamily_c> > families;
+    std::map<std::string, std::shared_ptr<FontFamily_c> > families;
     std::shared_ptr<FontCache_c> cache;
     uint32_t round;
 };

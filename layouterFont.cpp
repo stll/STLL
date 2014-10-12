@@ -204,7 +204,7 @@ FreeTypeLibrary_c::FreeTypeLibrary_c()
   FT_Library_SetLcdFilter(lib, FT_LCD_FILTER_DEFAULT);
 }
 
-void fontFamily_c::addFont(const FontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
+void FontFamily_c::addFont(const FontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
   fontFamilyParameter_c par;
 
@@ -216,7 +216,7 @@ void fontFamily_c::addFont(const FontResource_c & res, const std::string& style,
   fonts[par] = res;
 }
 
-std::shared_ptr<FontFace_c> fontFamily_c::getFont(uint32_t size, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
+std::shared_ptr<FontFace_c> FontFamily_c::getFont(uint32_t size, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
   fontFamilyParameter_c par;
 

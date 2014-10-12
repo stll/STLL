@@ -322,7 +322,7 @@ class FontCache_c
  * Usually you don't need to use this class directly as the CSS stylesheet class
  * textStyleSheet_c will take care of this.
  */
-class fontFamily_c
+class FontFamily_c
 {
   private:
 
@@ -354,7 +354,7 @@ class fontFamily_c
 
     /** \brief Initialize an empty family, using the given font cache to get the fonts
      */
-    fontFamily_c(std::shared_ptr<FontCache_c> c) : cache(c) {}
+    FontFamily_c(std::shared_ptr<FontCache_c> c) : cache(c) {}
 
     /** \brief Initialize an empty family, using font cache created specifically for this
      * family.
@@ -362,7 +362,7 @@ class fontFamily_c
      * This is normally not what you want as you will probably have
      * more than one family and they all should use the same cache
      */
-    fontFamily_c(void) : cache(std::make_shared<FontCache_c>()) {}
+    FontFamily_c(void) : cache(std::make_shared<FontCache_c>()) {}
 
     /** \brief Get a font instance from the family.
      *
