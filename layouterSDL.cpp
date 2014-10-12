@@ -360,11 +360,11 @@ void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
   {
     switch (i.command)
     {
-      case TextLayout_c::commandData::CMD_GLYPH:
+      case TextLayout_c::CommandData_c::CMD_GLYPH:
         outputGlyph(sx+i.x, sy+i.y, getGlyph(i.font, i.glyphIndex, sp), sp, i.c, s);
         break;
 
-      case TextLayout_c::commandData::CMD_RECT:
+      case TextLayout_c::CommandData_c::CMD_RECT:
         r.x = (i.x+sx+32)/64;
         r.y = (i.y+sy+32)/64;
         r.w = (i.x+sx+i.w+32)/64-r.x;
@@ -372,7 +372,7 @@ void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
         SDL_FillRect(s, &r, SDL_MapRGBA(s->format, i.c.r(), i.c.g(), i.c.b(), i.c.a()));
         break;
 
-      case TextLayout_c::commandData::CMD_IMAGE:
+      case TextLayout_c::CommandData_c::CMD_IMAGE:
         if (images)
           images->draw(i.x+sx, i.y+sy, i.w, i.h, s, i.imageURL);
         break;

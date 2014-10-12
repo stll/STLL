@@ -5,7 +5,7 @@
 		<font file="tests/FreeSans.ttf" size="921" />
 	</fonts>
 	<commands>
-		<image x="320" y="961" url="a" />
+		<image x="320" y="961" w="640" h="640" url="a" />
 		<rect x="320" y="1780" w="640" h="64" r="255" g="255" b="255" a="255" />
 		<glyph x="960" y="1600" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
 		<rect x="960" y="1780" w="711" h="64" r="255" g="255" b="255" a="255" />

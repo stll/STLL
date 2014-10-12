@@ -39,7 +39,7 @@ namespace STLL {
 typedef struct
 {
   // the commands to output this run
-  std::vector<std::pair<size_t, TextLayout_c::commandData>> run;
+  std::vector<std::pair<size_t, TextLayout_c::CommandData_c>> run;
 
   // the advance information of this run
   int dx, dy;
@@ -278,69 +278,51 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
         if (a.flags & codepointAttributes::FL_UNDERLINE)
         {
-          TextLayout_c::commandData g;
-
-          g.command = TextLayout_c::commandData::CMD_RECT;
-          g.x = run.dx;
-          g.w = a.inlay->getRight();
+          int32_t rx = run.dx;
+          int32_t ry;
+          int32_t rw = a.inlay->getRight();
+          int32_t rh;
 
           if (prop.underlineFont)
           {
-            g.y = -((prop.underlineFont->getUnderlinePosition()+prop.underlineFont->getUnderlineThickness()/2));
-            g.h = std::max(64, prop.underlineFont->getUnderlineThickness());
+            ry = -((prop.underlineFont->getUnderlinePosition()+prop.underlineFont->getUnderlineThickness()/2));
+            rh = std::max(64, prop.underlineFont->getUnderlineThickness());
           }
           else
           {
-            g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2));
-            g.h = std::max(64, a.font->getUnderlineThickness());
+            ry = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2));
+            rh = std::max(64, a.font->getUnderlineThickness());
           }
 
           for (size_t j = 0; j < a.shadows.size(); j++)
           {
-            g.x += a.shadows[j].dx;
-            g.y += a.shadows[j].dy;
-
-            g.c = a.shadows[j].c;
-
-            run.run.push_back(std::make_pair(j, g));
-
-            g.x -= a.shadows[j].dx;
-            g.y -= a.shadows[j].dy;
+            run.run.push_back(std::make_pair(j,
+                TextLayout_c::CommandData_c(rx+a.shadows[j].dx, ry+a.shadows[j].dy,
+                                            rw, rh, a.shadows[j].c)));
           }
 
-          g.c = a.c;
-
-          run.run.push_back(std::make_pair(normalLayer, g));
+          run.run.push_back(std::make_pair(normalLayer,
+              TextLayout_c::CommandData_c(rx, ry, rw, rh, a.c)));
         }
 
         run.dx += a.inlay->getRight();
       }
       else
       {
-        TextLayout_c::commandData g;
+        glyphIndex_t gi = glyph_info[j].codepoint;
+        auto gf = attr.get(runstart).font;
 
-        g.command = TextLayout_c::commandData::CMD_GLYPH;
+        int32_t gx = run.dx + (glyph_pos[j].x_offset);
+        int32_t gy = run.dy - (glyph_pos[j].y_offset)-attr.get(runstart).baseline_shift;
 
-        g.glyphIndex = glyph_info[j].codepoint;
-        g.font = attr.get(runstart).font;
-
-        g.x = run.dx + (glyph_pos[j].x_offset);
-        g.y = run.dy - (glyph_pos[j].y_offset)-attr.get(runstart).baseline_shift;
-
-        g.x = roundToDivisible(g.x, prop.round);
-        g.y = roundToDivisible(g.y, prop.round);
+        gx = roundToDivisible(gx, prop.round);
+        gy = roundToDivisible(gy, prop.round);
 
         for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
         {
-          g.x += attr.get(runstart).shadows[j].dx;
-          g.y += attr.get(runstart).shadows[j].dy;
-
-          g.c = attr.get(runstart).shadows[j].c;
-
-          run.run.push_back(std::make_pair(j, g));
-
-          g.x -= attr.get(runstart).shadows[j].dx;
-          g.y -= attr.get(runstart).shadows[j].dy;
+          run.run.push_back(std::make_pair(j,
+              TextLayout_c::CommandData_c(gf, gi, gx+a.shadows[j].dx,
+                                          gy+a.shadows[j].dy, a.shadows[j].c)));
         }
 
         run.dx += glyph_pos[j].x_advance;
@@ -349,42 +331,34 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         run.dx = roundToDivisible(run.dx, prop.round);
         run.dy = roundToDivisible(run.dy, prop.round);
 
-        g.c = a.c;
-
-        run.run.push_back(std::make_pair(normalLayer, g));
+        run.run.push_back(std::make_pair(normalLayer,
+            TextLayout_c::CommandData_c(gf, gi, gx, gy, a.c)));
 
         if (a.flags & codepointAttributes::FL_UNDERLINE)
         {
-          g.command = TextLayout_c::commandData::CMD_RECT;
-          g.w = glyph_pos[j].x_advance+64;
+          int32_t gw = glyph_pos[j].x_advance+64;
+          int32_t gh;
 
           if (prop.underlineFont)
           {
-            g.h = std::max(64, prop.underlineFont->getUnderlineThickness());
-            g.y = -((prop.underlineFont->getUnderlinePosition()+prop.underlineFont->getUnderlineThickness()/2));
+            gh = std::max(64, prop.underlineFont->getUnderlineThickness());
+            gy = -((prop.underlineFont->getUnderlinePosition()+prop.underlineFont->getUnderlineThickness()/2));
           }
           else
           {
-            g.h = std::max(64, a.font->getUnderlineThickness());
-            g.y = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2));
+            gh = std::max(64, a.font->getUnderlineThickness());
+            gy = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2));
           }
 
           for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
           {
-            g.x += attr.get(runstart).shadows[j].dx;
-            g.y += attr.get(runstart).shadows[j].dy;
-
-            g.c = attr.get(runstart).shadows[j].c;
-
-            run.run.push_back(std::make_pair(j, g));
-
-            g.x -= attr.get(runstart).shadows[j].dx;
-            g.y -= attr.get(runstart).shadows[j].dy;
+            run.run.push_back(std::make_pair(j,
+                TextLayout_c::CommandData_c(gx+a.shadows[j].dx, gy+a.shadows[j].dy,
+                                            gw, gh, a.shadows[j].c)));
           }
 
-          g.command = TextLayout_c::commandData::CMD_RECT;
-          g.c = a.c;
-          run.run.push_back(std::make_pair(normalLayer, g));
+          run.run.push_back(std::make_pair(normalLayer,
+              TextLayout_c::CommandData_c(gx, gy, gw, gh, a.c)));
         }
       }
 
@@ -708,7 +682,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
             for (auto & cc : runs[runorder[i]].run)
             {
               if (   (cc.first == layer)
-                  && (cc.second.command == TextLayout_c::commandData::CMD_RECT)
+                  && (cc.second.command == TextLayout_c::CommandData_c::CMD_RECT)
                  )
               {
                 cc.second.w += spaceadder;

@@ -282,19 +282,12 @@ int main ()
     l.emplace_back(layoutInfo_c(layoutXHTML(text, styleSheet, rectangleShape_c(64*TXT_WIDTH)),
                                 (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_RGB));
 
-    TextLayout_c::commandData c;
-    c.command = TextLayout_c::commandData::CMD_RECT;
-    c.x = c.y = 0;
-    c.w = TXT_WIDTH*64;
-    c.h = l[1].layout.getHeight();
-    c.c = color_c(50, 50, 50);
-
-    l[0].layout.addCommand(c);
+    l[0].layout.addCommand(TextLayout_c::CommandData_c(
+      0, 0, TXT_WIDTH*64, l[1].layout.getHeight(), color_c(50, 50, 50)));
 
     pugi::xml_document doc;
     saveLayoutToXML(l[1].layout, doc, fc);
     doc.save_file("example.lay");
-
 
     // Ausgabe mittels SDL
     showLayoutsSelf(WIN_WIDTH, 1000, l);

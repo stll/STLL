@@ -583,24 +583,20 @@ static TextLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
     else if (rules.getValue(xml, "vertical-align") == "middle") l2.shift(0, space/2);
   }
 
-  TextLayout_c::commandData c;
-
-  c.command = TextLayout_c::commandData::CMD_RECT;
-
   if (borderwidth_top)
   {
     std::string color = rules.getValue(xml, "border-color");
     if (rules.getValue(xml, "border-top-color") != "") color = rules.getValue(xml, "border-top-color");
     if (color == "")                                   color = rules.getValue(xml, "color");
-    c.c = evalColor(color);
+    auto cc = evalColor(color);
 
-    if (c.c.a() != 0)
+    if (cc.a() != 0)
     {
-      c.x = l2.getLeft()-padding_left-borderwidth_left;
-      c.y = ystart+margin_top;
-      c.w = l2.getRight()-l2.getLeft()+padding_left+padding_right+borderwidth_left+borderwidth_right;
-      c.h = borderwidth_top;
-      l2.addCommandStart(c);
+      int32_t cx = l2.getLeft()-padding_left-borderwidth_left;
+      int32_t cy = ystart+margin_top;
+      int32_t cw = l2.getRight()-l2.getLeft()+padding_left+padding_right+borderwidth_left+borderwidth_right;
+      int32_t ch = borderwidth_top;
+      l2.addCommandStart(TextLayout_c::CommandData_c(cx, cy, cw, ch, cc));
     }
   }
 
@@ -609,15 +605,15 @@ static TextLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
     std::string color = rules.getValue(xml, "border-color");
     if (rules.getValue(xml, "border-bottom-color") != "") color = rules.getValue(xml, "border-bottom-color");
     if (color == "")                                      color = rules.getValue(xml, "color");
-    c.c = evalColor(color);
+    auto cc = evalColor(color);
 
-    if (c.c.a() != 0)
+    if (cc.a() != 0)
     {
-      c.x = l2.getLeft()-padding_left-borderwidth_left;
-      c.y = l2.getHeight()-borderwidth_bottom-margin_bottom;
-      c.w = l2.getRight()-l2.getLeft()+padding_left+padding_right+borderwidth_left+borderwidth_right;
-      c.h = borderwidth_bottom;
-      l2.addCommandStart(c);
+      int32_t cx = l2.getLeft()-padding_left-borderwidth_left;
+      int32_t cy = l2.getHeight()-borderwidth_bottom-margin_bottom;
+      int32_t cw = l2.getRight()-l2.getLeft()+padding_left+padding_right+borderwidth_left+borderwidth_right;
+      int32_t ch = borderwidth_bottom;
+      l2.addCommandStart(TextLayout_c::CommandData_c(cx, cy, cw, ch, cc));
     }
   }
 
@@ -626,15 +622,15 @@ static TextLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
     std::string color = rules.getValue(xml, "border-color");
     if (rules.getValue(xml, "border-right-color") != "") color = rules.getValue(xml, "border-right-color");
     if (color == "")                                     color = rules.getValue(xml, "color");
-    c.c = evalColor(color);
+    auto cc = evalColor(color);
 
-    if (c.c.a() != 0)
+    if (cc.a() != 0)
     {
-      c.x = l2.getRight()+padding_right;
-      c.y = ystart+margin_top;
-      c.w = borderwidth_right;
-      c.h = l2.getHeight()-ystart-margin_bottom-margin_top;
-      l2.addCommandStart(c);
+      int32_t cx = l2.getRight()+padding_right;
+      int32_t cy = ystart+margin_top;
+      int32_t cw = borderwidth_right;
+      int32_t ch = l2.getHeight()-ystart-margin_bottom-margin_top;
+      l2.addCommandStart(TextLayout_c::CommandData_c(cx, cy, cw, ch, cc));
     }
   }
 
@@ -643,30 +639,28 @@ static TextLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
     std::string color = rules.getValue(xml, "border-color");
     if (rules.getValue(xml, "border-left-color") != "") color = rules.getValue(xml, "border-left-color");
     if (color == "")                                    color = rules.getValue(xml, "color");
-    c.c = evalColor(color);
+    auto cc = evalColor(color);
 
-    if (c.c.a() != 0)
+    if (cc.a() != 0)
     {
-      c.x = l2.getLeft()-padding_left-borderwidth_left;
-      c.y = ystart+margin_top;
-      c.w = borderwidth_left;
-      c.h = l2.getHeight()-ystart-margin_bottom-margin_top;
-      l2.addCommandStart(c);
+      int32_t cx = l2.getLeft()-padding_left-borderwidth_left;
+      int32_t cy = ystart+margin_top;
+      int32_t cw = borderwidth_left;
+      int32_t ch = l2.getHeight()-ystart-margin_bottom-margin_top;
+      l2.addCommandStart(TextLayout_c::CommandData_c(cx, cy, cw, ch, cc));
     }
   }
 
-  c.c = evalColor(rules.getValue(xml, "background-color"));
+  auto cc = evalColor(rules.getValue(xml, "background-color"));
 
-  if (c.c.a() != 0)
+  if (cc.a() != 0)
   {
-    c.command = TextLayout_c::commandData::CMD_RECT;
-
-    c.x = shape.getLeft(ystart+margin_top, ystart+margin_top)+borderwidth_left+margin_left;
-    c.y = ystart+borderwidth_top+margin_top;
-    c.w = shape.getRight(ystart+margin_top, ystart+margin_top)-
-          shape.getLeft(ystart+margin_top, ystart+margin_top)-borderwidth_right-borderwidth_left-margin_right-margin_left;
-    c.h = l2.getHeight()-ystart-borderwidth_bottom-borderwidth_top-margin_bottom-margin_top;
-    l2.addCommandStart(c);
+    int32_t cx = shape.getLeft(ystart+margin_top, ystart+margin_top)+borderwidth_left+margin_left;
+    int32_t cy = ystart+borderwidth_top+margin_top;
+    int32_t cw = shape.getRight(ystart+margin_top, ystart+margin_top)-
+                 shape.getLeft(ystart+margin_top, ystart+margin_top)-borderwidth_right-borderwidth_left-margin_right-margin_left;
+    int32_t ch = l2.getHeight()-ystart-borderwidth_bottom-borderwidth_top-margin_bottom-margin_top;
+    l2.addCommandStart(TextLayout_c::CommandData_c(cx, cy, cw, ch, cc));
   }
 
 #ifdef _DEBUG_ // allows to see the boxes using a random color for each
@@ -697,17 +691,16 @@ static TextLayout_c layoutXML_IMG(pugi::xml_node & xml, const textStyleSheet_c &
 {
   TextLayout_c l;
 
-  TextLayout_c::commandData c;
-  c.command = TextLayout_c::commandData::CMD_IMAGE;
-  c.x = shape.getLeft(ystart, ystart);
-  c.y = ystart;
-  c.w = evalSize(xml.attribute("width").value());
-  c.h = evalSize(xml.attribute("height").value());
-  c.imageURL = xml.attribute("src").value();
-  l.addCommand(c);
-  l.setHeight(ystart+c.h);
-  l.setLeft(c.x);
-  l.setRight(c.x+c.w);
+  int32_t cx = shape.getLeft(ystart, ystart);
+  int32_t cy = ystart;
+  int32_t cw = evalSize(xml.attribute("width").value());
+  int32_t ch = evalSize(xml.attribute("height").value());
+  auto ci = xml.attribute("src").value();
+
+  l.addCommand(TextLayout_c::CommandData_c(ci, cx, cy, cw, ch));
+  l.setHeight(ystart+ch);
+  l.setLeft(cx);
+  l.setRight(cx+cw);
 
   return l;
 }
