@@ -807,7 +807,7 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
     else if ((xml.type() == pugi::node_element) && (std::string("img") == xml.name()))
     {
       codepointAttributes a;
-      a.inlay = std::make_shared<TextLayout_c>(boxIt(xml, xml, rules, rectangleShape_c(10000), 0,
+      a.inlay = std::make_shared<TextLayout_c>(boxIt(xml, xml, rules, RectangleShape_c(10000), 0,
                                                      layoutXML_IMG, pugi::xml_node(), pugi::xml_node()));
       a.baseline_shift = 0;
       a.shadows = evalShadows(rules.getValue(xml.parent(), "text-shadow"));
@@ -1172,7 +1172,7 @@ static TextLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c
   // hight for each cell
   for (auto & c : cells)
   {
-    c.l = boxIt(c.xml, c.xml, rules, rectangleShape_c(colStart[c.col+c.colspan]-colStart[c.col]),
+    c.l = boxIt(c.xml, c.xml, rules, RectangleShape_c(colStart[c.col+c.colspan]-colStart[c.col]),
                 0, layoutXML_Flow, cellarray.get(c.col+1, c.row), cellarray.get(c.col+(1+left)*c.colspan, c.row+1),
                 rules.getValue(xml, "border-collapse") == "collapse");
   }
@@ -1238,7 +1238,7 @@ static TextLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c
       rh += rowheights[r];
 
     if (rh != c.l.getHeight())
-      c.l = boxIt(c.xml, c.xml, rules, rectangleShape_c(colStart[c.col+c.colspan]-colStart[c.col]),
+      c.l = boxIt(c.xml, c.xml, rules, RectangleShape_c(colStart[c.col+c.colspan]-colStart[c.col]),
                   0, layoutXML_Flow, cellarray.get(c.col+1, c.row), cellarray.get(c.col+(1+left)*c.colspan, c.row+1),
                   rules.getValue(xml, "border-collapse") == "collapse", rh);
 

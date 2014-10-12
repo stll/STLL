@@ -279,7 +279,7 @@ int main ()
     // das eigentliche Layout
     // layoutXHTML macht die Arbeit, übergeben wird der Text, das Stylesheet und eine Klasse,
     // die die Form des Textes beinhaltet (für nicht rechteckiges Layout
-    l.emplace_back(layoutInfo_c(layoutXHTML(text, styleSheet, rectangleShape_c(64*TXT_WIDTH)),
+    l.emplace_back(layoutInfo_c(layoutXHTML(text, styleSheet, RectangleShape_c(64*TXT_WIDTH)),
                                 (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_RGB));
 
     l[0].layout.addCommand(TextLayout_c::CommandData_c(
@@ -321,7 +321,7 @@ int main ()
   for (int row = 0; row < 20; row++)
   {
     prop.indent = (64*row)/3;
-    l2.append(layoutParagraph(U"The quick brown fox iiiiiiiiiiiii", attr, rectangleShape_c(400*64), prop, l2.getHeight()));
+    l2.append(layoutParagraph(U"The quick brown fox iiiiiiiiiiiii", attr, RectangleShape_c(400*64), prop, l2.getHeight()));
   }
 
   // Ausgabe mittels SDL
@@ -355,10 +355,10 @@ int main ()
     attr.set(0, 100, a);
 
     prop.round = 1;
-    l2 = layoutParagraph(U"A quick brown fox jumps over the lazy dog", attr, rectangleShape_c(400*64), prop, ypos);
+    l2 = layoutParagraph(U"A quick brown fox jumps over the lazy dog", attr, RectangleShape_c(400*64), prop, ypos);
     l.push_back(layoutInfo_c(l2, 0, 0, SUBP_NONE));
     prop.round = 64;
-    l2 = layoutParagraph(U"A quick brown fox jumps over the lazy dog", attr, rectangleShape_c(400*64), prop, ypos);
+    l2 = layoutParagraph(U"A quick brown fox jumps over the lazy dog", attr, RectangleShape_c(400*64), prop, ypos);
     ypos = l2.getHeight();
     l.push_back(layoutInfo_c(l2, WIN_WIDTH*32, 0, SUBP_RGB));
   }

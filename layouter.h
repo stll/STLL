@@ -530,7 +530,7 @@ class Shape_c
 /** \brief conctrete implementation of the shape that will allow layouting
  *  inside a rectangular with a certain width
  */
-class rectangleShape_c : public Shape_c
+class RectangleShape_c : public Shape_c
 {
   private:
     int32_t w;
@@ -539,7 +539,7 @@ class rectangleShape_c : public Shape_c
     /** \brief construct the shape such that the area goes from 0 to width on the x-axis
      *  \param width width of the rectangle in 1/64th pixels
      */
-    rectangleShape_c(int32_t width) : w(width) { }
+    RectangleShape_c(int32_t width) : w(width) { }
 
     virtual int32_t getLeft(int32_t /*top*/, int32_t /*bottom*/) const { return 0; }
     virtual int32_t getLeft2(int32_t /*top*/, int32_t /*bottom*/) const { return 0; }
