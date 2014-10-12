@@ -32,7 +32,42 @@
 
 namespace STLL {
 
-static std::unordered_map<GlyphKey_c, FT_GlyphSlotRec_ *> glyhCache;
+// TODO properly handle it, when FreeType returns an bitmap format that is not supported
+
+class GlyphData_c
+{
+  public:
+    int32_t left;
+    int32_t top;
+    int32_t rows;
+    int32_t width;
+    int32_t pitch;
+    uint8_t * buffer;
+
+    GlyphData_c(FT_GlyphSlotRec_ * ft) :
+      left(ft->bitmap_left), top(ft->bitmap_top), rows(ft->bitmap.rows),
+      width(ft->bitmap.width), pitch(ft->bitmap.pitch), buffer(0)
+    {
+      buffer = new uint8_t [rows*pitch];
+      memcpy(buffer, ft->bitmap.buffer, rows*pitch);
+    }
+
+    GlyphData_c(GlyphData_c && g) :
+      left(g.left), top(g.top), rows(g.rows),
+      width(g.width), pitch(g.pitch), buffer(0)
+    {
+      buffer = g.buffer;
+      g.buffer = 0;
+    }
+
+    ~GlyphData_c(void)
+    {
+      if (buffer)
+        delete [] buffer;
+    }
+};
+
+static std::unordered_map<GlyphKey_c, GlyphData_c> glyhCache;
 
 static Uint32 getpixel(SDL_Surface *surface, int x, int y)
 {
@@ -103,24 +138,24 @@ static uint8_t blend(uint8_t a1, uint8_t a2, uint8_t b)
   return a1 + (a2-a1) * b / 255;
 }
 
-static void outputGlyph_NONE_Fallback(int sx, int sy, FT_GlyphSlot img, color_c c, SDL_Surface * s)
+static void outputGlyph_NONE_Fallback(int sx, int sy, const GlyphData_c & img, color_c c, SDL_Surface * s)
 {
-  int stx = (sx+32)/64 + img->bitmap_left;
-  int sty = (sy+32)/64 - img->bitmap_top;
+  int stx = (sx+32)/64 + img.left;
+  int sty = (sy+32)/64 - img.top;
 
   int yp = sty;
 
-  for (int y = 0; y < img->bitmap.rows; y++)
+  for (int y = 0; y < img.rows; y++)
   {
     if (yp >= 0 && yp < s->h)
     {
       int xp = stx;
 
-      for (int x = 0; x < img->bitmap.width; x++)
+      for (int x = 0; x < img.width; x++)
       {
         if (xp >= 0 && xp < s->w )
         {
-          uint8_t a = (c.a()*img->bitmap.buffer[y*img->bitmap.pitch+x]+128)/255;
+          uint8_t a = (c.a()*img.buffer[y*img.pitch+x]+128)/255;
           auto p = getpixel(s, xp, yp);
 
           Uint8 r, g, b;
@@ -140,27 +175,27 @@ static void outputGlyph_NONE_Fallback(int sx, int sy, FT_GlyphSlot img, color_c 
   }
 }
 
-static void outputGlyph_NONE_RGBx(int sx, int sy, FT_GlyphSlot img, color_c c, SDL_Surface * s)
+static void outputGlyph_NONE_RGBx(int sx, int sy, const GlyphData_c & img, color_c c, SDL_Surface * s)
 {
-  int stx = (sx+32)/64 + img->bitmap_left;
-  int sty = (sy+32)/64 - img->bitmap_top;
+  int stx = (sx+32)/64 + img.left;
+  int sty = (sy+32)/64 - img.top;
 
   int yp = sty;
 
-  for (int y = 0; y < img->bitmap.rows; y++)
+  for (int y = 0; y < img.rows; y++)
   {
     if (yp >= 0 && yp < s->h)
     {
       int xp = stx;
 
       uint8_t * dst = (uint8_t*)s->pixels + yp * s->pitch + 4*xp;
-      uint8_t * src = img->bitmap.buffer + y*img->bitmap.pitch;
+      uint8_t * src = img.buffer + y*img.pitch;
 
-      for (int x = 0; x < img->bitmap.width; x++)
+      for (int x = 0; x < img.width; x++)
       {
         if (xp >= 0 && xp < s->w )
         {
-          uint8_t a = (c.a()*img->bitmap.buffer[y*img->bitmap.pitch+x]+128)/255;
+          uint8_t a = (c.a()*img.buffer[y*img.pitch+x]+128)/255;
 
           *dst = blend(*dst, c.b(), a); dst++;
           *dst = blend(*dst, c.g(), a); dst++;
@@ -174,22 +209,22 @@ static void outputGlyph_NONE_RGBx(int sx, int sy, FT_GlyphSlot img, color_c c, S
   }
 }
 
-static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, FT_GlyphSlot img, color_c c, SDL_Surface * s)
+static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, const GlyphData_c & img, color_c c, SDL_Surface * s)
 {
-  int stx = sx/64 + img->bitmap_left;
-  int sty = sy/64 - img->bitmap_top;
+  int stx = sx/64 + img.left;
+  int sty = sy/64 - img.top;
   int stc = (3*sx/64) % 3;
 
   int yp = sty;
 
-  for (int y = 0; y < img->bitmap.rows; y++)
+  for (int y = 0; y < img.rows; y++)
   {
     if (yp >= 0 && yp < s->h)
     {
       int xp = stx;
       int col = stc;
 
-      for (int x = 0; x < img->bitmap.width; x++)
+      for (int x = 0; x < img.width; x++)
       {
         if (xp >= 0 && xp < s->w )
         {
@@ -201,9 +236,9 @@ static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, FT_GlyphSlot img,
           // blend values
           switch (col)
           {
-            case 0: r = blend(r, c.r(), (img->bitmap.buffer[y*img->bitmap.pitch+x] * c.a() + 128) / 255); break;
-            case 1: g = blend(g, c.g(), (img->bitmap.buffer[y*img->bitmap.pitch+x] * c.a() + 128) / 255); break;
-            case 2: b = blend(b, c.b(), (img->bitmap.buffer[y*img->bitmap.pitch+x] * c.a() + 128) / 255); break;
+            case 0: r = blend(r, c.r(), (img.buffer[y*img.pitch+x] * c.a() + 128) / 255); break;
+            case 1: g = blend(g, c.g(), (img.buffer[y*img.pitch+x] * c.a() + 128) / 255); break;
+            case 2: b = blend(b, c.b(), (img.buffer[y*img.pitch+x] * c.a() + 128) / 255); break;
           }
 
           putpixel(s, xp, yp, SDL_MapRGBA(s->format, r, g, b, SDL_ALPHA_OPAQUE));
@@ -221,17 +256,17 @@ static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, FT_GlyphSlot img,
   }
 }
 
-static void outputGlyph_HorizontalRGB_RGBx(int sx, int sy, FT_GlyphSlot img, color_c c, SDL_Surface * s)
+static void outputGlyph_HorizontalRGB_RGBx(int sx, int sy, const GlyphData_c & img, color_c c, SDL_Surface * s)
 {
-  int stx = sx/64 + img->bitmap_left;
-  int sty = (sy+32)/64 - img->bitmap_top;
+  int stx = sx/64 + img.left;
+  int sty = (sy+32)/64 - img.top;
   int stc = (3*sx/64) % 3;
 
   int yp = sty;
 
-  assert(img->bitmap.width % 3 == 0);
+  assert(img.width % 3 == 0);
 
-  for (int y = 0; y < img->bitmap.rows; y++)
+  for (int y = 0; y < img.rows; y++)
   {
     if (yp >= 0 && yp < s->h)
     {
@@ -239,9 +274,9 @@ static void outputGlyph_HorizontalRGB_RGBx(int sx, int sy, FT_GlyphSlot img, col
       int col = stc;
 
       uint8_t * dst = (uint8_t*)s->pixels + yp * s->pitch + 4*xp + 2 - col;
-      uint8_t * src = img->bitmap.buffer + y*img->bitmap.pitch;
+      uint8_t * src = img.buffer + y*img.pitch;
 
-      for (int x = 0; x < img->bitmap.width; x++)
+      for (int x = 0; x < img.width; x++)
       {
         if (xp >= 0 && xp < s->w )
         {
@@ -275,14 +310,9 @@ static bool isRGBxSurface(SDL_Surface * s)
   return f->BytesPerPixel == 4 && f->Rmask == 0xFF0000 && f->Gmask == 0xFF00 && f->Bmask == 0xFF;
 }
 
-static void outputGlyph(int sx, int sy, FT_GlyphSlot img, SubPixelArrangement sp, color_c c, SDL_Surface * s)
+static void outputGlyph(int sx, int sy, const GlyphData_c & img, SubPixelArrangement sp, color_c c, SDL_Surface * s)
 {
   // check for the right image format
-  if (!img) return;
-  if (img->format != FT_GLYPH_FORMAT_BITMAP) return;
-  if (sp == SUBP_NONE && img->bitmap.pixel_mode != FT_PIXEL_MODE_GRAY) return;
-  if ((sp == SUBP_RGB || sp == SUBP_BGR) && img->bitmap.pixel_mode != FT_PIXEL_MODE_LCD) return;
-  if ((sp == SUBP_RGB_V || sp == SUBP_BGR_V) && img->bitmap.pixel_mode != FT_PIXEL_MODE_LCD_V) return;
 
   // hub code to decide which function to use for output, there are fast functions
   // for some of the output functions and fallbacks that always work
@@ -307,7 +337,7 @@ static void outputGlyph(int sx, int sy, FT_GlyphSlot img, SubPixelArrangement sp
   }
 }
 
-static FT_GlyphSlotRec_ * getGlyph(std::shared_ptr<FontFace_c> face, glyphIndex_t glyph, SubPixelArrangement sp)
+static GlyphData_c & getGlyph(std::shared_ptr<FontFace_c> face, glyphIndex_t glyph, SubPixelArrangement sp)
 {
   GlyphKey_c k(face, glyph, sp);
 
@@ -317,13 +347,12 @@ static FT_GlyphSlotRec_ * getGlyph(std::shared_ptr<FontFace_c> face, glyphIndex_
   {
     auto g = face->renderGlyph(glyph, sp);
 
-    FT_GlyphSlotRec_ * h = new FT_GlyphSlotRec;
+    assert(g->format == FT_GLYPH_FORMAT_BITMAP);
+    assert( sp != SUBP_NONE                       || g->bitmap.pixel_mode == FT_PIXEL_MODE_GRAY);
+    assert((sp != SUBP_RGB && sp != SUBP_BGR)     || g->bitmap.pixel_mode == FT_PIXEL_MODE_LCD);
+    assert((sp != SUBP_RGB_V && sp != SUBP_BGR_V) || g->bitmap.pixel_mode == FT_PIXEL_MODE_LCD_V);
 
-    memcpy(h, g, sizeof(FT_GlyphSlotRec));
-    h->bitmap.buffer = new uint8_t [g->bitmap.rows*g->bitmap.pitch];
-    memcpy(h->bitmap.buffer, g->bitmap.buffer, g->bitmap.rows*g->bitmap.pitch);
-
-    i = glyhCache.insert(std::make_pair(k, h)).first;
+    i = glyhCache.insert(std::make_pair(k, std::move(GlyphData_c(g)))).first;
   }
 
   return i->second;
