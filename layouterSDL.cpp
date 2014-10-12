@@ -43,6 +43,7 @@ class GlyphData_c
     int32_t width;
     int32_t pitch;
     uint8_t * buffer;
+    uint32_t lastUse;
 
     GlyphData_c(FT_GlyphSlotRec_ * ft) :
       left(ft->bitmap_left), top(ft->bitmap_top), rows(ft->bitmap.rows),
@@ -67,7 +68,8 @@ class GlyphData_c
     }
 };
 
-static std::unordered_map<GlyphKey_c, GlyphData_c> glyhCache;
+static std::unordered_map<GlyphKey_c, GlyphData_c> glyphCache;
+static uint32_t useCounter = 0;
 
 static Uint32 getpixel(SDL_Surface *surface, int x, int y)
 {
@@ -341,9 +343,9 @@ static GlyphData_c & getGlyph(std::shared_ptr<FontFace_c> face, glyphIndex_t gly
 {
   GlyphKey_c k(face, glyph, sp);
 
-  auto i = glyhCache.find(k);
+  auto i = glyphCache.find(k);
 
-  if (i == glyhCache.end())
+  if (i == glyphCache.end())
   {
     auto g = face->renderGlyph(glyph, sp);
 
@@ -352,8 +354,11 @@ static GlyphData_c & getGlyph(std::shared_ptr<FontFace_c> face, glyphIndex_t gly
     assert((sp != SUBP_RGB && sp != SUBP_BGR)     || g->bitmap.pixel_mode == FT_PIXEL_MODE_LCD);
     assert((sp != SUBP_RGB_V && sp != SUBP_BGR_V) || g->bitmap.pixel_mode == FT_PIXEL_MODE_LCD_V);
 
-    i = glyhCache.insert(std::make_pair(k, std::move(GlyphData_c(g)))).first;
+    i = glyphCache.insert(std::make_pair(k, std::move(GlyphData_c(g)))).first;
   }
+
+  i->second.lastUse = useCounter;
+  useCounter++;
 
   return i->second;
 }
@@ -406,6 +411,35 @@ void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
           images->draw(i.x+sx, i.y+sy, i.w, i.h, s, i.imageURL);
         break;
     }
+  }
+}
+
+void trimSDLFontCache(size_t num)
+{
+  if (num == 0)
+  {
+    glyphCache.clear();
+  }
+  else if (num < glyphCache.size())
+  {
+    // find elements that are oldest in the cache
+    std::vector<std::unordered_map<GlyphKey_c, GlyphData_c>::iterator> entries;
+
+    for (auto i = glyphCache.begin(); i != glyphCache.end(); ++i)
+      entries.push_back(i);
+
+    std::sort(entries.begin(), entries.end(),
+              [] (const std::unordered_map<GlyphKey_c, GlyphData_c>::iterator & a,
+                  const std::unordered_map<GlyphKey_c, GlyphData_c>::iterator & b) {
+      return a->second.lastUse < b->second.lastUse;
+    });
+
+    size_t toDel = glyphCache.size() - num;
+
+    for (size_t i = 0; i < toDel; i++)
+      glyphCache.erase(entries[i]);
+
+    printf("ttt\n");
   }
 }
 

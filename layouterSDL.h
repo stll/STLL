@@ -68,6 +68,17 @@ class imageDrawerSDL_c
 void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
                    SubPixelArrangement sp, imageDrawerSDL_c * images);
 
+/** \brief trims the font cache down to a maximal number of entries
+ *
+ * the SDL output module keeps a cache of rendered glyphs to speed up the process of
+ * outputting layouts. This cache may get too big on memory. To keep things within limits
+ * you can call this function to remove entries.
+ * If there are more entries in the cache the ones that were used the longest time ago are removed
+ *
+ * \param num maximal number of entries, e.g. 0 completely empties the cache
+ */
+void trimSDLFontCache(size_t num);
+
 }
 
 #endif
