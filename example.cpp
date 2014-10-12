@@ -310,7 +310,7 @@ int main ()
 
   TextLayout_c l2;
 
-  attributeIndex_c attr;
+  AttributeIndex_c attr;
   codepointAttributes a;
   a.c = color_c(255, 255, 255, 255);
   a.font = fc->getFont(fontResource_c("tests/FreeSans.ttf"), 16*64);
@@ -346,7 +346,7 @@ int main ()
 
   for (int row = 0; row < 20; row++)
   {
-    attributeIndex_c attr;
+    AttributeIndex_c attr;
     codepointAttributes a;
     a.c = color_c(155, 155, 255, 055);
     a.font = fc->getFont(fontResource_c("/usr/share/fonts/corefonts/georgiai.ttf"), (6+row)*64);

@@ -613,7 +613,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   s.addRule("p", "text-decoration", "");
 
   // check the underline feature where each letter has its own way
-  STLL::attributeIndex_c attr;
+  STLL::AttributeIndex_c attr;
   STLL::codepointAttributes a;
 
   a.c = STLL::color_c(255, 255, 255, 255);

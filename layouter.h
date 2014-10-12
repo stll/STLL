@@ -439,7 +439,7 @@ class codepointAttributes
  * This class behaves a bit like a vector of codepointAttributed in that you can
  * get an attribute for an index. The index is of type size_t
  */
-class attributeIndex_c
+class AttributeIndex_c
 {
   private:
     boost::icl::interval_map<size_t, codepointAttributes> attr;
@@ -448,12 +448,12 @@ class attributeIndex_c
     /** \brief create an empty index
      *  \attention you have to add at least one attribute
      */
-    attributeIndex_c(void) { }
+    AttributeIndex_c(void) { }
 
     /** \brief create an index where all entries have the same attribute
      *  \param a the attribute that all will share
      */
-    attributeIndex_c(const codepointAttributes & a)
+    AttributeIndex_c(const codepointAttributes & a)
     {
       attr += std::make_pair(boost::icl::interval<size_t>::closed(0, SIZE_MAX), a);
     }
@@ -608,7 +608,7 @@ typedef struct {
  *
  * TODO: instead of crashing, rather throw an exception in that case.
  */
-TextLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
+TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_c & attr,
                              const shape_c & shape, const layoutProperties & prop, int32_t ystart = 0);
 
 }

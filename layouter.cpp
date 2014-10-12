@@ -109,7 +109,7 @@ static bool isBidiCharacter(char32_t c)
 
 // use harfbuzz to layout runs of text
 static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
-                                           const attributeIndex_c & attr,
+                                           const AttributeIndex_c & attr,
                                            const std::vector<FriBidiLevel> & embedding_levels,
                                            const std::vector<char> & linebreaks,
                                            const layoutProperties & prop
@@ -737,7 +737,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
   return l;
 }
 
-static std::vector<char> getLinebreaks(const std::u32string & txt32, const attributeIndex_c & attr)
+static std::vector<char> getLinebreaks(const std::u32string & txt32, const AttributeIndex_c & attr)
 {
   size_t length = txt32.length();
 
@@ -772,7 +772,7 @@ static std::vector<char> getLinebreaks(const std::u32string & txt32, const attri
   return linebreaks;
 }
 
-TextLayout_c layoutParagraph(const std::u32string & txt32, const attributeIndex_c & attr,
+TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_c & attr,
                              const shape_c & shape, const layoutProperties & prop, int32_t ystart)
 {
   // calculate embedding types for the text

@@ -711,7 +711,7 @@ static TextLayout_c layoutXML_IMG(pugi::xml_node & xml, const textStyleSheet_c &
 // this function will also return a new node where it stopped working
 pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules,
                               layoutProperties & prop, std::u32string & txt,
-                              attributeIndex_c & attr, int32_t baseline = 0,
+                              AttributeIndex_c & attr, int32_t baseline = 0,
                               const std::string & link = "", bool exitOnError = false)
 {
   while (xml)
@@ -848,7 +848,7 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
 static TextLayout_c layoutXML_Phrasing(pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
 {
   std::u32string txt;
-  attributeIndex_c attr;
+  AttributeIndex_c attr;
   layoutProperties lprop;
 
   auto xml2 = layoutXML_text(xml, rules, lprop, txt, attr, 0, "", true);
@@ -946,7 +946,7 @@ static TextLayout_c layoutXML_UL(pugi::xml_node & xml, const textStyleSheet_c & 
 
       indentShape_c textshape(shape, direction == "ltr" ? listIndent : 0, direction == "ltr" ? 0: listIndent);
 
-      TextLayout_c bullet = layoutParagraph(U"\u2022", attributeIndex_c(a), *bulletshape.get(), prop, y+padding);
+      TextLayout_c bullet = layoutParagraph(U"\u2022", AttributeIndex_c(a), *bulletshape.get(), prop, y+padding);
       TextLayout_c text = boxIt(i, i, rules, textshape, y, layoutXML_Flow, i.previous_sibling(), pugi::xml_node());
 
       // append the bullet first and then the text, adjusting the bullet so that its baseline
