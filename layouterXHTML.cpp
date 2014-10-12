@@ -596,7 +596,7 @@ static TextLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
       int32_t cy = ystart+margin_top;
       int32_t cw = l2.getRight()-l2.getLeft()+padding_left+padding_right+borderwidth_left+borderwidth_right;
       int32_t ch = borderwidth_top;
-      l2.addCommandStart(CommandData_c(cx, cy, cw, ch, cc));
+      l2.addCommandStart(cx, cy, cw, ch, cc);
     }
   }
 
@@ -613,7 +613,7 @@ static TextLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
       int32_t cy = l2.getHeight()-borderwidth_bottom-margin_bottom;
       int32_t cw = l2.getRight()-l2.getLeft()+padding_left+padding_right+borderwidth_left+borderwidth_right;
       int32_t ch = borderwidth_bottom;
-      l2.addCommandStart(CommandData_c(cx, cy, cw, ch, cc));
+      l2.addCommandStart(cx, cy, cw, ch, cc);
     }
   }
 
@@ -630,7 +630,7 @@ static TextLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
       int32_t cy = ystart+margin_top;
       int32_t cw = borderwidth_right;
       int32_t ch = l2.getHeight()-ystart-margin_bottom-margin_top;
-      l2.addCommandStart(CommandData_c(cx, cy, cw, ch, cc));
+      l2.addCommandStart(cx, cy, cw, ch, cc);
     }
   }
 
@@ -647,7 +647,7 @@ static TextLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
       int32_t cy = ystart+margin_top;
       int32_t cw = borderwidth_left;
       int32_t ch = l2.getHeight()-ystart-margin_bottom-margin_top;
-      l2.addCommandStart(CommandData_c(cx, cy, cw, ch, cc));
+      l2.addCommandStart(cx, cy, cw, ch, cc);
     }
   }
 
@@ -660,7 +660,7 @@ static TextLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
     int32_t cw = shape.getRight(ystart+margin_top, ystart+margin_top)-
                  shape.getLeft(ystart+margin_top, ystart+margin_top)-borderwidth_right-borderwidth_left-margin_right-margin_left;
     int32_t ch = l2.getHeight()-ystart-borderwidth_bottom-borderwidth_top-margin_bottom-margin_top;
-    l2.addCommandStart(CommandData_c(cx, cy, cw, ch, cc));
+    l2.addCommandStart(cx, cy, cw, ch, cc);
   }
 
 #ifdef _DEBUG_ // allows to see the boxes using a random color for each
@@ -697,7 +697,7 @@ static TextLayout_c layoutXML_IMG(pugi::xml_node & xml, const textStyleSheet_c &
   int32_t ch = evalSize(xml.attribute("height").value());
   auto ci = xml.attribute("src").value();
 
-  l.addCommand(CommandData_c(ci, cx, cy, cw, ch));
+  l.addCommand(ci, cx, cy, cw, ch);
   l.setHeight(ystart+ch);
   l.setLeft(cx);
   l.setRight(cx+cw);

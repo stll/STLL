@@ -140,14 +140,40 @@ class TextLayout_c
     std::vector<linkInformation> links;
 
     /** \brief add a single drawing command to the end of the command list
-     *  \param d the command to add
+     *  \param args this is a forwarding function that will give all arguments to the
+     * contructor of the CommandData_c class that will be added
      *
      * \note if you add a command, you must update the left, right and height fields
      * as well as the firstBaseline your own
      */
-    void addCommand(const CommandData_c & d)
+    template <class... Args>
+    void addCommand(Args&&... args)
     {
-      data.push_back(d);
+      data.emplace_back(std::forward<Args>(args)...);
+    }
+
+    /** \brief add a single drawing command to the end of the command list
+     *  \param c the command to add
+     *
+     * \note if you add a command, you must update the left, right and height fields
+     * as well as the firstBaseline your own
+     */
+    void addCommand(const CommandData_c & c)
+    {
+      data.push_back(c);
+    }
+
+    /** \brief add a single drawing command to the start of the command list
+     *  \param args this is a forwarding function that will give all arguments to the
+     * contructor of the CommandData_c class that will be added
+     *
+     * \note if you add a command, you must update the left, right and height fields
+     * as well as the firstBaseline your own
+     */
+    template <class... Args>
+    void addCommandStart(Args&&... args)
+    {
+      data.emplace(data.begin(), std::forward<Args>(args)...);
     }
 
     /** \brief add a single drawing command to the start of the command list

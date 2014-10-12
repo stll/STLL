@@ -129,7 +129,7 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
   {
     if (a.name() == std::string("glyph"))
     {
-      CommandData_c c(
+      l.addCommand(
         found[std::stoi(a.attribute("font").value())],
         std::stoi(a.attribute("glyphIndex").value()),
         std::stoi(a.attribute("x").value()),
@@ -137,12 +137,10 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
         color_c(std::stoi(a.attribute("r").value()), std::stoi(a.attribute("g").value()),
                 std::stoi(a.attribute("b").value()), std::stoi(a.attribute("a").value()))
       );
-
-      l.addCommand(c);
     }
     else if (a.name() == std::string("rect"))
     {
-      CommandData_c c(
+      l.addCommand(
         std::stoi(a.attribute("x").value()),
         std::stoi(a.attribute("y").value()),
         std::stoi(a.attribute("w").value()),
@@ -150,20 +148,16 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
         color_c(std::stoi(a.attribute("r").value()), std::stoi(a.attribute("g").value()),
                 std::stoi(a.attribute("b").value()), std::stoi(a.attribute("a").value()))
       );
-
-      l.addCommand(c);
     }
     else if (a.name() == std::string("image"))
     {
-      CommandData_c c(
+      l.addCommand(
         a.attribute("url").value(),
         std::stoi(a.attribute("x").value()),
         std::stoi(a.attribute("y").value()),
         std::stoi(a.attribute("w").value()),
         std::stoi(a.attribute("h").value())
       );
-
-      l.addCommand(c);
     }
   }
 
