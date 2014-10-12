@@ -143,9 +143,9 @@ int main ()
   styleSheet.setRound(64);
 
   // alle Fonts, die so genutzt werden: familie heißt sans, und dann der bold Font dazu
-  styleSheet.font("sans", fontResource_c("/usr/share/fonts/freefont/FreeSerif.ttf"));
-  styleSheet.font("sans", fontResource_c("/usr/share/fonts/freefont/FreeSerifBold.ttf"), "normal", "normal", "bold");
-  styleSheet.font("sans-ar", fontResource_c(loadFile("tests/Amiri.ttf"), "arabic"));
+  styleSheet.font("sans", FontResource_c("/usr/share/fonts/freefont/FreeSerif.ttf"));
+  styleSheet.font("sans", FontResource_c("/usr/share/fonts/freefont/FreeSerifBold.ttf"), "normal", "normal", "bold");
+  styleSheet.font("sans-ar", FontResource_c(loadFile("tests/Amiri.ttf"), "arabic"));
 
   // CSS regeln, immer Selector, attribut, wert
   styleSheet.addRule("body", "color", "#ffffff");
@@ -312,7 +312,7 @@ int main ()
   AttributeIndex_c attr;
   codepointAttributes a;
   a.c = color_c(255, 255, 255, 255);
-  a.font = fc->getFont(fontResource_c("tests/FreeSans.ttf"), 16*64);
+  a.font = fc->getFont(FontResource_c("tests/FreeSans.ttf"), 16*64);
   a.lang = "en";
   a.flags = 0;
   attr.set(0, 100, a);
@@ -348,7 +348,7 @@ int main ()
     AttributeIndex_c attr;
     codepointAttributes a;
     a.c = color_c(155, 155, 255, 055);
-    a.font = fc->getFont(fontResource_c("/usr/share/fonts/corefonts/georgiai.ttf"), (6+row)*64);
+    a.font = fc->getFont(FontResource_c("/usr/share/fonts/corefonts/georgiai.ttf"), (6+row)*64);
     a.lang = "en";
     a.flags = 0;
     attr.set(0, 100, a);

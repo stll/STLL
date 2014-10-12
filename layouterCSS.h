@@ -87,7 +87,7 @@ class textStyleSheet_c
      * \param weight See fontFamily_c::getFont()
      * \param stretch See fontFamily_c::getFont()
      */
-    void font(const std::string & family, const fontResource_c & res,
+    void font(const std::string & family, const FontResource_c & res,
                  const std::string & style = "normal",
                  const std::string & variant = "normal",
                  const std::string & weight = "normal",

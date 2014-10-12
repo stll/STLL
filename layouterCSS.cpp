@@ -451,7 +451,7 @@ const std::string & textStyleSheet_c::getValue(pugi::xml_node node,
   return getDefault(attribute);
 }
 
-void textStyleSheet_c::font(const std::string& family, const fontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
+void textStyleSheet_c::font(const std::string& family, const FontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
   auto i = families.find(family);
 

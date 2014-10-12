@@ -119,7 +119,7 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
   std::vector<std::shared_ptr<fontFace_c>> found;
 
   for (const auto a : fonts.children())
-    found.push_back(c->getFont(fontResource_c(a.attribute("file").value()), std::stoi(a.attribute("size").value())));
+    found.push_back(c->getFont(FontResource_c(a.attribute("file").value()), std::stoi(a.attribute("size").value())));
 
   auto commands = doc.child("commands");
 

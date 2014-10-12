@@ -37,7 +37,7 @@ namespace STLL {
 
 // TODO the fontFace_c constructor and library interface is not perfect...
 
-fontFace_c::fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const fontResource_c & res, uint32_t size) : lib(l)
+fontFace_c::fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const FontResource_c & res, uint32_t size) : lib(l)
 {
   f = lib->newFace(res, size);
 }
@@ -72,7 +72,7 @@ int32_t fontFace_c::getUnderlineThickness(void) const
   return static_cast<int64_t>(f->underline_thickness*f->size->metrics.y_scale) / 65536;
 }
 
-std::shared_ptr<fontFace_c> fontCache_c::getFont(const fontResource_c & res, uint32_t size)
+std::shared_ptr<fontFace_c> fontCache_c::getFont(const FontResource_c & res, uint32_t size)
 {
   fontFaceParameter_c ffp(res, size);
 
@@ -123,7 +123,7 @@ FT_GlyphSlotRec_ * fontFace_c::renderGlyph(glyphIndex_t glyphIndex, SubPixelArra
   return f->glyph;
 }
 
-FT_Face freeTypeLibrary_c::newFace(const fontResource_c & res, uint32_t size)
+FT_Face freeTypeLibrary_c::newFace(const FontResource_c & res, uint32_t size)
 {
   FT_Face f;
   FT_Open_Args a;
@@ -204,7 +204,7 @@ freeTypeLibrary_c::freeTypeLibrary_c()
   FT_Library_SetLcdFilter(lib, FT_LCD_FILTER_DEFAULT);
 }
 
-void fontFamily_c::addFont(const fontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
+void fontFamily_c::addFont(const FontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
   fontFamilyParameter_c par;
 
@@ -238,13 +238,13 @@ std::shared_ptr<fontFace_c> fontFamily_c::getFont(uint32_t size, const std::stri
   }
 }
 
-fontResource_c fontCache_c::getFontResource(std::shared_ptr<fontFace_c> f) const
+FontResource_c fontCache_c::getFontResource(std::shared_ptr<fontFace_c> f) const
 {
   for (const auto a : fonts)
     if (a.second.lock() == f)
       return a.first.res;
 
-  return fontResource_c();
+  return FontResource_c();
 }
 
 uint32_t fontCache_c::getFontSize(std::shared_ptr<fontFace_c> f) const
