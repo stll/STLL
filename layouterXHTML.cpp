@@ -1249,7 +1249,7 @@ static textLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c
                   0, layoutXML_Flow, cellarray.get(c.col+1, c.row), cellarray.get(c.col+(1+left)*c.colspan, c.row+1),
                   rules.getValue(xml, "border-collapse") == "collapse", rh);
 
-    if (l.data.size() == 0)
+    if (l.getData().empty())
       l.setFirstBaseline(c.l.getFirstBaseline()+ystart);
 
     if (rtl)

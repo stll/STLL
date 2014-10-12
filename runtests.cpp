@@ -51,42 +51,42 @@ static bool compare(const STLL::textLayout_c & l, const pugi::xml_node & doc, st
 
   for (const auto a : commands.children())
   {
-    if (i >= l.data.size()) return false;
+    if (i >= l.getData().size()) return false;
 
     if (a.name() == std::string("glyph"))
     {
-      if (l.data[i].command != STLL::textLayout_c::commandData::CMD_GLYPH) return false;
-      if (l.data[i].x != std::stoi(a.attribute("x").value())) return false;
-      if (l.data[i].y != std::stoi(a.attribute("y").value())) return false;
-      if (l.data[i].glyphIndex != std::stoi(a.attribute("glyphIndex").value())) return false;
+      if (l.getData()[i].command != STLL::textLayout_c::commandData::CMD_GLYPH) return false;
+      if (l.getData()[i].x != std::stoi(a.attribute("x").value())) return false;
+      if (l.getData()[i].y != std::stoi(a.attribute("y").value())) return false;
+      if (l.getData()[i].glyphIndex != std::stoi(a.attribute("glyphIndex").value())) return false;
 
       int f = std::stoi(a.attribute("font").value());
-      if (c->getFontResource(l.data[i].font).getDescription() != found[f].first) return false;
-      if (c->getFontSize(l.data[i].font) != found[f].second) return false;
+      if (c->getFontResource(l.getData()[i].font).getDescription() != found[f].first) return false;
+      if (c->getFontSize(l.getData()[i].font) != found[f].second) return false;
 
-      if (l.data[i].c.r() != std::stoi(a.attribute("r").value())) return false;
-      if (l.data[i].c.g() != std::stoi(a.attribute("g").value())) return false;
-      if (l.data[i].c.b() != std::stoi(a.attribute("b").value())) return false;
-      if (l.data[i].c.a() != std::stoi(a.attribute("a").value())) return false;
+      if (l.getData()[i].c.r() != std::stoi(a.attribute("r").value())) return false;
+      if (l.getData()[i].c.g() != std::stoi(a.attribute("g").value())) return false;
+      if (l.getData()[i].c.b() != std::stoi(a.attribute("b").value())) return false;
+      if (l.getData()[i].c.a() != std::stoi(a.attribute("a").value())) return false;
     }
     else if (a.name() == std::string("rect"))
     {
-      if (l.data[i].command != STLL::textLayout_c::commandData::CMD_RECT) return false;
-      if (l.data[i].x != std::stoi(a.attribute("x").value())) return false;
-      if (l.data[i].y != std::stoi(a.attribute("y").value())) return false;
-      if (l.data[i].w != std::stoi(a.attribute("w").value())) return false;
-      if (l.data[i].h != std::stoi(a.attribute("h").value())) return false;
-      if (l.data[i].c.r() != std::stoi(a.attribute("r").value())) return false;
-      if (l.data[i].c.g() != std::stoi(a.attribute("g").value())) return false;
-      if (l.data[i].c.b() != std::stoi(a.attribute("b").value())) return false;
-      if (l.data[i].c.a() != std::stoi(a.attribute("a").value())) return false;
+      if (l.getData()[i].command != STLL::textLayout_c::commandData::CMD_RECT) return false;
+      if (l.getData()[i].x != std::stoi(a.attribute("x").value())) return false;
+      if (l.getData()[i].y != std::stoi(a.attribute("y").value())) return false;
+      if (l.getData()[i].w != std::stoi(a.attribute("w").value())) return false;
+      if (l.getData()[i].h != std::stoi(a.attribute("h").value())) return false;
+      if (l.getData()[i].c.r() != std::stoi(a.attribute("r").value())) return false;
+      if (l.getData()[i].c.g() != std::stoi(a.attribute("g").value())) return false;
+      if (l.getData()[i].c.b() != std::stoi(a.attribute("b").value())) return false;
+      if (l.getData()[i].c.a() != std::stoi(a.attribute("a").value())) return false;
     }
     else if (a.name() == std::string("image"))
     {
-      if (l.data[i].command != STLL::textLayout_c::commandData::CMD_IMAGE) return false;
-      if (l.data[i].x != std::stoi(a.attribute("x").value())) return false;
-      if (l.data[i].y != std::stoi(a.attribute("y").value())) return false;
-      if (l.data[i].imageURL != a.attribute("url").value()) return false;
+      if (l.getData()[i].command != STLL::textLayout_c::commandData::CMD_IMAGE) return false;
+      if (l.getData()[i].x != std::stoi(a.attribute("x").value())) return false;
+      if (l.getData()[i].y != std::stoi(a.attribute("y").value())) return false;
+      if (l.getData()[i].imageURL != a.attribute("url").value()) return false;
     }
     else
     {
@@ -96,7 +96,7 @@ static bool compare(const STLL::textLayout_c & l, const pugi::xml_node & doc, st
     i++;
   }
 
-  return i == l.data.size();
+  return i == l.getData().size();
 }
 
 
@@ -105,45 +105,45 @@ bool operator==(const STLL::textLayout_c a, const STLL::textLayout_c b)
   if (a.getHeight() != b.getHeight()) return false;
   if (a.getLeft() != b.getLeft()) return false;
   if (a.getRight() != b.getRight()) return false;
-  if (a.data.size() != b.data.size()) return false;
+  if (a.getData().size() != b.getData().size()) return false;
 
-  for (size_t i = 0; i < a.data.size(); i++)
+  for (size_t i = 0; i < a.getData().size(); i++)
   {
-    if (a.data[i].command != b.data[i].command) return false;
+    if (a.getData()[i].command != b.getData()[i].command) return false;
 
-    switch (a.data[i].command)
+    switch (a.getData()[i].command)
     {
       case STLL::textLayout_c::commandData::CMD_GLYPH:
-        if (a.data[i].x != b.data[i].x) return false;
-        if (a.data[i].y != b.data[i].y) return false;
-        if (a.data[i].glyphIndex != b.data[i].glyphIndex) return false;
+        if (a.getData()[i].x != b.getData()[i].x) return false;
+        if (a.getData()[i].y != b.getData()[i].y) return false;
+        if (a.getData()[i].glyphIndex != b.getData()[i].glyphIndex) return false;
 
         // TODO we can not compare fonts...
 
-        if (a.data[i].c.r() != b.data[i].c.r()) return false;
-        if (a.data[i].c.g() != b.data[i].c.g()) return false;
-        if (a.data[i].c.b() != b.data[i].c.b()) return false;
-        if (a.data[i].c.a() != b.data[i].c.a()) return false;
+        if (a.getData()[i].c.r() != b.getData()[i].c.r()) return false;
+        if (a.getData()[i].c.g() != b.getData()[i].c.g()) return false;
+        if (a.getData()[i].c.b() != b.getData()[i].c.b()) return false;
+        if (a.getData()[i].c.a() != b.getData()[i].c.a()) return false;
 
         break;
 
       case STLL::textLayout_c::commandData::CMD_RECT:
-        if (a.data[i].x != b.data[i].x) return false;
-        if (a.data[i].y != b.data[i].y) return false;
-        if (a.data[i].w != b.data[i].w) return false;
-        if (a.data[i].h != b.data[i].h) return false;
+        if (a.getData()[i].x != b.getData()[i].x) return false;
+        if (a.getData()[i].y != b.getData()[i].y) return false;
+        if (a.getData()[i].w != b.getData()[i].w) return false;
+        if (a.getData()[i].h != b.getData()[i].h) return false;
 
-        if (a.data[i].c.r() != b.data[i].c.r()) return false;
-        if (a.data[i].c.g() != b.data[i].c.g()) return false;
-        if (a.data[i].c.b() != b.data[i].c.b()) return false;
-        if (a.data[i].c.a() != b.data[i].c.a()) return false;
+        if (a.getData()[i].c.r() != b.getData()[i].c.r()) return false;
+        if (a.getData()[i].c.g() != b.getData()[i].c.g()) return false;
+        if (a.getData()[i].c.b() != b.getData()[i].c.b()) return false;
+        if (a.getData()[i].c.a() != b.getData()[i].c.a()) return false;
 
         break;
 
       case STLL::textLayout_c::commandData::CMD_IMAGE:
-        if (a.data[i].x != b.data[i].x) return false;
-        if (a.data[i].y != b.data[i].y) return false;
-        if (a.data[i].imageURL != b.data[i].imageURL) return false;
+        if (a.getData()[i].x != b.getData()[i].x) return false;
+        if (a.getData()[i].y != b.getData()[i].y) return false;
+        if (a.getData()[i].imageURL != b.getData()[i].imageURL) return false;
 
         break;
 

@@ -356,7 +356,7 @@ void showLayoutSDL(const textLayout_c & l, int sx, int sy, SDL_Surface * s,
 #endif
 
   /* render */
-  for (auto & i : l.data)
+  for (auto & i : l.getData())
   {
     switch (i.command)
     {

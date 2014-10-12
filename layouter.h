@@ -51,9 +51,12 @@ namespace STLL {
 class textLayout_c
 {
   private:
-    uint32_t height; // position where you can add additional text after this ...
+    // position where you can add additional text after this ...
+    uint32_t height;
+    // left and right edge
     int32_t left, right;
-    int32_t firstBaseline; // vertical position of the very first baseline in this layout
+    // vertical position of the very first baseline in this layout
+    int32_t firstBaseline;
 
   public:
 
@@ -93,10 +96,14 @@ class textLayout_c
 
     } commandData;
 
-    // order is the logical order, so when you do copy and paste we copy out of this using the order
-    // within the vector
-    // TODO find better solution instead of public vector
+  private:
     std::vector<commandData> data;
+
+  public:
+
+    /** \brief get the command vector
+     */
+    const std::vector<commandData> getData(void) const { return data; }
 
     class rectangle_c
     {

@@ -155,7 +155,7 @@ int main ()
   styleSheet.addRule("body", "text-align", "justify");
   styleSheet.addRule("p", "text-indent", "10px");
   styleSheet.addRule("body", "padding", "10px");
-  styleSheet.addRule("body", "background-color", "#303030");
+//  styleSheet.addRule("body", "background-color", "#303030");
   styleSheet.addRule("body", "text-shadow", "1px 1px #000000");
 //  styleSheet.addRule("p", "padding", "10px");
 //  styleSheet.addRule("ul", "padding", "10px");
@@ -217,20 +217,20 @@ int main ()
   styleSheet.addRule(".pframed", "border-color", "#ff00ff");
   styleSheet.addRule(".cent", "text-align", "center");
   styleSheet.addRule("a", "text-decoration", "underline");
-  styleSheet.addRule("a", "text-color", "#8080FF");
+  styleSheet.addRule("a", "color", "#8080FF");
 
   // der zu formatierende text
   std::string text = u8"<html><body>"
     "<h1 lang='de'>&iexcl;Ü<sup>2</sup>berschrift mit</h1>"
     "<p class='und'>Test <i class='BigFont' class='und'>Text</i> more and somme ii "
     "<span class='BoldFont' class='und'>more text so</span> that the pa\u00ADra\u00ADgraph iiiiii is at least "
-    "<span>long</span> enough to span some lines on the screen "
+    "<span>long</span> enough to <a href='url1'>span some lines on the screen</a> "
     "<img class='pframed' src='i1' width='30px' height='30px'/> <img class='pframed' src='i1' width='10px' height='10px'/>"
     "<img src='i1' width='10px' height='10px'/> "
     "let us "
     "also <i class='und'>i</i>nclude some more hebrew נייה, העגורן הוא and back to english </p>"
     "<p class='cent'><img class='pframed' src='i1' width='110px' height='30px'/></p>"
-    "<p lang='he' class='framed'>אברהם בן שמואל אבולעפיה (1240 - 1291 בערך), רב ומקובל שראה עצמו כנביא וכמשיח, "
+    "<p lang='he' class='framed'>אברהם <a href='url2'>בן שמואל אבולעפיה</a> (1240 - 1291 בערך), רב ומקובל שראה עצמו כנביא וכמשיח, "
     "נחשב לרוב כנציג הבולט של זרם הקבלה האקסטטית. היה בין הראשונים שהחלו במסע לגילוי עשרת "
     "השבטים האבודים. עקב חרם שהוטל עליו על ידי הרשבא בעקבות הכרזתו על עצמו כמשיח, נשתכח אבולעפיה "
     " מלב, עד השינוי שהחל במאה השש-עשרה בו החלו הרמק ורבי חיים ויטאל להתייחס לכתביו. להכרה מלאה "
@@ -273,15 +273,7 @@ int main ()
   // grauer Hintergrund, damit ich sehen kann, ob der Text die korrekte Breite hat
   // erzeuge ein künstliches Layout nur mit einem Rechteck drin... so etwas wird später
   // nicht mehr benötigt, ist nur für den Test
-  textLayout_c la;
-  textLayout_c::commandData c;
-  c.command = textLayout_c::commandData::CMD_RECT;
-  c.x = c.y = 0;
-  c.w = TXT_WIDTH;
-  c.h = 600;
-  c.c = color_c(50, 50, 50);
-  la.addCommand(c);
-  l.emplace_back(layoutInfo_c(la, (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_NONE));
+  l.emplace_back(layoutInfo_c(textLayout_c(), (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_NONE));
 
   try {
     // das eigentliche Layout
@@ -290,7 +282,14 @@ int main ()
     l.emplace_back(layoutInfo_c(layoutXHTML(text, styleSheet, rectangleShape_c(64*TXT_WIDTH)),
                                 (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_RGB));
 
-    l[0].layout.data[0].h = l[1].layout.getHeight();
+    textLayout_c::commandData c;
+    c.command = textLayout_c::commandData::CMD_RECT;
+    c.x = c.y = 0;
+    c.w = TXT_WIDTH*64;
+    c.h = l[1].layout.getHeight();
+    c.c = color_c(50, 50, 50);
+
+    l[0].layout.addCommand(c);
 
     pugi::xml_document doc;
     saveLayoutToXML(l[1].layout, doc, fc);

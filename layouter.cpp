@@ -264,7 +264,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
       if (a.inlay)
       {
-        for (auto in : a.inlay->data)
+        for (auto in : a.inlay->getData())
         {
           // if ascender is 0 we want to be below the baseline
           // but if we leave the inlay where is is the top line of them

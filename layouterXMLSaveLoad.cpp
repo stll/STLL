@@ -18,7 +18,7 @@ void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_
 
   std::vector<std::shared_ptr<STLL::fontFace_c>> found;
 
-  for (const auto & a : l.data)
+  for (const auto & a : l.getData())
   {
     if (  (a.command == textLayout_c::commandData::CMD_GLYPH)
         &&(std::find(found.begin(), found.end(), a.font) == found.end())
@@ -40,7 +40,7 @@ void saveLayoutToXML(const textLayout_c & l, pugi::xml_node & node, std::shared_
   auto commands = doc.append_child();
   commands.set_name("commands");
 
-  for (const auto & a : l.data)
+  for (const auto & a : l.getData())
   {
     switch (a.command)
     {
@@ -137,7 +137,7 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
       c.c = color_c(std::stoi(a.attribute("r").value()), std::stoi(a.attribute("g").value()),
                     std::stoi(a.attribute("b").value()), std::stoi(a.attribute("a").value()));
 
-      l.data.push_back(c);
+      l.addCommand(c);
     }
     else if (a.name() == std::string("rect"))
     {
@@ -151,7 +151,7 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
       c.c = color_c(std::stoi(a.attribute("r").value()), std::stoi(a.attribute("g").value()),
                     std::stoi(a.attribute("b").value()), std::stoi(a.attribute("a").value()));
 
-      l.data.push_back(c);
+      l.addCommand(c);
     }
     else if (a.name() == std::string("image"))
     {
@@ -162,7 +162,7 @@ textLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
       c.y = std::stoi(a.attribute("y").value());
       c.imageURL = a.attribute("url").value();
 
-      l.data.push_back(c);
+      l.addCommand(c);
     }
   }
 
