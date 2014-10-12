@@ -72,7 +72,7 @@ int32_t FontFace_c::getUnderlineThickness(void) const
   return static_cast<int64_t>(f->underline_thickness*f->size->metrics.y_scale) / 65536;
 }
 
-std::shared_ptr<FontFace_c> fontCache_c::getFont(const FontResource_c & res, uint32_t size)
+std::shared_ptr<FontFace_c> FontCache_c::getFont(const FontResource_c & res, uint32_t size)
 {
   fontFaceParameter_c ffp(res, size);
 
@@ -238,7 +238,7 @@ std::shared_ptr<FontFace_c> fontFamily_c::getFont(uint32_t size, const std::stri
   }
 }
 
-FontResource_c fontCache_c::getFontResource(std::shared_ptr<FontFace_c> f) const
+FontResource_c FontCache_c::getFontResource(std::shared_ptr<FontFace_c> f) const
 {
   for (const auto a : fonts)
     if (a.second.lock() == f)
@@ -247,7 +247,7 @@ FontResource_c fontCache_c::getFontResource(std::shared_ptr<FontFace_c> f) const
   return FontResource_c();
 }
 
-uint32_t fontCache_c::getFontSize(std::shared_ptr<FontFace_c> f) const
+uint32_t FontCache_c::getFontSize(std::shared_ptr<FontFace_c> f) const
 {
   for (const auto a : fonts)
     if (a.second.lock() == f)
@@ -256,7 +256,7 @@ uint32_t fontCache_c::getFontSize(std::shared_ptr<FontFace_c> f) const
   return 0;
 }
 
-bool fontCache_c::containsFont(std::shared_ptr<FontFace_c> f) const
+bool FontCache_c::containsFont(std::shared_ptr<FontFace_c> f) const
 {
   for (const auto a : fonts)
     if (a.second.lock() == f)

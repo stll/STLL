@@ -42,7 +42,7 @@ int main(int argv, char ** args)
     return 1;
   }
 
-  auto c = std::make_shared<fontCache_c>();
+  auto c = std::make_shared<FontCache_c>();
   auto l = loadLayoutFromXML(doc.child("layout"), c);
 
   if(SDL_Init(SDL_INIT_VIDEO) < 0)

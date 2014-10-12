@@ -4,7 +4,7 @@
 namespace STLL
 {
 
-void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node, std::shared_ptr<fontCache_c> c)
+void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node, std::shared_ptr<FontCache_c> c)
 {
   auto doc = node.append_child();
   doc.set_name("layout");
@@ -112,7 +112,7 @@ void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node, std::shared_
 }
 
 
-TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontCache_c> c)
+TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontCache_c> c)
 {
   // get the fonts from the file
   auto fonts = doc.child("fonts");

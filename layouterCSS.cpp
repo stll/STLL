@@ -536,7 +536,7 @@ void textStyleSheet_c::addRule(const std::string sel, const std::string attr, co
   rules.push_back(r);
 }
 
-textStyleSheet_c::textStyleSheet_c(std::shared_ptr< fontCache_c > c) : round(1)
+textStyleSheet_c::textStyleSheet_c(std::shared_ptr< FontCache_c > c) : round(1)
 {
   if (c)
   {
@@ -544,7 +544,7 @@ textStyleSheet_c::textStyleSheet_c(std::shared_ptr< fontCache_c > c) : round(1)
   }
   else
   {
-    cache = std::make_shared<fontCache_c>();
+    cache = std::make_shared<FontCache_c>();
   }
 }
 

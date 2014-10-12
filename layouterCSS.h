@@ -70,7 +70,7 @@ class textStyleSheet_c
      *
      * This cache will be used for all fonts of the style sheet.
      */
-    textStyleSheet_c(std::shared_ptr<fontCache_c> c = 0);
+    textStyleSheet_c(std::shared_ptr<FontCache_c> c = 0);
 
     /** \brief Add a font to a family.
      *
@@ -151,7 +151,7 @@ class textStyleSheet_c
   private:
     std::vector<rule> rules;
     std::map<std::string, std::shared_ptr<fontFamily_c> > families;
-    std::shared_ptr<fontCache_c> cache;
+    std::shared_ptr<FontCache_c> cache;
     uint32_t round;
 };
 

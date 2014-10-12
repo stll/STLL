@@ -32,7 +32,7 @@
 
 #include <string>
 
-static bool compare(const STLL::TextLayout_c & l, const pugi::xml_node & doc, std::shared_ptr<STLL::fontCache_c> c)
+static bool compare(const STLL::TextLayout_c & l, const pugi::xml_node & doc, std::shared_ptr<STLL::FontCache_c> c)
 {
   if (l.getHeight() != std::stoi(doc.attribute("height").value())) return false;
   if (l.getLeft() != std::stoi(doc.attribute("left").value())) return false;
@@ -161,7 +161,7 @@ bool operator==(const STLL::TextLayout_c a, const STLL::TextLayout_c b)
 
 static boost::test_tools::predicate_result layouts_identical(const  STLL::TextLayout_c & l,
                                                              const std::string & file,
-                                                             std::shared_ptr<STLL::fontCache_c> c)
+                                                             std::shared_ptr<STLL::FontCache_c> c)
 {
   pugi::xml_document doc;
 
@@ -365,7 +365,7 @@ BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
 
 BOOST_AUTO_TEST_CASE( Simple_Layouts )
 {
-  auto c = std::make_shared<STLL::fontCache_c>();
+  auto c = std::make_shared<STLL::FontCache_c>();
   STLL::textStyleSheet_c s(c);
 
   s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
@@ -652,7 +652,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
 
 BOOST_AUTO_TEST_CASE( Table_Layouts )
 {
-  auto c = std::make_shared<STLL::fontCache_c>();
+  auto c = std::make_shared<STLL::FontCache_c>();
   STLL::textStyleSheet_c s(c);
 
   s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
@@ -728,7 +728,7 @@ BOOST_AUTO_TEST_CASE( Table_Layouts )
 
 BOOST_AUTO_TEST_CASE( Frames_Layouts )
 {
-  auto c = std::make_shared<STLL::fontCache_c>();
+  auto c = std::make_shared<STLL::FontCache_c>();
   STLL::textStyleSheet_c s(c);
 
   s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
@@ -814,7 +814,7 @@ BOOST_AUTO_TEST_CASE( Frames_Layouts )
 
 BOOST_AUTO_TEST_CASE( Save_Load_Layouts )
 {
-  auto c = std::make_shared<STLL::fontCache_c>();
+  auto c = std::make_shared<STLL::FontCache_c>();
   STLL::textStyleSheet_c s(c);
 
   s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
@@ -832,21 +832,21 @@ BOOST_AUTO_TEST_CASE( Save_Load_Layouts )
 
   pugi::xml_document doc;
   saveLayoutToXML(l, doc, c);
-  auto c2 = std::make_shared<STLL::fontCache_c>();
+  auto c2 = std::make_shared<STLL::FontCache_c>();
   auto l2 = loadLayoutFromXML(doc.child("layout"), c2);
 
   BOOST_CHECK(l == l2);
 
 
   // use wrong cache for saving
-  auto c3 = std::make_shared<STLL::fontCache_c>();
+  auto c3 = std::make_shared<STLL::FontCache_c>();
 
   BOOST_CHECK_THROW(saveLayoutToXML(l, doc, c3), STLL::SaveLoadException_c);
 }
 
 BOOST_AUTO_TEST_CASE( Links )
 {
-  auto c = std::make_shared<STLL::fontCache_c>();
+  auto c = std::make_shared<STLL::FontCache_c>();
   STLL::textStyleSheet_c s(c);
 
   s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));

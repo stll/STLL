@@ -137,7 +137,7 @@ void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
 
 int main ()
 {
-  auto fc = std::make_shared<fontCache_c>();
+  auto fc = std::make_shared<FontCache_c>();
   textStyleSheet_c styleSheet(fc);
 
   styleSheet.setRound(64);

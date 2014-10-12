@@ -229,7 +229,7 @@ class FreeTypeLibrary_c : boost::noncopyable
 /** \brief this class encapsulates open fonts of a single library, it makes
  *  sure that each font is open only once
  */
-class fontCache_c
+class FontCache_c
 {
   public:
 
@@ -238,7 +238,7 @@ class fontCache_c
      * I am not really sure where is might be useful to use multiple caches on one
      * library... though
      */
-    fontCache_c(std::shared_ptr<FreeTypeLibrary_c> l) : lib(l) {}
+    FontCache_c(std::shared_ptr<FreeTypeLibrary_c> l) : lib(l) {}
 
     /** \brief Create a cache using an instance of the freetype library that is created
      * specifically for this cache instance
@@ -246,7 +246,7 @@ class fontCache_c
      * This is usually the thing you need, create one instance of this
      * class per thread of your application that needs to access the library
      */
-    fontCache_c(void) : lib(std::make_shared<FreeTypeLibrary_c>()) {}
+    FontCache_c(void) : lib(std::make_shared<FreeTypeLibrary_c>()) {}
 
     /** \brief Get a font face from this cache with the given resource and size.
      *
@@ -354,7 +354,7 @@ class fontFamily_c
 
     /** \brief Initialize an empty family, using the given font cache to get the fonts
      */
-    fontFamily_c(std::shared_ptr<fontCache_c> c) : cache(c) {}
+    fontFamily_c(std::shared_ptr<FontCache_c> c) : cache(c) {}
 
     /** \brief Initialize an empty family, using font cache created specifically for this
      * family.
@@ -362,7 +362,7 @@ class fontFamily_c
      * This is normally not what you want as you will probably have
      * more than one family and they all should use the same cache
      */
-    fontFamily_c(void) : cache(std::make_shared<fontCache_c>()) {}
+    fontFamily_c(void) : cache(std::make_shared<FontCache_c>()) {}
 
     /** \brief Get a font instance from the family.
      *
@@ -395,7 +395,7 @@ class fontFamily_c
 
   private:
     std::map<fontFamilyParameter_c, FontResource_c> fonts;
-    std::shared_ptr<fontCache_c> cache;
+    std::shared_ptr<FontCache_c> cache;
 };
 
 /** \brief This class can be used as the key in glyph caches, it describes the
