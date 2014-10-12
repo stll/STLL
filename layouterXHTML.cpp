@@ -429,7 +429,7 @@ static std::string getNodePath(const pugi::xml_node & xml)
     return getNodePath(xml.parent()) + "/" + xml.name();
 }
 
-static std::shared_ptr<fontFace_c> getFontForNode(const pugi::xml_node & xml, const textStyleSheet_c & rules)
+static std::shared_ptr<FontFace_c> getFontForNode(const pugi::xml_node & xml, const textStyleSheet_c & rules)
 {
   std::string fontFamily = rules.getValue(xml, "font-family");
   std::string fontStyle = rules.getValue(xml, "font-style");

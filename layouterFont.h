@@ -132,12 +132,12 @@ class FontResource_c
 
 /** \brief This class represents one font, made out of one resource and with a certain size.
  */
-class fontFace_c : boost::noncopyable
+class FontFace_c : boost::noncopyable
 {
   public:
 
-    fontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const FontResource_c & res, uint32_t size);
-    ~fontFace_c();
+    FontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const FontResource_c & res, uint32_t size);
+    ~FontFace_c();
 
     /** \brief Get the freetype structure for this font
      *
@@ -257,7 +257,7 @@ class fontCache_c
      * \param size The requested size
      * \return The instance of the font face
      */
-    std::shared_ptr<fontFace_c> getFont(const FontResource_c & res, uint32_t size);
+    std::shared_ptr<FontFace_c> getFont(const FontResource_c & res, uint32_t size);
 
     /** \brief Get the font resource for a font inside the cache (or empty resource, if the
      * font is not within
@@ -267,7 +267,7 @@ class fontCache_c
      *
      * \note The returned value is undefined, when the font doesn't exist in the cache
      */
-    FontResource_c getFontResource(std::shared_ptr<fontFace_c> f) const;
+    FontResource_c getFontResource(std::shared_ptr<FontFace_c> f) const;
 
     /** \brief Get the font size for a font inside the cache (or zero, if the
      * font is not within
@@ -277,13 +277,13 @@ class fontCache_c
      *
      * \note The returned value is undefined, when the font doesn't exist in the cache
      */
-    uint32_t getFontSize(std::shared_ptr<fontFace_c> f) const;
+    uint32_t getFontSize(std::shared_ptr<FontFace_c> f) const;
 
     /** \brief Find out, if a given font is handled inside this cache
      *
      * \return true, when the font is inside this cache
      */
-    bool containsFont(std::shared_ptr<fontFace_c> f) const;
+    bool containsFont(std::shared_ptr<FontFace_c> f) const;
 
   private:
 
@@ -307,7 +307,7 @@ class fontCache_c
 
     // all open fonts, used to check whether they have all been released
     // on library destruction
-    std::map<fontFaceParameter_c, std::weak_ptr<fontFace_c> > fonts;
+    std::map<fontFaceParameter_c, std::weak_ptr<FontFace_c> > fonts;
 
     // the library to use
     std::shared_ptr<FreeTypeLibrary_c> lib;
@@ -373,7 +373,7 @@ class fontFamily_c
      * \param stretch Font stretch, typical values are: "normal", "condensed"
      * \returns a nullptr, when the requested face doesn't exist, the font otherwise
      */
-    std::shared_ptr<fontFace_c> getFont(uint32_t size,
+    std::shared_ptr<FontFace_c> getFont(uint32_t size,
                                         const std::string & style = "normal",
                                         const std::string & variant = "normal",
                                         const std::string & weight = "normal",
@@ -405,7 +405,7 @@ class glyphKey_c
 {
   public:
 
-  glyphKey_c(std::shared_ptr<fontFace_c> f, glyphIndex_t idx, SubPixelArrangement s) : font((intptr_t)f.get()), glyphIndex(idx), sp(s) { }
+  glyphKey_c(std::shared_ptr<FontFace_c> f, glyphIndex_t idx, SubPixelArrangement s) : font((intptr_t)f.get()), glyphIndex(idx), sp(s) { }
 
   intptr_t font;
   glyphIndex_t glyphIndex;

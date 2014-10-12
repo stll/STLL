@@ -120,7 +120,7 @@ typedef struct
 
   // the font used for this run... will probably be identical to
   // the fonts in the run
-  std::shared_ptr<fontFace_c> font;
+  std::shared_ptr<FontFace_c> font;
 
   // is this run a space run? Will be removed at line ends
   bool space;
@@ -184,7 +184,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
                                           )
 {
   // Get our harfbuzz font structs
-  std::map<const std::shared_ptr<fontFace_c>, hb_font_t *> hb_ft_fonts;
+  std::map<const std::shared_ptr<FontFace_c>, hb_font_t *> hb_ft_fonts;
 
   // also get the maximal shadow numbers, so that we know how many layers there are
   size_t normalLayer = 0;

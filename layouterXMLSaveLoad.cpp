@@ -16,7 +16,7 @@ void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node, std::shared_
   auto fonts = doc.append_child();
   fonts.set_name("fonts");
 
-  std::vector<std::shared_ptr<STLL::fontFace_c>> found;
+  std::vector<std::shared_ptr<STLL::FontFace_c>> found;
 
   for (const auto & a : l.getData())
   {
@@ -116,7 +116,7 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
 {
   // get the fonts from the file
   auto fonts = doc.child("fonts");
-  std::vector<std::shared_ptr<fontFace_c>> found;
+  std::vector<std::shared_ptr<FontFace_c>> found;
 
   for (const auto a : fonts.children())
     found.push_back(c->getFont(FontResource_c(a.attribute("file").value()), std::stoi(a.attribute("size").value())));

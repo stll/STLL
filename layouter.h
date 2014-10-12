@@ -66,7 +66,7 @@ public:
   glyphIndex_t glyphIndex;
 
   /** \brief which front to take the glyph from */
-  std::shared_ptr<fontFace_c> font;
+  std::shared_ptr<FontFace_c> font;
 
   /** \name width and height of the rectangle to draw
    *  @{ */
@@ -81,7 +81,7 @@ public:
 
   /** \brief constructor to create an glyph command
    */
-  CommandData_c(std::shared_ptr<fontFace_c> f, glyphIndex_t i, int32_t x_, int32_t y_, color_c c_) :
+  CommandData_c(std::shared_ptr<FontFace_c> f, glyphIndex_t i, int32_t x_, int32_t y_, color_c c_) :
   command(CMD_GLYPH),
   font(f), glyphIndex(i), x(x_), y(y_), c(c_),
   w(0), h(0) {}
@@ -290,7 +290,7 @@ class codepointAttributes
 
   /** \brief font of the letter
    */
-  std::shared_ptr<fontFace_c> font;
+  std::shared_ptr<FontFace_c> font;
 
   /** \brief current language at this letter
    */
@@ -553,7 +553,7 @@ typedef struct {
    *
    * When not set, the underline will use the parameters of the font of each glyph.
    */
-  std::shared_ptr<fontFace_c> underlineFont;
+  std::shared_ptr<FontFace_c> underlineFont;
 
   /** \brief link URLs for the links used in the */
   std::vector<std::string> links;

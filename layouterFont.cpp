@@ -37,42 +37,42 @@ namespace STLL {
 
 // TODO the fontFace_c constructor and library interface is not perfect...
 
-fontFace_c::fontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const FontResource_c & res, uint32_t size) : lib(l)
+FontFace_c::FontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const FontResource_c & res, uint32_t size) : lib(l)
 {
   f = lib->newFace(res, size);
 }
 
-fontFace_c::~fontFace_c()
+FontFace_c::~FontFace_c()
 {
   lib->doneFace(f);
 }
 
-uint32_t fontFace_c::getHeight(void) const
+uint32_t FontFace_c::getHeight(void) const
 {
   return f->size->metrics.height;
 }
 
-int32_t fontFace_c::getAscender(void) const
+int32_t FontFace_c::getAscender(void) const
 {
   return f->size->metrics.ascender;
 }
 
-int32_t fontFace_c::getDescender(void) const
+int32_t FontFace_c::getDescender(void) const
 {
   return f->size->metrics.descender;
 }
 
-int32_t fontFace_c::getUnderlinePosition(void) const
+int32_t FontFace_c::getUnderlinePosition(void) const
 {
   return static_cast<int64_t>(f->underline_position*f->size->metrics.y_scale) / 65536;
 }
 
-int32_t fontFace_c::getUnderlineThickness(void) const
+int32_t FontFace_c::getUnderlineThickness(void) const
 {
   return static_cast<int64_t>(f->underline_thickness*f->size->metrics.y_scale) / 65536;
 }
 
-std::shared_ptr<fontFace_c> fontCache_c::getFont(const FontResource_c & res, uint32_t size)
+std::shared_ptr<FontFace_c> fontCache_c::getFont(const FontResource_c & res, uint32_t size)
 {
   fontFaceParameter_c ffp(res, size);
 
@@ -88,14 +88,14 @@ std::shared_ptr<fontFace_c> fontCache_c::getFont(const FontResource_c & res, uin
 
   // TODO... race maybe someone else opens a font here?
 
-  auto f = std::make_shared<fontFace_c>(lib, res, size);
+  auto f = std::make_shared<FontFace_c>(lib, res, size);
 
   fonts[ffp] = f;
 
   return f;
 }
 
-FT_GlyphSlotRec_ * fontFace_c::renderGlyph(glyphIndex_t glyphIndex, SubPixelArrangement sp)
+FT_GlyphSlotRec_ * FontFace_c::renderGlyph(glyphIndex_t glyphIndex, SubPixelArrangement sp)
 {
   FT_Render_Mode rm;
 
@@ -216,7 +216,7 @@ void fontFamily_c::addFont(const FontResource_c & res, const std::string& style,
   fonts[par] = res;
 }
 
-std::shared_ptr<fontFace_c> fontFamily_c::getFont(uint32_t size, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
+std::shared_ptr<FontFace_c> fontFamily_c::getFont(uint32_t size, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
   fontFamilyParameter_c par;
 
@@ -230,7 +230,7 @@ std::shared_ptr<fontFace_c> fontFamily_c::getFont(uint32_t size, const std::stri
   // when the font is not found, return an empty pointer
   if (i == fonts.end())
   {
-    return std::shared_ptr<fontFace_c>();
+    return std::shared_ptr<FontFace_c>();
   }
   else
   {
@@ -238,7 +238,7 @@ std::shared_ptr<fontFace_c> fontFamily_c::getFont(uint32_t size, const std::stri
   }
 }
 
-FontResource_c fontCache_c::getFontResource(std::shared_ptr<fontFace_c> f) const
+FontResource_c fontCache_c::getFontResource(std::shared_ptr<FontFace_c> f) const
 {
   for (const auto a : fonts)
     if (a.second.lock() == f)
@@ -247,7 +247,7 @@ FontResource_c fontCache_c::getFontResource(std::shared_ptr<fontFace_c> f) const
   return FontResource_c();
 }
 
-uint32_t fontCache_c::getFontSize(std::shared_ptr<fontFace_c> f) const
+uint32_t fontCache_c::getFontSize(std::shared_ptr<FontFace_c> f) const
 {
   for (const auto a : fonts)
     if (a.second.lock() == f)
@@ -256,7 +256,7 @@ uint32_t fontCache_c::getFontSize(std::shared_ptr<fontFace_c> f) const
   return 0;
 }
 
-bool fontCache_c::containsFont(std::shared_ptr<fontFace_c> f) const
+bool fontCache_c::containsFont(std::shared_ptr<FontFace_c> f) const
 {
   for (const auto a : fonts)
     if (a.second.lock() == f)
