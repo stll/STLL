@@ -405,16 +405,17 @@ class GlyphKey_c
 {
   public:
 
-  GlyphKey_c(std::shared_ptr<FontFace_c> f, glyphIndex_t idx, SubPixelArrangement s) : font((intptr_t)f.get()), glyphIndex(idx), sp(s) { }
+    GlyphKey_c(std::shared_ptr<FontFace_c> f, glyphIndex_t idx, SubPixelArrangement s) :
+      font((intptr_t)f.get()), glyphIndex(idx), sp(s) { }
 
-  intptr_t font;
-  glyphIndex_t glyphIndex;
-  SubPixelArrangement sp;
+    intptr_t font;
+    glyphIndex_t glyphIndex;
+    SubPixelArrangement sp;
 
-  bool operator==(const GlyphKey_c & a) const
-  {
-    return font == a.font && glyphIndex == a.glyphIndex && sp == a.sp;
-  }
+    bool operator==(const GlyphKey_c & a) const
+    {
+      return font == a.font && glyphIndex == a.glyphIndex && sp == a.sp;
+    }
 };
 
 }
