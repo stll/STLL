@@ -32,7 +32,7 @@
 
 namespace STLL {
 
-static std::unordered_map<glyphKey_c, FT_GlyphSlotRec_ *> glyhCache;
+static std::unordered_map<GlyphKey_c, FT_GlyphSlotRec_ *> glyhCache;
 
 static Uint32 getpixel(SDL_Surface *surface, int x, int y)
 {
@@ -309,7 +309,7 @@ static void outputGlyph(int sx, int sy, FT_GlyphSlot img, SubPixelArrangement sp
 
 static FT_GlyphSlotRec_ * getGlyph(std::shared_ptr<FontFace_c> face, glyphIndex_t glyph, SubPixelArrangement sp)
 {
-  glyphKey_c k(face, glyph, sp);
+  GlyphKey_c k(face, glyph, sp);
 
   auto i = glyhCache.find(k);
 
