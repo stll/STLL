@@ -144,6 +144,9 @@ class TextLayout_c
 
     /** \brief add a single drawing command to the end of the command list
      *  \param d the command to add
+     *
+     * \note if you add a command, you must update the left, right and height fields
+     * as well as the firstBaseline your own
      */
     void addCommand(const CommandData_c & d)
     {
@@ -152,6 +155,9 @@ class TextLayout_c
 
     /** \brief add a single drawing command to the start of the command list
      *  \param d the command to add
+     *
+     * \note if you add a command, you must update the left, right and height fields
+     * as well as the firstBaseline your own
      */
     void addCommandStart(const CommandData_c & d)
     {
@@ -170,7 +176,7 @@ class TextLayout_c
      */
     void append(const TextLayout_c & l, int dx = 0, int dy = 0)
     {
-      if (data.size() == 0)
+      if (data.empty())
         firstBaseline = l.firstBaseline + dy;
 
       for (auto a : l.data)
@@ -260,6 +266,13 @@ class TextLayout_c
         a.x += dx;
         a.y += dy;
       }
+
+      for (auto & l : links)
+        for (auto & a: l.areas)
+        {
+          a.x += dx;
+          a.y += dy;
+        }
     }
 
     /** \brief the height of the layout. This is supposed to be the vertical

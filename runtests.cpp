@@ -893,4 +893,12 @@ BOOST_AUTO_TEST_CASE( Links )
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
     "<html><body><p lang='en'>Test <a href='u1'>Text</a><a href='u2'>Link 2</a></p></body></html>",
     s, STLL::rectangleShape_c(1000*64)), "tests/link-07.lay", c));
+
+  // link inside a table cell that is vertically centred
+  s.addRule(".tc", "width", "100px");
+  s.addRule(".va-mid", "vertical-align", "middle");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
+    "<tr><td class='va-mid'><a href='l1'>Test</a></td><td>Table cell with some text to get a linebreak</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
+    s, STLL::rectangleShape_c(1000*64)), "tests/link-08.lay", c));
 }
