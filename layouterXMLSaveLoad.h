@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef __LAYOUTER_XML_SAVELOAD_H__
-#define __LAYOUTER_XML_SAVELOAD_H__
+#ifndef STLL_LAYOUTER_XML_SAVELOAD_H
+#define STLL_LAYOUTER_XML_SAVELOAD_H
 
 /** \file
  *  \brief Module simple load and save functions to store a layout into an XML file

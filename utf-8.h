@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef __UTF_8_H__
-#define __UTF_8_H__
+#ifndef STLL_UTF_8_H
+#define STLL_UTF_8_H
 
 /** \file
  *  \brief utf-8 helper code.

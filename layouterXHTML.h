@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef __LAYOUTER_XHTML_H__
-#define __LAYOUTER_XHTML_H__
+#ifndef STLL_LAYOUTER_XHTML_H
+#define STLL_LAYOUTER_XHTML_H
 
 /** \file
  *  \brief This module contains the XHTML parser and layouter

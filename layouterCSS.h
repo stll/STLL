@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef __LAYOUTER_CSS_H__
-#define __LAYOUTER_CSS_H__
+#ifndef STLL_LAYOUTER_CSS_H
+#define STLL_LAYOUTER_CSS_H
 
 /** \file
  *  \brief Module containing CSS functionality
