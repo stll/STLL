@@ -32,7 +32,7 @@
 
 using namespace STLL;
 
-class niftyShape_c : public shape_c
+class niftyShape_c : public Shape_c
 {
 public:
   niftyShape_c(void) {}

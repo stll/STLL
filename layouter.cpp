@@ -445,7 +445,7 @@ static void mergeLinks(TextLayout_c & txt, const std::vector<TextLayout_c::linkI
 }
 
 static TextLayout_c breakLines(std::vector<runInfo> & runs,
-                               const shape_c & shape,
+                               const Shape_c & shape,
                                FriBidiLevel max_level,
                                const layoutProperties & prop, int32_t ystart)
 {
@@ -773,7 +773,7 @@ static std::vector<char> getLinebreaks(const std::u32string & txt32, const Attri
 }
 
 TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_c & attr,
-                             const shape_c & shape, const layoutProperties & prop, int32_t ystart)
+                             const Shape_c & shape, const layoutProperties & prop, int32_t ystart)
 {
   // calculate embedding types for the text
   std::vector<FriBidiLevel> embedding_levels;

@@ -90,14 +90,14 @@ static const std::vector<const char *> NamedSym_values {
 };
 
 
-class indentShape_c : public shape_c
+class indentShape_c : public Shape_c
 {
   private:
-    const shape_c & outside;
+    const Shape_c & outside;
     int32_t ind_left, ind_right;
 
   public:
-    indentShape_c(const shape_c & s, int32_t li, int32_t ri) : outside(s), ind_left(li), ind_right(ri) { }
+    indentShape_c(const Shape_c & s, int32_t li, int32_t ri) : outside(s), ind_left(li), ind_right(ri) { }
 
     virtual int32_t getLeft(int32_t top, int32_t bottom) const { return outside.getLeft(top, bottom)+ind_left; }
     virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top, bottom)-ind_right; }
@@ -105,14 +105,14 @@ class indentShape_c : public shape_c
     virtual int32_t getRight2(int32_t top, int32_t bottom) const { return outside.getRight2(top, bottom)-ind_right; }
 };
 
-class stripLeftShape_c : public shape_c
+class stripLeftShape_c : public Shape_c
 {
   private:
-    const shape_c & outside;
+    const Shape_c & outside;
     int32_t ind_left, ind_right;
 
   public:
-    stripLeftShape_c(const shape_c & s, int32_t li, int32_t ri) : outside(s), ind_left(li), ind_right(ri) { }
+    stripLeftShape_c(const Shape_c & s, int32_t li, int32_t ri) : outside(s), ind_left(li), ind_right(ri) { }
 
     virtual int32_t getLeft(int32_t top, int32_t bottom) const { return outside.getLeft(top, bottom)+ind_left; }
     virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getLeft(top, bottom)+ind_right; }
@@ -120,14 +120,14 @@ class stripLeftShape_c : public shape_c
     virtual int32_t getRight2(int32_t top, int32_t bottom) const { return outside.getLeft2(top, bottom)+ind_right; }
 };
 
-class stripRightShape_c : public shape_c
+class stripRightShape_c : public Shape_c
 {
   private:
-    const shape_c & outside;
+    const Shape_c & outside;
     int32_t ind_left, ind_right;
 
   public:
-    stripRightShape_c(const shape_c & s, int32_t li, int32_t ri) : outside(s), ind_left(li), ind_right(ri) { }
+    stripRightShape_c(const Shape_c & s, int32_t li, int32_t ri) : outside(s), ind_left(li), ind_right(ri) { }
 
     virtual int32_t getLeft(int32_t top, int32_t bottom) const { return outside.getRight(top, bottom)-ind_left; }
     virtual int32_t getRight(int32_t top, int32_t bottom) const { return outside.getRight(top, bottom)-ind_right; }
@@ -481,13 +481,13 @@ static const pugi::char_t * getHTMLAttribute(pugi::xml_node xml, const std::stri
 }
 
 typedef TextLayout_c (*ParseFunction)(pugi::xml_node & xml, const textStyleSheet_c & rules,
-                                      const shape_c & shape, int32_t ystart);
+                                      const Shape_c & shape, int32_t ystart);
 
 
 // handles padding, margin and border, all in one, it takes the text returned from the
 // ParseFunction and boxes it
 static TextLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, const textStyleSheet_c & rules,
-                          const shape_c & shape, int32_t ystart, ParseFunction fkt,
+                          const Shape_c & shape, int32_t ystart, ParseFunction fkt,
                           const pugi::xml_node & above, const pugi::xml_node & left,
                           bool collapseBorder = false, uint32_t minHeight = 0)
 {
@@ -687,7 +687,7 @@ static TextLayout_c boxIt(const pugi::xml_node & xml, pugi::xml_node & xml2, con
 }
 
 static TextLayout_c layoutXML_IMG(pugi::xml_node & xml, const textStyleSheet_c & rules,
-                                  const shape_c & shape, int32_t ystart)
+                                  const Shape_c & shape, int32_t ystart)
 {
   TextLayout_c l;
 
@@ -845,7 +845,7 @@ pugi::xml_node layoutXML_text(pugi::xml_node xml, const textStyleSheet_c & rules
 
 // this function is different from all other layout functions usable in the boxIt
 // function, as it will change the xml node and return a new one
-static TextLayout_c layoutXML_Phrasing(pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+static TextLayout_c layoutXML_Phrasing(pugi::xml_node & xml, const textStyleSheet_c & rules, const Shape_c & shape, int32_t ystart)
 {
   std::u32string txt;
   AttributeIndex_c attr;
@@ -896,9 +896,9 @@ static TextLayout_c layoutXML_Phrasing(pugi::xml_node & xml, const textStyleShee
   return layoutParagraph(txt, attr, shape, lprop, ystart);
 }
 
-static TextLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart);
+static TextLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c & rules, const Shape_c & shape, int32_t ystart);
 
-static TextLayout_c layoutXML_UL(pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+static TextLayout_c layoutXML_UL(pugi::xml_node & xml, const textStyleSheet_c & rules, const Shape_c & shape, int32_t ystart)
 {
   TextLayout_c l;
   l.setHeight(ystart);
@@ -933,7 +933,7 @@ static TextLayout_c layoutXML_UL(pugi::xml_node & xml, const textStyleSheet_c & 
       prop.align = layoutProperties::ALG_CENTER;
       prop.round = rules.getRound();
 
-      std::unique_ptr<shape_c> bulletshape;
+      std::unique_ptr<Shape_c> bulletshape;
 
       if (direction == "ltr")
       {
@@ -1036,7 +1036,7 @@ static void layoutXML_TR(pugi::xml_node & xml, uint32_t row, const textStyleShee
   }
 }
 
-static TextLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+static TextLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c & rules, const Shape_c & shape, int32_t ystart)
 {
   std::vector<tableCell> cells;
   std::vector<uint32_t> widths;
@@ -1262,7 +1262,7 @@ static TextLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c
   return l;
 }
 
-static TextLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape, int32_t ystart)
+static TextLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c & rules, const Shape_c & shape, int32_t ystart)
 {
   TextLayout_c l;
   l.setHeight(ystart);
@@ -1343,7 +1343,7 @@ static TextLayout_c layoutXML_Flow(pugi::xml_node & txt, const textStyleSheet_c 
   return l;
 }
 
-static TextLayout_c layoutXML_HTML(const pugi::xml_node & txt, const textStyleSheet_c & rules, const shape_c & shape)
+static TextLayout_c layoutXML_HTML(const pugi::xml_node & txt, const textStyleSheet_c & rules, const Shape_c & shape)
 {
   TextLayout_c l;
 
@@ -1371,7 +1371,7 @@ static TextLayout_c layoutXML_HTML(const pugi::xml_node & txt, const textStyleSh
   return l;
 }
 
-TextLayout_c layoutXML(const pugi::xml_document & txt, const textStyleSheet_c & rules, const shape_c & shape)
+TextLayout_c layoutXML(const pugi::xml_document & txt, const textStyleSheet_c & rules, const Shape_c & shape)
 {
   TextLayout_c l;
 
@@ -1391,7 +1391,7 @@ TextLayout_c layoutXML(const pugi::xml_document & txt, const textStyleSheet_c & 
   return l;
 }
 
-TextLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules, const shape_c & shape)
+TextLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules, const Shape_c & shape)
 {
   pugi::xml_document doc;
 

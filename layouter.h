@@ -495,7 +495,7 @@ class AttributeIndex_c
  * supposed to be in. The function then need to check where the left and right edges
  * are for this area, e.g. they must take care that they return the smallest area.
  */
-class shape_c
+class Shape_c
 {
   public:
     /** \brief get the left edge
@@ -530,7 +530,7 @@ class shape_c
 /** \brief conctrete implementation of the shape that will allow layouting
  *  inside a rectangular with a certain width
  */
-class rectangleShape_c : public shape_c
+class rectangleShape_c : public Shape_c
 {
   private:
     int32_t w;
@@ -609,7 +609,7 @@ typedef struct {
  * TODO: instead of crashing, rather throw an exception in that case.
  */
 TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_c & attr,
-                             const shape_c & shape, const layoutProperties & prop, int32_t ystart = 0);
+                             const Shape_c & shape, const layoutProperties & prop, int32_t ystart = 0);
 
 }
 

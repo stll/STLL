@@ -42,14 +42,14 @@ namespace STLL {
  *  \attention it is not checked that txt is proper utf-8. If you have unsafe sources
  *  for your text to layout, use the check function from the utf-8 module
  */
-TextLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules, const shape_c & shape);
+TextLayout_c layoutXHTML(const std::string & txt, const textStyleSheet_c & rules, const Shape_c & shape);
 
 /** \brief layout the given preparsed XML tree as an HTML dom tree
  *  \param xml the xml tree to layout
  *  \param rules the stylesheet to use for layouting
  *  \param shape the shape to layout into
  */
-TextLayout_c layoutXML(const pugi::xml_document & xml, const textStyleSheet_c & rules, const shape_c & shape);
+TextLayout_c layoutXML(const pugi::xml_document & xml, const textStyleSheet_c & rules, const Shape_c & shape);
 
 }
 
