@@ -44,6 +44,64 @@
  */
 namespace STLL {
 
+/** \brief This structure encapsulates a drawing command
+ */
+class CommandData_c
+{
+public:
+  enum
+  {
+    CMD_GLYPH,  ///< draw a glyph from a font
+    CMD_RECT,   ///< draw a rectangle
+    CMD_IMAGE   ///< draw an image
+  } command;    ///< specifies what to draw
+
+  /** \name position of the glyph, or upper left corner of rectangle or image
+   *  @{ */
+  int32_t x;  ///< x position
+  int32_t y;  ///< y position
+  /** @} */
+
+  /** \brief which glyph to draw */
+  glyphIndex_t glyphIndex;
+
+  /** \brief which front to take the glyph from */
+  std::shared_ptr<fontFace_c> font;
+
+  /** \name width and height of the rectangle to draw
+   *  @{ */
+  uint32_t w;  ///< width of block
+  uint32_t h;  ///< height of block
+  /** @} */
+
+  /** \brief colour of the glyph or the rectangle */
+  color_c c;
+
+  std::string imageURL; ///< URL of image to draw
+
+  /** \brief constructor to create an glyph command
+   */
+  CommandData_c(std::shared_ptr<fontFace_c> f, glyphIndex_t i, int32_t x_, int32_t y_, color_c c_) :
+  command(CMD_GLYPH),
+  font(f), glyphIndex(i), x(x_), y(y_), c(c_),
+  w(0), h(0) {}
+
+  /** \brief constructor to create an image command
+   */
+  CommandData_c(const std::string & i, int32_t x_, int32_t y_, uint32_t w_, uint32_t h_) :
+  command(CMD_IMAGE),
+  imageURL(i), x(x_), y(y_), w(w_), h(h_),
+  glyphIndex(0) {}
+
+  /** \brief constructor to create an rectangle command
+   */
+  CommandData_c(int32_t x_, int32_t y_, uint32_t w_, uint32_t h_, color_c c_) :
+  command(CMD_RECT),
+  x(x_), y(y_), w(w_), h(h_), c(c_),
+  glyphIndex(0) {}
+
+};
+
 /** \brief encapsulates a finished layout.
  *
  * This class encapsulates a layout, it is a list of drawing commands.
@@ -57,68 +115,7 @@ class TextLayout_c
     int32_t left, right;
     // vertical position of the very first baseline in this layout
     int32_t firstBaseline;
-
-  public:
-
-    /** \brief This structure encapsulates a drawing command
-     */
-    class CommandData_c
-    {
-      public:
-        enum
-        {
-          CMD_GLYPH,  ///< draw a glyph from a font
-          CMD_RECT,   ///< draw a rectangle
-          CMD_IMAGE   ///< draw an image
-        } command;    ///< specifies what to draw
-
-        /** \name position of the glyph, or upper left corner of rectangle or image
-         *  @{ */
-        int32_t x;  ///< x position
-        int32_t y;  ///< y position
-        /** @} */
-
-        /** \brief which glyph to draw */
-        glyphIndex_t glyphIndex;
-
-        /** \brief which front to take the glyph from */
-        std::shared_ptr<fontFace_c> font;
-
-        /** \name width and height of the rectangle to draw
-         *  @{ */
-        uint32_t w;  ///< width of block
-        uint32_t h;  ///< height of block
-        /** @} */
-
-        /** \brief colour of the glyph or the rectangle */
-        color_c c;
-
-        std::string imageURL; ///< URL of image to draw
-
-        /** \brief constructor to create an glyph command
-         */
-        CommandData_c(std::shared_ptr<fontFace_c> f, glyphIndex_t i, int32_t x_, int32_t y_, color_c c_) :
-          command(CMD_GLYPH),
-          font(f), glyphIndex(i), x(x_), y(y_), c(c_),
-          w(0), h(0) {}
-
-        /** \brief constructor to create an image command
-         */
-        CommandData_c(const std::string & i, int32_t x_, int32_t y_, uint32_t w_, uint32_t h_) :
-          command(CMD_IMAGE),
-          imageURL(i), x(x_), y(y_), w(w_), h(h_),
-          glyphIndex(0) {}
-
-        /** \brief constructor to create an rectangle command
-         */
-        CommandData_c(int32_t x_, int32_t y_, uint32_t w_, uint32_t h_, color_c c_) :
-          command(CMD_RECT),
-          x(x_), y(y_), w(w_), h(h_), c(c_),
-          glyphIndex(0) {}
-
-    };
-
-  private:
+    // the drawing commands that make up this layout
     std::vector<CommandData_c> data;
 
   public:

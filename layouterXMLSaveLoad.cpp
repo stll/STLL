@@ -20,7 +20,7 @@ void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node, std::shared_
 
   for (const auto & a : l.getData())
   {
-    if (  (a.command == TextLayout_c::CommandData_c::CMD_GLYPH)
+    if (  (a.command == CommandData_c::CMD_GLYPH)
         &&(std::find(found.begin(), found.end(), a.font) == found.end())
        )
     {
@@ -44,7 +44,7 @@ void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node, std::shared_
   {
     switch (a.command)
     {
-      case STLL::TextLayout_c::CommandData_c::CMD_GLYPH:
+      case CommandData_c::CMD_GLYPH:
         {
           auto n = commands.append_child();
           n.set_name("glyph");
@@ -58,7 +58,7 @@ void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node, std::shared_
           n.append_attribute("a").set_value(a.c.a());
         }
         break;
-      case STLL::TextLayout_c::CommandData_c::CMD_RECT:
+      case CommandData_c::CMD_RECT:
         {
           auto n = commands.append_child();
           n.set_name("rect");
@@ -72,7 +72,7 @@ void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node, std::shared_
           n.append_attribute("a").set_value(a.c.a());
         }
         break;
-      case STLL::TextLayout_c::CommandData_c::CMD_IMAGE:
+      case CommandData_c::CMD_IMAGE:
         {
           auto n = commands.append_child();
           n.set_name("image");
@@ -129,7 +129,7 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
   {
     if (a.name() == std::string("glyph"))
     {
-      TextLayout_c::CommandData_c c(
+      CommandData_c c(
         found[std::stoi(a.attribute("font").value())],
         std::stoi(a.attribute("glyphIndex").value()),
         std::stoi(a.attribute("x").value()),
@@ -142,7 +142,7 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
     }
     else if (a.name() == std::string("rect"))
     {
-      TextLayout_c::CommandData_c c(
+      CommandData_c c(
         std::stoi(a.attribute("x").value()),
         std::stoi(a.attribute("y").value()),
         std::stoi(a.attribute("w").value()),
@@ -155,7 +155,7 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<fontC
     }
     else if (a.name() == std::string("image"))
     {
-      TextLayout_c::CommandData_c c(
+      CommandData_c c(
         a.attribute("url").value(),
         std::stoi(a.attribute("x").value()),
         std::stoi(a.attribute("y").value()),

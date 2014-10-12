@@ -282,8 +282,7 @@ int main ()
     l.emplace_back(layoutInfo_c(layoutXHTML(text, styleSheet, RectangleShape_c(64*TXT_WIDTH)),
                                 (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_RGB));
 
-    l[0].layout.addCommand(TextLayout_c::CommandData_c(
-      0, 0, TXT_WIDTH*64, l[1].layout.getHeight(), color_c(50, 50, 50)));
+    l[0].layout.addCommand(CommandData_c( 0, 0, TXT_WIDTH*64, l[1].layout.getHeight(), color_c(50, 50, 50)));
 
     pugi::xml_document doc;
     saveLayoutToXML(l[1].layout, doc, fc);

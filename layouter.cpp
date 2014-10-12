@@ -107,7 +107,7 @@ void TextLayout_c::shift(int32_t dx, int32_t dy)
 typedef struct
 {
   // the commands to output this run
-  std::vector<std::pair<size_t, TextLayout_c::CommandData_c>> run;
+  std::vector<std::pair<size_t, CommandData_c>> run;
 
   // the advance information of this run
   int dx, dy;
@@ -365,12 +365,10 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           for (size_t j = 0; j < a.shadows.size(); j++)
           {
             run.run.push_back(std::make_pair(j,
-                TextLayout_c::CommandData_c(rx+a.shadows[j].dx, ry+a.shadows[j].dy,
-                                            rw, rh, a.shadows[j].c)));
+                CommandData_c(rx+a.shadows[j].dx, ry+a.shadows[j].dy, rw, rh, a.shadows[j].c)));
           }
 
-          run.run.push_back(std::make_pair(normalLayer,
-              TextLayout_c::CommandData_c(rx, ry, rw, rh, a.c)));
+          run.run.push_back(std::make_pair(normalLayer, CommandData_c(rx, ry, rw, rh, a.c)));
         }
 
         run.dx += a.inlay->getRight();
@@ -389,8 +387,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
         {
           run.run.push_back(std::make_pair(j,
-              TextLayout_c::CommandData_c(gf, gi, gx+a.shadows[j].dx,
-                                          gy+a.shadows[j].dy, a.shadows[j].c)));
+              CommandData_c(gf, gi, gx+a.shadows[j].dx, gy+a.shadows[j].dy, a.shadows[j].c)));
         }
 
         run.dx += glyph_pos[j].x_advance;
@@ -399,8 +396,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         run.dx = roundToDivisible(run.dx, prop.round);
         run.dy = roundToDivisible(run.dy, prop.round);
 
-        run.run.push_back(std::make_pair(normalLayer,
-            TextLayout_c::CommandData_c(gf, gi, gx, gy, a.c)));
+        run.run.push_back(std::make_pair(normalLayer, CommandData_c(gf, gi, gx, gy, a.c)));
 
         if (a.flags & codepointAttributes::FL_UNDERLINE)
         {
@@ -421,12 +417,10 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
           {
             run.run.push_back(std::make_pair(j,
-                TextLayout_c::CommandData_c(gx+a.shadows[j].dx, gy+a.shadows[j].dy,
-                                            gw, gh, a.shadows[j].c)));
+                CommandData_c(gx+a.shadows[j].dx, gy+a.shadows[j].dy, gw, gh, a.shadows[j].c)));
           }
 
-          run.run.push_back(std::make_pair(normalLayer,
-              TextLayout_c::CommandData_c(gx, gy, gw, gh, a.c)));
+          run.run.push_back(std::make_pair(normalLayer, CommandData_c(gx, gy, gw, gh, a.c)));
         }
       }
 
@@ -750,7 +744,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
             for (auto & cc : runs[runorder[i]].run)
             {
               if (   (cc.first == layer)
-                  && (cc.second.command == TextLayout_c::CommandData_c::CMD_RECT)
+                  && (cc.second.command == CommandData_c::CMD_RECT)
                  )
               {
                 cc.second.w += spaceadder;
