@@ -250,7 +250,7 @@ static color_c evalColor(const std::string & col)
 class szFunctor
 {
   public:
-    virtual double get(void) = 0;
+    virtual double operator()(void) const { return 0; };
 };
 
 
@@ -258,7 +258,8 @@ class szFunctor
  *  \param sz the size string from the CSS
  *  \return the resulting size in pixel
  */
-static double evalSize(const std::string & sz, szFunctor * f = nullptr)
+template <class T = szFunctor>
+static double evalSize(const std::string & sz, T f = szFunctor())
 {
   // right now we accept only pixel sizes
   size_t l = sz.length();
@@ -267,9 +268,9 @@ static double evalSize(const std::string & sz, szFunctor * f = nullptr)
   {
     return 64*atof(sz.c_str());
   }
-  else if (f && sz[l-1] == '%')
+  else if (sz[l-1] == '%')
   {
-    return f->get() * atof(sz.c_str()) / 100;
+    return f() * atof(sz.c_str()) / 100;
   }
 
   throw XhtmlException_c("only pixel size format is supported");
@@ -288,13 +289,13 @@ class parentFunctor : public szFunctor
     parentFunctor(const std::string & t, pugi::xml_node n, const textStyleSheet_c & r) :
        tag(t), node(n), rules(r) {}
 
-    double get(void)
+    double operator()(void) const
     {
       if (!node)
         throw XhtmlException_c("no parent node to base a percent value on");
 
       parentFunctor f(tag, node.parent(), rules);
-      return evalSize(rules.getValue(node, tag), &f);
+      return evalSize(rules.getValue(node, tag), f);
     }
 };
 
@@ -436,7 +437,7 @@ static std::shared_ptr<fontFace_c> getFontForNode(const pugi::xml_node & xml, co
   std::string fontWeight = rules.getValue(xml, "font-weight");
 
   parentFunctor fkt("font-size", xml.parent(), rules);
-  double fontSize = evalSize(rules.getValue(xml, "font-size"), &fkt);
+  double fontSize = evalSize(rules.getValue(xml, "font-size"), fkt);
 
   auto fam = rules.findFamily(fontFamily);
 
@@ -1053,6 +1054,12 @@ static textLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c
   bool rtl = (rules.getValue(xml, "direction") == "rtl");
   int left = rtl ? 1 : -1;
 
+  std::string defaulttablewidth("100%");
+  auto tablew = rules.getValue(xml, "width", defaulttablewidth);
+  double table_width = evalSize(tablew, [&shape, ystart] (void)->double {
+    return shape.getRight(ystart, ystart) - shape.getLeft(ystart, ystart);
+  });
+
   // collect all cells of the table
   for (auto & i : xml)
   {
@@ -1060,6 +1067,8 @@ static textLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c
         && (std::string("colgroup") == i.name())
        )
     {
+      std::vector<double> relativeWidths;
+
       for (const auto & j : i)
       {
         if (   (j.type() == pugi::node_element)
@@ -1078,12 +1087,31 @@ static textLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c
             throw XhtmlException_c("malformed 'span' attribute (" + getNodePath(j) + ")");
           }
 
-          uint32_t width = evalSize(rules.getValue(j, "width"));
+          auto w = rules.getValue(j, "width");
 
-          while (span > 0)
+          if (w.back() == '*')
           {
-            widths.push_back(width);
-            span--;
+            double width = std::stod(w.substr(0, w.length()-1).c_str());
+
+            while (span > 0)
+            {
+              widths.push_back(0);
+              relativeWidths.push_back(width);
+              span--;
+            }
+          }
+          else
+          {
+            uint32_t width = evalSize(w, [table_width] (void) {
+              return table_width;
+            });
+
+            while (span > 0)
+            {
+              widths.push_back(width);
+              relativeWidths.push_back(0);
+              span--;
+            }
           }
         }
         else
@@ -1091,6 +1119,34 @@ static textLayout_c layoutXML_TABLE(pugi::xml_node & xml, const textStyleSheet_c
           throw XhtmlException_c("Only 'col' tags allowed within 'colgroup' tag (" + getNodePath(j) + ")");
         }
       }
+
+      assert(relativeWidths.size() == widths.size());
+
+      // handle relative widths
+      // 1) calculate the remaining width available for the table
+      uint32_t remainingWidth = 0;
+      for (auto w : widths)
+        remainingWidth += w;
+
+      if (remainingWidth < table_width)
+      {
+        remainingWidth = table_width - remainingWidth;
+
+        // 2) calculate the sum of all relative widths
+        double relSum = 0.0;
+        for (auto w : relativeWidths)
+          relSum += w;
+
+        // 3) distribute the space
+        if (relSum > 0.01)
+        {
+          for (int i = 0; i < relativeWidths.size(); i++)
+          {
+            widths[i] += remainingWidth * relativeWidths[i]/relSum;
+          }
+        }
+      }
+
       col = true;
     }
     else if (   (i.type() == pugi::node_element)

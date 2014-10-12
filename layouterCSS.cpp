@@ -280,6 +280,7 @@ static void checkFormatColor(const std::string & value)
 
 #define SZ_PX 1
 #define SZ_PERCENT 2
+#define SZ_RELATIVE 4
 
 static void checkFormatSize(const std::string & value, uint8_t formats)
 {
@@ -288,17 +289,23 @@ static void checkFormatSize(const std::string & value, uint8_t formats)
   {
     for (size_t i = 0; i < l-2; i++)
       if (!isNumChar(value[i]))
-        throw XhtmlException_c(std::string("size format for pixel size not correct") + value);
+        throw XhtmlException_c(std::string("size format for pixel size not correct ") + value);
   }
   else if ((formats & SZ_PERCENT) && value[l-1] == '%')
   {
     for (size_t i = 0; i < l-1; i++)
       if (!isNumChar(value[i]))
-        throw XhtmlException_c(std::string("size format for percent size not correct") + value);
+        throw XhtmlException_c(std::string("size format for percent size not correct ") + value);
+  }
+  else if ((formats & SZ_RELATIVE) && value[l-1] == '*')
+  {
+    for (size_t i = 0; i < l-1; i++)
+      if (!isNumChar(value[i]))
+        throw XhtmlException_c(std::string("size format for relative size not correct ") + value);
   }
   else
   {
-    throw XhtmlException_c(std::string("size value not pixel or percent format") + value);
+    throw XhtmlException_c(std::string("size value not pixel or percent format ") + value);
   }
 }
 
@@ -397,12 +404,16 @@ static void checkValueFormat(const std::string & attribute, const std::string & 
   if (attribute == "background-color") checkFormatColor(value);
   if (attribute == "text-decoration") checkValues(value, {"underline", ""}, "text-decoration");
   if (attribute == "text-shadow") checkShadowFormat(value);
-  if (attribute == "width") checkFormatSize(value, SZ_PX);
+
+  // TODO width in different environments may allow different formats...
+  if (attribute == "width") checkFormatSize(value, SZ_PX + SZ_PERCENT + SZ_RELATIVE);
   if (attribute == "border-collapse") checkValues(value, {"collapse", "separate"}, "border-collapse");
   if (attribute == "vertical-align") checkValues(value, {"baseline", "top", "middle", "bottom"}, "vertical-align");
 }
 
-const std::string & textStyleSheet_c::getValue(pugi::xml_node node, const std::string & attribute) const
+const std::string & textStyleSheet_c::getValue(pugi::xml_node node,
+                                               const std::string & attribute,
+                                               const std::string & def) const
 {
   // go through all rules, check only the ones that give a value to the requested attribute
   // evaluate rule by priority (look at the CSS priority rules
@@ -429,7 +440,10 @@ const std::string & textStyleSheet_c::getValue(pugi::xml_node node, const std::s
       return rules[bestI].value;
 
     if (!isInheriting(attribute))
-      return getDefault(attribute);
+      if (def.empty())
+        return getDefault(attribute);
+      else
+        return def;
 
     node = node.parent();
   }

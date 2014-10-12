@@ -125,10 +125,18 @@ class textStyleSheet_c
      *
      * \param node The xml node that the attribute value is requested for
      * \param attribute The attribute the value is requested for
+     * \param def default value that will be returned, when there is no value set
      *
      * \return The value of the attribute
+     *
+     * \note the default value is only used when it is not empty. When empty the CSS default
+     * will be used and if there is not CSS default an exception will be thrown
+     *
+     * \attention the function will return a reference to the string, when the default
+     * from the argument is returned, this will also be a reference to that argument, so
+     * the string containing the default must actually stay alive until the return value is handled
      */
-    const std::string & getValue(pugi::xml_node node, const std::string & attribute) const;
+    const std::string & getValue(pugi::xml_node node, const std::string & attribute, const std::string & def = "") const;
 
     /** \brief set the rounding factor. See layoutProperties.round for the details.
      *

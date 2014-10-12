@@ -702,6 +702,24 @@ BOOST_AUTO_TEST_CASE( Table_Layouts )
     "<td class='va-bot'>Test3</td>"
     "</tr></table></body></html>",
     s, STLL::rectangleShape_c(1000*64)), "tests/table-06.lay", c));
+
+  // basic table with 2x1 cells with percent width
+  s.addRule(".td", "width", "30%");
+  s.addRule("td", "border-width", "1px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><table><colgroup><col class='td' /><col class='td' /></colgroup>"
+    "<tr><td>Test with some more text</td><td>Table</td></tr></table></body></html>",
+    s, STLL::rectangleShape_c(300*64)), "tests/table-07.lay", c));
+
+  // basic table with 2x1 cells with percent width
+  s.addRule("table", "width", "80%");
+  s.addRule(".td", "width", "1*");
+  s.addRule(".te", "width", "2*");
+  s.addRule("td", "border-width", "1px");
+  BOOST_CHECK(layouts_identical(STLL::layoutXHTML(
+    "<html><body><table><colgroup><col class='td' /><col class='te' /><col class='tc' /></colgroup>"
+    "<tr><td>Test</td><td>Table</td><td>Text</td></tr></table></body></html>",
+    s, STLL::rectangleShape_c(300*64)), "tests/table-08.lay", c));
 }
 
 BOOST_AUTO_TEST_CASE( Frames_Layouts )
