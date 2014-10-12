@@ -37,7 +37,7 @@ namespace STLL {
 
 // TODO the fontFace_c constructor and library interface is not perfect...
 
-fontFace_c::fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const FontResource_c & res, uint32_t size) : lib(l)
+fontFace_c::fontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const FontResource_c & res, uint32_t size) : lib(l)
 {
   f = lib->newFace(res, size);
 }
@@ -123,7 +123,7 @@ FT_GlyphSlotRec_ * fontFace_c::renderGlyph(glyphIndex_t glyphIndex, SubPixelArra
   return f->glyph;
 }
 
-FT_Face freeTypeLibrary_c::newFace(const FontResource_c & res, uint32_t size)
+FT_Face FreeTypeLibrary_c::newFace(const FontResource_c & res, uint32_t size)
 {
   FT_Face f;
   FT_Open_Args a;
@@ -184,17 +184,17 @@ FT_Face freeTypeLibrary_c::newFace(const FontResource_c & res, uint32_t size)
                             res.getDescription() + "'. Maybe the font doesn't have one?");
 }
 
-void freeTypeLibrary_c::doneFace(FT_Face f)
+void FreeTypeLibrary_c::doneFace(FT_Face f)
 {
   FT_Done_Face(f);
 }
 
-freeTypeLibrary_c::~freeTypeLibrary_c()
+FreeTypeLibrary_c::~FreeTypeLibrary_c()
 {
   FT_Done_FreeType(lib);
 }
 
-freeTypeLibrary_c::freeTypeLibrary_c()
+FreeTypeLibrary_c::FreeTypeLibrary_c()
 {
   if (FT_Init_FreeType(&lib))
   {

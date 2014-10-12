@@ -70,7 +70,7 @@ class FreetypeException_c : public std::runtime_error
     explicit FreetypeException_c(const std::string & what_arg) : std::runtime_error(what_arg) {}
 };
 
-class freeTypeLibrary_c;
+class FreeTypeLibrary_c;
 
 /** \brief This class represents a font resource.
  *
@@ -136,7 +136,7 @@ class fontFace_c : boost::noncopyable
 {
   public:
 
-    fontFace_c(std::shared_ptr<freeTypeLibrary_c> l, const FontResource_c & res, uint32_t size);
+    fontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const FontResource_c & res, uint32_t size);
     ~fontFace_c();
 
     /** \brief Get the freetype structure for this font
@@ -183,7 +183,7 @@ class fontFace_c : boost::noncopyable
 
   private:
     FT_FaceRec_ *f;
-    std::shared_ptr<freeTypeLibrary_c> lib;
+    std::shared_ptr<FreeTypeLibrary_c> lib;
 };
 
 /** \brief This class encapsulates an instance of the freetype library
@@ -194,14 +194,14 @@ class fontFace_c : boost::noncopyable
  * You may need to create an instance of this class though, when you use the
  * low level interface (see \ref tutorial_pg)
  */
-class freeTypeLibrary_c : boost::noncopyable
+class FreeTypeLibrary_c : boost::noncopyable
 {
   public:
 
     /** \brief Create an instance of the freetype library */
-    freeTypeLibrary_c();
+    FreeTypeLibrary_c();
     /** \brief Destroy the library instance */
-    ~freeTypeLibrary_c();
+    ~FreeTypeLibrary_c();
 
     /** Make the library create a new font face using the given ressource and size
      *
@@ -238,7 +238,7 @@ class fontCache_c
      * I am not really sure where is might be useful to use multiple caches on one
      * library... though
      */
-    fontCache_c(std::shared_ptr<freeTypeLibrary_c> l) : lib(l) {}
+    fontCache_c(std::shared_ptr<FreeTypeLibrary_c> l) : lib(l) {}
 
     /** \brief Create a cache using an instance of the freetype library that is created
      * specifically for this cache instance
@@ -246,7 +246,7 @@ class fontCache_c
      * This is usually the thing you need, create one instance of this
      * class per thread of your application that needs to access the library
      */
-    fontCache_c(void) : lib(std::make_shared<freeTypeLibrary_c>()) {}
+    fontCache_c(void) : lib(std::make_shared<FreeTypeLibrary_c>()) {}
 
     /** \brief Get a font face from this cache with the given resource and size.
      *
@@ -310,7 +310,7 @@ class fontCache_c
     std::map<fontFaceParameter_c, std::weak_ptr<fontFace_c> > fonts;
 
     // the library to use
-    std::shared_ptr<freeTypeLibrary_c> lib;
+    std::shared_ptr<FreeTypeLibrary_c> lib;
 };
 
 /** \brief a class contains all resources for a family of fonts
