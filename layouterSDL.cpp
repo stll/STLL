@@ -438,8 +438,6 @@ void trimSDLFontCache(size_t num)
 
     for (size_t i = 0; i < toDel; i++)
       glyphCache.erase(entries[i]);
-
-    printf("ttt\n");
   }
 }
 
