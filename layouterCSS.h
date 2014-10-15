@@ -78,7 +78,7 @@ class textStyleSheet_c
      * If the given family doesn't exist, it will be created
      *
      * The class will use the same font cache and thus the same instance of the
-     * freetype library for all the fonts. So you can only use it from one thread.
+     * FreeType library for all the fonts. So you can only use it from one thread.
      *
      * \param family The name of the font family that gets a new member
      * \param res The resource for the new family member

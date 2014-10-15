@@ -25,12 +25,12 @@
 #include <stdint.h>
 
 /** \file
- *  \brief this file contains just a little helper class for a 4-value color
+ *  \brief this file contains just a little helper class for a 4-value colour
  */
 
 namespace STLL {
 
-/** \brief a little class representing an rgba colour value, an a value of 255 is
+/** \brief a little class representing an RGBA colour value, an a value of 255 is
  *  assumed to be opaque
  */
 class color_c
@@ -43,7 +43,7 @@ class color_c
     /** default constructor, transparent and black colour */
     color_c(void) : val{0, 0, 0, 0} {}
 
-    /** constructor for an rgb opaque or rgba colour */
+    /** constructor for an RGB opaque or RGBA colour */
     color_c(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) : val{r, g, b, a} {}
 
 

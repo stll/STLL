@@ -48,7 +48,7 @@ class SaveLoadException_c : public std::runtime_error
  */
 TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontCache_c> c);
 
-/** \brief store the layout into the diven XML node. A new layout node is created and the date
+/** \brief store the layout into the given XML node. A new layout node is created and the date
  *  is inserted into that node
  *  \param l the layout to save
  *  \param doc the XML node to add the layout to

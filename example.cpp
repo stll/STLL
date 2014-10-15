@@ -296,8 +296,6 @@ int main ()
     printf("Xhtml Exception: %s\n", e.what());
   }
 
-  return 0;
-
   // another example:
   {
 
@@ -365,5 +363,7 @@ int main ()
   // Ausgabe mittels SDL
   showLayoutsSelf(WIN_WIDTH, 1000, l);
   }
+
+  trimSDLFontCache(1);
 
 }

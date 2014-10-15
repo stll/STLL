@@ -36,7 +36,7 @@ class TextLayout_c;
 
 /** \brief class used to encapsulate image drawing
  *
- * When the showLayoutSDL routine needs to draw an image it will call the draw function in this
+ * When the routine showLayoutSDL needs to draw an image it will call the draw function in this
  * class to do the job. This allows you to do your own image loading and caching and such stuff.
  *
  * Derive from this function and implement the draw function to handle image drawing in your application

@@ -23,7 +23,7 @@
 #define STLL_LAYOUTER_FONT_H
 
 /** \file
- *  \brief a freetype wrapper
+ *  \brief a FreeType wrapper
  *
  * You normally don't need to use the stuff in this header
  */
@@ -55,14 +55,14 @@ typedef uint32_t glyphIndex_t;
  */
 typedef enum
 {
-  SUBP_NONE,   ///< don't use suppixel output (e.g. non LCD)
+  SUBP_NONE,   ///< don't use sub-pixel output (e.g. non LCD)
   SUBP_RGB,    ///< use horizontal RGB
   SUBP_BGR,    ///< use horizontal BGR
   SUBP_RGB_V,  ///< use vertical RGB (top to bottom)
   SUBP_BGR_V   ///< use vertical BGR (top to bottom)
 } SubPixelArrangement;
 
-/** \brief This class is thrown on problems with the freetype library
+/** \brief This class is thrown on problems with the FreeType library
  */
 class FreetypeException_c : public std::runtime_error
 {
@@ -139,7 +139,7 @@ class FontFace_c : boost::noncopyable
     FontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const FontResource_c & res, uint32_t size);
     ~FontFace_c();
 
-    /** \brief Get the freetype structure for this font
+    /** \brief Get the FreeType structure for this font
      *
      * This is required for example for harfbuzz. You normally don't need this when using STLL
      */
@@ -176,7 +176,8 @@ class FontFace_c : boost::noncopyable
 
     /** \brief render a glyph of this font
      * \param glyphIndex the index of the glyph to render (take it from the layout)
-     * \param sp the requested subpixel arrangement to apply to the rendering
+     * \param sp the requested sub-pixel arrangement to apply to the rendering
+     * \return a pointer to the FreeType glyph slot record, see FreeType documentation
      * \note glyphs are always rendered unhinted 8-bit FreeType bitmaps
      */
     FT_GlyphSlotRec_ * renderGlyph(glyphIndex_t glyphIndex, SubPixelArrangement sp);
@@ -186,9 +187,9 @@ class FontFace_c : boost::noncopyable
     std::shared_ptr<FreeTypeLibrary_c> lib;
 };
 
-/** \brief This class encapsulates an instance of the freetype library
+/** \brief This class encapsulates an instance of the FreeType library
  *
- * The class exposes the functions of the freetype library instance that are
+ * The class exposes the functions of the FreeType library instance that are
  * required by STLL. You normally don't need to use this interface at all.
  *
  * You may need to create an instance of this class though, when you use the
@@ -198,14 +199,14 @@ class FreeTypeLibrary_c : boost::noncopyable
 {
   public:
 
-    /** \brief Create an instance of the freetype library */
+    /** \brief Create an instance of the FreeType library */
     FreeTypeLibrary_c();
     /** \brief Destroy the library instance */
     ~FreeTypeLibrary_c();
 
-    /** Make the library create a new font face using the given ressource and size
+    /** Make the library create a new font face using the given resource and size
      *
-     * Usually you don't use this function directly but you use the fontFace_c class
+     * Usually you don't use this function directly but you use the FontFace_c class
      *
      * \param res The resource to use to create the font
      * \param size The requested font size
@@ -215,7 +216,7 @@ class FreeTypeLibrary_c : boost::noncopyable
 
     /** Make the library destroy a font
      *
-     * Usually you don't use this function directly but you use the fontFace_c class
+     * Usually you don't use this function directly but you use the FontFace_c class
      *
      * \param f the font to destroy
      */
@@ -240,7 +241,7 @@ class FontCache_c
      */
     FontCache_c(std::shared_ptr<FreeTypeLibrary_c> l) : lib(l) {}
 
-    /** \brief Create a cache using an instance of the freetype library that is created
+    /** \brief Create a cache using an instance of the FreeType library that is created
      * specifically for this cache instance
      *
      * This is usually the thing you need, create one instance of this
@@ -316,11 +317,11 @@ class FontCache_c
 /** \brief a class contains all resources for a family of fonts
  *
  * A family is a set of fonts with roman, italics, bold, ... variants
- * this class will store the resources to each font and create a fontFace_c for
+ * this class will store the resources to each font and create a FontFace_c for
  * it, when requested.
  *
  * Usually you don't need to use this class directly as the CSS stylesheet class
- * textStyleSheet_c will take care of this.
+ * TextStyleSheet_c will take care of this.
  */
 class FontFamily_c
 {
@@ -381,7 +382,7 @@ class FontFamily_c
 
     /** \brief Add a font to the family
      *
-     * \param res Ressource to use for this member of the font family
+     * \param res Resource to use for this member of the font family
      * \param style Font style, values are usually: "normal", "italic", "oblique"
      * \param variant Font variant, values are usually: "normal", "small-caps"
      * \param weight Font weight, typical values are: "lighter", "normal", "bold", "bolder"

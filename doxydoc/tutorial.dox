@@ -5,13 +5,13 @@
  * \code{.cpp}
 // create a font cache to get fonts, you need to keep this one
 // until you are done with the layouting and the output
-fontCache_c fc;
+FontCache_c fc;
 
 // setup the attributes for the text to output
 // we use a font from the fontcache and the color white
 // we also use the English language
-codepointAttributes attr;
-attr.font = fc->getFont("FreeSans.ttf", 20);
+CodepointAttributes attr;
+attr.font = fc->getFont(FontResource_c("FreeSans.ttf"), 20);
 attr.c(255, 255, 255, 255);
 attr.lang = "en";
 
@@ -19,7 +19,7 @@ attr.lang = "en";
 // all the characters in your text, the way we create it here
 // will setup the index in such a way, that _all_ characters Will
 // have the given attributes
-attributeIndex_c ai(attr);
+AttributeIndex_c ai(attr);
 
 // setup layouting properties. we want the text left aligned and
 // without any indentation
@@ -45,11 +45,11 @@ showLayoutSDL(layout, 20, 20, videoSurface);
  * For the XHTML layouter the flow is slightly different
  * \code{.cpp}
 // setup a stylesheet
-textStyleSheet_c styleSheet;
+TextStyleSheet_c styleSheet;
 
 // add the fonts that are required
-styleSheet.font("sans", fontResource_c("/usr/share/fonts/freefont/FreeSans.ttf"));
-styleSheet.font("sans", fontResource_c("/usr/share/fonts/freefont/FreeSansBold.ttf"), "normal", "normal", "bold");
+styleSheet.font("sans", FontResource_c("FreeSans.ttf"));
+styleSheet.font("sans", FontResource_c("FreeSansBold.ttf"), "normal", "normal", "bold");
 
 // add the CSS rules you need
 styleSheet.addRule("body", "color", "#ffffff");

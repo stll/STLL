@@ -141,7 +141,7 @@ class TextLayout_c
 
     /** \brief add a single drawing command to the end of the command list
      *  \param args this is a forwarding function that will give all arguments to the
-     * contructor of the CommandData_c class that will be added
+     * constructor of the CommandData_c class that will be added
      *
      * \note if you add a command, you must update the left, right and height fields
      * as well as the firstBaseline your own
@@ -165,7 +165,7 @@ class TextLayout_c
 
     /** \brief add a single drawing command to the start of the command list
      *  \param args this is a forwarding function that will give all arguments to the
-     * contructor of the CommandData_c class that will be added
+     * constructor of the CommandData_c class that will be added
      *
      * \note if you add a command, you must update the left, right and height fields
      * as well as the firstBaseline your own
@@ -344,7 +344,7 @@ class codepointAttributes
    * The inlay is a layout that will be placed instead of an actual glyph.
    * If you define the inlay, the font information will be ignored.
    * How the inlay interacts with line breaks depends on the character that is given
-   * as the placeholder. Linebreaks are done as if there was the given placeholder
+   * as the place holder. Line breaks are done as if there was the given place holder
    * character and not the inlay.
    *
    * The vertical alignment of the inlay is controlled by baseline_shift. If
@@ -381,9 +381,9 @@ class codepointAttributes
       && link == rhs.link;
   }
 
-  /** \brief this operator is required for the intervall container within the
+  /** \brief this operator is required for the interval container within the
    * attributeIndex_c class, do not use it
-   * \note the intervall container wants to accumulate information but
+   * \note the interval container wants to accumulate information but
    * as we can not do that here, we simply replace the old values
    */
   codepointAttributes operator += (const codepointAttributes & rhs)
@@ -496,7 +496,7 @@ class Shape_c
     virtual int32_t getRight2(int32_t top, int32_t bottom) const = 0;
 };
 
-/** \brief conctrete implementation of the shape that will allow layouting
+/** \brief concrete implementation of the shape that will allow layouting
  *  inside a rectangular with a certain width
  */
 class RectangleShape_c : public Shape_c
@@ -522,7 +522,7 @@ typedef struct {
   enum {
     ALG_LEFT,          ///< layout left adjusted
     ALG_RIGHT,         ///< layout right adjusted
-    ALG_CENTER,        ///< layout centered
+    ALG_CENTER,        ///< layout centred
     ALG_JUSTIFY_LEFT,  ///< layout justified and the last line left adjusted
     ALG_JUSTIFY_RIGHT  ///< layout justified and the last line right adjusted
   } align;             ///< alignment that the text is supposed to have
@@ -534,14 +534,14 @@ typedef struct {
   /** \brief This value tells the layouter how to round the positions of glyph and
    * other commands.
    *
-   * All positions are given in 1/64 pixel precision. But this can lead to strange artifacts
+   * All positions are given in 1/64 pixel precision. But this can lead to strange artefacts
    * if you can place the objects only with 1 pixel precision. For example the spacing of several
    * consecutive letters will be uneven, resulting in an uneven distribution of the glyphs.
    *
    * The right solution in that case would be to round the values to whole pixels. Or in the
-   * case you can place objects with subpixel accuracy to round to 1/3 of a pixel.
+   * case you can place objects with sub-pixel accuracy to round to 1/3 of a pixel.
    *
-   * The value 1 rounds to whole piexels, 3 to 1/3 pixel, 64 does not round at all:
+   * The value 1 rounds to whole pixels, 3 to 1/3 pixel, 64 does not round at all:
    * So only values between 1 and 63 actually do something everything else leads to no rounding
    */
   int32_t round;
@@ -564,10 +564,10 @@ typedef struct {
 /** paragraph layouting function
  *
  * \param txt32 the utf-32 encoded text to layout, no control sequences exist, use "\n" for newlines
- * \param attr the attributes (colors, ...) for all the characters in the text
+ * \param attr the attributes (colours, ...) for all the characters in the text
  * \param shape the shape that the final result is supposed to have
  * \param prop some parameters that the line breaking algorithm needs to give the result the expected
- *             shape (center or justified, ...)
+ *             shape (centre or justified, ...)
  * \param ystart the vertical starting point (in 1/64th pixels) of your output, the baseline of the first line
  *               of text will be shifted down from this position by the ascender of the line
  * \return the resulting layout
