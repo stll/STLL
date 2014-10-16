@@ -34,6 +34,7 @@ namespace STLL {
 
 // TODO properly handle it, when FreeType returns an bitmap format that is not supported
 
+// encapsulation for the FreeType bitmap structure, so secure proper freeing
 class GlyphData_c
 {
   public:
@@ -68,9 +69,15 @@ class GlyphData_c
     }
 };
 
+// our glyph cache with all the rendered glyphs
 static std::unordered_map<GlyphKey_c, GlyphData_c> glyphCache;
+
+// each time we access a glyph from the cache we increase this number
+// and write the value into the lastUse field of the rendered glyph
+// that is how we can find out glyphs that were not used the longest time
 static uint32_t useCounter = 0;
 
+// a simple get pixel function for the fallback render methods
 static Uint32 getpixel(SDL_Surface *surface, int x, int y)
 {
   int bpp = surface->format->BytesPerPixel;
@@ -102,6 +109,7 @@ static Uint32 getpixel(SDL_Surface *surface, int x, int y)
   }
 }
 
+// a simple put pixel function for the fallback render methods
 static void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
 {
   int bpp = surface->format->BytesPerPixel;
@@ -135,11 +143,14 @@ static void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
   }
 }
 
+// linear blending of 2 values
 static uint8_t blend(uint8_t a1, uint8_t a2, uint8_t b)
 {
   return a1 + (a2-a1) * b / 255;
 }
 
+// the fallback glyph rendering without sub-pixel output. This should work on every surface
+// independent of its format
 static void outputGlyph_NONE_Fallback(int sx, int sy, const GlyphData_c & img, color_c c, SDL_Surface * s)
 {
   int stx = (sx+32)/64 + img.left;
@@ -177,6 +188,8 @@ static void outputGlyph_NONE_Fallback(int sx, int sy, const GlyphData_c & img, c
   }
 }
 
+// an optimized glyph rendering function for not sub-pixel output. Optimized for surfaces with
+// 32 bits per pixel in RGBx order, x meaning one unused byte
 static void outputGlyph_NONE_RGBx(int sx, int sy, const GlyphData_c & img, color_c c, SDL_Surface * s)
 {
   int stx = (sx+32)/64 + img.left;
@@ -211,6 +224,8 @@ static void outputGlyph_NONE_RGBx(int sx, int sy, const GlyphData_c & img, color
   }
 }
 
+// a fallback output function with sub-pixel glyph placement, should work on all
+// target surface formats
 static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, const GlyphData_c & img, color_c c, SDL_Surface * s)
 {
   int stx = sx/64 + img.left;
@@ -258,6 +273,7 @@ static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, const GlyphData_c
   }
 }
 
+// sub-pixel glyph output optimized for 32 bit sifaces with red green blue unused order
 static void outputGlyph_HorizontalRGB_RGBx(int sx, int sy, const GlyphData_c & img, color_c c, SDL_Surface * s)
 {
   int stx = sx/64 + img.left;
@@ -339,6 +355,7 @@ static void outputGlyph(int sx, int sy, const GlyphData_c & img, SubPixelArrange
   }
 }
 
+// get the glyph from the cache, or render new using FreeType
 static GlyphData_c & getGlyph(std::shared_ptr<FontFace_c> face, glyphIndex_t glyph, SubPixelArrangement sp)
 {
   GlyphKey_c k(face, glyph, sp);
