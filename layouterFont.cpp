@@ -123,6 +123,11 @@ FT_GlyphSlotRec_ * FontFace_c::renderGlyph(glyphIndex_t glyphIndex, SubPixelArra
   return f->glyph;
 }
 
+bool FontFace_c::containsGlyph(char32_t ch)
+{
+  return FT_Get_Char_Index(f, ch) != 0;
+}
+
 FT_Face FreeTypeLibrary_c::newFace(const FontResource_c & res, uint32_t size)
 {
   FT_Face f;

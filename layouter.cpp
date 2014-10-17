@@ -278,7 +278,19 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     if (!run.shy)
       hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(txt32.c_str())+runstart, spos-runstart, 0, spos-runstart);
     else
-      hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(U"\u2010"), 1, 0, 1);
+    {
+      // we want to append a hyphen, sadly not all fonts contain the proper character for
+      // this simple symbol, so we first try the proper one, and if that is not available
+      // we use hypen-minus, which all should have
+      if (attr.get(runstart).font->containsGlyph(U'\u2010'))
+      {
+        hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(U"\u2010"), 1, 0, 1);
+      }
+      else
+      {
+        hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(U"\u002D"), 1, 0, 1);
+      }
+    }
 
     if (embedding_levels[runstart] % 2 == 0)
     {

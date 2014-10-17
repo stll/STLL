@@ -182,6 +182,12 @@ class FontFace_c : boost::noncopyable
      */
     FT_GlyphSlotRec_ * renderGlyph(glyphIndex_t glyphIndex, SubPixelArrangement sp);
 
+    /** \brief check if a given character is available within this font
+     * \param ch the unicode character to check
+     * \return true, when the character is available within the font, false otherwise
+     */
+    bool containsGlyph(char32_t ch);
+
   private:
     FT_FaceRec_ *f;
     std::shared_ptr<FreeTypeLibrary_c> lib;
