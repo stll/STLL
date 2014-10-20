@@ -104,9 +104,22 @@ void TextLayout_c::shift(int32_t dx, int32_t dy)
 // TODO better error checking, throw our own exceptions, e.g. when a link was not properly
 // specified
 
+// so let's see how does the whole paragraph layouting work..
+// at first we split the text into runs. A run is a section of the text that "belongs together" line breaks
+// only happen between runs. Also all the text in one run must be using the same font. The text in one
+// run is layouted using harfbuzz and then the runs are assembled into the paragraph
+// a possible fault is that also soft hyphens separate runs, so if the shaping of the not broken
+// word looks different from the shape of the word broken between lines, the results will be wrong
+// you should not use shy in that case
+// if your text has a shadow we create a layout commands containing a layer. This way we can
+// create the glyph command for the text and underlines in the order they appear in the text
+// and later on when we assemble the paragraph we sort the commands of one run by layer. This
+// makes sure that the important top layer is never covered by shadows
+
+// this structure contains the information of a run finished and ready or paragraph assembly
 typedef struct
 {
-  // the commands to output this run
+  // the commands to output this run including the layer (for shadows)
   std::vector<std::pair<size_t, CommandData_c>> run;
 
   // the advance information of this run
@@ -115,7 +128,7 @@ typedef struct
   // the embedding level (text direction) of this run
   FriBidiLevel embeddingLevel;
 
-  // linebreak information for AFTER this run, for values see liblinebreak
+  // line-break information for AFTER this run, for values see liblinebreak
   char linebreak;
 
   // the font used for this run... will probably be identical to
@@ -125,7 +138,7 @@ typedef struct
   // is this run a space run? Will be removed at line ends
   bool space;
 
-  // is this a soft hypen?? will ony be shown at line ends
+  // is this a soft hyphen?? will only be shown at line ends
   bool shy;
 
   // ascender and descender of this run
@@ -143,6 +156,8 @@ typedef struct
 
 
 // create the text direction information using libfribidi
+// txt32 and base_dir go in, embedding_levels comes out
+// return value is the maximal embedding level
 static FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32,
                                            std::vector<FriBidiLevel> & embedding_levels,
                                            FriBidiParType base_dir)
@@ -156,6 +171,8 @@ static FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32,
   return max_level;
 }
 
+// a rounding function that rounds r such that is is divisible by
+// d without remainder
 static int32_t roundToDivisible(int32_t r, int32_t d)
 {
   if (d > 0 && d < 64)
@@ -167,6 +184,8 @@ static int32_t roundToDivisible(int32_t r, int32_t d)
   return r;
 }
 
+// check if a character is a bidi control character and should not go into
+// the output stream
 static bool isBidiCharacter(char32_t c)
 {
   if (c == U'\U0000202A' || c == U'\U0000202B' || c == U'\U0000202C')
@@ -176,6 +195,11 @@ static bool isBidiCharacter(char32_t c)
 }
 
 // use harfbuzz to layout runs of text
+// txt32 is the test to break into runs
+// attr contains the attributes for each character of txt32
+// embedding_levels are the bidi embedding levels creates by getBidiEmbeddingLevels
+// linebreaks contains the line-break information from liblinebreak or libunibreak
+// prop contains some layouting settings
 static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
                                            const AttributeIndex_c & attr,
                                            const std::vector<FriBidiLevel> & embedding_levels,
@@ -195,6 +219,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     {
       auto a = attr.get(i);
 
+      // if we don't have the font in the map yet, we add it
       if (a.font && (hb_ft_fonts.find(a.font) == hb_ft_fonts.end()))
       {
         hb_ft_fonts[a.font] = hb_ft_font_create(a.font->getFace(), NULL);
@@ -207,32 +232,38 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
   // Create a buffer for harfbuzz to use
   hb_buffer_t *buf = hb_buffer_create();
 
+  // runstart always contains the first character for the current run
   size_t runstart = 0;
 
+  // skip bidi characters at the start of the run
   while (runstart < txt32.length() && isBidiCharacter(txt32[runstart])) runstart++;
 
   std::vector<runInfo> runs;
 
+  // as long as there is something left in the text
   while (runstart < txt32.length())
   {
+    // pos points at the first character AFTER the current run
     size_t spos = runstart+1;
     // find end of current run
-    while (   (spos < txt32.length())
-           && (   isBidiCharacter(txt32[spos])
-               || (  (embedding_levels[runstart] == embedding_levels[spos])
-                  && (attr.get(runstart).lang == attr.get(spos).lang)
-                  && (attr.get(runstart).font == attr.get(spos).font)
-                  && (attr.get(runstart).baseline_shift == attr.get(spos).baseline_shift)
-                  && (!attr.get(spos).inlay)
-                  && (!attr.get(spos-1).inlay)
-                  && (   (linebreaks[spos-1] == LINEBREAK_NOBREAK)
+    //
+    // the continues, as long as
+    while (   (spos < txt32.length())                                                       // there is text left in our string
+           && (   isBidiCharacter(txt32[spos])                                              // and
+               || (  (embedding_levels[runstart] == embedding_levels[spos])                 //  text direction has not changed
+                  && (attr.get(runstart).lang == attr.get(spos).lang)                       //  text still has the same language
+                  && (attr.get(runstart).font == attr.get(spos).font)                       //  and the same font
+                  && (attr.get(runstart).baseline_shift == attr.get(spos).baseline_shift)   //  and the same baseline
+                  && (!attr.get(spos).inlay)                                                //  and next char is not an inlay
+                  && (!attr.get(spos-1).inlay)                                              //  and we are an not inlay
+                  && (   (linebreaks[spos-1] == LINEBREAK_NOBREAK)                          //  and line-break is not requested
                       || (linebreaks[spos-1] == LINEBREAK_INSIDEACHAR)
                      )
-                  && (txt32[spos] != U' ')
+                  && (txt32[spos] != U' ')                                                  //  and there is no space (needed to adjust width for justification)
                   && (txt32[spos-1] != U' ')
-                  && (txt32[spos] != U'\n')
+                  && (txt32[spos] != U'\n')                                                 //  also end run on forced line-breaks
                   && (txt32[spos-1] != U'\n')
-                  && (txt32[spos] != U'\u00AD')
+                  && (txt32[spos] != U'\u00AD')                                             //  and on soft hyphen
                   )
                )
           )
@@ -242,6 +273,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
     runInfo run;
 
+    // check, if this is a space run, on line ends space runs will be removed
     if (txt32[spos-1] == U' ' || txt32[spos-1] == U'\n')
     {
       run.space = true;
@@ -251,12 +283,14 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       run.space = false;
     }
 
+    // check, if this run is a soft hyphen. Soft hyphens are ignored and not output, except on line endings
     run.shy = txt32[runstart] == U'\u00AD';
 
     std::string language = attr.get(runstart).lang;
 
+    // setup the language for the harfbuzz shaper
     // reset is not required, when no language is set, the buffer
-    // reset automatically resets the language and scribt info as well
+    // reset automatically resets the language and script info as well
     if (language != "")
     {
       size_t i = language.find_first_of('-');
@@ -275,13 +309,15 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       }
     }
 
+    // send the text to harfbuzz, in a normal run, send the normal text
+    // for a shy, send a hyphen
     if (!run.shy)
       hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(txt32.c_str())+runstart, spos-runstart, 0, spos-runstart);
     else
     {
       // we want to append a hyphen, sadly not all fonts contain the proper character for
       // this simple symbol, so we first try the proper one, and if that is not available
-      // we use hypen-minus, which all should have
+      // we use hyphen-minus, which all should have
       if (attr.get(runstart).font->containsGlyph(U'\u2010'))
       {
         hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(U"\u2010"), 1, 0, 1);
@@ -292,6 +328,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       }
     }
 
+    // set text direction for this run
     if (embedding_levels[runstart] % 2 == 0)
     {
       hb_buffer_set_direction(buf, HB_DIRECTION_LTR);
@@ -301,24 +338,29 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       hb_buffer_set_direction(buf, HB_DIRECTION_RTL);
     }
 
+    // get the right font for this run and do the shaping
     if (attr.get(runstart).font)
       hb_shape(hb_ft_fonts[attr.get(runstart).font], buf, NULL, 0);
 
+    // get the output
     unsigned int         glyph_count;
     hb_glyph_info_t     *glyph_info   = hb_buffer_get_glyph_infos(buf, &glyph_count);
     hb_glyph_position_t *glyph_pos    = hb_buffer_get_glyph_positions(buf, &glyph_count);
 
+    // fill in some of the run information
     run.dx = run.dy = 0;
     run.embeddingLevel = embedding_levels[runstart];
     run.linebreak = linebreaks[spos-1];
     run.font = attr.get(runstart).font;
     if (attr.get(runstart).inlay)
     {
+      // for inlays the ascender and descender depends on the size of the inlay
       run.ascender = attr.get(runstart).inlay->getHeight()+attr.get(runstart).baseline_shift;
       run.descender = attr.get(runstart).inlay->getHeight()-run.ascender;
     }
     else
     {
+      // for normal text ascender and descender are taken from the font
       run.ascender = run.font->getAscender()+attr.get(runstart).baseline_shift;
       run.descender = run.font->getDescender()+attr.get(runstart).baseline_shift;
     }
@@ -330,13 +372,17 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     TextLayout_c::rectangle_c linkRect;
     int linkStart;
 
+    // off we go creating the drawing commands
     for (size_t j=0; j < glyph_count; ++j)
     {
+      // bidi characters are skipped
       if (isBidiCharacter(txt32[glyph_info[j].cluster + runstart]))
         continue;
 
+      // get the attribute for the current character
       auto a = attr.get(glyph_info[j].cluster + runstart);
 
+      // when a new link is started, we save the current x-position within the run
       if (!curLink && a.link || curLink != a.link)
       {
         linkStart = run.dx;
@@ -344,6 +390,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
       if (a.inlay)
       {
+        // copy the drawing commands from the inlay, shift them
+        // to the right position
         for (auto in : a.inlay->getData())
         {
           // if ascender is 0 we want to be below the baseline
@@ -356,6 +404,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           run.run.push_back(std::make_pair(normalLayer, in));
         }
 
+        // create the underline for the inlay
+        // TODO try to merge this with the underline of a normal glyph
         if (a.flags & codepointAttributes::FL_UNDERLINE)
         {
           int32_t rx = run.dx;
@@ -387,29 +437,35 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       }
       else
       {
+        // output the glyph
         glyphIndex_t gi = glyph_info[j].codepoint;
         auto gf = attr.get(runstart).font;
 
         int32_t gx = run.dx + (glyph_pos[j].x_offset);
         int32_t gy = run.dy - (glyph_pos[j].y_offset)-attr.get(runstart).baseline_shift;
 
+        // round the position of the glyph
         gx = roundToDivisible(gx, prop.round);
         gy = roundToDivisible(gy, prop.round);
 
+        // output all shadows of the glyph
         for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
         {
           run.run.push_back(std::make_pair(j,
               CommandData_c(gf, gi, gx+a.shadows[j].dx, gy+a.shadows[j].dy, a.shadows[j].c)));
         }
 
+        // calculate the new position and round it
         run.dx += glyph_pos[j].x_advance;
         run.dy -= glyph_pos[j].y_advance;
 
         run.dx = roundToDivisible(run.dx, prop.round);
         run.dy = roundToDivisible(run.dy, prop.round);
 
+        // output the final glyph
         run.run.push_back(std::make_pair(normalLayer, CommandData_c(gf, gi, gx, gy, a.c)));
 
+        // create underline commands
         if (a.flags & codepointAttributes::FL_UNDERLINE)
         {
           int32_t gw = glyph_pos[j].x_advance+64;
@@ -436,10 +492,13 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         }
       }
 
+      // if we have a link, we include that information within the run
       if (a.link)
       {
+        // link has changed
         if (curLink && curLink != a.link)
         {
+          // store information for current link
           TextLayout_c::linkInformation l;
           l.url = prop.links[curLink-1];
           l.areas.push_back(linkRect);
@@ -449,6 +508,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
         if (!curLink)
         {
+          // start new link
           linkRect.x = linkStart;
           linkRect.y = -run.ascender;
           linkRect.w = run.dx-linkStart;
@@ -457,6 +517,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         }
         else
         {
+          // make link box for current link wider
           linkRect.w = run.dx-linkStart;
         }
       }
@@ -472,14 +533,17 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       curLink = 0;
     }
 
+    // save the run
     runs.push_back(run);
     runstart = spos;
 
+    // skip bidi characters
     while (runstart < txt32.length() && isBidiCharacter(txt32[runstart])) runstart++;
 
     hb_buffer_reset(buf);
   }
 
+  // free harfbuzz buffer and fonts
   hb_buffer_destroy(buf);
 
   for (auto & a : hb_ft_fonts)
@@ -488,11 +552,12 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
   return runs;
 }
 
+// merge links into a text layout, shifting the link boxes by dx and dy
 static void mergeLinks(TextLayout_c & txt, const std::vector<TextLayout_c::linkInformation> & links, int dx, int dy)
 {
+  // go over all links that we want to add
   for (const auto & l : links)
   {
-
     // try to find the link to insert in the already existing links within txt
     auto i = std::find_if(txt.links.begin(), txt.links.end(),
                           [&l] (TextLayout_c::linkInformation l2) { return l.url == l2.url; }
@@ -518,13 +583,21 @@ static void mergeLinks(TextLayout_c & txt, const std::vector<TextLayout_c::linkI
   }
 }
 
+// do the line breaking using the runs created before
 static TextLayout_c breakLines(std::vector<runInfo> & runs,
                                const Shape_c & shape,
                                FriBidiLevel max_level,
                                const layoutProperties & prop, int32_t ystart)
 {
+  // this vector is used for the reordering of the runs
+  // it contains the index of the run that should go in
+  // the n-th position.
+  // Theoretically this could be reused for each line, but
+  // that makes things more complicated, so we use one array
+  // for all the runs but reorder only the current line
   std::vector<size_t> runorder(runs.size());
   int n(0);
+  // initialize the array with 1...n
   std::generate(runorder.begin(), runorder.end(), [&]{ return n++; });
 
   // layout a paragraph line by line
@@ -573,7 +646,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
       // the line, or we run out of runs
       while (newspos < runs.size())
       {
-        // update line hight and with with the new run
+        // update line hight and width with the new run
         newAscend = std::max(newAscend, runs[newspos].ascender);
         newDescend = std::min(newDescend, runs[newspos].descender);
         newWidth += runs[newspos].dx;
@@ -581,9 +654,11 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
 
         // if we come to a point where we can break the line, we stop and
         // evaluate if these new added runs still fits
-        // we break out here, if the next run is a space and will allow breaking
-        // after the space (this will remove spaces at the end of the line
-        // we also break out, if we can break after the current run
+        //
+        // liblinebreak inserts the breaks AFTER the spaces, but we don't want to
+        // include the spaces at line ends, that is why we have 2 break conditions here:
+        // 1) when liblinebreak as inserted a break after the current run
+        // 2) when the next run is a space run and liblinebreak has inserted a break after that run
         if (  (    (newspos+1) < runs.size()
                 && (runs[newspos+1].space)
                 && (   (runs[newspos+1].linebreak == LINEBREAK_ALLOWBREAK)
@@ -598,7 +673,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
           break;
         }
 
-        // next run
+        // next run has to go in as well
         newspos++;
       }
 
@@ -607,7 +682,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
       newspos++;
 
       // check, if the line still fits in the available space
-      // if not break out and don't take over the new additional
+      // if not break out and don't take over the new additional runs
       // but even if it doesn't fit, we need to take over when we have
       // not yet anything in our line, this might happen when there is one
       // run that is longer than the available space
@@ -621,7 +696,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
       }
 
       // when the final character at the end of the line (prior to the latest
-      // additions is a shy, remove that one from the width, because them
+      // additions) is a shy, remove that one from the width, because the
       // shy will only be output at the end of the line
       if ((spos > runstart) && runs[spos-1].shy) newWidth -= runs[spos-1].dx;
 
@@ -643,7 +718,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
     }
 
     // this normally doesn't happen because the final run will never be a space
-    // because the linebreak will then happen before that space, but just in case
+    // because the line-break will then happen before that space, but just in case
     // remove it from the space counter
     if (runs[spos-1].space) numSpace--;
 
@@ -672,8 +747,9 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
     int32_t spaceLeft = shape.getRight(ypos, ypos+curAscend-curDescend) -
                         shape.getLeft(ypos, ypos+curAscend-curDescend) - curWidth;
 
-    // depending on the paragraph alignment settings we calculate where at the
-    // x-axis we start with the runs and how many additional pixels we add to a space
+    // output of runs is always left to right, so depending on the paragraph alignment
+    // settings we calculate where at the x-axis we start with the runs and how many
+    // additional pixels we add to each space
     int32_t xpos;
     double spaceadder = 0;
 
@@ -726,6 +802,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
       for (auto & r : runs[runorder[i]].run)
         maxlayer = std::max(maxlayer, r.first+1);
 
+    // output all the layers one after the other
     for (uint32_t layer = 0; layer < maxlayer; layer++)
     {
       int32_t xpos2 = xpos;
@@ -773,6 +850,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
             }
           }
 
+          // merge in the links, but only do this once, for the layer 0
           if (layer == 0)
             mergeLinks(l, runs[runorder[i]].links, xpos2+spaceadder*numSpace, ypos);
 
@@ -785,6 +863,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
       }
     }
 
+    // store the baseline position for the first line
     if (firstline == FL_FIRST)
     {
       l.setFirstBaseline(ypos);
@@ -804,6 +883,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
       firstline = FL_NORMAL;
   }
 
+  // set the final shape of the paragraph
   l.setHeight(ypos);
   l.setLeft(shape.getLeft2(ystart, ypos));
   l.setRight(shape.getRight2(ystart, ypos));
@@ -811,6 +891,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
   return l;
 }
 
+// calculate positions of potential line-breaks using liblinebreak
 static std::vector<char> getLinebreaks(const std::u32string & txt32, const AttributeIndex_c & attr)
 {
   size_t length = txt32.length();
@@ -819,22 +900,24 @@ static std::vector<char> getLinebreaks(const std::u32string & txt32, const Attri
 
   size_t runstart = 0;
 
+  // skip initial bidi characters
   while (runstart < length && isBidiCharacter(txt32[runstart])) runstart++;
 
   while (runstart < length)
   {
     size_t runpos = runstart+1;
 
+    // accumulate text that uses the same language and is no bidi character
     while (runpos < length && (isBidiCharacter(txt32[runpos]) || attr.get(runstart).lang == attr.get(runpos).lang))
     {
       runpos++;
     }
 
     // when calculating the length for the function call below, we need to keep in mind
-    // that the function will always force a linebreak at the end of the string, to avoid
+    // that the function will always force a line-break at the end of the string, to avoid
     // this when the string really goes on, we include the next character in the string
-    // to linebreak (except of course when the string really ends here), that way we get
-    // a real linebreak and the wrongly written break is overwritten in the next call
+    // to line-break (except of course when the string really ends here), that way we get
+    // a real line-break and the wrongly written break is overwritten in the next call
     set_linebreaks_utf32(reinterpret_cast<const utf32_t*>(txt32.c_str())+runstart,
                          runpos-runstart+(runpos < length ? 1 : 0),
                          attr.get(runstart).lang.c_str(), linebreaks.data()+runstart);
@@ -854,7 +937,7 @@ TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_
   FriBidiLevel max_level = getBidiEmbeddingLevels(txt32, embedding_levels,
                                 prop.ltr ? FRIBIDI_TYPE_LTR_VAL : FRIBIDI_TYPE_RTL_VAL);
 
-  // calculate the possible linebreak positions
+  // calculate the possible line-break positions
   auto linebreaks = getLinebreaks(txt32, attr);
 
   // create runs of layout text. Each run is a cohesive set, e.g. a word with a single
@@ -864,4 +947,6 @@ TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_
   // layout the runs into lines
   return breakLines(runs, shape, max_level, prop, ystart);
 }
+
+
 }
