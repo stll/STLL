@@ -35,7 +35,8 @@ if(SDL_FOUND)
   list(APPEND stll_SOURCES layouterSDL.cpp)
 endif()
 add_library(stll SHARED ${stll_SOURCES})
-target_compile_options(stll PRIVATE -std=c++11)
+# TODO actually check available XML libraries and only defined USE macros for the available ones
+target_compile_options(stll PRIVATE -std=c++11 -DUSE_PUGI_XML)
 target_include_directories(stll PRIVATE
   ${FREETYPE_INCLUDE_DIRS}
   ${FRIBIDI_INCLUDE_DIRS}

@@ -30,47 +30,9 @@
 
 namespace STLL {
 
+namespace internal {
 
-static bool ruleFits(const std::string & sel, const pugi::xml_node & node)
-{
-  if (sel == node.name()) return true;
-  if (sel[0] == '.')
-  {
-    for (auto attr: node.attributes())
-      if ((std::string("class") == attr.name()) && (attr.value() == sel.substr(1)))
-      {
-        return true;
-      }
-  }
-  if (sel.find_first_of('[') != sel.npos)
-  {
-    size_t st = sel.find_first_of('[');
-    size_t en = sel.find_first_of(']');
-    size_t mi = sel.find_first_of('=');
-
-    if (sel[mi-1] == '|')
-    {
-      std::string tag = sel.substr(0, st);
-      std::string attr = sel.substr(st+1, mi-2-st);
-      std::string val = sel.substr(mi+1, en-mi-1);
-
-      if (tag == node.name())
-      {
-        auto a = node.attribute(attr.c_str());
-        if (!a.empty())
-        {
-          std::string nodeattrval = std::string(a.value());
-          if (val.length() <= nodeattrval.length() && nodeattrval.substr(0, val.length()) == val)
-            return true;
-        }
-      }
-    }
-  }
-
-  return false;
-}
-
-static uint16_t rulePrio(const std::string & sel)
+uint16_t rulePrio(const std::string & sel)
 {
   if (sel[0] == '.') return 2;
   if (sel.find_first_of('[') != sel.npos) return 2;
@@ -78,7 +40,7 @@ static uint16_t rulePrio(const std::string & sel)
   return 1;
 }
 
-static bool isInheriting(const std::string & attribute)
+bool isInheriting(const std::string & attribute)
 {
   if (attribute == "color") return true;
   if (attribute == "font-family") return true;
@@ -120,7 +82,7 @@ static bool isInheriting(const std::string & attribute)
   return false;
 }
 
-static const std::string & getDefault(const std::string & attribute)
+const std::string & getDefault(const std::string & attribute)
 {
   static std::string defaults[]= { "sans", "normal", "0px", "", "ltr", "transparent", "separate", "baseline" };
 
@@ -163,6 +125,8 @@ static const std::string & getDefault(const std::string & attribute)
 
   return defaults[3];
 }
+
+};
 
 static bool isValidAttribute(const std::string & attribute)
 {
@@ -409,46 +373,6 @@ static void checkValueFormat(const std::string & attribute, const std::string & 
   if (attribute == "width") checkFormatSize(value, SZ_PX + SZ_PERCENT + SZ_RELATIVE);
   if (attribute == "border-collapse") checkValues(value, {"collapse", "separate"}, "border-collapse");
   if (attribute == "vertical-align") checkValues(value, {"baseline", "top", "middle", "bottom"}, "vertical-align");
-}
-
-const std::string & textStyleSheet_c::getValue(pugi::xml_node node,
-                                               const std::string & attribute,
-                                               const std::string & def) const
-{
-  // go through all rules, check only the ones that give a value to the requested attribute
-  // evaluate rule by priority (look at the CSS priority rules
-  // choose the highest priority
-
-  while (!node.empty())
-  {
-    uint16_t prio = 0;
-    size_t bestI;
-
-    for (size_t i = 0; i < rules.size(); i++)
-    {
-      if (   rules[i].attribute == attribute
-          && ruleFits(rules[i].selector, node)
-          && rulePrio(rules[i].selector) > prio
-         )
-      {
-        prio = rulePrio(rules[i].selector);
-        bestI = i;
-      }
-    }
-
-    if (prio)
-      return rules[bestI].value;
-
-    if (!isInheriting(attribute))
-      if (def.empty())
-        return getDefault(attribute);
-      else
-        return def;
-
-    node = node.parent();
-  }
-
-  return getDefault(attribute);
 }
 
 void textStyleSheet_c::font(const std::string& family, const FontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)

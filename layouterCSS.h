@@ -28,7 +28,7 @@
 
 #include "layouterFont.h"
 
-#include <pugixml.hpp>
+#include "xmllibraries.h"
 
 #include <string>
 #include <memory>
@@ -45,6 +45,55 @@ class XhtmlException_c : public std::runtime_error
     explicit XhtmlException_c(const std::string & what_arg) : std::runtime_error(what_arg) {}
 
 };
+
+namespace internal {
+
+  template <class X>
+  bool ruleFits(const std::string & sel, const X node)
+  {
+    if (sel == xml_getName(node)) return true;
+    if (sel[0] == '.')
+    {
+      if (xml_forEachAttribute(node, [sel](const char * n, const char * v) {
+        return (std::string("class") == n) && (v == sel.substr(1)); } ))
+      {
+        return true;
+      }
+    }
+    if (sel.find_first_of('[') != sel.npos)
+    {
+      size_t st = sel.find_first_of('[');
+      size_t en = sel.find_first_of(']');
+      size_t mi = sel.find_first_of('=');
+
+      if (sel[mi-1] == '|')
+      {
+        std::string tag = sel.substr(0, st);
+        std::string attr = sel.substr(st+1, mi-2-st);
+        std::string val = sel.substr(mi+1, en-mi-1);
+
+        if (tag == xml_getName(node))
+        {
+          const char * a = xml_getAttribute(node, attr.c_str());
+          if (a)
+          {
+            std::string nodeattrval = std::string(a);
+            if (val.length() <= nodeattrval.length() && nodeattrval.substr(0, val.length()) == val)
+              return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  uint16_t rulePrio(const std::string & sel);
+  bool isInheriting(const std::string & attribute);
+  const std::string & getDefault(const std::string & attribute);
+
+};
+
 
 /** \brief this class encapsulates information for how to format a text, just like the
  * style sheets in html are doing.
@@ -136,7 +185,47 @@ class textStyleSheet_c
      * from the argument is returned, this will also be a reference to that argument, so
      * the string containing the default must actually stay alive until the return value is handled
      */
-    const std::string & getValue(pugi::xml_node node, const std::string & attribute, const std::string & def = "") const;
+    template <class X>
+    const std::string & getValue(X node, const std::string & attribute, const std::string & def = "") const
+    {
+      // go through all rules, check only the ones that give a value to the requested attribute
+      // evaluate rule by priority (look at the CSS priority rules
+      // choose the highest priority
+
+      while (!xml_isEmpty(node))
+      {
+        uint16_t prio = 0;
+        size_t bestI;
+
+        for (size_t i = 0; i < rules.size(); i++)
+        {
+          if (   rules[i].attribute == attribute
+            && internal::ruleFits(rules[i].selector, node)
+            && internal::rulePrio(rules[i].selector) > prio
+          )
+          {
+            prio = internal::rulePrio(rules[i].selector);
+            bestI = i;
+          }
+        }
+
+        if (prio)
+          return rules[bestI].value;
+
+        if (!internal::isInheriting(attribute))
+          if (def.empty())
+            return internal::getDefault(attribute);
+          else
+            return def;
+
+          node = xml_getParent(node);
+      }
+
+      return internal::getDefault(attribute);
+    }
+
+
+
 
     /** \brief set the rounding factor. See layoutProperties.round for the details.
      *
@@ -153,6 +242,8 @@ class textStyleSheet_c
     std::map<std::string, std::shared_ptr<FontFamily_c> > families;
     std::shared_ptr<FontCache_c> cache;
     uint32_t round;
+
+
 };
 
 }
