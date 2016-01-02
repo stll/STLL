@@ -77,6 +77,18 @@ static std::unordered_map<GlyphKey_c, GlyphData_c> glyphCache;
 // that is how we can find out glyphs that were not used the longest time
 static uint32_t useCounter = 0;
 
+// lookup tables for gamma correct output
+// gamma contains the gamma value that the lookup tables are currently
+// set up for
+// GAMMA_SCALE is a scaling factor for limit calculation errors, the bigger
+// the more exact the output will be, but the bigger the 2nd lookup has to
+// be, and then 2 lookup tables for forward and inverse correction
+// the tables are updated when showLayout is called with a new gamma value
+static uint8_t gamma = 0;
+#define GAMMA_SCALE 8
+static uint16_t gammaFor[256] = {};
+static uint16_t gammaInv[256*GAMMA_SCALE] = {};
+
 // a simple get pixel function for the fallback render methods
 static Uint32 getpixel(SDL_Surface *surface, int x, int y)
 {
@@ -146,7 +158,19 @@ static void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
 // linear blending of 2 values
 static uint8_t blend(uint8_t a1, uint8_t a2, uint8_t b)
 {
-  return a1 + (a2-a1) * b / 255;
+  // the uncorrected blending function would look like this:
+  // return a1 + (a2-a1) * b / 255;
+  // but that results in wrong values when the target has a gamma
+  // corrected output (e.g. display surfaces for sRGB monitors)
+  // so we need to correct gamma forward on a1 and inverse on the output
+  // the target colour is already corrected
+
+  int d1 = gammaFor[a1];
+  int d2 = a2*GAMMA_SCALE;
+
+  int out = d1 + (d2-d1)*b/255;
+
+  return gammaInv[out];
 }
 
 // the fallback glyph rendering without sub-pixel output. This should work on every surface
@@ -380,9 +404,18 @@ static GlyphData_c & getGlyph(std::shared_ptr<FontFace_c> face, glyphIndex_t gly
   return i->second;
 }
 
+static color_c gammaColor(color_c c)
+{
+  return color_c(
+    gammaFor[c.r()]/GAMMA_SCALE,
+    gammaFor[c.g()]/GAMMA_SCALE,
+    gammaFor[c.b()]/GAMMA_SCALE,
+    c.a());
+}
+
 
 void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
-                   SubPixelArrangement sp, imageDrawerSDL_c * images)
+                   SubPixelArrangement sp, imageDrawerSDL_c * images, uint8_t g)
 {
   /* set up rendering via spanners */
   SDL_Rect r;
@@ -406,13 +439,24 @@ void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
   }
 #endif
 
+  if (g != gamma)
+  {
+    gamma = g;
+
+    for (int i = 0; i < 256; i++)
+      gammaFor[i] = (256*GAMMA_SCALE-1)*pow(i/255.0, g*0.1);
+
+    for (int i = 0; i < 256*GAMMA_SCALE; i++)
+      gammaInv[i] = 255*pow(i/(1.0*256*GAMMA_SCALE-1), 10.0/g);
+  }
+
   /* render */
   for (auto & i : l.getData())
   {
     switch (i.command)
     {
       case CommandData_c::CMD_GLYPH:
-        outputGlyph(sx+i.x, sy+i.y, getGlyph(i.font, i.glyphIndex, sp), sp, i.c, s);
+        outputGlyph(sx+i.x, sy+i.y, getGlyph(i.font, i.glyphIndex, sp), sp, gammaColor(i.c), s);
         break;
 
       case CommandData_c::CMD_RECT:

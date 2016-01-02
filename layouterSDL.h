@@ -64,9 +64,15 @@ class imageDrawerSDL_c
  *  \param sp which kind of sub-pixel positioning do you want?
  *  \param images a pointer to an image drawer class that is used to draw the images, when you give
  *                a nullptr here, no images will be drawn
+ *  \param gamma the gamma value of the target surface s in 0.1 increments. Screen surfaces usually have
+ *               a gamma of 2.2, if you blit to a intermediate surface use a gamma of one, but then you
+ *               should take care of gamma correction when blitting with alpha values.
+ *  \note the function uses some lookup tables to quickly calculate the gamma data, that table
+ *        is checked at the beginning of this function and recalculated, when necessary, so try
+ *        to stick to the same gamma value for long stretches
  */
 void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
-                   SubPixelArrangement sp, imageDrawerSDL_c * images);
+                   SubPixelArrangement sp, imageDrawerSDL_c * images, uint8_t gamma = 22);
 
 /** \brief trims the font cache down to a maximal number of entries
  *
