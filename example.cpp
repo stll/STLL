@@ -19,6 +19,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+
+#define USE_PUGI_XML
+
 #include "layouterXHTML.h"
 #include "layouter.h"
 #include "layouterSDL.h"
@@ -279,7 +282,7 @@ int main ()
     // das eigentliche Layout
     // layoutXHTML macht die Arbeit, übergeben wird der Text, das Stylesheet und eine Klasse,
     // die die Form des Textes beinhaltet (für nicht rechteckiges Layout
-    l.emplace_back(layoutInfo_c(layoutXHTML(text, styleSheet, RectangleShape_c(64*TXT_WIDTH)),
+    l.emplace_back(layoutInfo_c(layoutXHTML(Pugi, text, styleSheet, RectangleShape_c(64*TXT_WIDTH)),
                                 (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_RGB));
 
     l[0].layout.addCommand(0, 0, TXT_WIDTH*64, l[1].layout.getHeight(), color_c(50, 50, 50));

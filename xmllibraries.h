@@ -22,24 +22,54 @@
 #ifndef __XML_LIBRARIES_H__
 #define __XML_LIBRARIES_H__
 
+#include <tuple>
+
 /** \file
  *  \brief this file contains overloaded interface functions for all supported XML libraries
  */
 
-
 #ifdef USE_PUGI_XML
 #include <pugixml.hpp>
+#include <boost/lexical_cast.hpp>
+#include <memory>
 
-inline bool xml_isEmpty(const pugi::xml_node & i) { return i.empty(); }
-inline bool xml_isDataNode(const pugi::xml_node & i) { return i.type() == pugi::node_pcdata; }
-inline bool xml_isElementNode(const pugi::xml_node & i) { return i.type() == pugi::node_element; }
+namespace STLL {
 
-inline const char * xml_getName(const pugi::xml_node & i) { return i.name(); }
-inline pugi::xml_node xml_getParent(const pugi::xml_node & i) { return i.parent(); }
-inline pugi::xml_node xml_getFirstChild(const pugi::xml_node & i) { return i.first_child(); }
-inline pugi::xml_node xml_getNextSibling(const pugi::xml_node & i) { return i.next_sibling(); }
+inline std::tuple<std::unique_ptr<pugi::xml_document>, std::string> xml_parseStringPugi(const std::string & txt)
+{
+  auto doc = std::make_unique<pugi::xml_document>();
+  std::string error;
 
-inline const char * xml_getAttribute(const pugi::xml_node & i, const char * attr) {
+  auto res = doc->load_buffer(txt.c_str(), txt.length(), pugi::parse_ws_pcdata);
+
+  if (!res)
+  {
+    error =  std::string("Error Parsing XHTML [") + doc->child("node").attribute("attr").value() + "]\n" +
+             "Error description: " + res.description() + "\n" +
+             "Error offset: " + boost::lexical_cast<std::string>(res.offset) + "  " +
+             txt.substr(std::max<int>(res.offset-20, 0), 20) + "[here]" + txt.substr(res.offset, 20);
+  }
+
+  return std::make_tuple(std::move(doc), std::move(error));
+}
+
+inline pugi::xml_node xml_getHeadNode(const std::unique_ptr<pugi::xml_document> & doc)
+{
+  return doc->document_element();
+}
+
+inline bool xml_isEmpty(pugi::xml_node i) { return i.empty(); }
+inline bool xml_isDataNode(pugi::xml_node i) { return i.type() == pugi::node_pcdata; }
+inline bool xml_isElementNode(pugi::xml_node i) { return i.type() == pugi::node_element; }
+
+inline const char * xml_getName(pugi::xml_node i) { return i.name(); }
+inline const char * xml_getData(pugi::xml_node i) { return i.value(); }
+inline pugi::xml_node xml_getParent(pugi::xml_node i) { return i.parent(); }
+inline pugi::xml_node xml_getFirstChild(pugi::xml_node i) { return i.first_child(); }
+inline pugi::xml_node xml_getNextSibling(pugi::xml_node i) { return i.next_sibling(); }
+inline pugi::xml_node xml_getPreviousSibling(pugi::xml_node i) { return i.previous_sibling(); }
+
+inline const char * xml_getAttribute(pugi::xml_node i, const char * attr) {
   auto a = i.attribute(attr);
 
   if (a)
@@ -49,7 +79,7 @@ inline const char * xml_getAttribute(const pugi::xml_node & i, const char * attr
 }
 
 template <class F>
-bool xml_forEachChild(const pugi::xml_node & i, F f)
+bool xml_forEachChild(pugi::xml_node i, F f)
 {
   for (auto a : i)
   {
@@ -62,7 +92,7 @@ bool xml_forEachChild(const pugi::xml_node & i, F f)
 }
 
 template <class F>
-bool xml_forEachAttribute(const pugi::xml_node & i, F f)
+bool xml_forEachAttribute(pugi::xml_node i, F f)
 {
   for (auto a : i.attributes())
   {
@@ -74,6 +104,8 @@ bool xml_forEachAttribute(const pugi::xml_node & i, F f)
   return false;
 }
 
+};
+
 #endif
 
 
@@ -82,14 +114,52 @@ bool xml_forEachAttribute(const pugi::xml_node & i, F f)
 #ifdef USE_LIBXML2
 #include <libxml/tree.h>
 
+namespace STLL {
+
+class libxml2Doc_c {
+  public:
+    xmlDoc * doc;
+
+    libxml2Doc_c(xmlDoc * d) : doc(d) {}
+    ~libxml2Doc_c(void)
+    {
+      xmlFreeDoc(doc);
+    }
+
+};
+
+inline std::tuple<libxml2Doc_c, std::string> xml_parseStringLibXML2(const std::string & txt)
+{
+  LIBXML_TEST_VERSION
+
+  /*parse the file and get the DOM */
+  libxml2Doc_c doc(xmlReadDoc((const xmlChar*)txt.c_str(), "", "utf-8", XML_PARSE_NOENT + XML_PARSE_RECOVER));
+  std::string error;
+
+  if (doc.doc == NULL)
+  {
+    // TODO correct error information
+    error = std::string("Error Parsing XHTML [");
+  }
+
+  return std::make_tuple(doc, error);
+}
+
+inline const xmlNode * xml_getHeadNode(const libxml2Doc_c & doc)
+{
+  return xmlDocGetRootElement(doc.doc);
+}
+
 inline bool xml_isEmpty(const xmlNode * i) { return i == nullptr; }
 inline bool xml_isDataNode(const xmlNode * i) { return i->type == XML_TEXT_NODE; }
 inline bool xml_isElementNode(const xmlNode * i) { return i->type == XML_ELEMENT_NODE; }
 
-inline const char * xml_getName(const xmlNode * i) { return (const char*)(i->name); }
+inline const char * xml_getName(const xmlNode * i) { if (i && i->name) return (const char*)(i->name); else return ""; }
+inline const char * xml_getData(const xmlNode * i) { if (i && i->content) return (const char*)(i->content); else return ""; }
 inline const xmlNode * xml_getParent(const xmlNode * i) { return i->parent; }
 inline const xmlNode * xml_getFirstChild(const xmlNode * i) { return i->children; }
 inline const xmlNode * xml_getNextSibling(const xmlNode * i) { return i->next; }
+inline const xmlNode * xml_getPreviousSibling(const xmlNode * i) { return i->prev; }
 
 inline const char * xml_getAttribute(const xmlNode * i, const char * attr) {
   return (const char*)xmlGetProp(i, (const xmlChar*)attr);
@@ -123,6 +193,8 @@ bool xml_forEachAttribute(const xmlNode * i, F f) {
   }
 
   return false;
+}
+
 }
 
 #endif
