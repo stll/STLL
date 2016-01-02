@@ -574,10 +574,12 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
     "</body></html>",
     s, STLL::RectangleShape_c(250*64)), "tests/simple-26.lay", c));
 
-  // some named symbols
+#ifndef USE_LIBXML2
+  // some named symbols... libxml2 can not parse this...
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p>&amp;amp;&sect;&#163;&#xA3;&#xa3;&unknown;</p></body></html>",
     s, STLL::RectangleShape_c(200*64)), "tests/simple-27.lay", c));
+#endif
 
   // a layout with some ul bullets with different lines with different ascenders and descenders
   s.addRule("sup", "font-size", "90%");
