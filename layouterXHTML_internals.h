@@ -480,11 +480,19 @@ TextLayout_c layoutXML_IMG(X & xml, const textStyleSheet_c & rules,
 {
   TextLayout_c l;
 
+  auto aw = xml_getAttribute(xml, "width");
+  auto ah = xml_getAttribute(xml, "height");
+
   int32_t cx = shape.getLeft(ystart, ystart);
   int32_t cy = ystart;
-  int32_t cw = evalSize(xml_getAttribute(xml, "width"));
-  int32_t ch = evalSize(xml_getAttribute(xml, "height"));
+  int32_t cw = aw ? evalSize(aw) : 0;
+  int32_t ch = ah ? evalSize(ah) : 0;
   auto ci = xml_getAttribute(xml, "src");
+
+  if (ci == nullptr)
+  {
+    ci = "";
+  }
 
   l.addCommand(ci, cx, cy, cw, ch);
   l.setHeight(ystart+ch);
@@ -562,7 +570,9 @@ X layoutXML_text(X xml, const textStyleSheet_c & rules,
 
       if (std::string("a") == xml_getName(xml))
       {
-        layoutXML_text(xml_getFirstChild(xml), rules, prop, txt, attr, baseline, xml_getAttribute(xml, "href"));
+        auto link = xml_getAttribute(xml, "href");
+        if (link == nullptr) link = "";
+        layoutXML_text(xml_getFirstChild(xml), rules, prop, txt, attr, baseline, link);
       }
       else
       {
