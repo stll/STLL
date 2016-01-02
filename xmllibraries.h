@@ -123,9 +123,10 @@ class libxml2Doc_c {
     libxml2Doc_c(xmlDoc * d) : doc(d) {}
     ~libxml2Doc_c(void)
     {
-      xmlFreeDoc(doc);
+      if (doc)
+        xmlFreeDoc(doc);
     }
-
+    libxml2Doc_c(libxml2Doc_c && d) : doc(d.doc) { d.doc = 0; }
 };
 
 inline std::tuple<libxml2Doc_c, std::string> xml_parseStringLibXML2(const std::string & txt)
@@ -133,16 +134,16 @@ inline std::tuple<libxml2Doc_c, std::string> xml_parseStringLibXML2(const std::s
   LIBXML_TEST_VERSION
 
   /*parse the file and get the DOM */
-  libxml2Doc_c doc(xmlReadDoc((const xmlChar*)txt.c_str(), "", "utf-8", XML_PARSE_NOENT + XML_PARSE_RECOVER));
+  libxml2Doc_c doc(xmlReadDoc((const xmlChar*)txt.c_str(), "", "utf-8", XML_PARSE_NOERROR + XML_PARSE_NOWARNING));
   std::string error;
 
-  if (doc.doc == NULL)
+  if ((doc.doc == nullptr) || !(doc.doc->properties & XML_DOC_WELLFORMED))
   {
     // TODO correct error information
     error = std::string("Error Parsing XHTML [");
   }
 
-  return std::make_tuple(doc, error);
+  return std::make_tuple(std::move(doc), std::move(error));
 }
 
 inline const xmlNode * xml_getHeadNode(const libxml2Doc_c & doc)
