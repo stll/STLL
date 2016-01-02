@@ -23,6 +23,13 @@ pkg_check_modules(FRIBIDI REQUIRED fribidi)
 find_library(UNIBREAK_LIBRARY NAMES unibreak linebreak)
 find_library(PUGIXML_LIBRARY NAMES pugixml)
 
+if(LIBXML2_FOUND)
+  list(APPEND XMLLIBDEFINES -DUSE_LIBXML2)
+endif()
+if(PUGIXML_LIBRARY)
+  list(APPEND XMLLIBDEFINES -DUSE_PUGI_XML)
+endif()
+
 # STLL library
 set(stll_SOURCES
   layouter.cpp
@@ -32,16 +39,24 @@ set(stll_SOURCES
   layouterXMLSaveLoad.cpp
   utf-8.cpp
 )
+if(PUGIXML_LIBRARY)
+  list(APPEND stll_SOURCES layouterXHTML_Pugi.cpp)
+endif()
+if(LIBXML2_FOUND)
+  list(APPEND stll_SOURCES layouterXHTML_LibXML2.cpp)
+endif()
 if(SDL_FOUND)
   list(APPEND stll_SOURCES layouterSDL.cpp)
 endif()
 add_library(stll SHARED ${stll_SOURCES})
-target_compile_options(stll PRIVATE -std=c++14)
+target_compile_options(stll PRIVATE -std=c++14 ${XMLLIBDEFINES})
 target_include_directories(stll PRIVATE
+  ${CMAKE_CURRENT_BINARY_DIR}
   ${FREETYPE_INCLUDE_DIRS}
   ${FRIBIDI_INCLUDE_DIRS}
   ${HARFBUZZ_INCLUDE_DIRS}
   ${SDL_INCLUDE_DIR}
+  ${LIBXML2_INCLUDE_DIR}
 )
 target_link_libraries(stll PUBLIC
   ${FREETYPE_LIBRARIES}
@@ -49,22 +64,31 @@ target_link_libraries(stll PUBLIC
   ${HARFBUZZ_LIBRARIES}
   ${UNIBREAK_LIBRARY}
   ${SDL_LIBRARY}
-  # Pugi is always required, even for the XML2 tests (due to the comparison with the output layouts)
   ${PUGIXML_LIBRARY}
+  ${LIBXML2_LIBRARIES}
 )
 
 # Tests
 add_executable(runtestsPugi runtests.cpp)
 target_compile_options(runtestsPugi PRIVATE -std=c++14 -DUSE_PUGI_XML)
-target_include_directories(runtestsPugi PRIVATE)
-target_link_libraries(runtestsPugi PRIVATE stll ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+target_include_directories(runtestsPugi PRIVATE
+  ${CMAKE_CURRENT_BINARY_DIR}
+  )
+target_link_libraries(runtestsPugi PRIVATE stll
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+)
 add_test(test1 runtestsPugi)
 
 if(LIBXML2_FOUND)
   add_executable(runtestsLibXML2 runtests.cpp)
   target_compile_options(runtestsLibXML2 PRIVATE -std=c++14 -DUSE_LIBXML2)
-  target_include_directories(runtestsLibXML2 PRIVATE ${LIBXML2_INCLUDE_DIR})
-  target_link_libraries(runtestsLibXML2 PRIVATE stll ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${LIBXML2_LIBRARIES})
+  target_include_directories(runtestsLibXML2 PRIVATE
+    ${LIBXML2_INCLUDE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+  )
+  target_link_libraries(runtestsLibXML2 PRIVATE stll
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  )
   add_test(test1 runtestsLibXML2)
 endif()
 
@@ -72,13 +96,22 @@ endif()
 if(SDL_FOUND)
   add_executable(example example.cpp)
   target_compile_options(example PRIVATE -std=c++14)
-  target_include_directories(example PRIVATE ${SDL_INCLUDE_DIR})
-  target_link_libraries(example PRIVATE stll ${SDL_LIBRARY})
+  target_include_directories(example PRIVATE
+    ${SDL_INCLUDE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+  )
+  target_link_libraries(example PRIVATE stll
+    ${SDL_LIBRARY}
+  )
 endif()
 
 if(SDL_FOUND)
   add_executable(viewer viewer.cpp)
   target_compile_options(viewer PRIVATE -std=c++14)
-  target_include_directories(viewer PRIVATE ${SDL_INCLUDE_DIR})
-  target_link_libraries(viewer PRIVATE stll ${SDL_LIBRARY})
+  target_include_directories(viewer PRIVATE
+    ${SDL_INCLUDE_DIR}
+  )
+  target_link_libraries(viewer PRIVATE stll
+    ${SDL_LIBRARY}
+  )
 endif()
