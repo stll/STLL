@@ -39,7 +39,14 @@ TextLayout_c layoutXML(const xmlNode * txt, const textStyleSheet_c & rules, cons
  */
 TextLayout_c layoutXHTMLLibXML2(const std::string & txt, const textStyleSheet_c & rules, const Shape_c & shape)
 {
-  return layoutXML(STLL::xml_getHeadNode(std::get<0>(xml_parseStringLibXML2(txt))), rules, shape);
+  auto res = xml_parseStringLibXML2(txt);
+
+  if (std::get<1>(res) != "")
+  {
+    throw XhtmlException_c(std::get<1>(res));
+  }
+
+  return layoutXML(STLL::xml_getHeadNode(std::get<0>(res)), rules, shape);
 }
 
 };
