@@ -460,7 +460,7 @@ void textStyleSheet_c::addRule(const std::string sel, const std::string attr, co
   rules.push_back(r);
 }
 
-textStyleSheet_c::textStyleSheet_c(std::shared_ptr< FontCache_c > c) : round(1)
+textStyleSheet_c::textStyleSheet_c(std::shared_ptr< FontCache_c > c)
 {
   if (c)
   {

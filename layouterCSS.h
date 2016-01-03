@@ -241,7 +241,7 @@ class textStyleSheet_c
     std::vector<rule> rules;
     std::map<std::string, std::shared_ptr<FontFamily_c> > families;
     std::shared_ptr<FontCache_c> cache;
-    uint32_t round;
+    uint32_t round = 64;
 
 
 };

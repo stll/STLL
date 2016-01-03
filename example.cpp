@@ -143,8 +143,6 @@ int main ()
   auto fc = std::make_shared<FontCache_c>();
   textStyleSheet_c styleSheet(fc);
 
-  styleSheet.setRound(64);
-
   // alle Fonts, die so genutzt werden: familie heißt sans, und dann der bold Font dazu
   styleSheet.font("sans", FontResource_c("/usr/share/fonts/freefont/FreeSerif.ttf"));
   styleSheet.font("sans", FontResource_c("/usr/share/fonts/freefont/FreeSerifBold.ttf"), "normal", "normal", "bold");
@@ -304,10 +302,6 @@ int main ()
 
   layoutProperties prop;
 
-  prop.align = layoutProperties::ALG_LEFT;
-  prop.ltr = true;
-  prop.round = 3;
-
   TextLayout_c l2;
 
   AttributeIndex_c attr;
@@ -320,7 +314,7 @@ int main ()
 
   for (int row = 0; row < 20; row++)
   {
-    prop.indent = (64*row)/3;
+    prop.indent = 64*row/3;
     l2.append(layoutParagraph(U"The quick brown fox iiiiiiiiiiiii", attr, RectangleShape_c(400*64), prop, l2.getHeight()));
   }
 
@@ -334,11 +328,6 @@ int main ()
   {
   layoutProperties prop;
 
-  prop.align = layoutProperties::ALG_LEFT;
-  prop.ltr = true;
-  prop.round = 64;
-  prop.indent = 0;
-
   TextLayout_c l2;
 
   int ypos = 0;
@@ -348,16 +337,14 @@ int main ()
   {
     AttributeIndex_c attr;
     codepointAttributes a;
-    a.c = color_c(155, 155, 255, 055);
+    a.c = color_c(255, 255, 255, 255);
     a.font = fc->getFont(FontResource_c("/usr/share/fonts/corefonts/georgiai.ttf"), (6+row)*64);
     a.lang = "en";
     a.flags = 0;
     attr.set(0, 100, a);
 
-    prop.round = 1;
     l2 = layoutParagraph(U"A quick brown fox jumps over the lazy dog", attr, RectangleShape_c(400*64), prop, ypos);
     l.push_back(layoutInfo_c(l2, 0, 0, SUBP_NONE));
-    prop.round = 64;
     l2 = layoutParagraph(U"A quick brown fox jumps over the lazy dog", attr, RectangleShape_c(400*64), prop, ypos);
     ypos = l2.getHeight();
     l.push_back(layoutInfo_c(l2, WIN_WIDTH*32, 0, SUBP_RGB));

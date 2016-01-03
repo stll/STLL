@@ -525,11 +525,11 @@ typedef struct {
     ALG_CENTER,        ///< layout centred
     ALG_JUSTIFY_LEFT,  ///< layout justified and the last line left adjusted
     ALG_JUSTIFY_RIGHT  ///< layout justified and the last line right adjusted
-  } align;             ///< alignment that the text is supposed to have
+  } align = ALG_LEFT;  ///< alignment that the text is supposed to have
 
-  int32_t indent;      ///< indentation of the first line in pixel
+  int32_t indent = 0;  ///< indentation of the first line in pixel
 
-  bool ltr;            ///< is the base direction of the text left to right?
+  bool ltr = true;     ///< is the base direction of the text left to right?
 
   /** \brief This value tells the layouter how to round the positions of glyph and
    * other commands.
@@ -544,7 +544,7 @@ typedef struct {
    * The value 1 rounds to whole pixels, 3 to 1/3 pixel, 64 does not round at all:
    * So only values between 1 and 63 actually do something everything else leads to no rounding
    */
-  int32_t round;
+  int32_t round = 64;
 
   /** \brief The font that defines the underline parameters.
    *

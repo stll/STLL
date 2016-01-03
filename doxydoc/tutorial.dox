@@ -21,11 +21,8 @@ attr.lang = "en";
 // have the given attributes
 AttributeIndex_c ai(attr);
 
-// setup layouting properties. we want the text left aligned and
-// without any indentation
+// create layouting properties, the default is good enough for us right now
 layoutProperties prop;
-prop.align = layoutProperties::ALG_LEFT;
-prop.indent = 0;
 
 // now layout the text "Hello World" with the given attributes, put
 // it into a retcangle of width 200 pixel, use our layouting properties
