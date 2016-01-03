@@ -156,7 +156,7 @@ static void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
 }
 
 // linear blending of 2 values
-static uint8_t blend(uint8_t a1, uint8_t a2, uint8_t b)
+static uint8_t blend(uint8_t a1, uint8_t a2, uint16_t b1, uint16_t b2 = 0, uint8_t c = 0)
 {
   // the uncorrected blending function would look like this:
   // return a1 + (a2-a1) * b / 255;
@@ -164,11 +164,12 @@ static uint8_t blend(uint8_t a1, uint8_t a2, uint8_t b)
   // corrected output (e.g. display surfaces for sRGB monitors)
   // so we need to correct gamma forward on a1 and inverse on the output
   // the target colour is already corrected
+  int b = (int)b1 + ((int)b2-(int)b1)*c/64;
 
   int d1 = gammaFor[a1];
   int d2 = a2*GAMMA_SCALE;
 
-  int out = d1 + (d2-d1)*b/255;
+  int out = d1 + (d2-d1)*b/(255*255);
 
   return gammaInv[out];
 }
@@ -177,8 +178,9 @@ static uint8_t blend(uint8_t a1, uint8_t a2, uint8_t b)
 // independent of its format
 static void outputGlyph_NONE_Fallback(int sx, int sy, const GlyphData_c & img, color_c c, SDL_Surface * s)
 {
-  int stx = (sx+32)/64 + img.left;
+  int stx = sx/64 + img.left;
   int sty = (sy+32)/64 - img.top;
+  int stb = sx % 64;
 
   int yp = sty;
 
@@ -188,23 +190,30 @@ static void outputGlyph_NONE_Fallback(int sx, int sy, const GlyphData_c & img, c
     {
       int xp = stx;
 
-      for (int x = 0; x < img.width; x++)
+      uint16_t a = 0;
+      uint16_t aprev = 0;
+
+      for (int x = 0; x <= img.width; x++)
       {
+        a = c.a()*img.buffer[y*img.pitch+x];
+        if (x == img.width) a = 0;
+
         if (xp >= 0 && xp < s->w )
         {
-          uint8_t a = (c.a()*img.buffer[y*img.pitch+x]+128)/255;
           auto p = getpixel(s, xp, yp);
 
           Uint8 r, g, b;
           SDL_GetRGB(p, s->format, &r, &g, &b);
 
-          r = blend(r, c.r(), a);
-          g = blend(g, c.g(), a);
-          b = blend(b, c.b(), a);
+          r = blend(r, c.r(), a, aprev, stb);
+          g = blend(g, c.g(), a, aprev, stb);
+          b = blend(b, c.b(), a, aprev, stb);
 
           putpixel(s, xp, yp, SDL_MapRGBA(s->format, r, g, b, SDL_ALPHA_OPAQUE));
 
         }
+
+        aprev = a;
         xp++;
       }
     }
@@ -216,8 +225,9 @@ static void outputGlyph_NONE_Fallback(int sx, int sy, const GlyphData_c & img, c
 // 32 bits per pixel in RGBx order, x meaning one unused byte
 static void outputGlyph_NONE_RGBx(int sx, int sy, const GlyphData_c & img, color_c c, SDL_Surface * s)
 {
-  int stx = (sx+32)/64 + img.left;
+  int stx = sx/64 + img.left;
   int sty = (sy+32)/64 - img.top;
+  int stb = sx % 64;
 
   int yp = sty;
 
@@ -230,17 +240,25 @@ static void outputGlyph_NONE_RGBx(int sx, int sy, const GlyphData_c & img, color
       uint8_t * dst = (uint8_t*)s->pixels + yp * s->pitch + 4*xp;
       uint8_t * src = img.buffer + y*img.pitch;
 
-      for (int x = 0; x < img.width; x++)
+      uint16_t a = 0;
+      uint16_t aprev = 0;
+
+      for (int x = 0; x <= img.width; x++)
       {
+        a = c.a()*img.buffer[y*img.pitch+x];
+
+        if (x == img.width) a = 0;
+
         if (xp >= 0 && xp < s->w )
         {
-          uint8_t a = (c.a()*img.buffer[y*img.pitch+x]+128)/255;
 
-          *dst = blend(*dst, c.b(), a); dst++;
-          *dst = blend(*dst, c.g(), a); dst++;
-          *dst = blend(*dst, c.r(), a); dst++;
+          *dst = blend(*dst, c.b(), a, aprev, stb); dst++;
+          *dst = blend(*dst, c.g(), a, aprev, stb); dst++;
+          *dst = blend(*dst, c.r(), a, aprev, stb); dst++;
           dst++;
         }
+
+        aprev = a;
         xp++;
       }
     }
@@ -255,6 +273,7 @@ static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, const GlyphData_c
   int stx = sx/64 + img.left;
   int sty = sy/64 - img.top;
   int stc = (3*sx/64) % 3;
+  int stb = (3*sx) % 64;
 
   int yp = sty;
 
@@ -265,10 +284,17 @@ static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, const GlyphData_c
       int xp = stx;
       int col = stc;
 
-      for (int x = 0; x < img.width; x++)
+      uint16_t a = 0;
+      uint16_t aprev = 0;
+
+      for (int x = 0; x <= img.width; x++)
       {
+        a = img.buffer[y*img.pitch+x]*c.a();
+        if (x == img.width) a = 0;
+
         if (xp >= 0 && xp < s->w )
         {
+
           auto p = getpixel(s, xp, yp);
 
           Uint8 r, g, b;
@@ -277,13 +303,15 @@ static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, const GlyphData_c
           // blend values
           switch (col)
           {
-            case 0: r = blend(r, c.r(), (img.buffer[y*img.pitch+x] * c.a() + 128) / 255); break;
-            case 1: g = blend(g, c.g(), (img.buffer[y*img.pitch+x] * c.a() + 128) / 255); break;
-            case 2: b = blend(b, c.b(), (img.buffer[y*img.pitch+x] * c.a() + 128) / 255); break;
+            case 0: r = blend(r, c.r(), a, aprev, stb); break;
+            case 1: g = blend(g, c.g(), a, aprev, stb); break;
+            case 2: b = blend(b, c.b(), a, aprev, stb); break;
           }
 
           putpixel(s, xp, yp, SDL_MapRGBA(s->format, r, g, b, SDL_ALPHA_OPAQUE));
         }
+
+        aprev = a;
 
         col++;
         if (col >= 3)
@@ -303,6 +331,7 @@ static void outputGlyph_HorizontalRGB_RGBx(int sx, int sy, const GlyphData_c & i
   int stx = sx/64 + img.left;
   int sty = (sy+32)/64 - img.top;
   int stc = (3*sx/64) % 3;
+  int stb = (3*sx) % 64;
 
   int yp = sty;
 
@@ -318,17 +347,25 @@ static void outputGlyph_HorizontalRGB_RGBx(int sx, int sy, const GlyphData_c & i
       uint8_t * dst = (uint8_t*)s->pixels + yp * s->pitch + 4*xp + 2 - col;
       uint8_t * src = img.buffer + y*img.pitch;
 
-      for (int x = 0; x < img.width; x++)
+      uint16_t a = 0;
+      uint16_t aprev = 0;
+
+      for (int x = 0; x <= img.width; x++)
       {
+        a = *src*c.a();
+        if (x == img.width) a = 0;
+
         if (xp >= 0 && xp < s->w )
         {
           switch(col)
           {
-            case 0: *dst = blend(*dst, c.r(), (*src*c.a()+128)/255); break;
-            case 1: *dst = blend(*dst, c.g(), (*src*c.a()+128)/255); break;
-            case 2: *dst = blend(*dst, c.b(), (*src*c.a()+128)/255); break;
+            case 0: *dst = blend(*dst, c.r(), a, aprev, stb); break;
+            case 1: *dst = blend(*dst, c.g(), a, aprev, stb); break;
+            case 2: *dst = blend(*dst, c.b(), a, aprev, stb); break;
           }
         }
+
+        aprev = a;
 
         col++;
         dst--;
@@ -347,6 +384,9 @@ static void outputGlyph_HorizontalRGB_RGBx(int sx, int sy, const GlyphData_c & i
 
 static bool isRGBxSurface(SDL_Surface * s)
 {
+  return false;
+
+
   auto f = s->format;
 
   return f->BytesPerPixel == 4 && f->Rmask == 0xFF0000 && f->Gmask == 0xFF00 && f->Bmask == 0xFF;
