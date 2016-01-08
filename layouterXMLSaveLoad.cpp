@@ -77,6 +77,7 @@ void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node, std::shared_
           n.append_attribute("g").set_value(a.c.g());
           n.append_attribute("b").set_value(a.c.b());
           n.append_attribute("a").set_value(a.c.a());
+          n.append_attribute("blurr").set_value(a.blurr);
         }
         break;
       case CommandData_c::CMD_RECT:
@@ -91,6 +92,7 @@ void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node, std::shared_
           n.append_attribute("g").set_value(a.c.g());
           n.append_attribute("b").set_value(a.c.b());
           n.append_attribute("a").set_value(a.c.a());
+          n.append_attribute("blurr").set_value(a.blurr);
         }
         break;
       case CommandData_c::CMD_IMAGE:
@@ -156,7 +158,8 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontC
         std::stoi(a.attribute("x").value()),
         std::stoi(a.attribute("y").value()),
         color_c(std::stoi(a.attribute("r").value()), std::stoi(a.attribute("g").value()),
-                std::stoi(a.attribute("b").value()), std::stoi(a.attribute("a").value()))
+                std::stoi(a.attribute("b").value()), std::stoi(a.attribute("a").value())),
+        std::stoi(a.attribute("blurr").value())
       );
     }
     else if (a.name() == std::string("rect"))
@@ -167,7 +170,8 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontC
         std::stoi(a.attribute("w").value()),
         std::stoi(a.attribute("h").value()),
         color_c(std::stoi(a.attribute("r").value()), std::stoi(a.attribute("g").value()),
-                std::stoi(a.attribute("b").value()), std::stoi(a.attribute("a").value()))
+                std::stoi(a.attribute("b").value()), std::stoi(a.attribute("a").value())),
+        std::stoi(a.attribute("blurr").value())
       );
     }
     else if (a.name() == std::string("image"))

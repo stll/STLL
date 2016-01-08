@@ -382,7 +382,7 @@ TextLayout_c boxIt(X & xml, X & xml2, const textStyleSheet_c & rules,
       int32_t cy = ystart+margin_top;
       int32_t cw = l2.getRight()-l2.getLeft()+padding_left+padding_right+borderwidth_left+borderwidth_right;
       int32_t ch = borderwidth_top;
-      l2.addCommandStart(cx, cy, cw, ch, cc);
+      l2.addCommandStart(cx, cy, cw, ch, cc, 0);
     }
   }
 
@@ -399,7 +399,7 @@ TextLayout_c boxIt(X & xml, X & xml2, const textStyleSheet_c & rules,
       int32_t cy = l2.getHeight()-borderwidth_bottom-margin_bottom;
       int32_t cw = l2.getRight()-l2.getLeft()+padding_left+padding_right+borderwidth_left+borderwidth_right;
       int32_t ch = borderwidth_bottom;
-      l2.addCommandStart(cx, cy, cw, ch, cc);
+      l2.addCommandStart(cx, cy, cw, ch, cc, 0);
     }
   }
 
@@ -416,7 +416,7 @@ TextLayout_c boxIt(X & xml, X & xml2, const textStyleSheet_c & rules,
       int32_t cy = ystart+margin_top;
       int32_t cw = borderwidth_right;
       int32_t ch = l2.getHeight()-ystart-margin_bottom-margin_top;
-      l2.addCommandStart(cx, cy, cw, ch, cc);
+      l2.addCommandStart(cx, cy, cw, ch, cc, 0);
     }
   }
 
@@ -433,7 +433,7 @@ TextLayout_c boxIt(X & xml, X & xml2, const textStyleSheet_c & rules,
       int32_t cy = ystart+margin_top;
       int32_t cw = borderwidth_left;
       int32_t ch = l2.getHeight()-ystart-margin_bottom-margin_top;
-      l2.addCommandStart(cx, cy, cw, ch, cc);
+      l2.addCommandStart(cx, cy, cw, ch, cc, 0);
     }
   }
 
@@ -446,7 +446,7 @@ TextLayout_c boxIt(X & xml, X & xml2, const textStyleSheet_c & rules,
     int32_t cw = shape.getRight(ystart+margin_top, ystart+margin_top)-
                  shape.getLeft(ystart+margin_top, ystart+margin_top)-borderwidth_right-borderwidth_left-margin_right-margin_left;
     int32_t ch = l2.getHeight()-ystart-borderwidth_bottom-borderwidth_top-margin_bottom-margin_top;
-    l2.addCommandStart(cx, cy, cw, ch, cc);
+    l2.addCommandStart(cx, cy, cw, ch, cc, 0);
   }
 
 #ifdef _DEBUG_ // allows to see the boxes using a random color for each

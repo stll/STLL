@@ -32,6 +32,7 @@ endif()
 
 # STLL library
 set(stll_SOURCES
+  blurr.cpp
   layouter.cpp
   layouterCSS.cpp
   layouterFont.cpp

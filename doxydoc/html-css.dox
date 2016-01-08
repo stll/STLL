@@ -56,7 +56,7 @@
  *   is used
  * - background-color, only #-synatax and "transparent", default is transparent
  * - text-decoration, only the underline attribute, everything else means nothing
- * - text-shadow, multiple shadows are possible, no blurr, underline doesn't have a shadow
+ * - text-shadow, multiple shadows are possible, blurr always required, set to 0 if you want none, colour also always required
  * - border-collapse
  * - vertical-align in table cells and only values "top", "middle", "bottom", default == top
  */

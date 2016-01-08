@@ -427,10 +427,10 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           for (size_t j = 0; j < a.shadows.size(); j++)
           {
             run.run.push_back(std::make_pair(j,
-                CommandData_c(rx+a.shadows[j].dx, ry+a.shadows[j].dy, rw, rh, a.shadows[j].c)));
+                CommandData_c(rx+a.shadows[j].dx, ry+a.shadows[j].dy, rw, rh, a.shadows[j].c, a.shadows[j].blurr)));
           }
 
-          run.run.push_back(std::make_pair(normalLayer, CommandData_c(rx, ry, rw, rh, a.c)));
+          run.run.push_back(std::make_pair(normalLayer, CommandData_c(rx, ry, rw, rh, a.c, 0)));
         }
 
         run.dx += a.inlay->getRight();
@@ -452,7 +452,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
         {
           run.run.push_back(std::make_pair(j,
-              CommandData_c(gf, gi, gx+a.shadows[j].dx, gy+a.shadows[j].dy, a.shadows[j].c)));
+              CommandData_c(gf, gi, gx+a.shadows[j].dx, gy+a.shadows[j].dy, a.shadows[j].c, a.shadows[j].blurr)));
         }
 
         // calculate the new position and round it
@@ -463,7 +463,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         run.dy = roundToDivisible(run.dy, prop.round);
 
         // output the final glyph
-        run.run.push_back(std::make_pair(normalLayer, CommandData_c(gf, gi, gx, gy, a.c)));
+        run.run.push_back(std::make_pair(normalLayer, CommandData_c(gf, gi, gx, gy, a.c, 0)));
 
         // create underline commands
         if (a.flags & codepointAttributes::FL_UNDERLINE)
@@ -485,10 +485,10 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
           {
             run.run.push_back(std::make_pair(j,
-                CommandData_c(gx+a.shadows[j].dx, gy+a.shadows[j].dy, gw, gh, a.shadows[j].c)));
+                CommandData_c(gx+a.shadows[j].dx, gy+a.shadows[j].dy, gw, gh, a.shadows[j].c, a.shadows[j].blurr)));
           }
 
-          run.run.push_back(std::make_pair(normalLayer, CommandData_c(gx, gy, gw, gh, a.c)));
+          run.run.push_back(std::make_pair(normalLayer, CommandData_c(gx, gy, gw, gh, a.c, 0)));
         }
       }
 

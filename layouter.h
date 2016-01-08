@@ -77,28 +77,31 @@ public:
   /** \brief colour of the glyph or the rectangle */
   color_c c;
 
+  /** \brief blurr radius to use for this command */
+  uint16_t blurr;
+
   std::string imageURL; ///< URL of image to draw
 
   /** \brief constructor to create an glyph command
    */
-  CommandData_c(std::shared_ptr<FontFace_c> f, glyphIndex_t i, int32_t x_, int32_t y_, color_c c_) :
+  CommandData_c(std::shared_ptr<FontFace_c> f, glyphIndex_t i, int32_t x_, int32_t y_, color_c c_, uint16_t rad) :
   command(CMD_GLYPH),
   font(f), glyphIndex(i), x(x_), y(y_), c(c_),
-  w(0), h(0) {}
+  w(0), h(0), blurr(rad) {}
 
   /** \brief constructor to create an image command
    */
   CommandData_c(const std::string & i, int32_t x_, int32_t y_, uint32_t w_, uint32_t h_) :
   command(CMD_IMAGE),
   imageURL(i), x(x_), y(y_), w(w_), h(h_),
-  glyphIndex(0) {}
+  glyphIndex(0), blurr(0) {}
 
   /** \brief constructor to create an rectangle command
    */
-  CommandData_c(int32_t x_, int32_t y_, uint32_t w_, uint32_t h_, color_c c_) :
+  CommandData_c(int32_t x_, int32_t y_, uint32_t w_, uint32_t h_, color_c c_, uint16_t rad) :
   command(CMD_RECT),
   x(x_), y(y_), w(w_), h(h_), c(c_),
-  glyphIndex(0) {}
+  glyphIndex(0), blurr(rad) {}
 
 };
 
@@ -323,11 +326,15 @@ class codepointAttributes
      */
     int8_t dy;
 
+    /** \brief radius of the shadow in 1/64th pixel size
+     */
+    int16_t blurr;
+
     /** \brief comparison operator for one shadow
      */
     bool operator==(const struct shadow & rhs) const
     {
-      return c == rhs.c && dx == rhs.dx && dy == rhs.dy;
+      return c == rhs.c && dx == rhs.dx && dy == rhs.dy && blurr == rhs.blurr;
     }
 
   } shadow;

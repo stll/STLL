@@ -199,6 +199,14 @@ std::vector<codepointAttributes::shadow> evalShadows(const std::string & v)
     while (v[spos] == ' ' && spos < v.length()) spos++;
     if (spos >= v.length()) throw XhtmlException_c("Format of shadow invalid");
 
+    sh.blurr = evalSize(v.substr(spos, v.find(' ', spos)-spos));
+
+    while (v[spos] != ' ' && spos < v.length()) spos++;
+    if (spos >= v.length()) throw XhtmlException_c("Format of shadow invalid");
+
+    while (v[spos] == ' ' && spos < v.length()) spos++;
+    if (spos >= v.length()) throw XhtmlException_c("Format of shadow invalid");
+
     sh.c = evalColor(v.substr(spos, v.find(',', spos)-spos));
 
     s.push_back(sh);

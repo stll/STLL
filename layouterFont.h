@@ -412,16 +412,17 @@ class GlyphKey_c
 {
   public:
 
-    GlyphKey_c(std::shared_ptr<FontFace_c> f, glyphIndex_t idx, SubPixelArrangement s) :
-      font((intptr_t)f.get()), glyphIndex(idx), sp(s) { }
+    GlyphKey_c(std::shared_ptr<FontFace_c> f, glyphIndex_t idx, SubPixelArrangement s, uint16_t b) :
+      font((intptr_t)f.get()), glyphIndex(idx), sp(s), blurr(b) { }
 
     intptr_t font;
     glyphIndex_t glyphIndex;
     SubPixelArrangement sp;
+    uint16_t blurr;
 
     bool operator==(const GlyphKey_c & a) const
     {
-      return font == a.font && glyphIndex == a.glyphIndex && sp == a.sp;
+      return font == a.font && glyphIndex == a.glyphIndex && sp == a.sp && blurr == a.blurr;
     }
 };
 
@@ -435,7 +436,7 @@ class hash<STLL::GlyphKey_c>
   public :
   size_t operator()(const STLL::GlyphKey_c & name ) const
   {
-    return (size_t)name.font ^ (size_t)name.glyphIndex ^ (size_t)name.sp;
+    return (size_t)name.font ^ (size_t)name.glyphIndex ^ (size_t)name.sp ^ name.blurr;
   }
 };
 
