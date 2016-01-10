@@ -1,12 +1,14 @@
 var layouter_8h =
 [
-    [ "textLayout_c", "class_s_t_l_l_1_1text_layout__c.html", "class_s_t_l_l_1_1text_layout__c" ],
-    [ "commandData", "struct_s_t_l_l_1_1text_layout__c_1_1command_data.html", "struct_s_t_l_l_1_1text_layout__c_1_1command_data" ],
-    [ "codepointAttributes", "class_s_t_l_l_1_1codepoint_attributes.html", "class_s_t_l_l_1_1codepoint_attributes" ],
-    [ "shadow", "struct_s_t_l_l_1_1codepoint_attributes_1_1shadow.html", "struct_s_t_l_l_1_1codepoint_attributes_1_1shadow" ],
-    [ "attributeIndex_c", "class_s_t_l_l_1_1attribute_index__c.html", "class_s_t_l_l_1_1attribute_index__c" ],
-    [ "shape_c", "class_s_t_l_l_1_1shape__c.html", "class_s_t_l_l_1_1shape__c" ],
-    [ "rectangleShape_c", "class_s_t_l_l_1_1rectangle_shape__c.html", "class_s_t_l_l_1_1rectangle_shape__c" ],
-    [ "layoutProperties", "struct_s_t_l_l_1_1layout_properties.html", "struct_s_t_l_l_1_1layout_properties" ],
-    [ "layoutParagraph", "layouter_8h.html#adcb36725cfe35eacfcddad0a2a06ced8", null ]
+    [ "CommandData_c", "class_s_t_l_l_1_1_command_data__c.html", "class_s_t_l_l_1_1_command_data__c" ],
+    [ "TextLayout_c", "class_s_t_l_l_1_1_text_layout__c.html", "class_s_t_l_l_1_1_text_layout__c" ],
+    [ "Rectangle_c", "class_s_t_l_l_1_1_text_layout__c_1_1_rectangle__c.html", "class_s_t_l_l_1_1_text_layout__c_1_1_rectangle__c" ],
+    [ "LinkInformation_c", "class_s_t_l_l_1_1_text_layout__c_1_1_link_information__c.html", "class_s_t_l_l_1_1_text_layout__c_1_1_link_information__c" ],
+    [ "CodepointAttributes_c", "class_s_t_l_l_1_1_codepoint_attributes__c.html", "class_s_t_l_l_1_1_codepoint_attributes__c" ],
+    [ "Shadow_c", "class_s_t_l_l_1_1_codepoint_attributes__c_1_1_shadow__c.html", "class_s_t_l_l_1_1_codepoint_attributes__c_1_1_shadow__c" ],
+    [ "AttributeIndex_c", "class_s_t_l_l_1_1_attribute_index__c.html", "class_s_t_l_l_1_1_attribute_index__c" ],
+    [ "Shape_c", "class_s_t_l_l_1_1_shape__c.html", "class_s_t_l_l_1_1_shape__c" ],
+    [ "RectangleShape_c", "class_s_t_l_l_1_1_rectangle_shape__c.html", "class_s_t_l_l_1_1_rectangle_shape__c" ],
+    [ "LayoutProperties_c", "class_s_t_l_l_1_1_layout_properties__c.html", "class_s_t_l_l_1_1_layout_properties__c" ],
+    [ "layoutParagraph", "layouter_8h.html#ab663fe7dceae4de54ddc5076a4c8c2dc", null ]
 ];
