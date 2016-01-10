@@ -623,7 +623,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   STLL::AttributeIndex_c attr;
   STLL::codepointAttributes a;
 
-  a.c = STLL::color_c(255, 255, 255, 255);
+  a.c = STLL::Color_c(255, 255, 255, 255);
   a.font = c->getFont(STLL::FontResource_c("tests/FreeSans.ttf"), 16*64);
   a.flags = STLL::codepointAttributes::FL_UNDERLINE;
   attr.set(0, 3, a);

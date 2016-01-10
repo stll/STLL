@@ -313,7 +313,7 @@ int main ()
     l.emplace_back(layoutInfo_c(layoutXHTML(Pugi, text, styleSheet, RectangleShape_c(64*TXT_WIDTH)),
                                 (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_RGB));
 
-    l[0].layout.addCommand(0, 0, TXT_WIDTH*64, l[1].layout.getHeight(), color_c(50, 50, 50), 0);
+    l[0].layout.addCommand(0, 0, TXT_WIDTH*64, l[1].layout.getHeight(), Color_c(50, 50, 50), 0);
 
     pugi::xml_document doc;
     saveLayoutToXML(l[1].layout, doc);
@@ -336,7 +336,7 @@ int main ()
 
   AttributeIndex_c attr;
   codepointAttributes a;
-  a.c = color_c(255, 255, 255, 255);
+  a.c = Color_c(255, 255, 255, 255);
   a.font = fc->getFont(FontResource_c("tests/FreeSans.ttf"), 16*64);
   a.lang = "en";
   a.flags = 0;
@@ -367,7 +367,7 @@ int main ()
   {
     AttributeIndex_c attr;
     codepointAttributes a;
-    a.c = color_c(255, 255, 255, 255);
+    a.c = Color_c(255, 255, 255, 255);
     a.font = fc->getFont(FontResource_c("/usr/share/fonts/corefonts/georgiai.ttf"), (6+row)*64);
     a.lang = "en";
     a.flags = 0;

@@ -16,7 +16,7 @@ int main()
   // multiply by 64
   codepointAttributes attr;
   attr.font = fc.getFont(FontResource_c("tests/FreeSans.ttf"), 20*64);
-  attr.c = color_c(255, 255, 255, 255);
+  attr.c = Color_c(255, 255, 255, 255);
   attr.lang = "en";
 
   // setup the attribute index. This index assigns attributes to

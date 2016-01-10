@@ -33,7 +33,7 @@ namespace STLL {
 /** \brief a little class representing an RGBA colour value, an a value of 255 is
  *  assumed to be opaque
  */
-class color_c
+class Color_c
 {
   private:
     uint8_t val[4];
@@ -41,10 +41,10 @@ class color_c
   public:
 
     /** default constructor, transparent and black colour */
-    color_c(void) : val{0, 0, 0, 0} {}
+    Color_c(void) : val{0, 0, 0, 0} {}
 
     /** constructor for an RGB opaque or RGBA colour */
-    color_c(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) : val{r, g, b, a} {}
+    Color_c(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) : val{r, g, b, a} {}
 
 
     uint8_t r(void) const { return val[0]; } ///< get the r value of the colour
@@ -53,14 +53,14 @@ class color_c
     uint8_t a(void) const { return val[3]; } ///< get the a value of the colour
 
     /** comparison operator */
-    bool operator== (const color_c & rhs) const
+    bool operator== (const Color_c & rhs) const
     {
       return (val[0] == rhs.val[0]) && (val[1] == rhs.val[1]) &&
              (val[2] == rhs.val[2]) && (val[3] == rhs.val[3]);
     }
 
     /** assignment operator */
-    void operator= (const color_c & rhs)
+    void operator= (const Color_c & rhs)
     {
       val[0] = rhs.val[0];
       val[1] = rhs.val[1];

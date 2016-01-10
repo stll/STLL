@@ -140,7 +140,7 @@ class stripRightShape_c : public Shape_c
 };
 
 
-color_c evalColor(const std::string & col);
+Color_c evalColor(const std::string & col);
 std::vector<codepointAttributes::shadow> evalShadows(const std::string & v);
 std::string normalizeHTML(const std::string & in, char prev);
 

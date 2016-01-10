@@ -271,7 +271,7 @@ static uint8_t blend(uint8_t a1, uint8_t a2, uint16_t b1, uint16_t b2 = 0, uint8
 
 // the fallback glyph rendering without sub-pixel output. This should work on every surface
 // independent of its format
-static void outputGlyph_NONE_Fallback(int sx, int sy, const PaintData_c & img, color_c c, SDL_Surface * s)
+static void outputGlyph_NONE_Fallback(int sx, int sy, const PaintData_c & img, Color_c c, SDL_Surface * s)
 {
   int stx = sx/64 + img.left;
   int sty = (sy+32)/64 - img.top;
@@ -316,7 +316,7 @@ static void outputGlyph_NONE_Fallback(int sx, int sy, const PaintData_c & img, c
 
 // an optimized glyph rendering function for not sub-pixel output. Optimized for surfaces with
 // 32 bits per pixel in RGBx order, x meaning one unused byte
-static void outputGlyph_NONE_RGBx(int sx, int sy, const PaintData_c & img, color_c c, SDL_Surface * s)
+static void outputGlyph_NONE_RGBx(int sx, int sy, const PaintData_c & img, Color_c c, SDL_Surface * s)
 {
   int stx = sx/64 + img.left;
   int sty = (sy+32)/64 - img.top;
@@ -359,7 +359,7 @@ static void outputGlyph_NONE_RGBx(int sx, int sy, const PaintData_c & img, color
 
 // a fallback output function with sub-pixel glyph placement, should work on all
 // target surface formats
-static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, const PaintData_c & img, color_c c, SDL_Surface * s)
+static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, const PaintData_c & img, Color_c c, SDL_Surface * s)
 {
   int stx = sx/64 + img.left;
   int sty = sy/64 - img.top;
@@ -415,7 +415,7 @@ static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, const PaintData_c
 }
 
 // sub-pixel glyph output optimized for 32 bit surfaces with red green blue unused order
-static void outputGlyph_HorizontalRGB_RGBx(int sx, int sy, const PaintData_c & img, color_c c, SDL_Surface * s)
+static void outputGlyph_HorizontalRGB_RGBx(int sx, int sy, const PaintData_c & img, Color_c c, SDL_Surface * s)
 {
   int stx = sx/64 + img.left;
   int sty = (sy+32)/64 - img.top;
@@ -482,7 +482,7 @@ static int getSurfaceFormat(SDL_Surface * s)
   return 0;
 }
 
-static void outputGlyph(int sx, int sy, const PaintData_c & img, SubPixelArrangement sp, color_c c, SDL_Surface * s)
+static void outputGlyph(int sx, int sy, const PaintData_c & img, SubPixelArrangement sp, Color_c c, SDL_Surface * s)
 {
   // check for the right image format
 
@@ -555,9 +555,9 @@ static PaintData_c & getRect(int w, int h, SubPixelArrangement sp, uint16_t blur
   return i->second;
 }
 
-static color_c gammaColor(color_c c)
+static Color_c gammaColor(Color_c c)
 {
-  return color_c(
+  return Color_c(
     gammaFor[c.r()]/GAMMA_SCALE,
     gammaFor[c.g()]/GAMMA_SCALE,
     gammaFor[c.b()]/GAMMA_SCALE,

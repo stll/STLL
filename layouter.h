@@ -75,7 +75,7 @@ public:
   /** @} */
 
   /** \brief colour of the glyph or the rectangle */
-  color_c c;
+  Color_c c;
 
   /** \brief blurr radius to use for this command */
   uint16_t blurr;
@@ -84,7 +84,7 @@ public:
 
   /** \brief constructor to create an glyph command
    */
-  CommandData_c(std::shared_ptr<FontFace_c> f, glyphIndex_t i, int32_t x_, int32_t y_, color_c c_, uint16_t rad) :
+  CommandData_c(std::shared_ptr<FontFace_c> f, glyphIndex_t i, int32_t x_, int32_t y_, Color_c c_, uint16_t rad) :
   command(CMD_GLYPH), x(x_), y(y_), glyphIndex(i), font(f), w(0), h(0), c(c_), blurr(rad) {}
 
   /** \brief constructor to create an image command
@@ -94,7 +94,7 @@ public:
 
   /** \brief constructor to create an rectangle command
    */
-  CommandData_c(int32_t x_, int32_t y_, uint32_t w_, uint32_t h_, color_c c_, uint16_t rad) :
+  CommandData_c(int32_t x_, int32_t y_, uint32_t w_, uint32_t h_, Color_c c_, uint16_t rad) :
   command(CMD_RECT), x(x_), y(y_), glyphIndex(0), w(w_), h(h_), c(c_), blurr(rad) {}
 };
 
@@ -282,7 +282,7 @@ class codepointAttributes
 
   /** \brief colour of the letter
    */
-  color_c c;
+  Color_c c;
 
   /** \brief font of the letter
    */
@@ -307,7 +307,7 @@ class codepointAttributes
 
     /** \brief the colour to use for this shadow element
      */
-    color_c c;
+    Color_c c;
 
     /** \brief offset of the shadow in 1/64th pixels relative to the
      * position of the normal glyph

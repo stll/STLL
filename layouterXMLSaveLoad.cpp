@@ -154,7 +154,7 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontC
         std::stoi(a.attribute("glyphIndex").value()),
         std::stoi(a.attribute("x").value()),
         std::stoi(a.attribute("y").value()),
-        color_c(std::stoi(a.attribute("r").value()), std::stoi(a.attribute("g").value()),
+        Color_c(std::stoi(a.attribute("r").value()), std::stoi(a.attribute("g").value()),
                 std::stoi(a.attribute("b").value()), std::stoi(a.attribute("a").value())),
         std::stoi(a.attribute("blurr").value())
       );
@@ -166,7 +166,7 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontC
         std::stoi(a.attribute("y").value()),
         std::stoi(a.attribute("w").value()),
         std::stoi(a.attribute("h").value()),
-        color_c(std::stoi(a.attribute("r").value()), std::stoi(a.attribute("g").value()),
+        Color_c(std::stoi(a.attribute("r").value()), std::stoi(a.attribute("g").value()),
                 std::stoi(a.attribute("b").value()), std::stoi(a.attribute("a").value())),
         std::stoi(a.attribute("blurr").value())
       );

@@ -156,15 +156,15 @@ static uint8_t hex2byte(char c1, char c2)
  *  \param g green value of the color
  *  \param b blue value of the color
  */
-color_c evalColor(const std::string & col)
+Color_c evalColor(const std::string & col)
 {
   if (col == "transparent")
   {
-    return color_c();
+    return Color_c();
   }
   else
   {
-    return color_c(hex2byte(col[1], col[2]), hex2byte(col[3], col[4]), hex2byte(col[5], col[6]));
+    return Color_c(hex2byte(col[1], col[2]), hex2byte(col[3], col[4]), hex2byte(col[5], col[6]));
   }
 }
 
