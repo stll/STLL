@@ -5,7 +5,7 @@ using namespace STLL;
 
 int main()
 {
-  // create a font cache to get fonts, you need to keep this one
+  // create a font cache to get fonts. you need to keep this one
   // until you are done with the layouting and the output
   FontCache_c fc;
 
@@ -22,17 +22,16 @@ int main()
   // setup the attribute index. This index assigns attributes to
   // all the characters in your text, the way we create it here
   // will setup the index in such a way, that _all_ characters Will
-  // have the given attributes
+  // have the given attribute
   AttributeIndex_c ai(attr);
 
   // create layouting properties, the default is good enough for us right now
   LayoutProperties_c prop;
 
   // now layout the text "Hello World" with the given attributes, put
-  // it into a retcangle of width 200 pixel, use our layouting properties
-  // and start at y position 0
+  // it into a rectangle of width 200 pixel and use our layouting properties
   // the text needs to be utf-32 encoded for this function
-  auto layout = layoutParagraph(U"Hello World", ai, RectangleShape_c(200), prop);
+  auto layout = layoutParagraph(U"Hello World", ai, RectangleShape_c(200*64), prop);
 
   // that is it, now you can output the layout, using one of the Output
   // driver functions, e.g. using the SDL driver you can output the text

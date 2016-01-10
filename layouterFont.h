@@ -73,6 +73,8 @@ class FreetypeException_c : public std::runtime_error
 
 class FreeTypeLibrary_c;
 
+namespace internal {
+
 /** \brief encapsulate information for one font file
  */
 class FontFileResource_c
@@ -119,6 +121,8 @@ class FontFileResource_c
     }
 };
 
+}
+
 
 /** \brief This class represents a font resource.
  *
@@ -132,7 +136,7 @@ class FontFileResource_c
 class FontResource_c
 {
   private:
-    std::vector<FontFileResource_c> resources;
+    std::vector<internal::FontFileResource_c> resources;
 
   public:
     /** create a new font resource with one font
@@ -146,7 +150,7 @@ class FontResource_c
      */
     void addFont(const std::string & pathname)
     {
-      resources.emplace_back(FontFileResource_c(pathname));
+      resources.emplace_back(internal::FontFileResource_c(pathname));
     };
 
     /** add another font to the resource: from memory.
@@ -157,7 +161,7 @@ class FontResource_c
      */
     void addFont(std::pair<std::shared_ptr<uint8_t>, size_t> data, const std::string & descr)
     {
-      resources.emplace_back(FontFileResource_c(data.first, data.second, descr));
+      resources.emplace_back(internal::FontFileResource_c(data.first, data.second, descr));
     }
 
     /** the number of font files in this font
@@ -176,7 +180,7 @@ class FontResource_c
 
     /** get the fontfile ressource class for the fontfile at a given index
      */
-    FontFileResource_c getRessource(size_t idx) const { return resources[idx]; }
+    internal::FontFileResource_c getRessource(size_t idx) const { return resources[idx]; }
 
     /** operator for stl container usage */
     bool operator<(const FontResource_c & b) const
@@ -191,7 +195,7 @@ class FontFace_c : boost::noncopyable
 {
   public:
 
-    FontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const FontFileResource_c & r, uint32_t size);
+    FontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const internal::FontFileResource_c & r, uint32_t size);
     ~FontFace_c();
 
     /** \brief Get the FreeType structure for this font
@@ -209,7 +213,7 @@ class FontFace_c : boost::noncopyable
 
     /** \brief get the font resource that was used to create this font
      */
-    const FontFileResource_c & getResource(void) const { return rec; }
+    const internal::FontFileResource_c & getResource(void) const { return rec; }
 
     /** \brief Get the height of the font with multiplication factor of 64
      * \return height of font
@@ -254,7 +258,7 @@ class FontFace_c : boost::noncopyable
   private:
     FT_FaceRec_ *f;
     std::shared_ptr<FreeTypeLibrary_c> lib;
-    FontFileResource_c rec;
+    internal::FontFileResource_c rec;
     uint32_t size;
 };
 
@@ -322,7 +326,7 @@ class FreeTypeLibrary_c : boost::noncopyable
      * \param size The requested font size
      * \return The FT_Face value
      */
-    FT_FaceRec_ * newFace(const FontFileResource_c & r, uint32_t size);
+    FT_FaceRec_ * newFace(const internal::FontFileResource_c & r, uint32_t size);
 
     /** Make the library destroy a font
      *
@@ -371,7 +375,7 @@ class FontCache_c
      */
     Font_c getFont(const FontResource_c & res, uint32_t size);
 
-    std::shared_ptr<FontFace_c> getFont(const FontFileResource_c & res, uint32_t size);
+    std::shared_ptr<FontFace_c> getFont(const internal::FontFileResource_c & res, uint32_t size);
 
     /** \brief remove all fonts from the cache, fonts that are still in use will be kept, but all others
      * are removed
@@ -396,10 +400,10 @@ class FontCache_c
     class FontFaceParameter_c
     {
       public:
-        FontFileResource_c res;
+        internal::FontFileResource_c res;
         uint32_t size;
 
-        FontFaceParameter_c(const FontFileResource_c r, uint32_t s) : res(std::move(r)), size(s) {}
+        FontFaceParameter_c(const internal::FontFileResource_c r, uint32_t s) : res(std::move(r)), size(s) {}
 
         bool operator<(const FontFaceParameter_c & b) const
         {

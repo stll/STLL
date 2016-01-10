@@ -22,16 +22,12 @@
 #ifndef STLL_LAYOUTER_XML_SAVELOAD_H
 #define STLL_LAYOUTER_XML_SAVELOAD_H
 
-/** \file
- *  \brief Module simple load and save functions to store a layout into an XML file
- */
+/* not part of the library: this file provides code to load and store layouts in XML files */
 
 #include "layouter.h"
 #include "layouterFont.h"
 
 #include <pugixml.hpp>
-
-namespace STLL {
 
 /** \brief exception thrown when something went wrong with loading or saving
  */
@@ -46,7 +42,7 @@ class SaveLoadException_c : public std::runtime_error
  *  \param doc the XML node to load
  *  \param c the font cache to use to get the fonts from
  */
-TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontCache_c> c);
+STLL::TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<STLL::FontCache_c> c);
 
 /** \brief store the layout into the given XML node. A new layout node is created and the date
  *  is inserted into that node
@@ -56,8 +52,6 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontC
  *  \attention this only works, when the fonts in the layout are all inside the cache
  *  and all the used fonts are created using file names (and not RAM pointers)
  */
-void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & doc);
-
-}
+void saveLayoutToXML(const STLL::TextLayout_c & l, pugi::xml_node & doc);
 
 #endif

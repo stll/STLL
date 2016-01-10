@@ -26,8 +26,7 @@
 
 #include <cstdint>
 
-namespace STLL
-{
+namespace STLL { namespace internal {
 
 /** \brief apply a gaussian blurr to a 1 channel image
  *
@@ -40,6 +39,6 @@ namespace STLL
  */
 void gaussBlur (uint8_t * s, int w, int h, double r, int sx, int sy);
 
-};
+}; };
 
 

@@ -5,8 +5,7 @@
 #include <cmath>
 #include <memory>
 
-namespace STLL
-{
+namespace STLL { namespace internal {
 
 #define BLURR_N 3
 
@@ -73,4 +72,4 @@ void gaussBlur (uint8_t * s, int w, int h, double r, int sx, int sy)
   boxBlurH_4(d.get(), s, w, h, sx*(a[2]-1)/2);
 }
 
-}
+} }

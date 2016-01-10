@@ -95,7 +95,7 @@ class PaintData_c
 
       if (blurr > 0)
       {
-        gaussBlur(buffer.get(), pitch, rows, blurr/64.0, blurrw, blurrh);
+        internal::gaussBlur(buffer.get(), pitch, rows, blurr/64.0, blurrw, blurrh);
       }
     }
 

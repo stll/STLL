@@ -22,8 +22,7 @@
 
 #include "layouterXMLSaveLoad.h"
 
-namespace STLL
-{
+using namespace STLL;
 
 void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node)
 {
@@ -139,7 +138,7 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontC
   std::vector<std::shared_ptr<FontFace_c>> found;
 
   for (const auto a : fonts.children())
-    found.push_back(c->getFont(FontFileResource_c(a.attribute("file").value()), std::stoi(a.attribute("size").value())));
+    found.push_back(c->getFont(internal::FontFileResource_c(a.attribute("file").value()), std::stoi(a.attribute("size").value())));
 
   auto commands = doc.child("commands");
 
@@ -217,6 +216,4 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontC
   }
 
   return l;
-}
-
 }

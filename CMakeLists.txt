@@ -37,7 +37,6 @@ set(stll_SOURCES
   layouterCSS.cpp
   layouterFont.cpp
   layouterXHTML.cpp
-  layouterXMLSaveLoad.cpp
   utf-8.cpp
 )
 if(PUGIXML_LIBRARY)
@@ -70,7 +69,7 @@ target_link_libraries(stll PUBLIC
 )
 
 # Tests
-add_executable(runtestsPugi runtests.cpp)
+add_executable(runtestsPugi runtests.cpp layouterXMLSaveLoad.cpp)
 target_compile_options(runtestsPugi PRIVATE -std=c++14 -DUSE_PUGI_XML)
 target_include_directories(runtestsPugi PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}
@@ -81,7 +80,7 @@ target_link_libraries(runtestsPugi PRIVATE stll
 add_test(test1 runtestsPugi)
 
 if(LIBXML2_FOUND)
-  add_executable(runtestsLibXML2 runtests.cpp)
+  add_executable(runtestsLibXML2 runtests.cpp layouterXMLSaveLoad.cpp)
   target_compile_options(runtestsLibXML2 PRIVATE -std=c++14 -DUSE_LIBXML2)
   target_include_directories(runtestsLibXML2 PRIVATE
     ${LIBXML2_INCLUDE_DIR}
@@ -115,7 +114,7 @@ if(SDL_FOUND)
     ${SDL_LIBRARY}
   )
 
-  add_executable(example3 example3.cpp)
+  add_executable(example3 example3.cpp layouterXMLSaveLoad.cpp)
   target_compile_options(example3 PRIVATE -std=c++14)
   target_include_directories(example3 PRIVATE
     ${SDL_INCLUDE_DIR}
@@ -127,7 +126,7 @@ if(SDL_FOUND)
 endif()
 
 if(SDL_FOUND)
-  add_executable(viewer viewer.cpp)
+  add_executable(viewer viewer.cpp layouterXMLSaveLoad.cpp)
   target_compile_options(viewer PRIVATE -std=c++14)
   target_include_directories(viewer PRIVATE
     ${SDL_INCLUDE_DIR}

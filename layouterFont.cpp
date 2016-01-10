@@ -37,7 +37,7 @@ namespace STLL {
 
 // TODO the fontFace_c constructor and library interface is not perfect...
 
-FontFace_c::FontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const FontFileResource_c & r, uint32_t s) :
+FontFace_c::FontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const internal::FontFileResource_c & r, uint32_t s) :
                 lib(l), rec(r), size(s)
 {
   f = lib->newFace(r, s);
@@ -73,7 +73,7 @@ int32_t FontFace_c::getUnderlineThickness(void) const
   return static_cast<int64_t>(f->underline_thickness*f->size->metrics.y_scale) / 65536;
 }
 
-std::shared_ptr<FontFace_c> FontCache_c::getFont(const FontFileResource_c & res, uint32_t size)
+std::shared_ptr<FontFace_c> FontCache_c::getFont(const internal::FontFileResource_c & res, uint32_t size)
 {
   FontFaceParameter_c ffp(res, size);
 
@@ -141,7 +141,7 @@ bool FontFace_c::containsGlyph(char32_t ch)
   return FT_Get_Char_Index(f, ch) != 0;
 }
 
-FT_Face FreeTypeLibrary_c::newFace(const FontFileResource_c & r, uint32_t size)
+FT_Face FreeTypeLibrary_c::newFace(const internal::FontFileResource_c & r, uint32_t size)
 {
   FT_Face f;
   FT_Open_Args a;
