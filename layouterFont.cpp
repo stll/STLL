@@ -37,9 +37,10 @@ namespace STLL {
 
 // TODO the fontFace_c constructor and library interface is not perfect...
 
-FontFace_c::FontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const FontResource_c & res, uint32_t size) : lib(l)
+FontFace_c::FontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const FontFileResource_c & r, uint32_t s) :
+                lib(l), rec(r), size(s)
 {
-  f = lib->newFace(res, size);
+  f = lib->newFace(r, s);
 }
 
 FontFace_c::~FontFace_c()
@@ -72,7 +73,7 @@ int32_t FontFace_c::getUnderlineThickness(void) const
   return static_cast<int64_t>(f->underline_thickness*f->size->metrics.y_scale) / 65536;
 }
 
-std::shared_ptr<FontFace_c> FontCache_c::getFont(const FontResource_c & res, uint32_t size)
+std::shared_ptr<FontFace_c> FontCache_c::getFont(const FontFileResource_c & res, uint32_t size)
 {
   fontFaceParameter_c ffp(res, size);
 
@@ -80,17 +81,29 @@ std::shared_ptr<FontFace_c> FontCache_c::getFont(const FontResource_c & res, uin
 
   if (i != fonts.end())
   {
-    auto a = i->second.lock();
+    auto a = i->second;
 
-    if (a)
-      return a;
+    if (a) return a;
   }
 
   // TODO... race maybe someone else opens a font here?
 
-  auto f = std::make_shared<FontFace_c>(lib, res, size);
+  auto a = std::make_shared<FontFace_c>(lib, res, size);
 
-  fonts[ffp] = f;
+  fonts.insert(std::make_pair(ffp, a));
+
+  return a;
+}
+
+
+Font_c FontCache_c::getFont(const FontResource_c & res, uint32_t size)
+{
+  Font_c f;
+
+  for (auto & r : res)
+  {
+    f.add(getFont(r, size));
+  }
 
   return f;
 }
@@ -128,25 +141,25 @@ bool FontFace_c::containsGlyph(char32_t ch)
   return FT_Get_Char_Index(f, ch) != 0;
 }
 
-FT_Face FreeTypeLibrary_c::newFace(const FontResource_c & res, uint32_t size)
+FT_Face FreeTypeLibrary_c::newFace(const FontFileResource_c & r, uint32_t size)
 {
   FT_Face f;
   FT_Open_Args a;
-  if (res.getDatasize() == 0) {
+  if (r.getDatasize() == 0) {
       a.flags = FT_OPEN_PATHNAME;
-      a.pathname = const_cast<FT_String*>(res.getDescription().c_str());  // TODO const correctness is not given
+      a.pathname = const_cast<FT_String*>(r.getDescription().c_str());  // TODO const correctness is not given
       a.num_params = 0;
       a.params = nullptr;
   } else {
       a.flags = FT_OPEN_MEMORY;
-      a.memory_base = res.getData().get();
-      a.memory_size = res.getDatasize();
+      a.memory_base = r.getData().get();
+      a.memory_size = r.getDatasize();
       a.num_params = 0;
       a.params = nullptr;
   }
   if (FT_Open_Face(lib, &a, 0, &f))
   {
-    throw FreetypeException_c(std::string("Could not open Font '") + res.getDescription() + "' maybe "
+    throw FreetypeException_c(std::string("Could not open Font '") + r.getDescription() + "' maybe "
                               "file is spelled wrong or file is broken");
   }
 
@@ -155,7 +168,7 @@ FT_Face FreeTypeLibrary_c::newFace(const FontResource_c & res, uint32_t size)
     doneFace(f);
 
     throw FreetypeException_c(std::string("Could not set the requested file to font '") +
-                              res.getDescription() + "'");
+                              r.getDescription() + "'");
   }
 
   /*  See http://www.microsoft.com/typography/otspec/name.htm
@@ -178,7 +191,7 @@ FT_Face FreeTypeLibrary_c::newFace(const FontResource_c & res, uint32_t size)
       {
         doneFace(f);
         throw FreetypeException_c(std::string("Could not set a unicode character map to font '") +
-                                  res.getDescription() + "'. Maybe the font doesn't have one?");
+                                  r.getDescription() + "'. Maybe the font doesn't have one?");
       }
       return f;
     }
@@ -186,7 +199,7 @@ FT_Face FreeTypeLibrary_c::newFace(const FontResource_c & res, uint32_t size)
 
   doneFace(f);
   throw FreetypeException_c(std::string("Could not find a unicode character map to font '") +
-                            res.getDescription() + "'. Maybe the font doesn't have one?");
+                            r.getDescription() + "'. Maybe the font doesn't have one?");
 }
 
 void FreeTypeLibrary_c::doneFace(FT_Face f)
@@ -209,6 +222,18 @@ FreeTypeLibrary_c::FreeTypeLibrary_c()
   FT_Library_SetLcdFilter(lib, FT_LCD_FILTER_DEFAULT);
 }
 
+std::shared_ptr<FontFace_c> Font_c::get(char32_t codepoint) const
+{
+  for (auto f : fonts)
+    if (f->containsGlyph(codepoint)) return f;
+
+  if (fonts.size())
+    return fonts[0];
+
+  return 0;
+}
+
+
 void FontFamily_c::addFont(const FontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
   fontFamilyParameter_c par;
@@ -221,7 +246,7 @@ void FontFamily_c::addFont(const FontResource_c & res, const std::string& style,
   fonts[par] = res;
 }
 
-std::shared_ptr<FontFace_c> FontFamily_c::getFont(uint32_t size, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
+Font_c FontFamily_c::getFont(uint32_t size, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
   fontFamilyParameter_c par;
 
@@ -235,39 +260,12 @@ std::shared_ptr<FontFace_c> FontFamily_c::getFont(uint32_t size, const std::stri
   // when the font is not found, return an empty pointer
   if (i == fonts.end())
   {
-    return std::shared_ptr<FontFace_c>();
+    return Font_c();
   }
   else
   {
     return cache->getFont(i->second, size);
   }
-}
-
-FontResource_c FontCache_c::getFontResource(std::shared_ptr<FontFace_c> f) const
-{
-  for (const auto a : fonts)
-    if (a.second.lock() == f)
-      return a.first.res;
-
-  return FontResource_c();
-}
-
-uint32_t FontCache_c::getFontSize(std::shared_ptr<FontFace_c> f) const
-{
-  for (const auto a : fonts)
-    if (a.second.lock() == f)
-      return a.first.size;
-
-  return 0;
-}
-
-bool FontCache_c::containsFont(std::shared_ptr<FontFace_c> f) const
-{
-  for (const auto a : fonts)
-    if (a.second.lock() == f)
-      return true;
-
-  return false;
 }
 
 }

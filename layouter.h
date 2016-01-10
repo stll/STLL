@@ -293,7 +293,7 @@ class codepointAttributes
 
   /** \brief font of the letter
    */
-  std::shared_ptr<FontFace_c> font;
+  Font_c font;
 
   /** \brief current language at this letter
    */
@@ -375,7 +375,7 @@ class codepointAttributes
 
   /** \brief create an empty attribute, no font, no language, no flags, no inlay, no baseline shift
    */
-  codepointAttributes(void) : font(0), lang(""), flags(0), inlay(0), baseline_shift(0), link(0) { }
+  codepointAttributes(void) : lang(""), flags(0), inlay(0), baseline_shift(0), link(0) { }
 
   /** \brief comparison operator
    */
@@ -560,7 +560,7 @@ typedef struct {
    *
    * When not set, the underline will use the parameters of the font of each glyph.
    */
-  std::shared_ptr<FontFace_c> underlineFont;
+  Font_c underlineFont;
 
   /** \brief link URLs for the links used in the */
   std::vector<std::string> links;

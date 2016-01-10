@@ -210,7 +210,7 @@ std::string getNodePath(X xml)
 
 
 template <class X>
-std::shared_ptr<FontFace_c> getFontForNode(X xml, const textStyleSheet_c & rules)
+Font_c getFontForNode(X xml, const textStyleSheet_c & rules)
 {
   std::string fontFamily = rules.getValue(xml, "font-family");
   std::string fontStyle = rules.getValue(xml, "font-style");
@@ -234,7 +234,7 @@ std::shared_ptr<FontFace_c> getFontForNode(X xml, const textStyleSheet_c & rules
                                      "', variant: '" + fontVariant +
                                      "', weight: '" + fontWeight + ") required here: " + getNodePath(xml));
 
-  return 0;
+  return Font_c();
 }
 
 
@@ -584,13 +584,13 @@ X layoutXML_text(X xml, const textStyleSheet_c & rules,
     {
       auto font = getFontForNode(xml, rules);
 
-      layoutXML_text(xml_getFirstChild(xml), rules, prop, txt, attr, baseline-font->getAscender()/2, link);
+      layoutXML_text(xml_getFirstChild(xml), rules, prop, txt, attr, baseline-font.getAscender()/2, link);
     }
     else if (xml_isElementNode(xml) && (std::string("sup") == xml_getName(xml)))
     {
       auto font = getFontForNode(xml_getParent(xml), rules);
 
-      layoutXML_text(xml_getFirstChild(xml), rules, prop, txt, attr, baseline+font->getAscender()/2, link);
+      layoutXML_text(xml_getFirstChild(xml), rules, prop, txt, attr, baseline+font.getAscender()/2, link);
     }
     else if (xml_isElementNode(xml) && (std::string("br") == xml_getName(xml)))
     {
@@ -726,7 +726,7 @@ TextLayout_c layoutXML_UL(X & xml, const textStyleSheet_c & rules, const Shape_c
       a.shadows = evalShadows(rules.getValue(xml, "text-shadow"));
 
       int32_t padding = evalSize(rules.getValue(i, "padding"));
-      int32_t listIndent = font->getAscender();
+      int32_t listIndent = font.getAscender();
 
       auto direction = rules.getValue(xml, "direction");
 

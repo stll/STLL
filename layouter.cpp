@@ -219,10 +219,13 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     {
       auto a = attr.get(i);
 
-      // if we don't have the font in the map yet, we add it
-      if (a.font && (hb_ft_fonts.find(a.font) == hb_ft_fonts.end()))
+      for (auto f : a.font)
       {
-        hb_ft_fonts[a.font] = hb_ft_font_create(a.font->getFace(), NULL);
+        // if we don't have the font in the map yet, we add it
+        if (hb_ft_fonts.find(f) == hb_ft_fonts.end())
+        {
+          hb_ft_fonts[f] = hb_ft_font_create(f->getFace(), NULL);
+        }
       }
 
       normalLayer = std::max(normalLayer, attr.get(i).shadows.size());
@@ -248,11 +251,14 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     // find end of current run
     //
     // the continues, as long as
+
+    std::shared_ptr<FontFace_c> font = attr.get(runstart).font.get(txt32[runstart]);
+
     while (   (spos < txt32.length())                                                       // there is text left in our string
            && (   isBidiCharacter(txt32[spos])                                              // and
                || (  (embedding_levels[runstart] == embedding_levels[spos])                 //  text direction has not changed
                   && (attr.get(runstart).lang == attr.get(spos).lang)                       //  text still has the same language
-                  && (attr.get(runstart).font == attr.get(spos).font)                       //  and the same font
+                  && (font == attr.get(spos).font.get(txt32[spos]))                         //  and the same font
                   && (attr.get(runstart).baseline_shift == attr.get(spos).baseline_shift)   //  and the same baseline
                   && (!attr.get(spos).inlay)                                                //  and next char is not an inlay
                   && (!attr.get(spos-1).inlay)                                              //  and we are an not inlay
@@ -318,7 +324,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       // we want to append a hyphen, sadly not all fonts contain the proper character for
       // this simple symbol, so we first try the proper one, and if that is not available
       // we use hyphen-minus, which all should have
-      if (attr.get(runstart).font->containsGlyph(U'\u2010'))
+      if (font->containsGlyph(U'\u2010'))
       {
         hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(U"\u2010"), 1, 0, 1);
       }
@@ -339,8 +345,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     }
 
     // get the right font for this run and do the shaping
-    if (attr.get(runstart).font)
-      hb_shape(hb_ft_fonts[attr.get(runstart).font], buf, NULL, 0);
+    if (font)
+      hb_shape(hb_ft_fonts[font], buf, NULL, 0);
 
     // get the output
     unsigned int         glyph_count;
@@ -351,7 +357,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     run.dx = run.dy = 0;
     run.embeddingLevel = embedding_levels[runstart];
     run.linebreak = linebreaks[spos-1];
-    run.font = attr.get(runstart).font;
+    run.font = font;
     if (attr.get(runstart).inlay)
     {
       // for inlays the ascender and descender depends on the size of the inlay
@@ -415,13 +421,13 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
           if (prop.underlineFont)
           {
-            ry = -((prop.underlineFont->getUnderlinePosition()+prop.underlineFont->getUnderlineThickness()/2));
-            rh = std::max(64, prop.underlineFont->getUnderlineThickness());
+            ry = -((prop.underlineFont.getUnderlinePosition()+prop.underlineFont.getUnderlineThickness()/2));
+            rh = std::max(64, prop.underlineFont.getUnderlineThickness());
           }
           else
           {
-            ry = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2));
-            rh = std::max(64, a.font->getUnderlineThickness());
+            ry = -((a.font.getUnderlinePosition()+a.font.getUnderlineThickness()/2));
+            rh = std::max(64, a.font.getUnderlineThickness());
           }
 
           for (size_t j = 0; j < a.shadows.size(); j++)
@@ -439,7 +445,6 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       {
         // output the glyph
         glyphIndex_t gi = glyph_info[j].codepoint;
-        auto gf = attr.get(runstart).font;
 
         int32_t gx = run.dx + (glyph_pos[j].x_offset);
         int32_t gy = run.dy - (glyph_pos[j].y_offset)-attr.get(runstart).baseline_shift;
@@ -452,7 +457,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
         {
           run.run.push_back(std::make_pair(j,
-              CommandData_c(gf, gi, gx+a.shadows[j].dx, gy+a.shadows[j].dy, a.shadows[j].c, a.shadows[j].blurr)));
+              CommandData_c(font, gi, gx+a.shadows[j].dx, gy+a.shadows[j].dy, a.shadows[j].c, a.shadows[j].blurr)));
         }
 
         // calculate the new position and round it
@@ -463,7 +468,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         run.dy = roundToDivisible(run.dy, prop.round);
 
         // output the final glyph
-        run.run.push_back(std::make_pair(normalLayer, CommandData_c(gf, gi, gx, gy, a.c, 0)));
+        run.run.push_back(std::make_pair(normalLayer, CommandData_c(font, gi, gx, gy, a.c, 0)));
 
         // create underline commands
         if (a.flags & codepointAttributes::FL_UNDERLINE)
@@ -473,13 +478,13 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
           if (prop.underlineFont)
           {
-            gh = std::max(64, prop.underlineFont->getUnderlineThickness());
-            gy = -((prop.underlineFont->getUnderlinePosition()+prop.underlineFont->getUnderlineThickness()/2));
+            gh = std::max(64, prop.underlineFont.getUnderlineThickness());
+            gy = -((prop.underlineFont.getUnderlinePosition()+prop.underlineFont.getUnderlineThickness()/2));
           }
           else
           {
-            gh = std::max(64, a.font->getUnderlineThickness());
-            gy = -((a.font->getUnderlinePosition()+a.font->getUnderlineThickness()/2));
+            gh = std::max(64, a.font.getUnderlineThickness());
+            gy = -((a.font.getUnderlinePosition()+a.font.getUnderlineThickness()/2));
           }
 
           for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)

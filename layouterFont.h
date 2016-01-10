@@ -33,6 +33,7 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <vector>
 
 #include <stdint.h>
 #include <stdexcept>
@@ -72,50 +73,40 @@ class FreetypeException_c : public std::runtime_error
 
 class FreeTypeLibrary_c;
 
-/** \brief This class represents a font resource.
- *
- *  Right now a file name or a memory pointer are supported resource types
+/** \brief encapsulate information for one font file
  */
-class FontResource_c
+class FontFileResource_c
 {
   private:
-    std::shared_ptr<uint8_t> data;
-    size_t datasize;
-    std::string descr;
+    std::shared_ptr<uint8_t> data; ///< pointer to an already loaded font file
+    size_t datasize;               ///< size of that data chunk
+    std::string descr;             ///< either a complete path to a font file, or a short description for the loaded file
 
   public:
-    /** Create a font resource for a file given its path.
-     *
-     * \param pathname File name of the file to use as font
-     */
-    FontResource_c(const std::string & pathname): data(nullptr), datasize(0), descr(pathname) {};
 
-    /** Create a font resource from memory.
-     *
-     * \param data is a pair containing a shared pointer to the data and the size of the data
-     * \param descr description string, will be used to describe the font when an exception is thrown
-     *              (e.g. problems loading the font)
+    /** \brief create a font resource for font in RAM
+     * \param p pointer to the RAM data
+     * \param s size in bytes of the RAM data
+     * \param d description of the font... not used by the library, you may use it for yourself to recognize fonts
      */
-    FontResource_c(std::pair<std::shared_ptr<uint8_t>, size_t> data, const std::string & descr): data(data.first), datasize(data.second), descr(descr) {};
+    FontFileResource_c(std::shared_ptr<uint8_t> p, size_t s, std::string d) : data(std::move(p)), datasize(s), descr(std::move(d)) {}
 
-    /** Create an empty resource
-     *
-     * This constructor is required by the STL containers, don't use it
+    /** \brief create a font resource for a font in a file
+     * \param filename the filename to use
      */
-    FontResource_c(void): data(nullptr), datasize(0), descr("") {}
+    FontFileResource_c(std::string filename) : datasize(0), descr(std::move(filename)) {}
 
-    /** Get the description of the font resource.
-     *
-     * \return the description. This will be either the path to the font file, or the description
-     * given when creating a memory resource
-     */
+    /** Get the font description or the font file */
     const std::string & getDescription(void) const { return descr; }
 
-    std::shared_ptr<uint8_t> getData() const { return data; }
+    /** get the data, if nullptr, then description contains a file name */
+    std::shared_ptr<uint8_t> getData(void) const { return data; }
 
-    size_t getDatasize() const { return datasize; }
+    /** get the size of the data returned in getData */
+    size_t getDatasize(void) const { return datasize; }
 
-    bool operator<(const FontResource_c & b) const
+    /** comparison operator for stl containert */
+    bool operator<(const FontFileResource_c & b) const
     {
       if (data < b.data) return true;
       if (data > b.data) return false;
@@ -126,17 +117,81 @@ class FontResource_c
       if (descr < b.descr) return true;
       return false;
     }
-
-    bool operator>(const FontResource_c & b) const { return b < *this; }
 };
 
-/** \brief This class represents one font, made out of one resource and with a certain size.
+
+/** \brief This class represents a font resource.
+ *
+ *  A font is a collection of several font files that together constitute of the font. If several
+ *  files contain the same glyphs then the first one added to this resource class will be used
+ *
+ *  A good example for the usage of this is the google noto font. Which consists of many files
+ *  but the hebrew fonts don't contain numbers for example, so you have to take the glyphs for
+ *  numbers from the regular fonts with the roman letters
+ */
+class FontResource_c
+{
+  private:
+    std::vector<FontFileResource_c> resources;
+
+  public:
+    /** create a new font resource with one font
+     */
+    template <typename... Args>
+    FontResource_c(Args... par) { addFont(par...); }
+
+    /** add another font to the resource: a file given its path.
+     *
+     * \param pathname File name of the file to use as font
+     */
+    void addFont(const std::string & pathname)
+    {
+      resources.emplace_back(FontFileResource_c(pathname));
+    };
+
+    /** add another font to the resource: from memory.
+     *
+     * \param data is a pair containing a shared pointer to the data and the size of the data
+     * \param descr description string, will be used to describe the font when an exception is thrown
+     *              (e.g. problems loading the font)
+     */
+    void addFont(std::pair<std::shared_ptr<uint8_t>, size_t> data, const std::string & descr)
+    {
+      resources.emplace_back(FontFileResource_c(data.first, data.second, descr));
+    }
+
+    /** the number of font files in this font
+     */
+    size_t size(void) const { return resources.size(); }
+
+    /** iterators for for loops */
+    auto begin(void) const { return resources.begin(); }
+    auto end(void) const { return resources.end(); }
+
+    /** Create an empty resource
+     *
+     * This constructor is required by the STL containers, don't use it
+     */
+    FontResource_c(void) {}
+
+    /** get the fontfile ressource class for the fontfile at a given index
+     */
+    FontFileResource_c getRessource(size_t idx) const { return resources[idx]; }
+
+    /** operator for stl container usage */
+    bool operator<(const FontResource_c & b) const
+    {
+      return std::lexicographical_compare(resources.begin(), resources.end(), b.resources.begin(), b.resources.end());
+    }
+};
+
+/** \brief This class represents one font, made out of one font file resource with a certain size.
  */
 class FontFace_c : boost::noncopyable
 {
   public:
 
-    FontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const FontResource_c & res, uint32_t size);
+    FontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const FontFileResource_c & r, uint32_t size);
     ~FontFace_c();
 
     /** \brief Get the FreeType structure for this font
@@ -147,6 +202,14 @@ class FontFace_c : boost::noncopyable
 
     /** \name Functions to get font metrics
      *  @{ */
+
+    /** \brief get the size of the font
+     */
+    uint32_t getSize(void) const { return size; }
+
+    /** \brief get the font resource that was used to create this font
+     */
+    const FontFileResource_c & getResource(void) const { return rec; }
 
     /** \brief Get the height of the font with multiplication factor of 64
      * \return height of font
@@ -191,6 +254,47 @@ class FontFace_c : boost::noncopyable
   private:
     FT_FaceRec_ *f;
     std::shared_ptr<FreeTypeLibrary_c> lib;
+    FontFileResource_c rec;
+    uint32_t size;
+};
+
+/** \brief contains all the FontFaces_c of one FontRessource_c
+ *
+ * You usually don't create this class, it is greated for you by FontCache_c::getFont
+ */
+class Font_c
+{
+  public:
+
+    Font_c(void) {}
+
+    /** add a font face to the font */
+    void add(std::shared_ptr<FontFace_c> f) { fonts.emplace_back(std::move(f)); }
+
+    /** iterators for for loops */
+    auto begin(void) const { return fonts.begin(); }
+    auto end(void) const { return fonts.end(); }
+
+    /** \brief find the fontface that contains the codepoint
+     */
+    std::shared_ptr<FontFace_c> get(char32_t codepoint) const;
+
+    // some functions that get metrics of this font, they are always taken from the
+    // first font face in the font
+    uint32_t getHeight(void) const { return fonts[0]->getHeight(); }
+    int32_t getAscender(void) const { return fonts[0]->getAscender(); }
+    int32_t getDescender(void) const { return fonts[0]->getDescender(); }
+    int32_t getUnderlinePosition(void) const { return fonts[0]->getUnderlinePosition(); }
+    int32_t getUnderlineThickness(void) const { return fonts[0]->getUnderlineThickness(); }
+
+    /** number of font faces in the font */
+    explicit operator bool() const { return fonts.size() > 0; }
+
+    /** comparison operator */
+    bool operator==(const Font_c & rhs) const { return std::equal(fonts.begin(), fonts.end(), rhs.fonts.begin(), rhs.fonts.end()); }
+
+  private:
+    std::vector<std::shared_ptr<FontFace_c>> fonts;
 };
 
 /** \brief This class encapsulates an instance of the FreeType library
@@ -218,7 +322,7 @@ class FreeTypeLibrary_c : boost::noncopyable
      * \param size The requested font size
      * \return The FT_Face value
      */
-    FT_FaceRec_ * newFace(const FontResource_c & res, uint32_t size);
+    FT_FaceRec_ * newFace(const FontFileResource_c & r, uint32_t size);
 
     /** Make the library destroy a font
      *
@@ -261,60 +365,55 @@ class FontCache_c
      * otherwise a new one will be opened.
      *
      * \param res The resource to use to create the font instance
+     * \param idx the index, which font do we want to get from the ressource
      * \param size The requested size
      * \return The instance of the font face
      */
-    std::shared_ptr<FontFace_c> getFont(const FontResource_c & res, uint32_t size);
+    Font_c getFont(const FontResource_c & res, uint32_t size);
 
-    /** \brief Get the font resource for a font inside the cache (or empty resource, if the
-     * font is not within
-     *
-     * \param f font to look for
-     * \return the resource that was used to create the font
-     *
-     * \note The returned value is undefined, when the font doesn't exist in the cache
-     */
-    FontResource_c getFontResource(std::shared_ptr<FontFace_c> f) const;
+    std::shared_ptr<FontFace_c> getFont(const FontFileResource_c & res, uint32_t size);
 
-    /** \brief Get the font size for a font inside the cache (or zero, if the
-     * font is not within
-     *
-     * \param f font to look for
-     * \return the size used to create the font
-     *
-     * \note The returned value is undefined, when the font doesn't exist in the cache
+    /** \brief remove all fonts from the cache, fonts that are still in use will be kept, but all others
+     * are removed
      */
-    uint32_t getFontSize(std::shared_ptr<FontFace_c> f) const;
-
-    /** \brief Find out, if a given font is handled inside this cache
-     *
-     * \return true, when the font is inside this cache
-     */
-    bool containsFont(std::shared_ptr<FontFace_c> f) const;
+    void clear(void)
+    {
+      for(auto it = fonts.begin(); it != fonts.end(); )
+      {
+        if(it->second.use_count() == 1)
+        {
+          it = fonts.erase(it);
+        }
+        else
+        {
+          ++it;
+        }
+      }
+    }
 
   private:
 
     class fontFaceParameter_c
     {
-    public:
-      FontResource_c res;
-      uint32_t size;
+      public:
+        FontFileResource_c res;
+        uint32_t size;
 
-      fontFaceParameter_c(const FontResource_c & r, uint32_t s) : res(r), size(s) {}
+        fontFaceParameter_c(const FontFileResource_c r, uint32_t s) : res(std::move(r)), size(s) {}
 
-      bool operator<(const fontFaceParameter_c & b) const
-      {
-        if (res < b.res) return true;
-        if (res > b.res) return false;
+        bool operator<(const fontFaceParameter_c & b) const
+        {
+          if (res < b.res) return true;
+          if (b.res < res) return false;
 
-        if (size < b.size) return true;
-        return false;
-      }
+          if (size < b.size) return true;
+          return false;
+        }
     };
 
     // all open fonts, used to check whether they have all been released
     // on library destruction
-    std::map<fontFaceParameter_c, std::weak_ptr<FontFace_c> > fonts;
+    std::map<fontFaceParameter_c, std::shared_ptr<FontFace_c> > fonts;
 
     // the library to use
     std::shared_ptr<FreeTypeLibrary_c> lib;
@@ -380,11 +479,11 @@ class FontFamily_c
      * \param stretch Font stretch, typical values are: "normal", "condensed"
      * \returns a nullptr, when the requested face doesn't exist, the font otherwise
      */
-    std::shared_ptr<FontFace_c> getFont(uint32_t size,
-                                        const std::string & style = "normal",
-                                        const std::string & variant = "normal",
-                                        const std::string & weight = "normal",
-                                        const std::string & stretch = "normal");
+    Font_c getFont(uint32_t size,
+                   const std::string & style = "normal",
+                   const std::string & variant = "normal",
+                   const std::string & weight = "normal",
+                   const std::string & stretch = "normal");
 
     /** \brief Add a font to the family
      *

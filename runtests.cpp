@@ -67,8 +67,8 @@ static bool compare(const STLL::TextLayout_c & l, const pugi::xml_node & doc, st
       if (l.getData()[i].glyphIndex != std::stoi(a.attribute("glyphIndex").value())) return false;
 
       int f = std::stoi(a.attribute("font").value());
-      if (c->getFontResource(l.getData()[i].font).getDescription() != found[f].first) return false;
-      if (c->getFontSize(l.getData()[i].font) != found[f].second) return false;
+      if (l.getData()[i].font->getResource().getDescription() != found[f].first) return false;
+      if (l.getData()[i].font->getSize() != found[f].second) return false;
 
       if (l.getData()[i].c.r() != std::stoi(a.attribute("r").value())) return false;
       if (l.getData()[i].c.g() != std::stoi(a.attribute("g").value())) return false;

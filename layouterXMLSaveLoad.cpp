@@ -47,13 +47,10 @@ void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node, std::shared_
     {
       found.push_back(a.font);
 
-      if (!c->containsFont(a.font))
-        throw SaveLoadException_c("Font not found in cache, maybe wrong cache?");
-
       auto fnt = fonts.append_child();
       fnt.set_name("font");
-      fnt.append_attribute("file").set_value(c->getFontResource(a.font).getDescription().c_str());
-      fnt.append_attribute("size").set_value(c->getFontSize(a.font));
+      fnt.append_attribute("file").set_value(a.font->getResource().getDescription().c_str());
+      fnt.append_attribute("size").set_value(a.font->getSize());
     }
   }
 
@@ -142,7 +139,7 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontC
   std::vector<std::shared_ptr<FontFace_c>> found;
 
   for (const auto a : fonts.children())
-    found.push_back(c->getFont(FontResource_c(a.attribute("file").value()), std::stoi(a.attribute("size").value())));
+    found.push_back(c->getFont(FontFileResource_c(a.attribute("file").value()), std::stoi(a.attribute("size").value())));
 
   auto commands = doc.child("commands");
 
