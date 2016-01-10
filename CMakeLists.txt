@@ -95,13 +95,33 @@ endif()
 
 # Example programs
 if(SDL_FOUND)
-  add_executable(example example.cpp)
-  target_compile_options(example PRIVATE -std=c++14)
-  target_include_directories(example PRIVATE
+  add_executable(example1 example1.cpp)
+  target_compile_options(example1 PRIVATE -std=c++14)
+  target_include_directories(example1 PRIVATE
     ${SDL_INCLUDE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
   )
-  target_link_libraries(example PRIVATE stll
+  target_link_libraries(example1 PRIVATE stll
+    ${SDL_LIBRARY}
+  )
+
+  add_executable(example2 example2.cpp)
+  target_compile_options(example2 PRIVATE -std=c++14)
+  target_include_directories(example2 PRIVATE
+    ${SDL_INCLUDE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+  )
+  target_link_libraries(example2 PRIVATE stll
+    ${SDL_LIBRARY}
+  )
+
+  add_executable(example3 example3.cpp)
+  target_compile_options(example3 PRIVATE -std=c++14)
+  target_include_directories(example3 PRIVATE
+    ${SDL_INCLUDE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+  )
+  target_link_libraries(example3 PRIVATE stll
     ${SDL_LIBRARY}
   )
 endif()

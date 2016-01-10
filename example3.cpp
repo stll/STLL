@@ -74,7 +74,7 @@ class layoutInfo_c
 
 class myImageDrawer_c : public imageDrawerSDL_c
 {
-  void draw(int32_t x, int32_t y, uint32_t w, uint32_t h, SDL_Surface * s, const std::string & url)
+  void draw(int32_t x, int32_t y, uint32_t w, uint32_t h, SDL_Surface * s, const std::string &)
   {
     SDL_Rect r;
 
@@ -103,9 +103,26 @@ void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
   SDL_EnableUNICODE(1);
 
   /* Clear our surface */
-  SDL_FillRect(screen, NULL, 0 );
 
   myImageDrawer_c id;
+
+#if 0
+  auto t = SDL_GetTicks();
+  int i;
+
+  while (SDL_GetTicks()-t < 5000)
+  {
+    for (auto & a : data)
+      showLayoutSDL(a.layout, a.sx, a.sy, screen, a.sp, &id);
+
+    i++;
+  }
+
+  printf("%i runden\n", i);
+#endif
+
+  SDL_FillRect(screen, NULL, 0 );
+
 
   for (auto & a : data)
     showLayoutSDL(a.layout, a.sx, a.sy, screen, a.sp, &id);
@@ -144,20 +161,33 @@ int main ()
   textStyleSheet_c styleSheet(fc);
 
   // alle Fonts, die so genutzt werden: familie heißt sans, und dann der bold Font dazu
-  styleSheet.font("sans", FontResource_c("/usr/share/fonts/freefont/FreeSerif.ttf"));
-  styleSheet.font("sans", FontResource_c("/usr/share/fonts/freefont/FreeSerifBold.ttf"), "normal", "normal", "bold");
-  styleSheet.font("sans-ar", FontResource_c(loadFile("tests/Amiri.ttf"), "arabic"));
+  {
+    FontResource_c r;
+    r.addFont("/usr/share/fonts/noto/NotoSans-Regular.ttf");
+    r.addFont("/usr/share/fonts/noto/NotoSansHebrew-Regular.ttf");
+    r.addFont("/usr/share/fonts/noto/NotoKufiArabic-Regular.ttf");
+
+    styleSheet.font("sans", r);
+  }
+  {
+    FontResource_c r;
+    r.addFont("/usr/share/fonts/noto/NotoSans-Bold.ttf");
+    r.addFont("/usr/share/fonts/noto/NotoSansHebrew-Bold.ttf");
+    r.addFont("/usr/share/fonts/noto/NotoKufiArabic-Bold.ttf");
+
+    styleSheet.font("sans", r, "normal", "normal", "bold");
+  }
 
   // CSS regeln, immer Selector, attribut, wert
   styleSheet.addRule("body", "color", "#ffffff");
-  styleSheet.addRule("body", "font-size", "16px");
+  styleSheet.addRule("body", "font-size", "13px");
   styleSheet.addRule("sub", "font-size", "80%");
   styleSheet.addRule("sup", "font-size", "80%");
   styleSheet.addRule("body", "text-align", "justify");
   styleSheet.addRule("p", "text-indent", "10px");
   styleSheet.addRule("body", "padding", "10px");
 //  styleSheet.addRule("body", "background-color", "#303030");
-  styleSheet.addRule("body", "text-shadow", "1px 1px #000000");
+  styleSheet.addRule("body", "text-shadow", "1px 1px 3px #000000");
 //  styleSheet.addRule("p", "padding", "10px");
 //  styleSheet.addRule("ul", "padding", "10px");
 //  styleSheet.addRule("li", "padding", "10px");
@@ -169,13 +199,13 @@ int main ()
   styleSheet.addRule("h1", "font-size", "60px");
   styleSheet.addRule("h1", "text-align", "center");
   styleSheet.addRule("h1", "text-decoration", "underline");
-  styleSheet.addRule("h1", "text-shadow", "1px 1px #F0F0F0, -1px -1px #000000");
+//  styleSheet.addRule("h1", "text-shadow", "1px 1px 3px #F0F0F0, -1px -1px 3px #000000");
+  styleSheet.addRule("h1", "text-shadow", "7px 7px 7px #FF0101");
   styleSheet.addRule("h1", "color", "#909090");
   styleSheet.addRule(".und", "text-decoration", "underline");
   styleSheet.addRule("p[lang|=he]", "direction", "rtl");
   styleSheet.addRule("ul[lang|=he]", "direction", "rtl");
   styleSheet.addRule("p[lang|=ar]", "direction", "rtl");
-  styleSheet.addRule("p[lang|=ar]", "font-family", "sans-ar");
   styleSheet.addRule(".framed", "border-width", "1px");
   styleSheet.addRule(".framed", "padding", "10px");
   styleSheet.addRule(".framed", "border-color", "#ff0000");
@@ -194,7 +224,7 @@ int main ()
   styleSheet.addRule("th", "border-color", "#000000");
   styleSheet.addRule("th", "border-bottom-color", "#FFFFFF");
   styleSheet.addRule("th", "text-align", "center");
-  styleSheet.addRule("th", "text-shadow", "1px 1px #000000");
+  styleSheet.addRule("th", "text-shadow", "1px 1px 0px #000000");
 //  styleSheet.addRule("th", "margin", "10px");
   styleSheet.addRule("table", "margin", "10px");
   styleSheet.addRule("table", "border-width", "1px");
@@ -283,10 +313,10 @@ int main ()
     l.emplace_back(layoutInfo_c(layoutXHTML(Pugi, text, styleSheet, RectangleShape_c(64*TXT_WIDTH)),
                                 (WIN_WIDTH-TXT_WIDTH)/2, 10, SUBP_RGB));
 
-    l[0].layout.addCommand(0, 0, TXT_WIDTH*64, l[1].layout.getHeight(), color_c(50, 50, 50));
+    l[0].layout.addCommand(0, 0, TXT_WIDTH*64, l[1].layout.getHeight(), color_c(50, 50, 50), 0);
 
     pugi::xml_document doc;
-    saveLayoutToXML(l[1].layout, doc, fc);
+    saveLayoutToXML(l[1].layout, doc);
     doc.save_file("example.lay");
 
     // Ausgabe mittels SDL
