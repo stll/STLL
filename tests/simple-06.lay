@@ -4,13 +4,13 @@
 		<font file="tests/FreeSans.ttf" size="1024" />
 	</fonts>
 	<commands>
-		<glyph x="0" y="896" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
-		<rect x="0" y="1076" w="711" h="64" r="255" g="255" b="255" a="255" />
-		<glyph x="640" y="896" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" />
-		<rect x="640" y="1076" w="610" h="64" r="255" g="255" b="255" a="255" />
-		<glyph x="1216" y="896" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" />
-		<rect x="1216" y="1076" w="569" h="64" r="255" g="255" b="255" a="255" />
-		<glyph x="1728" y="896" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" />
-		<rect x="1728" y="1076" w="351" h="64" r="255" g="255" b="255" a="255" />
+		<glyph x="0" y="896" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<rect x="0" y="1076" w="711" h="64" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="647" y="896" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<rect x="647" y="1076" w="610" h="64" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1193" y="896" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<rect x="1193" y="1076" w="569" h="64" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1698" y="896" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<rect x="1698" y="1076" w="351" h="64" r="255" g="255" b="255" a="255" blurr="0" />
 	</commands>
 </layout>

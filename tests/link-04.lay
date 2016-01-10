@@ -4,38 +4,38 @@
 		<font file="tests/FreeSans.ttf" size="1024" />
 	</fonts>
 	<commands>
-		<glyph x="0" y="1280" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="640" y="1280" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1216" y="1280" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1728" y="1280" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1984" y="1280" glyphIndex="3" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="2240" y="1280" glyphIndex="51" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="2944" y="1280" glyphIndex="85" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="3264" y="1280" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" />
-		<image x="4096" y="1" w="1280" h="1280" url="a" />
-		<glyph x="5632" y="1280" glyphIndex="51" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="6336" y="1280" glyphIndex="82" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="6912" y="1280" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="7424" y="1280" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="7680" y="1280" glyphIndex="3" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="7936" y="1280" glyphIndex="47" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="8512" y="1280" glyphIndex="76" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="8768" y="1280" glyphIndex="81" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="9344" y="1280" glyphIndex="78" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="10112" y="1280" glyphIndex="21" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="0" y="1280" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="647" y="1280" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1193" y="1280" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1698" y="1280" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1985" y="1280" glyphIndex="3" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2241" y="1280" glyphIndex="51" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2913" y="1280" glyphIndex="85" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="3253" y="1280" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<image x="4055" y="1" w="1280" h="1280" url="a" />
+		<glyph x="5591" y="1280" glyphIndex="51" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="6263" y="1280" glyphIndex="82" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="6810" y="1280" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="7315" y="1280" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="7602" y="1280" glyphIndex="3" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="7858" y="1280" glyphIndex="47" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="8435" y="1280" glyphIndex="76" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="8662" y="1280" glyphIndex="81" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="9212" y="1280" glyphIndex="78" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="9994" y="1280" glyphIndex="21" font="0" r="255" g="255" b="255" a="255" blurr="0" />
 	</commands>
 	<links>
 		<link url="u1">
-			<area x="2240" y="384" w="1600" h="1088" />
-			<area x="3840" y="384" w="256" h="1088" />
-			<area x="4096" y="0" w="1280" h="1280" />
-			<area x="5376" y="384" w="256" h="1088" />
-			<area x="5632" y="384" w="2048" h="1088" />
+			<area x="2241" y="384" w="1558" h="1088" />
+			<area x="3799" y="384" w="256" h="1088" />
+			<area x="4055" y="0" w="1280" h="1280" />
+			<area x="5335" y="384" w="256" h="1088" />
+			<area x="5591" y="384" w="2011" h="1088" />
 		</link>
 		<link url="u2">
-			<area x="7936" y="384" w="1920" h="1088" />
-			<area x="9856" y="384" w="256" h="1088" />
-			<area x="10112" y="384" w="576" h="1088" />
+			<area x="7858" y="384" w="1880" h="1088" />
+			<area x="9738" y="384" w="256" h="1088" />
+			<area x="9994" y="384" w="569" h="1088" />
 		</link>
 	</links>
 </layout>

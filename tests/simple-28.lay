@@ -8,53 +8,53 @@
 		<font file="tests/FreeSans.ttf" size="671" />
 	</fonts>
 	<commands>
-		<glyph x="448" y="1088" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1088" y="1088" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1728" y="1088" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="2304" y="1088" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="2816" y="1088" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="448" y="2560" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1088" y="2560" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1728" y="2176" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" />
-		<glyph x="448" y="4928" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1088" y="4928" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1728" y="4544" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" />
-		<glyph x="2240" y="4096" glyphIndex="21" font="2" r="255" g="255" b="255" a="255" />
-		<glyph x="2688" y="3712" glyphIndex="21" font="3" r="255" g="255" b="255" a="255" />
-		<glyph x="3136" y="3392" glyphIndex="21" font="4" r="255" g="255" b="255" a="255" />
-		<glyph x="448" y="6016" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1088" y="6016" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1728" y="6464" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" />
-		<glyph x="2240" y="6848" glyphIndex="21" font="2" r="255" g="255" b="255" a="255" />
-		<glyph x="2688" y="7168" glyphIndex="21" font="3" r="255" g="255" b="255" a="255" />
-		<glyph x="3136" y="7488" glyphIndex="21" font="4" r="255" g="255" b="255" a="255" />
-		<glyph x="448" y="8864" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1088" y="8864" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
-		<image x="1728" y="7585" w="640" h="1280" url="" />
-		<glyph x="448" y="10336" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" />
+		<glyph x="435" y="1088" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1088" y="1088" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1735" y="1088" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2281" y="1088" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2786" y="1088" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="435" y="2560" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1088" y="2560" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1735" y="2112" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="435" y="4928" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1088" y="4928" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1735" y="4480" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2233" y="4064" glyphIndex="21" font="2" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2696" y="3680" glyphIndex="21" font="3" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="3123" y="3328" glyphIndex="21" font="4" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="435" y="6016" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1088" y="6016" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1735" y="6432" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2233" y="6816" glyphIndex="21" font="2" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2696" y="7168" glyphIndex="21" font="3" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="3123" y="7456" glyphIndex="21" font="4" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="435" y="8864" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1088" y="8864" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<image x="1735" y="7585" w="640" h="1280" url="" />
+		<glyph x="435" y="10336" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" blurr="0" />
 		<image x="1088" y="9057" w="640" h="1280" url="" />
-		<glyph x="448" y="11872" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" />
-		<rect x="3648" y="10336" w="6400" h="2368" r="32" g="32" b="32" a="255" />
-		<glyph x="4288" y="11872" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="4928" y="11872" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="5504" y="11872" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="6016" y="11872" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="448" y="13984" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1344" y="13984" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1984" y="13984" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="2624" y="13600" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" />
-		<glyph x="1344" y="15456" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1984" y="15456" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="2624" y="15072" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" />
-		<glyph x="448" y="16544" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1088" y="16544" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1728" y="16544" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="2240" y="16544" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1344" y="18016" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1984" y="18016" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="2624" y="17632" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" />
-		<glyph x="1344" y="19488" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="1984" y="19488" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" />
-		<glyph x="2624" y="19104" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" />
+		<glyph x="435" y="11872" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<rect x="3648" y="10336" w="6400" h="2368" r="32" g="32" b="32" a="255" blurr="0" />
+		<glyph x="4288" y="11872" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="4935" y="11872" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="5481" y="11872" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="5986" y="11872" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="435" y="13984" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1331" y="13984" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1984" y="13984" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2631" y="13536" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1331" y="15456" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1984" y="15456" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2631" y="15008" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="435" y="16544" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1088" y="16544" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1735" y="16544" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2240" y="16544" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1331" y="18016" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1984" y="18016" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2631" y="17568" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1331" y="19488" glyphIndex="3199" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="1984" y="19488" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2631" y="19040" glyphIndex="21" font="1" r="255" g="255" b="255" a="255" blurr="0" />
 	</commands>
 </layout>
