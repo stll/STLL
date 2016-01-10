@@ -99,36 +99,4 @@ make test
  * - 'Ellipsiation'. In some GUI elements there might not be enough space for the complete
  *   text. This library will automatically shorten the text until it has a certain maximal
  *   length by replacing text with '...'
- *
- * \section hint_sec Hinting and sub-pixel placement
- *
- * STLLs current approach to hinting and sub-pixel placement is:
- * - no hinting at all
- * - allow the user to choose if he wants sub-pixel placement or not
- * - depending on whether to use sub-pixel placement or not, the STLL user should
- *   choose the right amount of glyph rounding to get good results.
- *
- * Here is the rationale for that:
- * - Harfbuzz, which is used for shaping and letter positioning doesn't allow you
- *   to specify if you want hinted placement or not. The default library always uses
- *   unhinted placement.
- * - when using unhinted letters, the letters may have a width that is not a multiple
- *   of whole pixels. If you then output text aligned to whole pixels it can result
- *   in an uneven display. For example, imagine that the width of the unhinted letter
- *   is 3.5 pixel, multiple consecutive occurrences of the letters will then be at
- *   x-positions 0, 3.5, 7, 10.5, ... rounding these values results in positions 0, 3, 7, 10, ...
- *   so the distance is sometimes 4 and sometimes 3 pixels. To avoid this problem make
- *   STLL do the rounding using the STLL::StyleSheet_c.setRound function for XHTML output or
- *   the STLL::layoutProperties.round value for paragraph output. That way you will
- *   get identical distances.
- * - The sub-pixel rendering of the glyphs requires a simple low-pass filter to spread the pixel
- *   values a bit or colour fringes will be visible. Sadly those simple filters were
- *   a target of a patent-mob, so FreeType will ship by default with the filters disabled.
- *   STLL will try to enable those filters, but in case FreeType doesn't contain them they
- *   will still be inactive and result in colourful letters.
- *
- * So the guide for the user is:
- * - when possible use sub-pixel placement this results in an even type face
- * - when your FreeType needs to be without the filters, use normal output, and activate
- *   rounding of letter positions or you will see uneven letter distances
  */

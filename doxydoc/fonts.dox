@@ -1,0 +1,35 @@
+/**
+ * \page fonts_pg Fonts in STLL
+ * This page will explain how the fonts are handled in STLL.
+ *
+ * A font file resource (class FontFileResource_c) contains the information where to load a font from,
+ * when the application needs one. This can be either a file name including path or it can be a buffer
+ * containing an already loaded file.
+ *
+ * Unicode contains many more codepoints than many font files can contain. It is also not really
+ * handy to create one huge file containing all you need. That is why some fonts split up the whole
+ * range of unicode codepoints into several files. You then choose which one you want to use and assemble
+ * them into a font within your application.
+ *
+ * This concept is represented by the class FontResource_c. This class contains a list of font file resources.
+ *
+ * This class is used to specify fonts for usage or for font loading within the application. You give this
+ * class to the font cache and it will load all the required font files.
+ *
+ * What you then get is a font (class Font_c) containing all the fonts files from all the font file resources
+ * within the font resource.
+ *
+ * Each font file resource will result in a FontFace_c class added to the Font_c. Each FontFace_c is one font
+ * file loaded for usage at a certain size.
+ *
+ * For XHTML usage another layer of abstraction is added. This layer creates font families. A font family is a
+ * set of fonts, where each set has a different characteristic, e.g. normal, italic, bold font of one font.
+ *
+ * You add one font resource class for each member of the family and the XHTML layouter will use them.
+ *
+ * When drawing text using one font the application has to choose the right font face for each character to draw
+ * this is done by simply checking the font faces in the fonr one after the other. The first one that contains
+ * the required glyph is used. That means for you:
+ * - try to arrange the font files within the font resource so that the often used ones appear first
+ * - if 2 font faces provide the same characters put the one first into the resource that you want to use
+ */
