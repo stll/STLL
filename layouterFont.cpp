@@ -117,7 +117,7 @@ FT_GlyphSlotRec_ * FontFace_c::renderGlyph(glyphIndex_t glyphIndex, SubPixelArra
   }
 
   /* load glyph image into the slot (erase previous one) */
-  if (FT_Load_Glyph(f, glyphIndex, FT_LOAD_NO_HINTING)) return 0;
+  if (FT_Load_Glyph(f, glyphIndex, FT_LOAD_TARGET_LIGHT)) return 0;
   if (FT_Render_Glyph(f->glyph, rm)) return 0;
 
   return f->glyph;
