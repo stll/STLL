@@ -56,7 +56,7 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontC
  *  \attention this only works, when the fonts in the layout are all inside the cache
  *  and all the used fonts are created using file names (and not RAM pointers)
  */
-void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & doc, std::shared_ptr<FontCache_c> c);
+void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & doc);
 
 }
 

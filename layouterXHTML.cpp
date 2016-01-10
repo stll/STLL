@@ -254,7 +254,7 @@ std::string normalizeHTML(const std::string & in, char prev)
 
           if (j+2 < in.size() && in[j+2] == 'x')
           {
-            int k = j+3;
+            size_t k = j+3;
             while (k < in.size())
             {
               if (in[k] == ';')
@@ -269,7 +269,7 @@ std::string normalizeHTML(const std::string & in, char prev)
           }
           else
           {
-            int k = j+2;
+            size_t k = j+2;
             while (k < in.size())
             {
               if (in[k] == ';')

@@ -85,24 +85,17 @@ public:
   /** \brief constructor to create an glyph command
    */
   CommandData_c(std::shared_ptr<FontFace_c> f, glyphIndex_t i, int32_t x_, int32_t y_, color_c c_, uint16_t rad) :
-  command(CMD_GLYPH),
-  font(f), glyphIndex(i), x(x_), y(y_), c(c_),
-  w(0), h(0), blurr(rad) {}
+  command(CMD_GLYPH), x(x_), y(y_), glyphIndex(i), font(f), w(0), h(0), c(c_), blurr(rad) {}
 
   /** \brief constructor to create an image command
    */
   CommandData_c(const std::string & i, int32_t x_, int32_t y_, uint32_t w_, uint32_t h_) :
-  command(CMD_IMAGE),
-  imageURL(i), x(x_), y(y_), w(w_), h(h_),
-  glyphIndex(0), blurr(0) {}
+  command(CMD_IMAGE), x(x_), y(y_), glyphIndex(0), w(w_), h(h_), blurr(0), imageURL(i) {}
 
   /** \brief constructor to create an rectangle command
    */
   CommandData_c(int32_t x_, int32_t y_, uint32_t w_, uint32_t h_, color_c c_, uint16_t rad) :
-  command(CMD_RECT),
-  x(x_), y(y_), w(w_), h(h_), c(c_),
-  glyphIndex(0), blurr(rad) {}
-
+  command(CMD_RECT), x(x_), y(y_), glyphIndex(0), w(w_), h(h_), c(c_), blurr(rad) {}
 };
 
 /** \brief encapsulates a finished layout.

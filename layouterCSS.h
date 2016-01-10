@@ -213,10 +213,16 @@ class textStyleSheet_c
           return rules[bestI].value;
 
         if (!internal::isInheriting(attribute))
+        {
           if (def.empty())
+          {
             return internal::getDefault(attribute);
+          }
           else
+          {
             return def;
+          }
+        }
 
           node = xml_getParent(node);
       }

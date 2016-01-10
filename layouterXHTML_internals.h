@@ -475,8 +475,7 @@ TextLayout_c boxIt(X & xml, X & xml2, const textStyleSheet_c & rules,
 
 
 template <class X>
-TextLayout_c layoutXML_IMG(X & xml, const textStyleSheet_c & rules,
-                                  const Shape_c & shape, int32_t ystart)
+TextLayout_c layoutXML_IMG(X & xml, const textStyleSheet_c &, const Shape_c & shape, int32_t ystart)
 {
   TextLayout_c l;
 
@@ -933,7 +932,7 @@ TextLayout_c layoutXML_TABLE(X & xml, const textStyleSheet_c & rules, const Shap
         // 3) distribute the space
         if (relSum > 0.01)
         {
-          for (int i = 0; i < relativeWidths.size(); i++)
+          for (size_t i = 0; i < relativeWidths.size(); i++)
           {
             widths[i] += remainingWidth * relativeWidths[i]/relSum;
           }

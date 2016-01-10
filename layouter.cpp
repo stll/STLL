@@ -33,26 +33,15 @@
 
 namespace STLL {
 
-TextLayout_c::TextLayout_c(TextLayout_c&& src)
-{
-  swap(data, src.data);
-  height = src.height;
-  left = src.left;
-  right = src.right;
-  firstBaseline = src.firstBaseline;
-  links.swap(src.links);
-}
+TextLayout_c::TextLayout_c(TextLayout_c&& src) :
+height(src.height), left(src.left), right(src.right), firstBaseline(src.firstBaseline),
+data(std::move(src.data)), links(std::move(src.links)) { }
 
-TextLayout_c::TextLayout_c(const TextLayout_c& src): height(src.height), left(src.left),
-                                            right(src.right), data(src.data),
-                                            firstBaseline(src.firstBaseline),
-                                            links(src.links)
-{
-}
+TextLayout_c::TextLayout_c(const TextLayout_c& src):
+height(src.height), left(src.left), right(src.right), firstBaseline(src.firstBaseline),
+data(src.data), links(src.links) { }
 
-TextLayout_c::TextLayout_c(void): height(0), left(0), right(0), firstBaseline(0)
-{
-}
+TextLayout_c::TextLayout_c(void): height(0), left(0), right(0), firstBaseline(0) { }
 
 void TextLayout_c::append(const TextLayout_c & l, int dx, int dy)
 {
@@ -389,7 +378,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       auto a = attr.get(glyph_info[j].cluster + runstart);
 
       // when a new link is started, we save the current x-position within the run
-      if (!curLink && a.link || curLink != a.link)
+      if ((!curLink && a.link) || (curLink != a.link))
       {
         linkStart = run.dx;
       }

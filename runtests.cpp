@@ -38,11 +38,11 @@
 #define XMLLIB LibXML2
 #endif
 
-static bool compare(const STLL::TextLayout_c & l, const pugi::xml_node & doc, std::shared_ptr<STLL::FontCache_c> c)
+static bool compare(const STLL::TextLayout_c & l, const pugi::xml_node & doc)
 {
-  if (l.getHeight() != std::stoi(doc.attribute("height").value())) return false;
-  if (l.getLeft() != std::stoi(doc.attribute("left").value())) return false;
-  if (l.getRight() != std::stoi(doc.attribute("right").value())) return false;
+  if ((int)l.getHeight() != std::stoi(doc.attribute("height").value())) return false;
+  if ((int)l.getLeft() != std::stoi(doc.attribute("left").value())) return false;
+  if ((int)l.getRight() != std::stoi(doc.attribute("right").value())) return false;
 
   // get the fonts from the file
   auto fonts = doc.child("fonts");
@@ -64,7 +64,7 @@ static bool compare(const STLL::TextLayout_c & l, const pugi::xml_node & doc, st
       if (l.getData()[i].command != STLL::CommandData_c::CMD_GLYPH) return false;
       if (l.getData()[i].x != std::stoi(a.attribute("x").value())) return false;
       if (l.getData()[i].y != std::stoi(a.attribute("y").value())) return false;
-      if (l.getData()[i].glyphIndex != std::stoi(a.attribute("glyphIndex").value())) return false;
+      if (l.getData()[i].glyphIndex != (STLL::glyphIndex_t)std::stoi(a.attribute("glyphIndex").value())) return false;
 
       int f = std::stoi(a.attribute("font").value());
       if (l.getData()[i].font->getResource().getDescription() != found[f].first) return false;
@@ -80,20 +80,20 @@ static bool compare(const STLL::TextLayout_c & l, const pugi::xml_node & doc, st
       if (l.getData()[i].command != STLL::CommandData_c::CMD_RECT) return false;
       if (l.getData()[i].x != std::stoi(a.attribute("x").value())) return false;
       if (l.getData()[i].y != std::stoi(a.attribute("y").value())) return false;
-      if (l.getData()[i].w != std::stoi(a.attribute("w").value())) return false;
-      if (l.getData()[i].h != std::stoi(a.attribute("h").value())) return false;
-      if (l.getData()[i].c.r() != std::stoi(a.attribute("r").value())) return false;
-      if (l.getData()[i].c.g() != std::stoi(a.attribute("g").value())) return false;
-      if (l.getData()[i].c.b() != std::stoi(a.attribute("b").value())) return false;
-      if (l.getData()[i].c.a() != std::stoi(a.attribute("a").value())) return false;
+      if ((int)l.getData()[i].w != std::stoi(a.attribute("w").value())) return false;
+      if ((int)l.getData()[i].h != std::stoi(a.attribute("h").value())) return false;
+      if ((int)l.getData()[i].c.r() != std::stoi(a.attribute("r").value())) return false;
+      if ((int)l.getData()[i].c.g() != std::stoi(a.attribute("g").value())) return false;
+      if ((int)l.getData()[i].c.b() != std::stoi(a.attribute("b").value())) return false;
+      if ((int)l.getData()[i].c.a() != std::stoi(a.attribute("a").value())) return false;
     }
     else if (a.name() == std::string("image"))
     {
       if (l.getData()[i].command != STLL::CommandData_c::CMD_IMAGE) return false;
       if (l.getData()[i].x != std::stoi(a.attribute("x").value())) return false;
       if (l.getData()[i].y != std::stoi(a.attribute("y").value())) return false;
-      if (l.getData()[i].w != std::stoi(a.attribute("w").value())) return false;
-      if (l.getData()[i].h != std::stoi(a.attribute("h").value())) return false;
+      if ((int)l.getData()[i].w != std::stoi(a.attribute("w").value())) return false;
+      if ((int)l.getData()[i].h != std::stoi(a.attribute("h").value())) return false;
       if (l.getData()[i].imageURL != a.attribute("url").value()) return false;
     }
     else
@@ -166,17 +166,16 @@ bool operator==(const STLL::TextLayout_c a, const STLL::TextLayout_c b)
 }
 
 static boost::test_tools::predicate_result layouts_identical(const  STLL::TextLayout_c & l,
-                                                             const std::string & file,
-                                                             std::shared_ptr<STLL::FontCache_c> c)
+                                                             const std::string & file)
 {
   pugi::xml_document doc;
 
   auto res = doc.load_file(file.c_str());
 
-  if (!res || !compare(l, doc.child("layout"), c))
+  if (!res || !compare(l, doc.child("layout")))
   {
     doc.reset();
-    saveLayoutToXML(l, doc, c);
+    saveLayoutToXML(l, doc);
     doc.save_file((file+"new").c_str());
 
     return false;
@@ -229,45 +228,45 @@ BOOST_AUTO_TEST_CASE( Stylesheet_Resource_Tests )
   BOOST_CHECK_THROW(s.addRule("p", "font-size", "-10px"), STLL::XhtmlException_c);
 
   // invalid shadow list: unit wrong 1st number
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12p 12px #2034ff , 12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12p 12px 0px #2034ff , 12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: unit wrong 2nd number
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12x #2034ff , 12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12x 0px #2034ff , 12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: colour not enough digits
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px -12px #204ff , 12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px -12px 0px #204ff , 12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: comma missing
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px #2034ff  12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px 0px #2034ff  12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: trailing comma
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px #2034ff , -12px 12px #121212,"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px 0px #2034ff , -12px 12px 0px #121212,"), STLL::XhtmlException_c);
   // invalid shadow list: colour missing at the end
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px #2034ff , 12px -12px"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px 0px #2034ff , 12px -12px"), STLL::XhtmlException_c);
   // invalid shadow list: not enough digits for colour
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px #2034f, 12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px 0px #2034f, 12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: invalid digit in colour
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px #2034fg, 12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px 0px #2034fg, 12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: y in size unit
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12py 12px #2034ff, 12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12py 12px 0px #2034ff, 12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: too many digits in colour letter
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px #2034fff, 12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px 0px #2034fff, 12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: too many digits in colour number
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px #2034ff0, 12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px 0px #2034ff0, 12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: hash in wrong position
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px #12px #2034ff, 12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px #12px 0px #2034ff, 12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: additional minus in offset
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-1-2px 12px #2034ff, 12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-1-2px 12px 0px #2034ff, 12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: additional minus in colour
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px #20-3ff, 12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px 0px #20-3ff, 12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: digit before the coloud #
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px 1#2034ff, 12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px 0px 1#2034ff, 12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: letter in offset number
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px #2034ff, 12px 12Apx #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px 0px #2034ff, 12px 12Apx 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: unit improperly spelled
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12pxp 12px #2034ff, 12px 12px #121212"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12pxp 12px 0px #2034ff, 12px 12px 0px #121212"), STLL::XhtmlException_c);
   // invalid shadow list: not enough digits in last colour
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px #2034ff, 12px 12px #12112"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px 0px #2034ff, 12px 12px 0px #12112"), STLL::XhtmlException_c);
   // invalid shadow list: missing space 1
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px12px #2034ff, 12px 12px #1211F2"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px12px 0px #2034ff, 12px 12px 0px #1211F2"), STLL::XhtmlException_c);
   // invalid shadow list: missing space 2
-  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px#2034ff, 12px 12px #1211F2"), STLL::XhtmlException_c);
+  BOOST_CHECK_THROW(s.addRule("p", "text-shadow", "-12px 12px#2034ff, 12px 12px 0px #1211F2"), STLL::XhtmlException_c);
 
   // invalid colour: hash missing
   BOOST_CHECK_THROW(s.addRule("p", "color", "000000"), STLL::XhtmlException_c);
@@ -381,13 +380,13 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   // simple text
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test Text</p></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/simple-01.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/simple-01.lay"));
 
   // check text indent
   s.addRule("body", "text-indent", "10px");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test Text</p></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/simple-02.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/simple-02.lay"));
   s.addRule("body", "text-indent", "0px");
 
   // a language with script and at the same time right to left: arabic
@@ -396,39 +395,39 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   s.addRule("p[lang|=ar]", "font-family", "sans-ar");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='ar-arab'>كأس الأمم</p></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/simple-03.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/simple-03.lay"));
 
   // usage of soft hyphen
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test&#173;Text&#173;Textwithaverylongadditiontomakeitlong</p></body></html>",
-    s, STLL::RectangleShape_c(300*64)), "tests/simple-04.lay", c));
+    s, STLL::RectangleShape_c(300*64)), "tests/simple-04.lay"));
 
   // a simple inlay
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Te<img width='10px' height='10px' src='a' />st</p></body></html>",
-    s, STLL::RectangleShape_c(300*64)), "tests/simple-05.lay", c));
+    s, STLL::RectangleShape_c(300*64)), "tests/simple-05.lay"));
 
   // a simple underline test
   s.addRule("p", "text-decoration", "underline");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test</p></body></html>",
-    s, STLL::RectangleShape_c(300*64)), "tests/simple-06.lay", c));
+    s, STLL::RectangleShape_c(300*64)), "tests/simple-06.lay"));
   s.addRule("p", "text-decoration", "");
 
   // more complex underline with inlay and only partially
   s.addRule("span", "text-decoration", "underline");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>T<span>e<img width='10px' height='10px' src='a' />s</span>t</p></body></html>",
-    s, STLL::RectangleShape_c(300*64)), "tests/simple-07.lay", c));
+    s, STLL::RectangleShape_c(300*64)), "tests/simple-07.lay"));
   s.addRule("span", "text-decoration", "");
 
   // more complex underline with inlay and only partially and additionally a shadow
   s.addRule("body", "padding", "3px");  // make a bit space around to actually see something
   s.addRule("span", "text-decoration", "underline");
-  s.addRule("p", "text-shadow", "1px 1px #FF0000, -1px -1px #00FF00");
+  s.addRule("p", "text-shadow", "1px 1px 0px #FF0000, -1px -1px 0px #00FF00");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>T<span>e<img width='10px' height='10px' src='a' />s</span>t</p></body></html>",
-    s, STLL::RectangleShape_c(300*64)), "tests/simple-08.lay", c));
+    s, STLL::RectangleShape_c(300*64)), "tests/simple-08.lay"));
   s.addRule("span", "text-decoration", "");
   s.addRule("p", "text-shadow", "");
 
@@ -436,7 +435,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   s.addRule("p", "text-decoration", "underline");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Text with spaces</p></body></html>",
-    s, STLL::RectangleShape_c(300*64)), "tests/simple-09.lay", c));
+    s, STLL::RectangleShape_c(300*64)), "tests/simple-09.lay"));
   s.addRule("p", "text-decoration", "");
 
   // centered text
@@ -444,21 +443,21 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   s.addRule("body", "text-indent", "10px");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p>A longer text that will give us some lines of text in the output</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-10.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-10.lay"));
 
   // left adjusted text
   s.addRule("p", "text-align", "left");
   s.addRule("body", "text-indent", "10px");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p>A longer text that will give us some lines of text in the output</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-11.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-11.lay"));
 
   // right adjusted text
   s.addRule("p", "text-align", "right");
   s.addRule("body", "text-indent", "10px");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p>A longer text that will give us some lines of text in the output</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-12.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-12.lay"));
 
   // justified text
   s.addRule("p", "text-align", "justify");
@@ -466,7 +465,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   s.addRule("body", "text-indent", "10px");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p>A longer text that will give us some lines of text in the output</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-13.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-13.lay"));
 
   // justified text
   s.addRule("p", "text-align", "justify");
@@ -474,7 +473,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   s.addRule("body", "text-indent", "10px");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p>A longer text that will give us some lines of text in the output</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-14.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-14.lay"));
   s.addRule("p", "text-align", "left");
   s.addRule("p", "text-align-last", "");
   s.addRule("body", "text-indent", "0px");
@@ -482,38 +481,38 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   // must break
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p>A longer<br />text<br />that will give<br />us some lines<br />of text</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-15.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-15.lay"));
 
   // must break with centered text
   s.addRule("p", "text-align", "center");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p>A longer<br />text<br />that will give<br />us some lines<br />of text</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-16.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-16.lay"));
   s.addRule("p", "text-align", "left");
 
   // test of division with a style
   s.addRule(".tt", "color", "#80FF80");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><div class='tt'><p>Test Text</p></div></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/simple-17.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/simple-17.lay"));
 
   // unordered list
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><ul><li>Test Text</li><li>More Text</li></ul></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/simple-18.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/simple-18.lay"));
 
   // nested unordered list
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><ul><li>Test Text<ul><li>One nested item</li><li>And another one</li>"
     "</ul></li><li>More Text</li></ul></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/simple-19.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/simple-19.lay"));
 
   // nested unordered list right to left
   s.addRule(".rtl", "direction", "rtl");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><ul class='rtl'><li>Test Text<ul><li>One nested item</li><li>And another one</li>"
     "</ul></li><li>More Text</li></ul></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/simple-20.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/simple-20.lay"));
 
   // justified text with no align last value -> information comes from direction
   s.addRule("p", "text-align", "justify");
@@ -525,7 +524,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
     "<p>A longer text that will give us some lines of text in the output</p>"
     "<p class='rtl'>A longer text that will give us some lines of text in the output</p>"
     "</body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-21.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-21.lay"));
 
   // no text align at all -> comes from direction
   s.addRule("p", "text-align", "");
@@ -536,19 +535,19 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
     "<p>A longer text that will give us some lines of text in the output</p>"
     "<p class='rtl'>A longer text that will give us some lines of text in the output</p>"
     "</body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-22.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-22.lay"));
 
   // sub and sup
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test<sub>1</sub> Text<sup>2</sup></p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-23.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-23.lay"));
 
   // sub and sup with relatively smaller font size
   s.addRule("sub", "font-size", "70%");
   s.addRule("sup", "font-size", "50%");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test<sub>1</sub> Text<sup>2</sup></p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-24.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-24.lay"));
 
   // check HTML normalization: all paragraphs must look the same
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
@@ -559,7 +558,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
     "<p>Test\nText</p>"
     "<p>Test \n Text</p>"
     "</body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/simple-25.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/simple-25.lay"));
 
   // several inlaid rtl and lrt texts, the 2 lines must look different even though
   // they look similar in the html text
@@ -572,13 +571,13 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
     "<p lang='en'>Test <span lang='he'>אברהם<span lang='en'> Text </span>שמואל</span> Three</p>"
     "<p lang='en'>Test <span lang='he'>אברהם</span> Text <span lang='he'>שמואל</span> Three</p>"
     "</body></html>",
-    s, STLL::RectangleShape_c(250*64)), "tests/simple-26.lay", c));
+    s, STLL::RectangleShape_c(250*64)), "tests/simple-26.lay"));
 
 #ifndef USE_LIBXML2
   // some named symbols... libxml2 can not parse this...
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p>&amp;amp;&sect;&#163;&#xA3;&#xa3;&unknown;</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-27.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-27.lay"));
 #endif
 
   // a layout with some ul bullets with different lines with different ascenders and descenders
@@ -599,25 +598,25 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
     "<li><ul><li>T<sup>2</sup></li><li>T<sup>2</sup></li></ul></li>"
     "<li>Tst<ul><li>T<sup>2</sup></li><li>T<sup>2</sup></li></ul></li>"
     "</ul></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-28.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-28.lay"));
 
   // a simple image and text but without the paragraph environment
   s.addRule("body", "padding", "0px");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body>Te<img width='10px' height='10px' src='a' />st</body></html>",
-    s, STLL::RectangleShape_c(300*64)), "tests/simple-05.lay", c));
+    s, STLL::RectangleShape_c(300*64)), "tests/simple-05.lay"));
 
   // just an image but without paragraph environment
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><img width='10px' height='10px' src='a' /></body></html>",
-    s, STLL::RectangleShape_c(300*64)), "tests/simple-29.lay", c));
+    s, STLL::RectangleShape_c(300*64)), "tests/simple-29.lay"));
 
   // check underline of sup and images... they must use the same underline
   s.addRule("body", "padding", "5px");
   s.addRule("p", "text-decoration", "underline");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p><img width='10px' height='10px' src='a' />T<sup>est</sup></p></body></html>",
-    s, STLL::RectangleShape_c(300*64)), "tests/simple-30.lay", c));
+    s, STLL::RectangleShape_c(300*64)), "tests/simple-30.lay"));
   s.addRule("p", "text-decoration", "");
 
   // check the underline feature where each letter has its own way
@@ -646,7 +645,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   l.indent = 0;
 
   BOOST_CHECK(layouts_identical(STLL::layoutParagraph(U"TestITest", attr, STLL::RectangleShape_c(300*64), l),
-                                "tests/simple-31.lay", c));
+                                "tests/simple-31.lay"));
 
   // a simple underline test with spaces to underline and a linebreak in between to
   // check that justification spaces properly work
@@ -654,7 +653,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   s.addRule("p", "text-align", "justify");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Text with spaces and moreandlongerwords</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/simple-32.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/simple-32.lay"));
   s.addRule("p", "text-decoration", "");
 }
 
@@ -672,33 +671,33 @@ BOOST_AUTO_TEST_CASE( Table_Layouts )
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td>Test</td><td>T</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/table-01.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/table-01.lay"));
 
   // basic table with 2x2 cells, right to left direction
   s.addRule("table", "direction", "rtl");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td>Test</td><td>T</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/table-02.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/table-02.lay"));
   s.addRule("table", "direction", "ltr");
 
   // basic table with 2x2 cells with one multi line cell
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td>Test with some more text</td><td>T</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/table-03.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/table-03.lay"));
 
   // basic table with 2x2 cells with one multi line cell
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td rowspan='2'>Test with some more text</td><td>T</td></tr><tr><td>Table</td></tr></table></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/table-04.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/table-04.lay"));
 
   // basic table with 2x2 cells with one multi columns cell
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td colspan='2'>Test with some more text</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/table-05.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/table-05.lay"));
 
   // basic table with 4 columns, first column is relatively high, the others with
   // different vertical alignment
@@ -713,7 +712,7 @@ BOOST_AUTO_TEST_CASE( Table_Layouts )
     "<td class='va-mid'>Test2</td>"
     "<td class='va-bot'>Test3</td>"
     "</tr></table></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/table-06.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/table-06.lay"));
 
   // basic table with 2x1 cells with percent width
   s.addRule(".td", "width", "30%");
@@ -721,7 +720,7 @@ BOOST_AUTO_TEST_CASE( Table_Layouts )
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><table><colgroup><col class='td' /><col class='td' /></colgroup>"
     "<tr><td>Test with some more text</td><td>Table</td></tr></table></body></html>",
-    s, STLL::RectangleShape_c(300*64)), "tests/table-07.lay", c));
+    s, STLL::RectangleShape_c(300*64)), "tests/table-07.lay"));
 
   // basic table with 2x1 cells with percent width
   s.addRule("table", "width", "80%");
@@ -731,7 +730,7 @@ BOOST_AUTO_TEST_CASE( Table_Layouts )
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><table><colgroup><col class='td' /><col class='te' /><col class='tc' /></colgroup>"
     "<tr><td>Test</td><td>Table</td><td>Text</td></tr></table></body></html>",
-    s, STLL::RectangleShape_c(300*64)), "tests/table-08.lay", c));
+    s, STLL::RectangleShape_c(300*64)), "tests/table-08.lay"));
 }
 
 BOOST_AUTO_TEST_CASE( Frames_Layouts )
@@ -750,28 +749,28 @@ BOOST_AUTO_TEST_CASE( Frames_Layouts )
   s.addRule("body", "border-top-width", "10px");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test Text</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/border-01.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/border-01.lay"));
   s.addRule("body", "border-top-width", "0px");
 
   // bottom border
   s.addRule("body", "border-bottom-width", "10px");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test Text</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/border-02.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/border-02.lay"));
   s.addRule("body", "border-bottom-width", "0px");
 
   // left border
   s.addRule("body", "border-left-width", "10px");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test Text</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/border-03.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/border-03.lay"));
   s.addRule("body", "border-left-width", "0px");
 
   // right border
   s.addRule("body", "border-right-width", "10px");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test Text</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/border-04.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/border-04.lay"));
   s.addRule("body", "border-right-width", "0px");
 
   // check margin collapsing
@@ -782,7 +781,7 @@ BOOST_AUTO_TEST_CASE( Frames_Layouts )
   s.addRule("p", "border-color", "#FFFF00");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test Text</p><p>Text Test</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/border-05.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/border-05.lay"));
   s.addRule("p", "border-width", "0px");
 
   // table with 2x3 cells with one multiline and one multirow cell with bordercollapse
@@ -792,7 +791,7 @@ BOOST_AUTO_TEST_CASE( Frames_Layouts )
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td colspan='2'>Test with some more text</td></tr><tr><td rowspan='2'>T</td><td>Table</td></tr><tr><td>Oops</td></tr></table></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/border-06.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/border-06.lay"));
 
   // table with 2x3 cells with one multiline and one multirow cell with bordercollapse but margins and extra right margin
   s.addRule(".tc", "width", "100px");
@@ -804,7 +803,7 @@ BOOST_AUTO_TEST_CASE( Frames_Layouts )
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td colspan='2'>Test with some more text</td></tr><tr><td rowspan='2'>T</td><td>Table</td></tr><tr><td>Oops</td></tr></table></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/border-07.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/border-07.lay"));
 
   // table with 2x3 cells with one multiline and one multirow cell with bordercollapse not margins, extra right border
   s.addRule(".tc", "width", "100px");
@@ -817,7 +816,7 @@ BOOST_AUTO_TEST_CASE( Frames_Layouts )
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td colspan='2'>Test with some more text</td></tr><tr><td rowspan='2'>T</td><td>Table</td></tr><tr><td>Oops</td></tr></table></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/border-08.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/border-08.lay"));
 }
 
 BOOST_AUTO_TEST_CASE( Save_Load_Layouts )
@@ -839,17 +838,11 @@ BOOST_AUTO_TEST_CASE( Save_Load_Layouts )
     s, STLL::RectangleShape_c(200*64));
 
   pugi::xml_document doc;
-  saveLayoutToXML(l, doc, c);
+  saveLayoutToXML(l, doc);
   auto c2 = std::make_shared<STLL::FontCache_c>();
   auto l2 = loadLayoutFromXML(doc.child("layout"), c2);
 
   BOOST_CHECK(l == l2);
-
-
-  // use wrong cache for saving
-  auto c3 = std::make_shared<STLL::FontCache_c>();
-
-  BOOST_CHECK_THROW(saveLayoutToXML(l, doc, c3), STLL::SaveLoadException_c);
 }
 
 BOOST_AUTO_TEST_CASE( Links )
@@ -864,23 +857,23 @@ BOOST_AUTO_TEST_CASE( Links )
   // simple one link layout
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test <a href='u1'>Text</a></p></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/link-01.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/link-01.lay"));
 
   // simple two link layout
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test <a href='u1'>Text</a> <a href='u2'>Link 2</a></p></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/link-02.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/link-02.lay"));
 
   // link in a stretched line an linebreak (check that spaces are stretched properly)
   s.addRule("p", "text-align", "justify");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test <a href='u1'>Text</a> <a href='u2'>Link 2 with spaces</a> asdkjh asd eru</p></body></html>",
-    s, STLL::RectangleShape_c(200*64)), "tests/link-03.lay", c));
+    s, STLL::RectangleShape_c(200*64)), "tests/link-03.lay"));
 
   // link with an image inside
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test <a href='u1'>Pre <img src='a' width='20px' height='20px' /> Post</a> <a href='u2'>Link 2</a></p></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/link-04.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/link-04.lay"));
 
   // link with an image inside a box
   s.addRule("img", "border-width", "2px");
@@ -888,19 +881,19 @@ BOOST_AUTO_TEST_CASE( Links )
   s.addRule("img", "padding", "3px");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test <a href='u1'>Pre <img src='a' width='20px' height='20px' /> Post</a> <a href='u2'>Link 2</a></p></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/link-05.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/link-05.lay"));
 
   // link inside a table cell
   s.addRule(".tc", "width", "100px");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td><a href='l1'>Test</a></td><td>T</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/link-06.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/link-06.lay"));
 
   // simple two link layout where the links directly touch
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><p lang='en'>Test <a href='u1'>Text</a><a href='u2'>Link 2</a></p></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/link-07.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/link-07.lay"));
 
   // link inside a table cell that is vertically centred
   s.addRule(".tc", "width", "100px");
@@ -908,5 +901,5 @@ BOOST_AUTO_TEST_CASE( Links )
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
     "<html><body><table><colgroup><col class='tc' /><col class='tc' /></colgroup>"
     "<tr><td class='va-mid'><a href='l1'>Test</a></td><td>Table cell with some text to get a linebreak</td></tr><tr><td>T</td><td>Table</td></tr></table></body></html>",
-    s, STLL::RectangleShape_c(1000*64)), "tests/link-08.lay", c));
+    s, STLL::RectangleShape_c(1000*64)), "tests/link-08.lay"));
 }

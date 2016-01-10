@@ -34,6 +34,12 @@ int main(int argv, char ** args)
 {
   pugi::xml_document doc;
 
+  if (argv != 2)
+  {
+    printf("specify the layout to load as an argument\n");
+    return 1;
+  }
+
   auto res = doc.load_file(args[1]);
 
   if (!res)
@@ -71,7 +77,7 @@ int main(int argv, char ** args)
   {
     SDL_Rect r;
     for (int x = 0; x < 1+l.getRight()/640; x++)
-      for (int y = 0; y < 1+l.getHeight()/640; y++)
+      for (int y = 0; y < 1+(int)l.getHeight()/640; y++)
       {
         if ((x + y) % 2)
         {

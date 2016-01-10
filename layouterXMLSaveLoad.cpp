@@ -25,7 +25,7 @@
 namespace STLL
 {
 
-void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node, std::shared_ptr<FontCache_c> c)
+void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node)
 {
   auto doc = node.append_child();
   doc.set_name("layout");
