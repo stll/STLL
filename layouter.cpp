@@ -160,19 +160,6 @@ static FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32,
   return max_level;
 }
 
-// a rounding function that rounds r such that is is divisible by
-// d without remainder
-static int32_t roundToDivisible(int32_t r, int32_t d)
-{
-  if (d > 0 && d < 64)
-  {
-    r = ( d*r + 32 ) / 64;
-    r = (64*r + d/2) / d;
-  }
-
-  return r;
-}
-
 // check if a character is a bidi control character and should not go into
 // the output stream
 static bool isBidiCharacter(char32_t c)
@@ -438,10 +425,6 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         int32_t gx = run.dx + (glyph_pos[j].x_offset);
         int32_t gy = run.dy - (glyph_pos[j].y_offset)-attr.get(runstart).baseline_shift;
 
-        // round the position of the glyph
-        gx = roundToDivisible(gx, prop.round);
-        gy = roundToDivisible(gy, prop.round);
-
         // output all shadows of the glyph
         for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
         {
@@ -452,9 +435,6 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         // calculate the new position and round it
         run.dx += glyph_pos[j].x_advance;
         run.dy -= glyph_pos[j].y_advance;
-
-        run.dx = roundToDivisible(run.dx, prop.round);
-        run.dy = roundToDivisible(run.dy, prop.round);
 
         // output the final glyph
         run.run.push_back(std::make_pair(normalLayer, CommandData_c(font, gi, gx, gy, a.c, 0)));

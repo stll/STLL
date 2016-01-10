@@ -688,7 +688,6 @@ TextLayout_c layoutXML_Phrasing(X & xml, const TextStyleSheet_c & rules, const S
 
   lprop.indent = evalSize(rules.getValue(xml, "text-indent"));
   lprop.ltr = rules.getValue(xml, "direction") == "ltr";
-  lprop.round = rules.getRound();
   lprop.underlineFont = getFontForNode(xml_getParent(xml), rules);
 
   xml = xml2;
@@ -733,7 +732,6 @@ TextLayout_c layoutXML_UL(X & xml, const TextStyleSheet_c & rules, const Shape_c
       prop.indent = 0;
       prop.ltr = true;
       prop.align = LayoutProperties_c::ALG_CENTER;
-      prop.round = rules.getRound();
 
       std::unique_ptr<Shape_c> bulletshape;
 

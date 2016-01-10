@@ -230,21 +230,10 @@ class TextStyleSheet_c
       return internal::getDefault(attribute);
     }
 
-    /** \brief set the rounding factor. See layoutProperties.round for the details.
-     *
-     * This tells the HTML layouter, which value to tell the paragraph layouter
-     */
-    void setRound(uint32_t val) { round = val; }
-
-    /** \brief get the rounding factor. See layoutProperties.round for the details.
-     */
-    uint32_t getRound(void) const { return round; }
-
   private:
     std::vector<rule> rules;
     std::map<std::string, std::shared_ptr<FontFamily_c> > families;
     std::shared_ptr<FontCache_c> cache;
-    uint32_t round = 64;
 };
 
 }

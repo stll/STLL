@@ -534,23 +534,6 @@ class LayoutProperties_c
 
     bool ltr = true;     ///< is the base direction of the text left to right?
 
-    /** \brief This value tells the layouter how to round the positions of glyph and
-     * other commands.
-     *
-     * All positions are given in 1/64 pixel precision. But this can lead to strange artefacts
-     * if you can place the objects only with 1 pixel precision. For example the spacing of several
-     * consecutive letters will be uneven, resulting in an uneven distribution of the glyphs.
-     *
-     * The right solution in that case would be to round the values to whole pixels. Or in the
-     * case you can place objects with sub-pixel accuracy to round to 1/3 of a pixel.
-     *
-     * The value 1 rounds to whole pixels, 3 to 1/3 pixel, 64 does not round at all:
-     * So only values between 1 and 63 actually do something everything else leads to no rounding
-     *
-     * TODO remove this feature
-     */
-    int32_t round = 64;
-
     /** \brief The font that defines the underline parameters.
      *
      * When underlines need to be placed they will be placed according to this font. That way

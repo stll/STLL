@@ -640,7 +640,6 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   STLL::LayoutProperties_c l;
 
   l.align = STLL::LayoutProperties_c::ALG_JUSTIFY_LEFT;
-  l.round = 1;
   l.ltr = true;
   l.indent = 0;
 
