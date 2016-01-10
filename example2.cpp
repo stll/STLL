@@ -8,7 +8,7 @@ using namespace STLL;
 int main()
 {
   // setup a stylesheet
-  textStyleSheet_c styleSheet;
+  TextStyleSheet_c styleSheet;
 
   // add the fonts that are required
   styleSheet.font("sans", FontResource_c("tests/FreeSans.ttf"));

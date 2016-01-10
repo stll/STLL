@@ -393,15 +393,15 @@ class FontCache_c
 
   private:
 
-    class fontFaceParameter_c
+    class FontFaceParameter_c
     {
       public:
         FontFileResource_c res;
         uint32_t size;
 
-        fontFaceParameter_c(const FontFileResource_c r, uint32_t s) : res(std::move(r)), size(s) {}
+        FontFaceParameter_c(const FontFileResource_c r, uint32_t s) : res(std::move(r)), size(s) {}
 
-        bool operator<(const fontFaceParameter_c & b) const
+        bool operator<(const FontFaceParameter_c & b) const
         {
           if (res < b.res) return true;
           if (b.res < res) return false;
@@ -413,7 +413,7 @@ class FontCache_c
 
     // all open fonts, used to check whether they have all been released
     // on library destruction
-    std::map<fontFaceParameter_c, std::shared_ptr<FontFace_c> > fonts;
+    std::map<FontFaceParameter_c, std::shared_ptr<FontFace_c> > fonts;
 
     // the library to use
     std::shared_ptr<FreeTypeLibrary_c> lib;
@@ -435,7 +435,7 @@ class FontFamily_c
     // a class containing all the variables for a
     // font inside a family, it is used as the key inside the map
     // for all font files
-    class fontFamilyParameter_c
+    class FontFamilyParameter_c
     {
       public:
         std::string style;
@@ -443,7 +443,7 @@ class FontFamily_c
         std::string weight;
         std::string stretch;
 
-        bool operator<(const fontFamilyParameter_c & b) const
+        bool operator<(const FontFamilyParameter_c & b) const
         {
           if (style < b.style) return true;
           if (style > b.style) return false;
@@ -500,7 +500,7 @@ class FontFamily_c
                  const std::string & stretch = "normal");
 
   private:
-    std::map<fontFamilyParameter_c, FontResource_c> fonts;
+    std::map<FontFamilyParameter_c, FontResource_c> fonts;
     std::shared_ptr<FontCache_c> cache;
 };
 

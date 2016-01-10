@@ -14,7 +14,7 @@ int main()
   // we also use the English language
   // keep in mind that the font size is given in units of 1/64th, so
   // multiply by 64
-  codepointAttributes attr;
+  CodepointAttributes_c attr;
   attr.font = fc.getFont(FontResource_c("tests/FreeSans.ttf"), 20*64);
   attr.c = Color_c(255, 255, 255, 255);
   attr.lang = "en";
@@ -26,7 +26,7 @@ int main()
   AttributeIndex_c ai(attr);
 
   // create layouting properties, the default is good enough for us right now
-  layoutProperties prop;
+  LayoutProperties_c prop;
 
   // now layout the text "Hello World" with the given attributes, put
   // it into a retcangle of width 200 pixel, use our layouting properties

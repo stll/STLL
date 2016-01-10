@@ -58,7 +58,7 @@ void TextLayout_c::append(const TextLayout_c & l, int dx, int dy)
   for (auto a : l.links)
   {
     size_t i = links.size();
-    linkInformation l;
+    LinkInformation_c l;
     l.url = a.url;
     links.push_back(l);
     for (auto b : a.areas)
@@ -134,7 +134,7 @@ typedef struct
   int32_t ascender, descender;
 
   // link boxes for this run
-  std::vector<TextLayout_c::linkInformation> links;
+  std::vector<TextLayout_c::LinkInformation_c> links;
 
 #ifndef NDEBUG
   // the text of this run, useful for debugging to see what is going on
@@ -193,7 +193,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
                                            const AttributeIndex_c & attr,
                                            const std::vector<FriBidiLevel> & embedding_levels,
                                            const std::vector<char> & linebreaks,
-                                           const layoutProperties & prop
+                                           const LayoutProperties_c & prop
                                           )
 {
   // Get our harfbuzz font structs
@@ -364,7 +364,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 #endif
 
     size_t curLink = 0;
-    TextLayout_c::rectangle_c linkRect;
+    TextLayout_c::Rectangle_c linkRect;
     int linkStart;
 
     // off we go creating the drawing commands
@@ -401,7 +401,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
         // create the underline for the inlay
         // TODO try to merge this with the underline of a normal glyph
-        if (a.flags & codepointAttributes::FL_UNDERLINE)
+        if (a.flags & CodepointAttributes_c::FL_UNDERLINE)
         {
           int32_t rx = run.dx;
           int32_t ry;
@@ -460,7 +460,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         run.run.push_back(std::make_pair(normalLayer, CommandData_c(font, gi, gx, gy, a.c, 0)));
 
         // create underline commands
-        if (a.flags & codepointAttributes::FL_UNDERLINE)
+        if (a.flags & CodepointAttributes_c::FL_UNDERLINE)
         {
           int32_t gw = glyph_pos[j].x_advance+64;
           int32_t gh;
@@ -493,7 +493,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         if (curLink && curLink != a.link)
         {
           // store information for current link
-          TextLayout_c::linkInformation l;
+          TextLayout_c::LinkInformation_c l;
           l.url = prop.links[curLink-1];
           l.areas.push_back(linkRect);
           run.links.push_back(l);
@@ -520,7 +520,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     // finalize an open link
     if (curLink)
     {
-      TextLayout_c::linkInformation l;
+      TextLayout_c::LinkInformation_c l;
       l.url = prop.links[curLink-1];
       l.areas.push_back(linkRect);
       run.links.push_back(l);
@@ -547,20 +547,20 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 }
 
 // merge links into a text layout, shifting the link boxes by dx and dy
-static void mergeLinks(TextLayout_c & txt, const std::vector<TextLayout_c::linkInformation> & links, int dx, int dy)
+static void mergeLinks(TextLayout_c & txt, const std::vector<TextLayout_c::LinkInformation_c> & links, int dx, int dy)
 {
   // go over all links that we want to add
   for (const auto & l : links)
   {
     // try to find the link to insert in the already existing links within txt
     auto i = std::find_if(txt.links.begin(), txt.links.end(),
-                          [&l] (TextLayout_c::linkInformation l2) { return l.url == l2.url; }
+                          [&l] (TextLayout_c::LinkInformation_c l2) { return l.url == l2.url; }
                          );
 
     // when not found create it
     if (i == txt.links.end())
     {
-      TextLayout_c::linkInformation l2;
+      TextLayout_c::LinkInformation_c l2;
       l2.url = l.url;
       txt.links.emplace_back(l2);
       i = txt.links.end()-1;
@@ -581,7 +581,7 @@ static void mergeLinks(TextLayout_c & txt, const std::vector<TextLayout_c::linkI
 static TextLayout_c breakLines(std::vector<runInfo> & runs,
                                const Shape_c & shape,
                                FriBidiLevel max_level,
-                               const layoutProperties & prop, int32_t ystart)
+                               const LayoutProperties_c & prop, int32_t ystart)
 {
   // this vector is used for the reordering of the runs
   // it contains the index of the run that should go in
@@ -623,7 +623,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
     forcebreak = false;
 
     // if it is a first line, we add the indent first
-    if ((firstline != FL_NORMAL) && prop.align != layoutProperties::ALG_CENTER) curWidth = prop.indent;
+    if ((firstline != FL_NORMAL) && prop.align != LayoutProperties_c::ALG_CENTER) curWidth = prop.indent;
 
     // now go through the remaining runs and add them
     while (spos < runs.size())
@@ -750,20 +750,20 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
     switch (prop.align)
     {
       default:
-      case layoutProperties::ALG_LEFT:
+      case LayoutProperties_c::ALG_LEFT:
         xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
         if (firstline != FL_NORMAL) xpos += prop.indent;
         break;
 
-      case layoutProperties::ALG_RIGHT:
+      case LayoutProperties_c::ALG_RIGHT:
         xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft;
         break;
 
-      case layoutProperties::ALG_CENTER:
+      case LayoutProperties_c::ALG_CENTER:
         xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft/2;
         break;
 
-      case layoutProperties::ALG_JUSTIFY_LEFT:
+      case LayoutProperties_c::ALG_JUSTIFY_LEFT:
         xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
         // don't justify last paragraph
         if (numSpace > 1 && spos < runs.size() && !forcebreak)
@@ -773,7 +773,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
 
         break;
 
-      case layoutProperties::ALG_JUSTIFY_RIGHT:
+      case LayoutProperties_c::ALG_JUSTIFY_RIGHT:
         // don't justify last paragraph
         if (numSpace > 1 && spos < runs.size() && !forcebreak)
         {
@@ -924,7 +924,7 @@ static std::vector<char> getLinebreaks(const std::u32string & txt32, const Attri
 }
 
 TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_c & attr,
-                             const Shape_c & shape, const layoutProperties & prop, int32_t ystart)
+                             const Shape_c & shape, const LayoutProperties_c & prop, int32_t ystart)
 {
   // calculate embedding types for the text
   std::vector<FriBidiLevel> embedding_levels;

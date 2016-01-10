@@ -194,7 +194,7 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontC
   {
     for (const auto l2 : links.children())
     {
-      TextLayout_c::linkInformation link;
+      TextLayout_c::LinkInformation_c link;
 
       link.url = l2.attribute("url").value();
 
@@ -202,7 +202,7 @@ TextLayout_c loadLayoutFromXML(const pugi::xml_node & doc, std::shared_ptr<FontC
       {
         if (a.name() == std::string("area"))
         {
-          TextLayout_c::rectangle_c r;
+          TextLayout_c::Rectangle_c r;
           r.x = std::stoi(a.attribute("x").value());
           r.y = std::stoi(a.attribute("y").value());
           r.w = std::stoi(a.attribute("w").value());

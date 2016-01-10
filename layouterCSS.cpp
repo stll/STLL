@@ -380,7 +380,7 @@ static void checkValueFormat(const std::string & attribute, const std::string & 
   if (attribute == "vertical-align") checkValues(value, {"baseline", "top", "middle", "bottom"}, "vertical-align");
 }
 
-void textStyleSheet_c::font(const std::string& family, const FontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
+void TextStyleSheet_c::font(const std::string& family, const FontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
   auto i = families.find(family);
 
@@ -440,7 +440,7 @@ static void checkSelectorValidity(const std::string & sel)
   }
 }
 
-void textStyleSheet_c::addRule(const std::string sel, const std::string attr, const std::string val)
+void TextStyleSheet_c::addRule(const std::string sel, const std::string attr, const std::string val)
 {
   checkSelectorValidity(sel);
 
@@ -465,7 +465,7 @@ void textStyleSheet_c::addRule(const std::string sel, const std::string attr, co
   rules.push_back(r);
 }
 
-textStyleSheet_c::textStyleSheet_c(std::shared_ptr< FontCache_c > c)
+TextStyleSheet_c::TextStyleSheet_c(std::shared_ptr< FontCache_c > c)
 {
   if (c)
   {

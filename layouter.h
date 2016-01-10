@@ -120,20 +120,20 @@ class TextLayout_c
      */
     const std::vector<CommandData_c> getData(void) const { return data; }
 
-    class rectangle_c
+    class Rectangle_c
     {
       public:
         int x, y, w, h;
     };
 
-    typedef struct
+    class LinkInformation_c
     {
-      std::string url;
+      public:
+        std::string url;
+        std::vector<Rectangle_c> areas;
+    };
 
-      std::vector<rectangle_c> areas;
-    } linkInformation;
-
-    std::vector<linkInformation> links;
+    std::vector<LinkInformation_c> links;
 
     /** \brief add a single drawing command to the end of the command list
      *  \param args this is a forwarding function that will give all arguments to the
@@ -276,7 +276,7 @@ class TextLayout_c
 
 /** \brief this structure contains all attributes that a single glyph can get assigned
  */
-class codepointAttributes
+class CodepointAttributes_c
 {
   public:
 
@@ -302,41 +302,41 @@ class codepointAttributes
 
   /** \brief one element of the shadow
    */
-  typedef struct shadow
+  class Shadow_c
   {
+    public:
 
-    /** \brief the colour to use for this shadow element
-     */
-    Color_c c;
+      /** \brief the colour to use for this shadow element
+       */
+      Color_c c;
 
-    /** \brief offset of the shadow in 1/64th pixels relative to the
-     * position of the normal glyph
-     */
-    int8_t dx;
+      /** \brief offset of the shadow in 1/64th pixels relative to the
+       * position of the normal glyph
+       */
+      int8_t dx;
 
-    /** \brief offset of the shadow in 1/64th pixels relative to the
-     * position of the normal glyph
-     */
-    int8_t dy;
+      /** \brief offset of the shadow in 1/64th pixels relative to the
+       * position of the normal glyph
+       */
+      int8_t dy;
 
-    /** \brief radius of the shadow in 1/64th pixel size
-     */
-    int16_t blurr;
+      /** \brief radius of the shadow in 1/64th pixel size
+       */
+      int16_t blurr;
 
-    /** \brief comparison operator for one shadow
-     */
-    bool operator==(const struct shadow & rhs) const
-    {
-      return c == rhs.c && dx == rhs.dx && dy == rhs.dy && blurr == rhs.blurr;
-    }
-
-  } shadow;
+      /** \brief comparison operator for one shadow
+       */
+      bool operator==(const struct Shadow_c & rhs) const
+      {
+        return c == rhs.c && dx == rhs.dx && dy == rhs.dy && blurr == rhs.blurr;
+      }
+  };
 
   /** \brief the shadows to draw behind the real glyph. The shadows are drawn in the
    * order within this vector and on top of that the real glyph will be drawn
    * inlays will have no shadow
    */
-  std::vector<shadow> shadows;
+  std::vector<Shadow_c> shadows;
 
   /** \brief sometimes you want to place something different instead of a glyph (e.g. an image).
    * This can be done with an inlay.
@@ -368,11 +368,11 @@ class codepointAttributes
 
   /** \brief create an empty attribute, no font, no language, no flags, no inlay, no baseline shift
    */
-  codepointAttributes(void) : lang(""), flags(0), inlay(0), baseline_shift(0), link(0) { }
+  CodepointAttributes_c(void) : lang(""), flags(0), inlay(0), baseline_shift(0), link(0) { }
 
   /** \brief comparison operator
    */
-  bool operator==(const codepointAttributes & rhs) const
+  bool operator==(const CodepointAttributes_c & rhs) const
   {
     return c == rhs.c && font == rhs.font && lang == rhs.lang
       && flags == rhs.flags && shadows.size() && rhs.shadows.size()
@@ -386,7 +386,7 @@ class codepointAttributes
    * \note the interval container wants to accumulate information but
    * as we can not do that here, we simply replace the old values
    */
-  codepointAttributes operator += (const codepointAttributes & rhs)
+  CodepointAttributes_c operator += (const CodepointAttributes_c & rhs)
   {
     // when someone tries to overwrite the attributes, we take over the new ones
     c = rhs.c;
@@ -411,7 +411,7 @@ class codepointAttributes
 class AttributeIndex_c
 {
   private:
-    boost::icl::interval_map<size_t, codepointAttributes> attr;
+    boost::icl::interval_map<size_t, CodepointAttributes_c> attr;
 
   public:
     /** \brief create an empty index
@@ -422,7 +422,7 @@ class AttributeIndex_c
     /** \brief create an index where all entries have the same attribute
      *  \param a the attribute that all will share
      */
-    AttributeIndex_c(const codepointAttributes & a)
+    AttributeIndex_c(const CodepointAttributes_c & a)
     {
       attr += std::make_pair(boost::icl::interval<size_t>::closed(0, SIZE_MAX), a);
     }
@@ -431,7 +431,7 @@ class AttributeIndex_c
      *  \param i index that will have the attribute
      *  \param a the attribute
      */
-    void set(size_t i, codepointAttributes a)
+    void set(size_t i, CodepointAttributes_c a)
     {
       attr += std::make_pair(boost::icl::interval<size_t>::closed(i, i), a);
     }
@@ -441,7 +441,7 @@ class AttributeIndex_c
      *  \param end first index that will no longer have the attribute
      *  \param a the attribute
      */
-    void set(size_t start, size_t end, codepointAttributes a)
+    void set(size_t start, size_t end, CodepointAttributes_c a)
     {
       attr += std::make_pair(boost::icl::interval<size_t>::closed(start, end), a);
     }
@@ -450,7 +450,7 @@ class AttributeIndex_c
      *  \param i the index for which the attribute is requested
      *  \return the requested attribute
      */
-    const codepointAttributes & get(size_t i) const
+    const CodepointAttributes_c & get(size_t i) const
     {
       return attr.find(i)->second;
     }
@@ -518,47 +518,51 @@ class RectangleShape_c : public Shape_c
 
 /** \brief this structure contains information for the layouter how to layout the text
  */
-typedef struct {
-  enum {
-    ALG_LEFT,          ///< layout left adjusted
-    ALG_RIGHT,         ///< layout right adjusted
-    ALG_CENTER,        ///< layout centred
-    ALG_JUSTIFY_LEFT,  ///< layout justified and the last line left adjusted
-    ALG_JUSTIFY_RIGHT  ///< layout justified and the last line right adjusted
-  } align = ALG_LEFT;  ///< alignment that the text is supposed to have
+class LayoutProperties_c
+{
+  public:
 
-  int32_t indent = 0;  ///< indentation of the first line in pixel
+    enum {
+      ALG_LEFT,          ///< layout left adjusted
+      ALG_RIGHT,         ///< layout right adjusted
+      ALG_CENTER,        ///< layout centred
+      ALG_JUSTIFY_LEFT,  ///< layout justified and the last line left adjusted
+      ALG_JUSTIFY_RIGHT  ///< layout justified and the last line right adjusted
+    } align = ALG_LEFT;  ///< alignment that the text is supposed to have
 
-  bool ltr = true;     ///< is the base direction of the text left to right?
+    int32_t indent = 0;  ///< indentation of the first line in pixel
 
-  /** \brief This value tells the layouter how to round the positions of glyph and
-   * other commands.
-   *
-   * All positions are given in 1/64 pixel precision. But this can lead to strange artefacts
-   * if you can place the objects only with 1 pixel precision. For example the spacing of several
-   * consecutive letters will be uneven, resulting in an uneven distribution of the glyphs.
-   *
-   * The right solution in that case would be to round the values to whole pixels. Or in the
-   * case you can place objects with sub-pixel accuracy to round to 1/3 of a pixel.
-   *
-   * The value 1 rounds to whole pixels, 3 to 1/3 pixel, 64 does not round at all:
-   * So only values between 1 and 63 actually do something everything else leads to no rounding
-   */
-  int32_t round = 64;
+    bool ltr = true;     ///< is the base direction of the text left to right?
 
-  /** \brief The font that defines the underline parameters.
-   *
-   * When underlines need to be placed they will be placed according to this font. That way
-   * you get the same font, regardless of size of text or font.
-   *
-   * When not set, the underline will use the parameters of the font of each glyph.
-   */
-  Font_c underlineFont;
+    /** \brief This value tells the layouter how to round the positions of glyph and
+     * other commands.
+     *
+     * All positions are given in 1/64 pixel precision. But this can lead to strange artefacts
+     * if you can place the objects only with 1 pixel precision. For example the spacing of several
+     * consecutive letters will be uneven, resulting in an uneven distribution of the glyphs.
+     *
+     * The right solution in that case would be to round the values to whole pixels. Or in the
+     * case you can place objects with sub-pixel accuracy to round to 1/3 of a pixel.
+     *
+     * The value 1 rounds to whole pixels, 3 to 1/3 pixel, 64 does not round at all:
+     * So only values between 1 and 63 actually do something everything else leads to no rounding
+     *
+     * TODO remove this feature
+     */
+    int32_t round = 64;
 
-  /** \brief link URLs for the links used in the */
-  std::vector<std::string> links;
+    /** \brief The font that defines the underline parameters.
+     *
+     * When underlines need to be placed they will be placed according to this font. That way
+     * you get the same font, regardless of size of text or font.
+     *
+     * When not set, the underline will use the parameters of the font of each glyph.
+     */
+    Font_c underlineFont;
 
-} layoutProperties;
+    /** \brief link URLs for the links used in the */
+    std::vector<std::string> links;
+};
 
 
 /** paragraph layouting function
@@ -578,7 +582,7 @@ typedef struct {
  * TODO: instead of crashing, rather throw an exception in that case.
  */
 TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_c & attr,
-                             const Shape_c & shape, const layoutProperties & prop, int32_t ystart = 0);
+                             const Shape_c & shape, const LayoutProperties_c & prop, int32_t ystart = 0);
 
 }
 

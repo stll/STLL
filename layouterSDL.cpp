@@ -566,7 +566,7 @@ static Color_c gammaColor(Color_c c)
 
 
 void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
-                   SubPixelArrangement sp, imageDrawerSDL_c * images, uint8_t g)
+                   SubPixelArrangement sp, ImageDrawerSDL_c * images, uint8_t g)
 {
   /* set up rendering via spanners */
   SDL_Rect r;

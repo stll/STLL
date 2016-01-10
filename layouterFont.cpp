@@ -75,7 +75,7 @@ int32_t FontFace_c::getUnderlineThickness(void) const
 
 std::shared_ptr<FontFace_c> FontCache_c::getFont(const FontFileResource_c & res, uint32_t size)
 {
-  fontFaceParameter_c ffp(res, size);
+  FontFaceParameter_c ffp(res, size);
 
   auto i = fonts.find(ffp);
 
@@ -236,7 +236,7 @@ std::shared_ptr<FontFace_c> Font_c::get(char32_t codepoint) const
 
 void FontFamily_c::addFont(const FontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
-  fontFamilyParameter_c par;
+  FontFamilyParameter_c par;
 
   par.style = style;
   par.variant = variant;
@@ -248,7 +248,7 @@ void FontFamily_c::addFont(const FontResource_c & res, const std::string& style,
 
 Font_c FontFamily_c::getFont(uint32_t size, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
-  fontFamilyParameter_c par;
+  FontFamilyParameter_c par;
 
   par.style = style;
   par.variant = variant;

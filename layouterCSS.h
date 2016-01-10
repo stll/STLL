@@ -101,7 +101,7 @@ namespace internal {
  * This class contains a list of normal CSS rules as well as a list of font families
  * to use for outputting text.
  */
-class textStyleSheet_c
+class TextStyleSheet_c
 {
     typedef struct
     {
@@ -119,7 +119,7 @@ class textStyleSheet_c
      *
      * This cache will be used for all fonts of the style sheet.
      */
-    textStyleSheet_c(std::shared_ptr<FontCache_c> c = 0);
+    TextStyleSheet_c(std::shared_ptr<FontCache_c> c = 0);
 
     /** \brief Add a font to a family.
      *
@@ -230,9 +230,6 @@ class textStyleSheet_c
       return internal::getDefault(attribute);
     }
 
-
-
-
     /** \brief set the rounding factor. See layoutProperties.round for the details.
      *
      * This tells the HTML layouter, which value to tell the paragraph layouter
@@ -248,8 +245,6 @@ class textStyleSheet_c
     std::map<std::string, std::shared_ptr<FontFamily_c> > families;
     std::shared_ptr<FontCache_c> cache;
     uint32_t round = 64;
-
-
 };
 
 }

@@ -42,10 +42,10 @@ namespace STLL {
  *  \param shape the shape to layout into
  */
 #ifdef USE_PUGI_XML
-TextLayout_c layoutXML(pugi::xml_node txt, const textStyleSheet_c & rules, const Shape_c & shape);
+TextLayout_c layoutXML(pugi::xml_node txt, const TextStyleSheet_c & rules, const Shape_c & shape);
 #endif
 #ifdef USE_LIBXML2
-TextLayout_c layoutXML(const xmlNode * txt, const textStyleSheet_c & rules, const Shape_c & shape);
+TextLayout_c layoutXML(const xmlNode * txt, const TextStyleSheet_c & rules, const Shape_c & shape);
 #endif
 
 /** \brief layout the given XHTML code
@@ -57,10 +57,10 @@ TextLayout_c layoutXML(const xmlNode * txt, const textStyleSheet_c & rules, cons
  *  for your text to layout, use the check function from the utf-8 module
  */
 #ifdef USE_PUGI_XML
-TextLayout_c layoutXHTMLPugi(const std::string & txt, const textStyleSheet_c & rules, const Shape_c & shape);
+TextLayout_c layoutXHTMLPugi(const std::string & txt, const TextStyleSheet_c & rules, const Shape_c & shape);
 #endif
 #ifdef USE_LIBXML2
-TextLayout_c layoutXHTMLLibXML2(const std::string & txt, const textStyleSheet_c & rules, const Shape_c & shape);
+TextLayout_c layoutXHTMLLibXML2(const std::string & txt, const TextStyleSheet_c & rules, const Shape_c & shape);
 #endif
 
 #define layoutXHTML2(lib, txt, rules, shape) layoutXHTML##lib(txt, rules, shape)

@@ -186,7 +186,7 @@ static boost::test_tools::predicate_result layouts_identical(const  STLL::TextLa
 
 BOOST_AUTO_TEST_CASE( Stylesheet_Resource_Tests )
 {
-  STLL::textStyleSheet_c s;
+  STLL::TextStyleSheet_c s;
 
   //************************************
   // check invalid selectors
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE( Stylesheet_Resource_Tests )
 
 BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
 {
-  STLL::textStyleSheet_c s;
+  STLL::TextStyleSheet_c s;
   STLL::RectangleShape_c r(200*64);
 
   s.addRule("p", "font-size", "16px");
@@ -371,7 +371,7 @@ BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
 BOOST_AUTO_TEST_CASE( Simple_Layouts )
 {
   auto c = std::make_shared<STLL::FontCache_c>();
-  STLL::textStyleSheet_c s(c);
+  STLL::TextStyleSheet_c s(c);
 
   s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
   s.addRule("body", "font-size", "16px");
@@ -621,11 +621,11 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
 
   // check the underline feature where each letter has its own way
   STLL::AttributeIndex_c attr;
-  STLL::codepointAttributes a;
+  STLL::CodepointAttributes_c a;
 
   a.c = STLL::Color_c(255, 255, 255, 255);
   a.font = c->getFont(STLL::FontResource_c("tests/FreeSans.ttf"), 16*64);
-  a.flags = STLL::codepointAttributes::FL_UNDERLINE;
+  a.flags = STLL::CodepointAttributes_c::FL_UNDERLINE;
   attr.set(0, 3, a);
 
   a.font = c->getFont(STLL::FontResource_c("tests/FreeSans.ttf"), 2*16*64);
@@ -637,9 +637,9 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   a.inlay->setHeight(10*64);
   attr.set(4, a);
 
-  STLL::layoutProperties l;
+  STLL::LayoutProperties_c l;
 
-  l.align = STLL::layoutProperties::ALG_JUSTIFY_LEFT;
+  l.align = STLL::LayoutProperties_c::ALG_JUSTIFY_LEFT;
   l.round = 1;
   l.ltr = true;
   l.indent = 0;
@@ -660,7 +660,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
 BOOST_AUTO_TEST_CASE( Table_Layouts )
 {
   auto c = std::make_shared<STLL::FontCache_c>();
-  STLL::textStyleSheet_c s(c);
+  STLL::TextStyleSheet_c s(c);
 
   s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
   s.addRule("body", "font-size", "16px");
@@ -736,7 +736,7 @@ BOOST_AUTO_TEST_CASE( Table_Layouts )
 BOOST_AUTO_TEST_CASE( Frames_Layouts )
 {
   auto c = std::make_shared<STLL::FontCache_c>();
-  STLL::textStyleSheet_c s(c);
+  STLL::TextStyleSheet_c s(c);
 
   s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
 
@@ -822,7 +822,7 @@ BOOST_AUTO_TEST_CASE( Frames_Layouts )
 BOOST_AUTO_TEST_CASE( Save_Load_Layouts )
 {
   auto c = std::make_shared<STLL::FontCache_c>();
-  STLL::textStyleSheet_c s(c);
+  STLL::TextStyleSheet_c s(c);
 
   s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
 
@@ -848,7 +848,7 @@ BOOST_AUTO_TEST_CASE( Save_Load_Layouts )
 BOOST_AUTO_TEST_CASE( Links )
 {
   auto c = std::make_shared<STLL::FontCache_c>();
-  STLL::textStyleSheet_c s(c);
+  STLL::TextStyleSheet_c s(c);
 
   s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
   s.addRule("body", "font-size", "16px");

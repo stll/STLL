@@ -141,7 +141,7 @@ class stripRightShape_c : public Shape_c
 
 
 Color_c evalColor(const std::string & col);
-std::vector<codepointAttributes::shadow> evalShadows(const std::string & v);
+std::vector<CodepointAttributes_c::Shadow_c> evalShadows(const std::string & v);
 std::string normalizeHTML(const std::string & in, char prev);
 
 class szFunctor
@@ -156,10 +156,10 @@ class parentFunctor : public szFunctor
   private:
     std::string tag;
     X node;
-    const textStyleSheet_c & rules;
+    const TextStyleSheet_c & rules;
 
   public:
-    parentFunctor(const std::string & t, X n, const textStyleSheet_c & r) :
+    parentFunctor(const std::string & t, X n, const TextStyleSheet_c & r) :
        tag(t), node(n), rules(r) {}
 
     double operator()(void) const
@@ -210,7 +210,7 @@ std::string getNodePath(X xml)
 
 
 template <class X>
-Font_c getFontForNode(X xml, const textStyleSheet_c & rules)
+Font_c getFontForNode(X xml, const TextStyleSheet_c & rules)
 {
   std::string fontFamily = rules.getValue(xml, "font-family");
   std::string fontStyle = rules.getValue(xml, "font-style");
@@ -266,13 +266,13 @@ const char * getHTMLAttribute(X xml, const std::string attr)
 
 
 template <class X>
-using ParseFunction = TextLayout_c (*)(X & xml, const textStyleSheet_c & rules,
+using ParseFunction = TextLayout_c (*)(X & xml, const TextStyleSheet_c & rules,
                                       const Shape_c & shape, int32_t ystart);
 
 // handles padding, margin and border, all in one, it takes the text returned from the
 // ParseFunction and boxes it
 template <class X>
-TextLayout_c boxIt(X & xml, X & xml2, const textStyleSheet_c & rules,
+TextLayout_c boxIt(X & xml, X & xml2, const TextStyleSheet_c & rules,
                           const Shape_c & shape, int32_t ystart, ParseFunction<X> fkt,
                           X above, X left,
                           bool collapseBorder = false, uint32_t minHeight = 0)
@@ -475,7 +475,7 @@ TextLayout_c boxIt(X & xml, X & xml2, const textStyleSheet_c & rules,
 
 
 template <class X>
-TextLayout_c layoutXML_IMG(X & xml, const textStyleSheet_c &, const Shape_c & shape, int32_t ystart)
+TextLayout_c layoutXML_IMG(X & xml, const TextStyleSheet_c &, const Shape_c & shape, int32_t ystart)
 {
   TextLayout_c l;
 
@@ -507,8 +507,8 @@ TextLayout_c layoutXML_IMG(X & xml, const textStyleSheet_c &, const Shape_c & sh
 // instead of looking at the children
 // this function will also return a new node where it stopped working
 template <class X>
-X layoutXML_text(X xml, const textStyleSheet_c & rules,
-                              layoutProperties & prop, std::u32string & txt,
+X layoutXML_text(X xml, const TextStyleSheet_c & rules,
+                              LayoutProperties_c & prop, std::u32string & txt,
                               AttributeIndex_c & attr, int32_t baseline = 0,
                               const std::string & link = "", bool exitOnError = false)
 {
@@ -523,7 +523,7 @@ X layoutXML_text(X xml, const textStyleSheet_c & rules,
       else
         txt += u8_convertToU32(normalizeHTML(xml_getData(xml), txt[txt.length()-1]));
 
-      codepointAttributes a;
+      CodepointAttributes_c a;
 
       a.c = evalColor(rules.getValue(xml_getParent(xml), "color"));
       a.font = getFontForNode(xml_getParent(xml), rules);
@@ -531,7 +531,7 @@ X layoutXML_text(X xml, const textStyleSheet_c & rules,
       a.flags = 0;
       if (rules.getValue(xml_getParent(xml), "text-decoration") == "underline")
       {
-        a.flags |= codepointAttributes::FL_UNDERLINE;
+        a.flags |= CodepointAttributes_c::FL_UNDERLINE;
       }
       a.shadows = evalShadows(rules.getValue(xml_getParent(xml), "text-shadow"));
 
@@ -594,7 +594,7 @@ X layoutXML_text(X xml, const textStyleSheet_c & rules,
     else if (xml_isElementNode(xml) && (std::string("br") == xml_getName(xml)))
     {
       txt += U'\n';
-      codepointAttributes a;
+      CodepointAttributes_c a;
       a.flags = 0;
       a.font = getFontForNode(xml_getParent(xml), rules);
       a.lang = getHTMLAttribute(xml_getParent(xml), "lang");
@@ -602,7 +602,7 @@ X layoutXML_text(X xml, const textStyleSheet_c & rules,
     }
     else if (xml_isElementNode(xml) && (std::string("img") == xml_getName(xml)))
     {
-      codepointAttributes a;
+      CodepointAttributes_c a;
       a.inlay = std::make_shared<TextLayout_c>(boxIt(xml, xml, rules, RectangleShape_c(10000), 0,
                                                      layoutXML_IMG, X(), X()));
       a.baseline_shift = 0;
@@ -612,7 +612,7 @@ X layoutXML_text(X xml, const textStyleSheet_c & rules,
       // can find the position of the underline
       if (rules.getValue(xml_getParent(xml), "text-decoration") == "underline")
       {
-        a.flags |= codepointAttributes::FL_UNDERLINE;
+        a.flags |= CodepointAttributes_c::FL_UNDERLINE;
         a.font = getFontForNode(xml_getParent(xml), rules);
         a.c = evalColor(rules.getValue(xml_getParent(xml), "color"));
       }
@@ -645,28 +645,28 @@ X layoutXML_text(X xml, const textStyleSheet_c & rules,
 // this function is different from all other layout functions usable in the boxIt
 // function, as it will change the xml node and return a new one
 template <class X>
-TextLayout_c layoutXML_Phrasing(X & xml, const textStyleSheet_c & rules, const Shape_c & shape, int32_t ystart)
+TextLayout_c layoutXML_Phrasing(X & xml, const TextStyleSheet_c & rules, const Shape_c & shape, int32_t ystart)
 {
   std::u32string txt;
   AttributeIndex_c attr;
-  layoutProperties lprop;
+  LayoutProperties_c lprop;
 
   auto xml2 = layoutXML_text(xml, rules, lprop, txt, attr, 0, "", true);
 
   std::string s = rules.getValue(xml, "text-align");
 
-  if      (s == "left")   lprop.align = layoutProperties::ALG_LEFT;
-  else if (s == "right")  lprop.align = layoutProperties::ALG_RIGHT;
-  else if (s == "center") lprop.align = layoutProperties::ALG_CENTER;
+  if      (s == "left")   lprop.align = LayoutProperties_c::ALG_LEFT;
+  else if (s == "right")  lprop.align = LayoutProperties_c::ALG_RIGHT;
+  else if (s == "center") lprop.align = LayoutProperties_c::ALG_CENTER;
   else if (s == "justify") {
     s = rules.getValue(xml, "text-align-last");
-    if      (s == "left")  lprop.align = layoutProperties::ALG_JUSTIFY_LEFT;
-    else if (s == "right") lprop.align = layoutProperties::ALG_JUSTIFY_RIGHT;
+    if      (s == "left")  lprop.align = LayoutProperties_c::ALG_JUSTIFY_LEFT;
+    else if (s == "right") lprop.align = LayoutProperties_c::ALG_JUSTIFY_RIGHT;
     else if (s == "")
     {
       s = rules.getValue(xml, "direction");
-      if (s == "ltr") lprop.align = layoutProperties::ALG_JUSTIFY_LEFT;
-      if (s == "rtl") lprop.align = layoutProperties::ALG_JUSTIFY_RIGHT;
+      if (s == "ltr") lprop.align = LayoutProperties_c::ALG_JUSTIFY_LEFT;
+      if (s == "rtl") lprop.align = LayoutProperties_c::ALG_JUSTIFY_RIGHT;
     }
     else
     {
@@ -677,8 +677,8 @@ TextLayout_c layoutXML_Phrasing(X & xml, const textStyleSheet_c & rules, const S
   else if (s == "")
   {
     s = rules.getValue(xml, "direction");
-    if (s == "ltr") lprop.align = layoutProperties::ALG_LEFT;
-    if (s == "rtl") lprop.align = layoutProperties::ALG_RIGHT;
+    if (s == "ltr") lprop.align = LayoutProperties_c::ALG_LEFT;
+    if (s == "rtl") lprop.align = LayoutProperties_c::ALG_RIGHT;
   }
   else
   {
@@ -700,10 +700,10 @@ TextLayout_c layoutXML_Phrasing(X & xml, const textStyleSheet_c & rules, const S
 
 
 template <class X>
-TextLayout_c layoutXML_Flow(X & txt, const textStyleSheet_c & rules, const Shape_c & shape, int32_t ystart);
+TextLayout_c layoutXML_Flow(X & txt, const TextStyleSheet_c & rules, const Shape_c & shape, int32_t ystart);
 
 template <class X>
-TextLayout_c layoutXML_UL(X & xml, const textStyleSheet_c & rules, const Shape_c & shape, int32_t ystart)
+TextLayout_c layoutXML_UL(X & xml, const TextStyleSheet_c & rules, const Shape_c & shape, int32_t ystart)
 {
   TextLayout_c l;
   l.setHeight(ystart);
@@ -717,7 +717,7 @@ TextLayout_c layoutXML_UL(X & xml, const textStyleSheet_c & rules, const Shape_c
       auto font = getFontForNode(i, rules);
       auto y = l.getHeight();
 
-      codepointAttributes a;
+      CodepointAttributes_c a;
       a.c = evalColor(rules.getValue(xml, "color"));
       a.font = font;
       a.lang = "";
@@ -729,10 +729,10 @@ TextLayout_c layoutXML_UL(X & xml, const textStyleSheet_c & rules, const Shape_c
 
       auto direction = rules.getValue(xml, "direction");
 
-      layoutProperties prop;
+      LayoutProperties_c prop;
       prop.indent = 0;
       prop.ltr = true;
-      prop.align = layoutProperties::ALG_CENTER;
+      prop.align = LayoutProperties_c::ALG_CENTER;
       prop.round = rules.getRound();
 
       std::unique_ptr<Shape_c> bulletshape;
@@ -773,7 +773,7 @@ TextLayout_c layoutXML_UL(X & xml, const textStyleSheet_c & rules, const Shape_c
 
 
 template <class X>
-void layoutXML_TR(X & xml, uint32_t row, const textStyleSheet_c & /* rules */,
+void layoutXML_TR(X & xml, uint32_t row, const TextStyleSheet_c & /* rules */,
                          std::vector<tableCell<X>> & cells, vector2d<X> & cellarray,
                          size_t columns)
 {
@@ -835,7 +835,7 @@ void layoutXML_TR(X & xml, uint32_t row, const textStyleSheet_c & /* rules */,
 
 
 template <class X>
-TextLayout_c layoutXML_TABLE(X & xml, const textStyleSheet_c & rules, const Shape_c & shape, int32_t ystart)
+TextLayout_c layoutXML_TABLE(X & xml, const TextStyleSheet_c & rules, const Shape_c & shape, int32_t ystart)
 {
   std::vector<tableCell<X>> cells;
   std::vector<uint32_t> widths;
@@ -1061,7 +1061,7 @@ TextLayout_c layoutXML_TABLE(X & xml, const textStyleSheet_c & rules, const Shap
 }
 
 template <class X>
-TextLayout_c layoutXML_Flow(X & txt, const textStyleSheet_c & rules, const Shape_c & shape, int32_t ystart)
+TextLayout_c layoutXML_Flow(X & txt, const TextStyleSheet_c & rules, const Shape_c & shape, int32_t ystart)
 {
   TextLayout_c l;
   l.setHeight(ystart);
@@ -1143,7 +1143,7 @@ TextLayout_c layoutXML_Flow(X & txt, const textStyleSheet_c & rules, const Shape
 }
 
 template <class X>
-TextLayout_c layoutXML_HTML(X & txt, const textStyleSheet_c & rules, const Shape_c & shape)
+TextLayout_c layoutXML_HTML(X & txt, const TextStyleSheet_c & rules, const Shape_c & shape)
 {
   TextLayout_c l;
 
@@ -1178,7 +1178,7 @@ TextLayout_c layoutXML_HTML(X & txt, const textStyleSheet_c & rules, const Shape
  *  \param shape the shape to layout into
  */
 template <class X>
-TextLayout_c layoutXML_int(X txt, const textStyleSheet_c & rules, const Shape_c & shape)
+TextLayout_c layoutXML_int(X txt, const TextStyleSheet_c & rules, const Shape_c & shape)
 {
   TextLayout_c l;
 

@@ -24,7 +24,7 @@
 
 namespace STLL {
 
-TextLayout_c layoutXML(const xmlNode * txt, const textStyleSheet_c & rules, const Shape_c & shape)
+TextLayout_c layoutXML(const xmlNode * txt, const TextStyleSheet_c & rules, const Shape_c & shape)
 {
   return internal::layoutXML_int(txt, rules, shape);
 }
@@ -37,7 +37,7 @@ TextLayout_c layoutXML(const xmlNode * txt, const textStyleSheet_c & rules, cons
  *  \attention it is not checked that txt is proper utf-8. If you have unsafe sources
  *  for your text to layout, use the check function from the utf-8 module
  */
-TextLayout_c layoutXHTMLLibXML2(const std::string & txt, const textStyleSheet_c & rules, const Shape_c & shape)
+TextLayout_c layoutXHTMLLibXML2(const std::string & txt, const TextStyleSheet_c & rules, const Shape_c & shape)
 {
   auto res = xml_parseStringLibXML2(txt);
 

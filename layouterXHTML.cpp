@@ -170,11 +170,11 @@ Color_c evalColor(const std::string & col)
 
 
 
-std::vector<codepointAttributes::shadow> evalShadows(const std::string & v)
+std::vector<CodepointAttributes_c::Shadow_c> evalShadows(const std::string & v)
 {
-  std::vector<codepointAttributes::shadow> s;
+  std::vector<CodepointAttributes_c::Shadow_c> s;
 
-  codepointAttributes::shadow sh;
+  CodepointAttributes_c::Shadow_c sh;
 
   size_t spos = 0;
 

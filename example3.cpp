@@ -72,7 +72,7 @@ class layoutInfo_c
     SubPixelArrangement sp;
 };
 
-class myImageDrawer_c : public imageDrawerSDL_c
+class myImageDrawer_c : public ImageDrawerSDL_c
 {
   void draw(int32_t x, int32_t y, uint32_t w, uint32_t h, SDL_Surface * s, const std::string &)
   {
@@ -158,7 +158,7 @@ void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
 int main ()
 {
   auto fc = std::make_shared<FontCache_c>();
-  textStyleSheet_c styleSheet(fc);
+  TextStyleSheet_c styleSheet(fc);
 
   // alle Fonts, die so genutzt werden: familie heißt sans, und dann der bold Font dazu
   {
@@ -330,12 +330,12 @@ int main ()
   // another example:
   {
 
-  layoutProperties prop;
+  LayoutProperties_c prop;
 
   TextLayout_c l2;
 
   AttributeIndex_c attr;
-  codepointAttributes a;
+  CodepointAttributes_c a;
   a.c = Color_c(255, 255, 255, 255);
   a.font = fc->getFont(FontResource_c("tests/FreeSans.ttf"), 16*64);
   a.lang = "en";
@@ -356,7 +356,7 @@ int main ()
   }
 
   {
-  layoutProperties prop;
+  LayoutProperties_c prop;
 
   TextLayout_c l2;
 
@@ -366,7 +366,7 @@ int main ()
   for (int row = 0; row < 20; row++)
   {
     AttributeIndex_c attr;
-    codepointAttributes a;
+    CodepointAttributes_c a;
     a.c = Color_c(255, 255, 255, 255);
     a.font = fc->getFont(FontResource_c("/usr/share/fonts/corefonts/georgiai.ttf"), (6+row)*64);
     a.lang = "en";

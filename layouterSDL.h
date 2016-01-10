@@ -41,7 +41,7 @@ class TextLayout_c;
  *
  * Derive from this function and implement the draw function to handle image drawing in your application
  */
-class imageDrawerSDL_c
+class ImageDrawerSDL_c
 {
   public:
     /** \brief function called to draw an image
@@ -72,7 +72,7 @@ class imageDrawerSDL_c
  *        to stick to the same gamma value for long stretches
  */
 void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
-                   SubPixelArrangement sp = SUBP_NONE, imageDrawerSDL_c * images = 0, uint8_t gamma = 22);
+                   SubPixelArrangement sp = SUBP_NONE, ImageDrawerSDL_c * images = 0, uint8_t gamma = 22);
 
 /** \brief trims the font cache down to a maximal number of entries
  *
