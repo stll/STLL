@@ -38,6 +38,7 @@ set(stll_SOURCES
   src/layouterFont.cpp
   src/layouterXHTML.cpp
   src/utf-8.cpp
+  src/output/cache_single.cpp
 )
 if(PUGIXML_LIBRARY)
   list(APPEND stll_SOURCES src/layouterXHTML_Pugi.cpp)

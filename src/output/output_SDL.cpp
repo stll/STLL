@@ -24,154 +24,17 @@
 
 #include <stll/layouter.h>
 #include <stll/color.h>
-#include "blurr.h"
+
+#include "cache_single.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include <unordered_map>
-
-namespace STLL {
-
 // TODO properly handle it, when FreeType returns an bitmap format that is not supported
 
-// encapsulation for an object to paint it contains the data for the alpha value
-// of an object to paint. It is used to store information about single glyphs or
-// single rectangles to draw
-class PaintData_c
-{
-  private:
-
-    // copy the buffer and apply a blurr, if needed, when buffer pointer
-    // is nullptr, then the whole buffer is assumed to be completely filled with 255 value (used
-    // for rectangles)
-    void blurrInit(uint8_t * buf_dat, uint16_t buf_pitch, uint16_t buf_rows, uint16_t blurr, SubPixelArrangement sp)
-    {
-      // create a buffer that is big enough to hold the complete blurred image
-      // and has an additional number of columns on the right so that no additional
-      // checks are needed for drawing for the last column
-      // so the pitch of the buffered image is always 1 or 2 columns wider than the image width (depending on suppixel)
-      int blurrh = 1;
-      int blurrw = 1;
-      int addc = 1;
-      int ts = blurr/32;
-      int ls = blurr/32;
-
-      left -= ls;
-      top += ts;
-
-      switch (sp)
-      {
-        default:
-        case SUBP_NONE:
-          break;
-
-        case SUBP_RGB:
-        case SUBP_BGR:
-          blurrw *= 3;
-          ls *= 3;
-          addc *= 3;
-          break;
-      }
-
-      width += 2*ls;
-      pitch += 2*ls;
-      rows += 2*ts;
-
-      // make the pitxh bigger
-      pitch += addc;
-
-      buffer = std::make_unique<uint8_t[]>(rows*pitch);
-      memset(buffer.get(), 0, rows*pitch);
-
-      // copy image into the centre of the enlarged buffer
-      for (int i = 0; i < buf_rows; i++)
-      {
-        if (buf_dat)
-          memcpy(buffer.get()+(i+ts)*pitch+ls, buf_dat+i*(buf_pitch), buf_pitch);
-        else
-          memset(buffer.get()+(i+ts)*pitch+ls, 255, buf_pitch);
-      }
-
-      if (blurr > 0)
-      {
-        internal::gaussBlur(buffer.get(), pitch, rows, blurr/64.0, blurrw, blurrh);
-      }
-    }
-
-  public:
-    int32_t left;  // position of the top left corner relative to the baseposition of the image
-    int32_t top;
-    int32_t rows;  // hight of image
-    int32_t width; // width of image
-    int32_t pitch; // number of bytes per line of image, guaranteed to be at least 1 or 2 bigger than width
-    std::unique_ptr<uint8_t[]> buffer;
-    uint32_t lastUse;
-
-    // create from glyph data
-    PaintData_c(FT_GlyphSlotRec_ * ft, uint16_t blurr, SubPixelArrangement sp) :
-      left(ft->bitmap_left), top(ft->bitmap_top), rows(ft->bitmap.rows),
-      width(ft->bitmap.width), pitch(ft->bitmap.pitch)
-    {
-      blurrInit(ft->bitmap.buffer, ft->bitmap.pitch, ft->bitmap.rows, blurr, sp);
-    }
-
-    // create rectangle data
-    PaintData_c(uint16_t _pitch, uint16_t _rows, uint16_t blurr, SubPixelArrangement sp) :
-      left(0), top(0), rows(_rows), width(_pitch), pitch(_pitch)
-    {
-      blurrInit(0, _pitch, _rows, blurr, sp);
-    }
-
-    const uint8_t * getBuffer(void) const { return buffer.get(); }
-};
-
-// hash key similar to the GlyphKey_c
-class RectKey_c
-{
-  public:
-    int w;
-    int h;
-    int blurr;
-    SubPixelArrangement sp;
-
-    RectKey_c(int wi, int hi, int b, SubPixelArrangement s) : w(wi), h(hi), blurr(b), sp(s) {}
-
-    bool operator==(const RectKey_c & a) const
-    {
-      return w == a.w && h == a.h && sp == a.sp && blurr == a.blurr;
-    }
-
-};
-
-}
-
-namespace std {
-
-template <>
-class hash<STLL::RectKey_c>
-{
-  public :
-  size_t operator()(const STLL::RectKey_c & name ) const
-  {
-    return (size_t)name.w * (size_t)name.h * (size_t)name.blurr * (size_t)(name.sp);
-  }
-};
-
-};
 
 namespace STLL
 {
-
-// our glyph cache with all the rendered glyphs
-static std::unordered_map<GlyphKey_c, PaintData_c> glyphCache;
-static std::unordered_map<RectKey_c, PaintData_c> rectCache;
-
-// each time we access a glyph from the cache we increase this number
-// and write the value into the lastUse field of the rendered glyph
-// that is how we can find out glyphs that were not used the longest time
-static uint32_t useCounter = 0;
-
 // lookup tables for gamma correct output
 // gamma contains the gamma value that the lookup tables are currently
 // set up for
@@ -271,7 +134,7 @@ static uint8_t blend(uint8_t a1, uint8_t a2, uint16_t b1, uint16_t b2 = 0, uint8
 
 // the fallback glyph rendering without sub-pixel output. This should work on every surface
 // independent of its format
-static void outputGlyph_NONE_Fallback(int sx, int sy, const PaintData_c & img, Color_c c, SDL_Surface * s)
+static void outputGlyph_NONE_Fallback(int sx, int sy, const internal::PaintData_c & img, Color_c c, SDL_Surface * s)
 {
   int stx = sx/64 + img.left;
   int sty = (sy+32)/64 - img.top;
@@ -316,7 +179,7 @@ static void outputGlyph_NONE_Fallback(int sx, int sy, const PaintData_c & img, C
 
 // an optimized glyph rendering function for not sub-pixel output. Optimized for surfaces with
 // 32 bits per pixel in RGBx order, x meaning one unused byte
-static void outputGlyph_NONE_RGBx(int sx, int sy, const PaintData_c & img, Color_c c, SDL_Surface * s)
+static void outputGlyph_NONE_RGBx(int sx, int sy, const internal::PaintData_c & img, Color_c c, SDL_Surface * s)
 {
   int stx = sx/64 + img.left;
   int sty = (sy+32)/64 - img.top;
@@ -359,7 +222,7 @@ static void outputGlyph_NONE_RGBx(int sx, int sy, const PaintData_c & img, Color
 
 // a fallback output function with sub-pixel glyph placement, should work on all
 // target surface formats
-static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, const PaintData_c & img, Color_c c, SDL_Surface * s)
+static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, const internal::PaintData_c & img, Color_c c, SDL_Surface * s)
 {
   int stx = sx/64 + img.left;
   int sty = sy/64 - img.top;
@@ -415,7 +278,7 @@ static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, const PaintData_c
 }
 
 // sub-pixel glyph output optimized for 32 bit surfaces with red green blue unused order
-static void outputGlyph_HorizontalRGB_RGBx(int sx, int sy, const PaintData_c & img, Color_c c, SDL_Surface * s)
+static void outputGlyph_HorizontalRGB_RGBx(int sx, int sy, const internal::PaintData_c & img, Color_c c, SDL_Surface * s)
 {
   int stx = sx/64 + img.left;
   int sty = (sy+32)/64 - img.top;
@@ -482,7 +345,7 @@ static int getSurfaceFormat(SDL_Surface * s)
   return 0;
 }
 
-static void outputGlyph(int sx, int sy, const PaintData_c & img, SubPixelArrangement sp, Color_c c, SDL_Surface * s)
+static void outputGlyph(int sx, int sy, const internal::PaintData_c & img, SubPixelArrangement sp, Color_c c, SDL_Surface * s)
 {
   // check for the right image format
 
@@ -500,59 +363,6 @@ static void outputGlyph(int sx, int sy, const PaintData_c & img, SubPixelArrange
     case calcFormatID(0, SUBP_RGB):  outputGlyph_HorizontalRGB_Fallback(sx, sy, img, c, s); break;
     case calcFormatID(1, SUBP_RGB):  outputGlyph_HorizontalRGB_RGBx(sx, sy, img, c, s);     break;
   }
-}
-
-// get the glyph from the cache, or render new using FreeType
-static PaintData_c & getGlyph(std::shared_ptr<FontFace_c> face, glyphIndex_t glyph, SubPixelArrangement sp, uint16_t blurr)
-{
-  GlyphKey_c k(face, glyph, sp, blurr);
-
-  auto i = glyphCache.find(k);
-
-  if (i == glyphCache.end())
-  {
-    auto g = face->renderGlyph(glyph, sp);
-
-    assert(g->format == FT_GLYPH_FORMAT_BITMAP);
-    assert( sp != SUBP_NONE                       || g->bitmap.pixel_mode == FT_PIXEL_MODE_GRAY);
-    assert((sp != SUBP_RGB && sp != SUBP_BGR)     || g->bitmap.pixel_mode == FT_PIXEL_MODE_LCD);
-    assert((sp != SUBP_RGB_V && sp != SUBP_BGR_V) || g->bitmap.pixel_mode == FT_PIXEL_MODE_LCD_V);
-
-    i = glyphCache.insert(std::make_pair(k, std::move(PaintData_c(g, blurr, sp)))).first;
-  }
-
-  i->second.lastUse = useCounter;
-  useCounter++;
-
-  return i->second;
-}
-
-static PaintData_c & getRect(int w, int h, SubPixelArrangement sp, uint16_t blurr)
-{
-  RectKey_c k(w, h, blurr, sp);
-
-  auto i = rectCache.find(k);
-
-  if (i == rectCache.end())
-  {
-    int rw = (w+32)/64;
-    int rh = (h+32)/64;
-
-    switch (sp)
-    {
-      default:
-      case SUBP_NONE:
-        break;
-
-      case SUBP_RGB:
-        rw = (3*w+32)/64;
-        break;
-    }
-
-    i = rectCache.insert(std::make_pair(k, std::move(PaintData_c(rw, rh, blurr, sp)))).first;
-  }
-
-  return i->second;
 }
 
 static Color_c gammaColor(Color_c c)
@@ -607,7 +417,7 @@ void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
     switch (i.command)
     {
       case CommandData_c::CMD_GLYPH:
-        outputGlyph(sx+i.x, sy+i.y, getGlyph(i.font, i.glyphIndex, sp, i.blurr), sp, gammaColor(i.c), s);
+        outputGlyph(sx+i.x, sy+i.y, internal::cache_single_getGlyph(i.font, i.glyphIndex, sp, i.blurr), sp, gammaColor(i.c), s);
         break;
 
       case CommandData_c::CMD_RECT:
@@ -621,7 +431,7 @@ void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
         }
         else
         {
-          outputGlyph(sx+i.x, sy+i.y, getRect(i.w, i.h, sp, i.blurr), sp, gammaColor(i.c), s);
+          outputGlyph(sx+i.x, sy+i.y, internal::cache_single_getRect(i.w, i.h, sp, i.blurr), sp, gammaColor(i.c), s);
         }
         break;
 
@@ -635,32 +445,7 @@ void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
 
 void trimSDLFontCache(size_t num)
 {
-  if (num == 0)
-  {
-    glyphCache.clear();
-  }
-  else if (num < glyphCache.size())
-  {
-    // find elements that are oldest in the cache
-    std::vector<std::unordered_map<GlyphKey_c, PaintData_c>::iterator> entries;
-
-    for (auto i = glyphCache.begin(); i != glyphCache.end(); ++i)
-      entries.push_back(i);
-
-    std::sort(entries.begin(), entries.end(),
-              [] (const std::unordered_map<GlyphKey_c, PaintData_c>::iterator & a,
-                  const std::unordered_map<GlyphKey_c, PaintData_c>::iterator & b) {
-      return a->second.lastUse < b->second.lastUse;
-    });
-
-    size_t toDel = glyphCache.size() - num;
-
-    for (size_t i = 0; i < toDel; i++)
-      glyphCache.erase(entries[i]);
-  }
-
-  // we always clear out the complete rectangle cache, they are cheap to redo when necessary
-  rectCache.clear();
+  internal::cache_single_trim(num);
 }
 
 }
