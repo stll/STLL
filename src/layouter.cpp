@@ -352,7 +352,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
 
     size_t curLink = 0;
     TextLayout_c::Rectangle_c linkRect;
-    int linkStart;
+    int linkStart = 0;
 
     // off we go creating the drawing commands
     for (size_t j=0; j < glyph_count; ++j)
