@@ -1,5 +1,5 @@
-#include "layouter.h"
-#include "layouterSDL.h"
+#include <stll/layouter.h>
+#include <stll/output_SDL.h>
 
 using namespace STLL;
 

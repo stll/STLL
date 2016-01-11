@@ -24,8 +24,8 @@
 
 /* not part of the library: this file provides code to load and store layouts in XML files */
 
-#include "layouter.h"
-#include "layouterFont.h"
+#include <stll/layouter.h>
+#include <stll/layouterFont.h>
 
 #include <pugixml.hpp>
 

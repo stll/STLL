@@ -22,10 +22,12 @@
 
 #define USE_PUGI_XML
 
-#include "layouterXHTML.h"
-#include "layouter.h"
-#include "layouterSDL.h"
 #include "layouterXMLSaveLoad.h"
+
+#include <stll/layouterXHTML.h>
+#include <stll/layouter.h>
+#include <stll/output_SDL.h>
+
 #include <boost/concept_check.hpp>
 
 #include <fstream>

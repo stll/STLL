@@ -23,9 +23,9 @@
 #define BOOST_TEST_MODULE STLL Tests
 #include <boost/test/unit_test.hpp>
 
-#include "layouterCSS.h"
-#include "layouterXHTML.h"
-#include "layouterFont.h"
+#include <stll/layouterCSS.h>
+#include <stll/layouterXHTML.h>
+#include <stll/layouterFont.h>
 #include "layouterXMLSaveLoad.h"
 
 #include <pugixml.hpp>

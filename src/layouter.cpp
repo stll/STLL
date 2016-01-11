@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "layouter.h"
+#include <stll/layouter.h>
 
 #include <harfbuzz/hb.h>
 #include <harfbuzz/hb-ft.h>

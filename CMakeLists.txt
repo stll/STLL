@@ -32,7 +32,7 @@ endif()
 
 # STLL library
 set(stll_SOURCES
-  src/blurr.cpp
+  src/output/blurr.cpp
   src/layouter.cpp
   src/layouterCSS.cpp
   src/layouterFont.cpp
@@ -46,7 +46,7 @@ if(LIBXML2_FOUND)
   list(APPEND stll_SOURCES src/layouterXHTML_LibXML2.cpp)
 endif()
 if(SDL_FOUND)
-  list(APPEND stll_SOURCES src/layouterSDL.cpp)
+  list(APPEND stll_SOURCES src/output/output_SDL.cpp)
 endif()
 add_library(stll SHARED ${stll_SOURCES})
 target_compile_options(stll PRIVATE -std=c++14 ${XMLLIBDEFINES})
@@ -57,6 +57,8 @@ target_include_directories(stll PRIVATE
   ${HARFBUZZ_INCLUDE_DIRS}
   ${SDL_INCLUDE_DIR}
   ${LIBXML2_INCLUDE_DIR}
+  include
+  src
 )
 target_link_libraries(stll PUBLIC
   ${FREETYPE_LIBRARIES}
@@ -73,6 +75,7 @@ add_executable(runtestsPugi src/runtests.cpp src/layouterXMLSaveLoad.cpp)
 target_compile_options(runtestsPugi PRIVATE -std=c++14 -DUSE_PUGI_XML)
 target_include_directories(runtestsPugi PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}
+  include
   )
 target_link_libraries(runtestsPugi PRIVATE stll
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
@@ -85,6 +88,7 @@ if(LIBXML2_FOUND)
   target_include_directories(runtestsLibXML2 PRIVATE
     ${LIBXML2_INCLUDE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
+    include
   )
   target_link_libraries(runtestsLibXML2 PRIVATE stll
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
@@ -99,6 +103,7 @@ if(SDL_FOUND)
   target_include_directories(example1 PRIVATE
     ${SDL_INCLUDE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
+    include
   )
   target_link_libraries(example1 PRIVATE stll
     ${SDL_LIBRARY}
@@ -109,6 +114,7 @@ if(SDL_FOUND)
   target_include_directories(example2 PRIVATE
     ${SDL_INCLUDE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
+    include
   )
   target_link_libraries(example2 PRIVATE stll
     ${SDL_LIBRARY}
@@ -119,6 +125,7 @@ if(SDL_FOUND)
   target_include_directories(example3 PRIVATE
     ${SDL_INCLUDE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
+    include
   )
   target_link_libraries(example3 PRIVATE stll
     ${SDL_LIBRARY}
@@ -130,6 +137,7 @@ if(SDL_FOUND)
   target_compile_options(viewer PRIVATE -std=c++14)
   target_include_directories(viewer PRIVATE
     ${SDL_INCLUDE_DIR}
+    include
   )
   target_link_libraries(viewer PRIVATE stll
     ${SDL_LIBRARY}
@@ -138,5 +146,3 @@ endif()
 
 #install (TARGETS MathFunctions DESTINATION bin)
 #install (FILES MathFunctions.h DESTINATION include)
-
-

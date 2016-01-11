@@ -28,9 +28,7 @@
 
 #include "layouterCSS.h"
 #include "layouter.h"
-
 #include "xmllibraries.h"
-#include "utf-8.h"
 
 #include <string>
 

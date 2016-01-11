@@ -19,10 +19,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "layouterXHTML.h"
+#include <stll/layouterXHTML.h>
 #include "layouterXHTML_internals.h"
 
-#include "utf-8.h"
+#include <stll/utf-8.h>
 
 #include <string>
 #include <vector>

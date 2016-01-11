@@ -20,10 +20,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "layouterSDL.h"
+#include <stll/output_SDL.h>
 
-#include "layouter.h"
-#include "color.h"
+#include <stll/layouter.h>
+#include <stll/color.h>
 #include "blurr.h"
 
 #include <ft2build.h>

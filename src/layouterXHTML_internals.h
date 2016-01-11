@@ -26,11 +26,11 @@
  *  \brief This module contains the XHTML parser and layouter
  */
 
-#include "layouterCSS.h"
-#include "layouter.h"
+#include <stll/layouterCSS.h>
+#include <stll/layouter.h>
 
-#include "xmllibraries.h"
-#include "utf-8.h"
+#include <stll/xmllibraries.h>
+#include <stll/utf-8.h>
 
 #include <string>
 
