@@ -32,21 +32,21 @@ endif()
 
 # STLL library
 set(stll_SOURCES
-  blurr.cpp
-  layouter.cpp
-  layouterCSS.cpp
-  layouterFont.cpp
-  layouterXHTML.cpp
-  utf-8.cpp
+  src/blurr.cpp
+  src/layouter.cpp
+  src/layouterCSS.cpp
+  src/layouterFont.cpp
+  src/layouterXHTML.cpp
+  src/utf-8.cpp
 )
 if(PUGIXML_LIBRARY)
-  list(APPEND stll_SOURCES layouterXHTML_Pugi.cpp)
+  list(APPEND stll_SOURCES src/layouterXHTML_Pugi.cpp)
 endif()
 if(LIBXML2_FOUND)
-  list(APPEND stll_SOURCES layouterXHTML_LibXML2.cpp)
+  list(APPEND stll_SOURCES src/layouterXHTML_LibXML2.cpp)
 endif()
 if(SDL_FOUND)
-  list(APPEND stll_SOURCES layouterSDL.cpp)
+  list(APPEND stll_SOURCES src/layouterSDL.cpp)
 endif()
 add_library(stll SHARED ${stll_SOURCES})
 target_compile_options(stll PRIVATE -std=c++14 ${XMLLIBDEFINES})
@@ -69,7 +69,7 @@ target_link_libraries(stll PUBLIC
 )
 
 # Tests
-add_executable(runtestsPugi runtests.cpp layouterXMLSaveLoad.cpp)
+add_executable(runtestsPugi src/runtests.cpp src/layouterXMLSaveLoad.cpp)
 target_compile_options(runtestsPugi PRIVATE -std=c++14 -DUSE_PUGI_XML)
 target_include_directories(runtestsPugi PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}
@@ -77,10 +77,10 @@ target_include_directories(runtestsPugi PRIVATE
 target_link_libraries(runtestsPugi PRIVATE stll
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 )
-add_test(test1 runtestsPugi)
+add_test(test_PugiXML runtestsPugi)
 
 if(LIBXML2_FOUND)
-  add_executable(runtestsLibXML2 runtests.cpp layouterXMLSaveLoad.cpp)
+  add_executable(runtestsLibXML2 src/runtests.cpp src/layouterXMLSaveLoad.cpp)
   target_compile_options(runtestsLibXML2 PRIVATE -std=c++14 -DUSE_LIBXML2)
   target_include_directories(runtestsLibXML2 PRIVATE
     ${LIBXML2_INCLUDE_DIR}
@@ -89,12 +89,12 @@ if(LIBXML2_FOUND)
   target_link_libraries(runtestsLibXML2 PRIVATE stll
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   )
-  add_test(test1 runtestsLibXML2)
+  add_test(text_LibXML2 runtestsLibXML2)
 endif()
 
 # Example programs
 if(SDL_FOUND)
-  add_executable(example1 example1.cpp)
+  add_executable(example1 src/example1.cpp)
   target_compile_options(example1 PRIVATE -std=c++14)
   target_include_directories(example1 PRIVATE
     ${SDL_INCLUDE_DIR}
@@ -104,7 +104,7 @@ if(SDL_FOUND)
     ${SDL_LIBRARY}
   )
 
-  add_executable(example2 example2.cpp)
+  add_executable(example2 src/example2.cpp)
   target_compile_options(example2 PRIVATE -std=c++14)
   target_include_directories(example2 PRIVATE
     ${SDL_INCLUDE_DIR}
@@ -114,7 +114,7 @@ if(SDL_FOUND)
     ${SDL_LIBRARY}
   )
 
-  add_executable(example3 example3.cpp layouterXMLSaveLoad.cpp)
+  add_executable(example3 src/example3.cpp src/layouterXMLSaveLoad.cpp)
   target_compile_options(example3 PRIVATE -std=c++14)
   target_include_directories(example3 PRIVATE
     ${SDL_INCLUDE_DIR}
@@ -126,7 +126,7 @@ if(SDL_FOUND)
 endif()
 
 if(SDL_FOUND)
-  add_executable(viewer viewer.cpp layouterXMLSaveLoad.cpp)
+  add_executable(viewer src/viewer.cpp src/layouterXMLSaveLoad.cpp)
   target_compile_options(viewer PRIVATE -std=c++14)
   target_include_directories(viewer PRIVATE
     ${SDL_INCLUDE_DIR}
@@ -135,3 +135,8 @@ if(SDL_FOUND)
     ${SDL_LIBRARY}
   )
 endif()
+
+#install (TARGETS MathFunctions DESTINATION bin)
+#install (FILES MathFunctions.h DESTINATION include)
+
+
