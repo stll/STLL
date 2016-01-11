@@ -743,7 +743,13 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../color.h ../layouter.h ../layouterCSS.h ../layouterFont.h ../layouterSDL.h ../layouterXHTML.h ../utf8.h \
+INPUT                  = ../include/stll/color.h \
+                         ../include/stll/layouter.h \
+                         ../include/stll/layouterCSS.h \
+                         ../include/stll/layouterFont.h \
+                         ../include/stll/output_SDL.h \
+                         ../include/stll/layouterXHTML.h \
+                         ../include/stll/utf8.h \
                          ./
 
 # This tag can be used to specify the character encoding of the source files
@@ -813,7 +819,7 @@ EXCLUDE_SYMBOLS        = STLL::internal::*, STLL::internal
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           = ../
+EXAMPLE_PATH           = ../src
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
