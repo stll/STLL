@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>STLL: Drawing the layouts</title>
+<title>STLL: Member List</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,10 +39,18 @@
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
-      <li class="current"><a href="pages.html"><span>Related&#160;Pages</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
-      <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
+    </ul>
+  </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
+      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
 </div><!-- top -->
@@ -57,32 +65,19 @@
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('drawing_pg.html','');});
+$(document).ready(function(){initNavTree('class_s_t_l_l_1_1_image_drawer_s_d_l__c.html','');});
 </script>
 <div id="doc-content">
 <div class="header">
   <div class="headertitle">
-<div class="title">Drawing the layouts </div>  </div>
+<div class="title">STLL::ImageDrawerSDL_c Member List</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>When it comes to drawing the final layout there are quite some choices to make. This page will try to explain some of the available options.</p>
-<p>Not all output drivers will support all the available options. Please read there for further information</p>
-<h1><a class="anchor" id="gamma_sec"></a>
-Gamma</h1>
-<p>Some output drivers support gamma correct blending when drawing. That means they can be used to draw onto surfaces that do have a non linear intensity curve.</p>
-<p>Most consumer level displays do have a non linear intensity curve, that means that the grey with the intensity values 128 is not half as bright as the one with intensity 255.</p>
-<p>This has repercussions on blending. When not correctly done it will result in black shadows along blend lines and in letters that appear too thin.</p>
-<p>To resolve this problem use the following rules:</p><ul>
-<li>when drawing into a display buffer use the gamma value of 2.2</li>
-<li>when drawing into non display buffers use gamma 1 (but make sure that you properly blend when you draw that buffer onto the surface</li>
-</ul>
-<p>The SDL output driver provides gamma values for output. OpenGL provides the possibility to set Framebuffers to sRGB which results in proper blending when drawn into.</p>
-<h1><a class="anchor" id="subpixel_sec"></a>
-Sub pixel placement</h1>
-<p>Sub pixel placement allows more accurate placement of pixels onto the screen. It requires a 1:1 correspondence between the framebuffer and the display, so it doesn't work on CRTs and it also doesn't work when the display has to scale the framebuffer.</p>
-<p>But when all conditions are met you will get a sharper result and more evenly distributed letters.</p>
-<p>The output routines need to know the sub pixel arrangement though to make the right drawing decisions. So: if you can not find out and don't want to ask the user for that information don't use it. When used wrongly it will result in ugly output. </p>
-</div></div><!-- contents -->
+
+<p>This is the complete list of members for <a class="el" href="class_s_t_l_l_1_1_image_drawer_s_d_l__c.html">STLL::ImageDrawerSDL_c</a>, including all inherited members.</p>
+<table class="directory">
+  <tr class="even"><td class="entry"><a class="el" href="class_s_t_l_l_1_1_image_drawer_s_d_l__c.html#a8e3ef56d5c3a60f9266576c99857ad23">draw</a>(int32_t x, int32_t y, uint32_t w, uint32_t h, SDL_Surface *s, const std::string &amp;url)=0</td><td class="entry"><a class="el" href="class_s_t_l_l_1_1_image_drawer_s_d_l__c.html">STLL::ImageDrawerSDL_c</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+</table></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

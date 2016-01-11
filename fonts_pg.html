@@ -40,6 +40,9 @@
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li class="current"><a href="pages.html"><span>Related&#160;Pages</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
+      <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
     </ul>
   </div>
 </div><!-- top -->
@@ -59,10 +62,10 @@ $(document).ready(function(){initNavTree('fonts_pg.html','');});
 <div id="doc-content">
 <div class="header">
   <div class="headertitle">
-<div class="title">Fonts in STLL </div>  </div>
+<div class="title">Fonts in <a class="el" href="namespace_s_t_l_l.html" title="The namespace for the library. Every function and class is within this namespace. ...">STLL</a> </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>This page will explain how the fonts are handled in STLL.</p>
+<div class="textblock"><p>This page will explain how the fonts are handled in <a class="el" href="namespace_s_t_l_l.html" title="The namespace for the library. Every function and class is within this namespace. ...">STLL</a>.</p>
 <p>A font file resource (class FontFileResource_c) contains the information where to load a font from, when the application needs one. This can be either a file name including path or it can be a buffer containing an already loaded file.</p>
 <p>Unicode contains many more codepoints than many font files can contain. It is also not really handy to create one huge file containing all you need. That is why some fonts split up the whole range of unicode codepoints into several files. You then choose which one you want to use and assemble them into a font within your application.</p>
 <p>This concept is represented by the class FontResource_c. This class contains a list of font file resources.</p>
@@ -80,7 +83,7 @@ $(document).ready(function(){initNavTree('fonts_pg.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Jan 11 2016 21:41:05 for STLL by
+    <li class="footer">Generated on Mon Jan 11 2016 21:43:43 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

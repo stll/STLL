@@ -40,6 +40,9 @@
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li class="current"><a href="pages.html"><span>Related&#160;Pages</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
+      <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
     </ul>
   </div>
 </div><!-- top -->
@@ -70,17 +73,102 @@ $(document).ready(function(){initNavTree('tutorial_pg.html','');});
 Using the Paragraph Layouter</h1>
 <p>The paragraph layouter is a basic layouter for one or more paragraphs of text. Its input is a unicode string, some settings and a set of properties for each and every character in the string to format.</p>
 <p>That way it is possible to change a single character to underlined, or red or make is using a different font</p>
-<p>To use the paragraph layouter only you need to use code like the following </p><div class="fragment"></div><!-- fragment --><h1><a class="anchor" id="tut_xhtml_sec"></a>
+<p>To use the paragraph layouter only you need to use code like the following </p><div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="layouter_8h.html">stll/layouter.h</a>&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="output___s_d_l_8h.html">stll/output_SDL.h</a>&gt;</span></div>
+<div class="line"></div>
+<div class="line"><span class="keyword">using namespace </span><a class="code" href="namespace_s_t_l_l.html">STLL</a>;</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">  <span class="comment">// create a font cache to get fonts. you need to keep this one</span></div>
+<div class="line">  <span class="comment">// until you are done with the layouting and the output</span></div>
+<div class="line">  <a class="code" href="class_s_t_l_l_1_1_font_cache__c.html">FontCache_c</a> fc;</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// setup the attributes for the text to output</span></div>
+<div class="line">  <span class="comment">// we use a font from the fontcache and the color white</span></div>
+<div class="line">  <span class="comment">// we also use the English language</span></div>
+<div class="line">  <span class="comment">// keep in mind that the font size is given in units of 1/64th, so</span></div>
+<div class="line">  <span class="comment">// multiply by 64</span></div>
+<div class="line">  <a class="code" href="class_s_t_l_l_1_1_codepoint_attributes__c.html">CodepointAttributes_c</a> attr;</div>
+<div class="line">  attr.<a class="code" href="class_s_t_l_l_1_1_codepoint_attributes__c.html#a66a7b8da57506db6ab7f69c1a25d5af8">font</a> = fc.<a class="code" href="class_s_t_l_l_1_1_font_cache__c.html#a15da3357ff0b5336f97960ee7949991f">getFont</a>(<a class="code" href="class_s_t_l_l_1_1_font_resource__c.html">FontResource_c</a>(<span class="stringliteral">&quot;tests/FreeSans.ttf&quot;</span>), 20*64);</div>
+<div class="line">  attr.<a class="code" href="class_s_t_l_l_1_1_codepoint_attributes__c.html#a90967aca24ccb9148956dfa80c4361fa">c</a> = <a class="code" href="class_s_t_l_l_1_1_color__c.html">Color_c</a>(255, 255, 255, 255);</div>
+<div class="line">  attr.<a class="code" href="class_s_t_l_l_1_1_codepoint_attributes__c.html#aea2a394f4ea12aacfcce261019e295bc">lang</a> = <span class="stringliteral">&quot;en&quot;</span>;</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// setup the attribute index. This index assigns attributes to</span></div>
+<div class="line">  <span class="comment">// all the characters in your text, the way we create it here</span></div>
+<div class="line">  <span class="comment">// will setup the index in such a way, that _all_ characters Will</span></div>
+<div class="line">  <span class="comment">// have the given attribute</span></div>
+<div class="line">  <a class="code" href="class_s_t_l_l_1_1_attribute_index__c.html">AttributeIndex_c</a> ai(attr);</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// create layouting properties, the default is good enough for us right now</span></div>
+<div class="line">  <a class="code" href="class_s_t_l_l_1_1_layout_properties__c.html">LayoutProperties_c</a> prop;</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// now layout the text &quot;Hello World&quot; with the given attributes, put</span></div>
+<div class="line">  <span class="comment">// it into a rectangle of width 200 pixel and use our layouting properties</span></div>
+<div class="line">  <span class="comment">// the text needs to be utf-32 encoded for this function</span></div>
+<div class="line">  <span class="keyword">auto</span> layout = <a class="code" href="namespace_s_t_l_l.html#ab663fe7dceae4de54ddc5076a4c8c2dc">layoutParagraph</a>(U<span class="stringliteral">&quot;Hello World&quot;</span>, ai, <a class="code" href="class_s_t_l_l_1_1_rectangle_shape__c.html">RectangleShape_c</a>(200*64), prop);</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// that is it, now you can output the layout, using one of the Output</span></div>
+<div class="line">  <span class="comment">// driver functions, e.g. using the SDL driver you can output the text</span></div>
+<div class="line">  <span class="comment">// at position 20, 20 on the given surface (also in units of 1/64th)</span></div>
+<div class="line">  SDL_Surface *screen = SDL_SetVideoMode(800, 600, 32, SDL_SWSURFACE | SDL_DOUBLEBUF);</div>
+<div class="line">  <a class="code" href="namespace_s_t_l_l.html#ad1ddfc4800c23300e6339f7cc6e2cc7e">showLayoutSDL</a>(layout, 20*64, 20*64, screen);</div>
+<div class="line">  SDL_Flip(screen);</div>
+<div class="line">  sleep(10);</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// now you can get rid of the cache, if you want</span></div>
+<div class="line">}</div>
+</div><!-- fragment --><h1><a class="anchor" id="tut_xhtml_sec"></a>
 Using the XHTML Layouter</h1>
 <p>The XHTML layouter takes a subsection of HTML as a string and parses it and uses the paragraph layouter to layout the text. Here you specify the format using html and css-like formatting information.</p>
 <p>The XHTML Layouter comes with 2 entry pointe. One takes a string, parses that string into a DOM-tree and works with that tree.</p>
 <p>The other choice is to directly input a DOM-tree on your own.</p>
-<p>For the XHTML layouter the flow is slightly different </p><div class="fragment"></div><!-- fragment --> </div></div><!-- contents -->
+<p>For the XHTML layouter the flow is slightly different </p><div class="fragment"><div class="line"><span class="preprocessor">#define USE_PUGI_XML</span></div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="layouter_8h.html">stll/layouter.h</a>&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="output___s_d_l_8h.html">stll/output_SDL.h</a>&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="layouter_x_h_t_m_l_8h.html">stll/layouterXHTML.h</a>&gt;</span></div>
+<div class="line"></div>
+<div class="line"><span class="keyword">using namespace </span><a class="code" href="namespace_s_t_l_l.html">STLL</a>;</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">  <span class="comment">// setup a stylesheet</span></div>
+<div class="line">  <a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html">TextStyleSheet_c</a> styleSheet;</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// add the fonts that are required</span></div>
+<div class="line">  <span class="comment">// we create one font family names &quot;sans&quot; with 2 members, a normal and a bold one</span></div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#acc443319cca55245808e1b3fb64b2505">font</a>(<span class="stringliteral">&quot;sans&quot;</span>, <a class="code" href="class_s_t_l_l_1_1_font_resource__c.html">FontResource_c</a>(<span class="stringliteral">&quot;tests/FreeSans.ttf&quot;</span>));</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#acc443319cca55245808e1b3fb64b2505">font</a>(<span class="stringliteral">&quot;sans&quot;</span>, <a class="code" href="class_s_t_l_l_1_1_font_resource__c.html">FontResource_c</a>(<span class="stringliteral">&quot;tests/FreeSansBold.ttf&quot;</span>), <span class="stringliteral">&quot;normal&quot;</span>, <span class="stringliteral">&quot;normal&quot;</span>, <span class="stringliteral">&quot;bold&quot;</span>);</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// add the CSS rules you need, this should be familiar to everybody knowing CSS</span></div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;body&quot;</span>, <span class="stringliteral">&quot;color&quot;</span>, <span class="stringliteral">&quot;#ffffff&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;body&quot;</span>, <span class="stringliteral">&quot;font-size&quot;</span>, <span class="stringliteral">&quot;20px&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;body&quot;</span>, <span class="stringliteral">&quot;text-align&quot;</span>, <span class="stringliteral">&quot;justify&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;body&quot;</span>, <span class="stringliteral">&quot;padding&quot;</span>, <span class="stringliteral">&quot;10px&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;h1&quot;</span>, <span class="stringliteral">&quot;font-weight&quot;</span>, <span class="stringliteral">&quot;bold&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;h1&quot;</span>, <span class="stringliteral">&quot;font-size&quot;</span>, <span class="stringliteral">&quot;60px&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;h1&quot;</span>, <span class="stringliteral">&quot;text-align&quot;</span>, <span class="stringliteral">&quot;center&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;h1&quot;</span>, <span class="stringliteral">&quot;background-color&quot;</span>, <span class="stringliteral">&quot;#FF8080&quot;</span>);</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// The XHTML code we want to format, it needs to be utf-8 encoded</span></div>
+<div class="line">  std::string text = u8<span class="stringliteral">&quot;&lt;html&gt;&lt;body&gt;&lt;h1&gt;Title&lt;/h1&gt;&lt;p&gt;Some text&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;&quot;</span>;</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// layout the XHTML code, in a 200 pixel wide rectangle</span></div>
+<div class="line">  <span class="keyword">auto</span> layout = <a class="code" href="namespace_s_t_l_l.html#a6b3018805d08e36d166c6247c1d0783b">layoutXHTMLPugi</a>(text, styleSheet, <a class="code" href="class_s_t_l_l_1_1_rectangle_shape__c.html">RectangleShape_c</a>(200*64) );</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// again output the layout</span></div>
+<div class="line">  SDL_Surface *screen = SDL_SetVideoMode(800, 600, 32, SDL_SWSURFACE | SDL_DOUBLEBUF);</div>
+<div class="line">  <a class="code" href="namespace_s_t_l_l.html#ad1ddfc4800c23300e6339f7cc6e2cc7e">showLayoutSDL</a>(layout, 20*64, 20*64, screen);</div>
+<div class="line">  SDL_Flip(screen);</div>
+<div class="line">  sleep(10);</div>
+<div class="line">}</div>
+</div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Jan 11 2016 21:41:05 for STLL by
+    <li class="footer">Generated on Mon Jan 11 2016 21:43:43 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>
