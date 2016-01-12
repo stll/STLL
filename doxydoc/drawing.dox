@@ -36,4 +36,12 @@
  * if you can not find out and don't want to ask the user for that information don't use it. When used wrongly it
  * will result in ugly output.
  *
+ * Also keep in mind that drawing with sub pixel placement is not possible on surfaces with included alpha
+ * channel because the resulting surface can not properly drawn onto any other surface. This would require
+ * separate alpha channel for each colour component.
+ *
+ * Sub pixel drawing only properly works when drawing directly onto the target. When drawing onto surfaces
+ * with an alpha channel, the alpha of all the pixels are untouched assuming that the background is properly
+ * prepared for the glyphs (e.g. opaque)
+ *
  */

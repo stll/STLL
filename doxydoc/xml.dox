@@ -1,0 +1,26 @@
+/**
+ * \page xml_pg XML
+ *
+ * STLL tries to be indepentend of the XML library to use for parsing the XHTML code. This
+ * is achieved by a little XML abstraction layer that contains functions to access a DOM tree
+ * parsed by a certain library.
+ *
+ * For each library to support STLL must provide this interface.
+ *
+ * The XHTML parser is written with C++ templates and instantiated once for each library
+ *
+ * Right now STLL supports libxml2 and pugixml as XML libraries. The library support is checked
+ * at compile time. When a library is available the instance is compiled in, if not it will be
+ * left out. If you want to add support for a different library you need to recompile
+ *
+ * If you want to add support for a new library that is not yet supported by STLL you have to do the following:
+ *
+ * - add check for the library to CMakeList.txt and define a compiler variable USE_xxx for your library
+ * - open xmllibraries.h and add overloaded functions for your library (copy paste adapt)
+ * - create a new file layouterXHTML_xxx for your library and inside create an instantiation of the parser for your library (copy paste adapt)
+ * - add your new parser function to the layouterXHTML.h header file (copy paste adapt)
+ * - add a new runtest instance for your library to CMakeList.txt and make sure all tests pass (copy paste adapt)
+ * - send in a patch so that others can profit from your work
+ *
+ * Most of it is simple stuff, the hardest is step 2 to create the overloaded functions.
+ */
