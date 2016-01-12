@@ -1,3 +1,5 @@
+// you have to define the xml library you want to use
+// STLL needs to be compiled with support for this library
 #define USE_PUGI_XML
 
 #include <stll/layouter.h>
