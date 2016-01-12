@@ -72,7 +72,7 @@ target_link_libraries(stll PUBLIC
 )
 
 # Tests
-add_executable(runtestsPugi src/runtests.cpp src/layouterXMLSaveLoad.cpp)
+add_executable(runtestsPugi examples/runtests.cpp examples/layouterXMLSaveLoad.cpp)
 target_compile_options(runtestsPugi PRIVATE -std=c++14 -DUSE_PUGI_XML)
 target_include_directories(runtestsPugi PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}
@@ -84,11 +84,10 @@ target_link_libraries(runtestsPugi PRIVATE stll
 add_test(test_PugiXML runtestsPugi)
 
 if(LIBXML2_FOUND)
-  add_executable(runtestsLibXML2 src/runtests.cpp src/layouterXMLSaveLoad.cpp)
+  add_executable(runtestsLibXML2 examples/runtests.cpp examples/layouterXMLSaveLoad.cpp)
   target_compile_options(runtestsLibXML2 PRIVATE -std=c++14 -DUSE_LIBXML2)
   target_include_directories(runtestsLibXML2 PRIVATE
     ${LIBXML2_INCLUDE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}
     include
   )
   target_link_libraries(runtestsLibXML2 PRIVATE stll
@@ -99,33 +98,30 @@ endif()
 
 # Example programs
 if(SDL_FOUND)
-  add_executable(example1 src/example1.cpp)
+  add_executable(example1 examples/example1.cpp)
   target_compile_options(example1 PRIVATE -std=c++14)
   target_include_directories(example1 PRIVATE
     ${SDL_INCLUDE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}
     include
   )
   target_link_libraries(example1 PRIVATE stll
     ${SDL_LIBRARY}
   )
 
-  add_executable(example2 src/example2.cpp)
+  add_executable(example2 examples/example2.cpp)
   target_compile_options(example2 PRIVATE -std=c++14)
   target_include_directories(example2 PRIVATE
     ${SDL_INCLUDE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}
     include
   )
   target_link_libraries(example2 PRIVATE stll
     ${SDL_LIBRARY}
   )
 
-  add_executable(example3 src/example3.cpp src/layouterXMLSaveLoad.cpp)
+  add_executable(example3 examples/example3.cpp examples/layouterXMLSaveLoad.cpp)
   target_compile_options(example3 PRIVATE -std=c++14)
   target_include_directories(example3 PRIVATE
     ${SDL_INCLUDE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}
     include
   )
   target_link_libraries(example3 PRIVATE stll
@@ -134,7 +130,7 @@ if(SDL_FOUND)
 endif()
 
 if(SDL_FOUND)
-  add_executable(viewer src/viewer.cpp src/layouterXMLSaveLoad.cpp)
+  add_executable(viewer examples/viewer.cpp examples/layouterXMLSaveLoad.cpp)
   target_compile_options(viewer PRIVATE -std=c++14)
   target_include_directories(viewer PRIVATE
     ${SDL_INCLUDE_DIR}
