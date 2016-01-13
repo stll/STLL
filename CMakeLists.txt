@@ -141,5 +141,12 @@ if(SDL_FOUND)
   )
 endif()
 
-#install (TARGETS MathFunctions DESTINATION bin)
-#install (FILES MathFunctions.h DESTINATION include)
+# source package
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_SOURCE_GENERATOR "TBZ2")
+set(CPACK_SOURCE_IGNORE_FILES
+  "/.git/;/.kdev4/;/tests/*;~$;try2.kdev4;.gitignore;${CPACK_SOURCE_IGNORE_FILES}")
+include(CPack)
+
