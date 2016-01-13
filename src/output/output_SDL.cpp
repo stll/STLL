@@ -115,9 +115,7 @@ static int getSurfaceFormat(SDL_Surface * s)
   auto f = s->format;
 
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
-  if (f->BytesPerPixel == 4 && f->Rmask == 0xFF0000 && f->Gmask == 0xFF00 && f->Bmask == 0xFF)
-    return 1;
-  if (f->BytesPerPixel == 3 && f->Rmask == 0xFF0000 && f->Gmask == 0xFF00 && f->Bmask == 0xFF)
+  if (f->Rmask == 0xFF0000 && f->Gmask == 0xFF00 && f->Bmask == 0xFF)
     return 1;
 #endif
 
@@ -140,32 +138,32 @@ static void outputGlyph(int sx, int sy, const internal::PaintData_c & img, SubPi
   {
     default: // use no subpixel and no optimisation as default... should not happen though
     case calcFormatID(0, SUBP_NONE):
-      outputGlyph_NONE(sx, sy, img, c, (uint8_t*)s->pixels,
-                                s->pitch, s->format->BytesPerPixel, s->w, s->h,
-                                [s](const uint8_t * p) -> auto { return getpixel(p, s->format); },
-                                [s](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { putpixel(p, r, g, b, s->format); },
-                                gamma);
+      outputGlyph_NONE(
+        sx, sy, img, c, (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
+        [s](const uint8_t * p) -> auto { return getpixel(p, s->format); },
+        [s](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { putpixel(p, r, g, b, s->format); },
+        gamma);
       break;
     case calcFormatID(1, SUBP_NONE):
-      outputGlyph_NONE(sx, sy, img, c, (uint8_t*)s->pixels,
-                                s->pitch, s->format->BytesPerPixel, s->w, s->h,
-                                [s](const uint8_t * p) -> auto { return std::make_tuple(p[2], p[1], p[0]); },
-                                [s](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { p[2] = r; p[1] = g; p[0] = b; },
-                                gamma);
+      outputGlyph_NONE(
+        sx, sy, img, c, (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
+        [s](const uint8_t * p) -> auto { return std::make_tuple(p[2], p[1], p[0]); },
+        [s](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { p[2] = r; p[1] = g; p[0] = b; },
+        gamma);
       break;
     case calcFormatID(0, SUBP_RGB):
-      outputGlyph_HorizontalRGB(sx, sy, img, c, (uint8_t*)s->pixels,
-                                s->pitch, s->format->BytesPerPixel, s->w, s->h,
-                                [s](const uint8_t * p) -> auto { return getpixel(p, s->format); },
-                                [s](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { putpixel(p, r, g, b, s->format); },
-                                gamma);
+      outputGlyph_HorizontalRGB(
+        sx, sy, img, c, (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
+        [s](const uint8_t * p) -> auto { return getpixel(p, s->format); },
+        [s](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { putpixel(p, r, g, b, s->format); },
+        gamma);
       break;
     case calcFormatID(1, SUBP_RGB):
-      outputGlyph_HorizontalRGB(sx, sy, img, c, (uint8_t*)s->pixels,
-                                s->pitch, s->format->BytesPerPixel, s->w, s->h,
-                                [s](const uint8_t * p) -> auto { return std::make_tuple(p[2], p[1], p[0]); },
-                                [s](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { p[2] = r; p[1] = g; p[0] = b; },
-                                gamma);
+      outputGlyph_HorizontalRGB(
+        sx, sy, img, c, (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
+        [s](const uint8_t * p) -> auto { return std::make_tuple(p[2], p[1], p[0]); },
+        [s](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { p[2] = r; p[1] = g; p[0] = b; },
+        gamma);
       break;
   }
 }
