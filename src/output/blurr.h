@@ -20,6 +20,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+#ifndef __BLURR_H__
+#define __BLURR_H__
+
 /** \file
  *  \brief a gaussian blurr
  */
@@ -42,3 +45,4 @@ void gaussBlur (uint8_t * s, int w, int h, double r, int sx, int sy);
 }; };
 
 
+#endif

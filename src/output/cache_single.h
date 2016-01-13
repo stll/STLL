@@ -20,6 +20,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+#ifndef __CACHE_SINGLE_H__
+#define __CACHE_SINGLE_H__
+
 #include <stll/layouterFont.h>
 
 #include <ft2build.h>
@@ -64,3 +67,5 @@ PaintData_c & cache_single_getRect(int w, int h, SubPixelArrangement sp, uint16_
 void cache_single_trim(size_t num);
 
 } }
+
+#endif

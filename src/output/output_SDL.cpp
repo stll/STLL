@@ -26,6 +26,8 @@
 #include <stll/color.h>
 
 #include "cache_single.h"
+#include "gamma.h"
+#include "blitter.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -35,58 +37,48 @@
 
 namespace STLL
 {
-// lookup tables for gamma correct output
-// gamma contains the gamma value that the lookup tables are currently
-// set up for
-// GAMMA_SCALE is a scaling factor for limit calculation errors, the bigger
-// the more exact the output will be, but the bigger the 2nd lookup has to
-// be, and then 2 lookup tables for forward and inverse correction
-// the tables are updated when showLayout is called with a new gamma value
-static uint8_t gamma = 0;
-#define GAMMA_SCALE 8
-static uint16_t gammaFor[256] = {};
-static uint16_t gammaInv[256*GAMMA_SCALE] = {};
+
+static Gamma_c<8> gamma;
 
 // a simple get pixel function for the fallback render methods
-static Uint32 getpixel(SDL_Surface *surface, int x, int y)
+std::tuple<uint8_t, uint8_t, uint8_t> getpixel(const uint8_t * p, const SDL_PixelFormat * f)
 {
-  int bpp = surface->format->BytesPerPixel;
-  /* Here p is the address to the pixel we want to retrieve */
-  Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+  uint32_t val;
 
-  switch(bpp) {
-    case 1:
-      return *p;
+  switch(f->BytesPerPixel) {
+    case 1: val = *p;
       break;
 
-    case 2:
-      return *(Uint16 *)p;
+    case 2: val = *(Uint16 *)p;
       break;
 
     case 3:
       if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
-        return p[0] << 16 | p[1] << 8 | p[2];
+        val = p[0] << 16 | p[1] << 8 | p[2];
       else
-        return p[0] | p[1] << 8 | p[2] << 16;
+        val = p[0] | p[1] << 8 | p[2] << 16;
       break;
 
-    case 4:
-      return *(Uint32 *)p;
+    case 4: val = *(Uint32 *)p;
       break;
 
     default:
-      return 0;       /* shouldn't happen, but avoids warnings */
+      val = 0;       /* shouldn't happen, but avoids warnings */
+      break;
   }
+
+  Uint8 r, g, b;
+  SDL_GetRGB(val, f, &r, &g, &b);
+
+  return std::make_tuple(r, g, b);
 }
 
 // a simple put pixel function for the fallback render methods
-static void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
+void putpixel(uint8_t * p, uint8_t r, uint8_t g, uint8_t b, const SDL_PixelFormat * f)
 {
-  int bpp = surface->format->BytesPerPixel;
-  /* Here p is the address to the pixel we want to set */
-  Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+  uint32_t pixel = SDL_MapRGB(f, r, g, b);
 
-  switch(bpp) {
+  switch(f->BytesPerPixel) {
     case 1:
       *p = pixel;
       break;
@@ -113,220 +105,6 @@ static void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
   }
 }
 
-// linear blending of 2 values
-static uint8_t blend(uint8_t a1, uint8_t a2, uint16_t b1, uint16_t b2 = 0, uint8_t c = 0)
-{
-  // the uncorrected blending function would look like this:
-  // return a1 + (a2-a1) * b / 255;
-  // but that results in wrong values when the target has a gamma
-  // corrected output (e.g. display surfaces for sRGB monitors)
-  // so we need to correct gamma forward on a1 and inverse on the output
-  // the target colour is already corrected
-  int b = (int)b1 + ((int)b2-(int)b1)*c/64;
-
-  int d1 = gammaFor[a1];
-  int d2 = a2*GAMMA_SCALE;
-
-  int out = d1 + (d2-d1)*b/(255*255);
-
-  return gammaInv[out];
-}
-
-// the fallback glyph rendering without sub-pixel output. This should work on every surface
-// independent of its format
-static void outputGlyph_NONE_Fallback(int sx, int sy, const internal::PaintData_c & img, Color_c c, SDL_Surface * s)
-{
-  int stx = sx/64 + img.left;
-  int sty = (sy+32)/64 - img.top;
-  int stb = sx % 64;
-
-  int yp = sty;
-
-  for (int y = 0; y < img.rows; y++)
-  {
-    if (yp >= 0 && yp < s->h)
-    {
-      int xp = stx;
-
-      uint16_t a = 0;
-      uint16_t aprev = 0;
-
-      for (int x = 0; x <= img.width; x++)
-      {
-        a = c.a()*img.buffer[y*img.pitch+x];
-
-        if (xp >= 0 && xp < s->w )
-        {
-          auto p = getpixel(s, xp, yp);
-
-          Uint8 r, g, b;
-          SDL_GetRGB(p, s->format, &r, &g, &b);
-
-          r = blend(r, c.r(), a, aprev, stb);
-          g = blend(g, c.g(), a, aprev, stb);
-          b = blend(b, c.b(), a, aprev, stb);
-
-          putpixel(s, xp, yp, SDL_MapRGBA(s->format, r, g, b, SDL_ALPHA_OPAQUE));
-        }
-
-        aprev = a;
-        xp++;
-      }
-    }
-    yp++;
-  }
-}
-
-// an optimized glyph rendering function for not sub-pixel output. Optimized for surfaces with
-// 32 bits per pixel in RGBx order, x meaning one unused byte
-static void outputGlyph_NONE_RGBx(int sx, int sy, const internal::PaintData_c & img, Color_c c, SDL_Surface * s)
-{
-  int stx = sx/64 + img.left;
-  int sty = (sy+32)/64 - img.top;
-  int stb = sx % 64;
-
-  int yp = sty;
-
-  if (stx < 0 || stx + img.width >= s->w)
-  {
-    outputGlyph_NONE_Fallback(sx, sy, img, c, s);
-    return;
-  }
-
-  for (int y = 0; y < img.rows; y++)
-  {
-    if (yp >= 0 && yp < s->h)
-    {
-      uint8_t * dst = (uint8_t*)s->pixels + yp * s->pitch + 4*stx;
-      const uint8_t * src = img.getBuffer() + y*img.pitch;
-
-      uint16_t a = 0;
-      uint16_t aprev = 0;
-
-      for (int x = 0; x <= img.width; x++)
-      {
-        a = *src*c.a();
-
-        *dst = blend(*dst, c.b(), a, aprev, stb); dst++;
-        *dst = blend(*dst, c.g(), a, aprev, stb); dst++;
-        *dst = blend(*dst, c.r(), a, aprev, stb); dst++;
-        dst++;
-        src++;
-
-        aprev = a;
-      }
-    }
-    yp++;
-  }
-}
-
-// a fallback output function with sub-pixel glyph placement, should work on all
-// target surface formats
-static void outputGlyph_HorizontalRGB_Fallback(int sx, int sy, const internal::PaintData_c & img, Color_c c, SDL_Surface * s)
-{
-  int stx = sx/64 + img.left;
-  int sty = sy/64 - img.top;
-  int stc = (3*sx/64) % 3;
-  int stb = (3*sx) % 64;
-
-  int yp = sty;
-
-  for (int y = 0; y < img.rows; y++)
-  {
-    if (yp >= 0 && yp < s->h)
-    {
-      int xp = stx;
-      int col = stc;
-
-      uint16_t a = 0;
-      uint16_t aprev = 0;
-
-      for (int x = 0; x <= img.width; x++)
-      {
-        a = img.buffer[y*img.pitch+x]*c.a();
-
-        if (xp >= 0 && xp < s->w )
-        {
-          auto p = getpixel(s, xp, yp);
-
-          Uint8 r, g, b;
-          SDL_GetRGB(p, s->format, &r, &g, &b);
-
-          // blend values
-          switch (col)
-          {
-            case 0: r = blend(r, c.r(), a, aprev, stb); break;
-            case 1: g = blend(g, c.g(), a, aprev, stb); break;
-            case 2: b = blend(b, c.b(), a, aprev, stb); break;
-          }
-
-          putpixel(s, xp, yp, SDL_MapRGBA(s->format, r, g, b, SDL_ALPHA_OPAQUE));
-        }
-
-        aprev = a;
-
-        col++;
-        if (col >= 3)
-        {
-          col = 0;
-          xp++;
-        }
-      }
-    }
-    yp++;
-  }
-}
-
-// sub-pixel glyph output optimized for 32 bit surfaces with red green blue unused order
-static void outputGlyph_HorizontalRGB_RGBx(int sx, int sy, const internal::PaintData_c & img, Color_c c, SDL_Surface * s)
-{
-  int stx = sx/64 + img.left;
-  int sty = (sy+32)/64 - img.top;
-  int stc = (3*sx/64) % 3;
-  int stb = (3*sx) % 64;
-
-  int yp = sty;
-
-  if (stx < 0 || stx + img.width/3 >= s->w || img.width < 6)
-  {
-    outputGlyph_HorizontalRGB_Fallback(sx, sy, img, c, s);
-    return;
-  }
-
-  for (int y = 0; y < img.rows; y++)
-  {
-    if (yp >= 0 && yp < s->h)
-    {
-      uint8_t * dst = (uint8_t*)s->pixels + yp * s->pitch + 4*stx + 2 - stc;
-      const uint8_t * src = img.getBuffer() + y*img.pitch;
-
-      uint16_t a = 0;
-      uint16_t aprev = 0;
-
-      // output single sub-pixel elements until we reach a proper pixel border
-      switch (stc)
-      {
-        case 1: a = *src*c.a(); *dst = blend(*dst, c.g(), a, aprev, stb); aprev = a; src++; dst--;
-        case 2: a = *src*c.a(); *dst = blend(*dst, c.b(), a, aprev, stb); aprev = a; src++; dst += 6;
-      }
-
-      int x = img.width/3;
-
-      // output the remainder in a more efficient loop in whole pixel sections
-      // this assumes that the image width is a bit more than the width declared in img.width
-      // and that the additional columns are empty
-      while (x > 0)
-      {
-        a = *src*c.a(); *dst = blend(*dst, c.r(), a, aprev, stb); aprev = a; src++; dst--;
-        a = *src*c.a(); *dst = blend(*dst, c.g(), a, aprev, stb); aprev = a; src++; dst--;
-        a = *src*c.a(); *dst = blend(*dst, c.b(), a, aprev, stb); aprev = a; src++; dst += 6;
-        x --;
-      }
-    }
-    yp++;
-  }
-}
-
 constexpr static int calcFormatID(int format, SubPixelArrangement sp)
 {
   return (int)(sp)+format*8;
@@ -339,6 +117,8 @@ static int getSurfaceFormat(SDL_Surface * s)
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
   if (f->BytesPerPixel == 4 && f->Rmask == 0xFF0000 && f->Gmask == 0xFF00 && f->Bmask == 0xFF)
     return 1;
+  if (f->BytesPerPixel == 3 && f->Rmask == 0xFF0000 && f->Gmask == 0xFF00 && f->Bmask == 0xFF)
+    return 1;
 #endif
 
   // default format
@@ -350,29 +130,46 @@ static void outputGlyph(int sx, int sy, const internal::PaintData_c & img, SubPi
   // check for the right image format
 
   // hub code to decide which function to use for output, there are fast functions
-  // for some of the output functions and fallbacks that always work
-  // the fallbacks are also done very exact with clipping and such, while the
-  // fast functions might not do so, but only check if clipping is required and then
-  // forward to the fallback function
+  // for some of the output functions and fallbacks that always work but use relatively slow
+  // pixel read and write routines
+  // if you need additional surface formats add them here (e.g other 3 or 4 Byte formats with
+  // a different byte order
+  // as I don't know what is a useful set to support I only add the one format I I know of: mine
 
   switch (calcFormatID(getSurfaceFormat(s), sp))
   {
     default: // use no subpixel and no optimisation as default... should not happen though
-    case calcFormatID(0, SUBP_NONE): outputGlyph_NONE_Fallback(sx, sy, img, c, s);          break;
-    case calcFormatID(1, SUBP_NONE): outputGlyph_NONE_RGBx(sx, sy, img, c, s);              break;
-    case calcFormatID(0, SUBP_RGB):  outputGlyph_HorizontalRGB_Fallback(sx, sy, img, c, s); break;
-    case calcFormatID(1, SUBP_RGB):  outputGlyph_HorizontalRGB_RGBx(sx, sy, img, c, s);     break;
+    case calcFormatID(0, SUBP_NONE):
+      outputGlyph_NONE(sx, sy, img, c, (uint8_t*)s->pixels,
+                                s->pitch, s->format->BytesPerPixel, s->w, s->h,
+                                [s](const uint8_t * p) -> auto { return getpixel(p, s->format); },
+                                [s](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { putpixel(p, r, g, b, s->format); },
+                                gamma);
+      break;
+    case calcFormatID(1, SUBP_NONE):
+      outputGlyph_NONE(sx, sy, img, c, (uint8_t*)s->pixels,
+                                s->pitch, s->format->BytesPerPixel, s->w, s->h,
+                                [s](const uint8_t * p) -> auto { return std::make_tuple(p[2], p[1], p[0]); },
+                                [s](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { p[2] = r; p[1] = g; p[0] = b; },
+                                gamma);
+      break;
+    case calcFormatID(0, SUBP_RGB):
+      outputGlyph_HorizontalRGB(sx, sy, img, c, (uint8_t*)s->pixels,
+                                s->pitch, s->format->BytesPerPixel, s->w, s->h,
+                                [s](const uint8_t * p) -> auto { return getpixel(p, s->format); },
+                                [s](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { putpixel(p, r, g, b, s->format); },
+                                gamma);
+      break;
+    case calcFormatID(1, SUBP_RGB):
+      outputGlyph_HorizontalRGB(sx, sy, img, c, (uint8_t*)s->pixels,
+                                s->pitch, s->format->BytesPerPixel, s->w, s->h,
+                                [s](const uint8_t * p) -> auto { return std::make_tuple(p[2], p[1], p[0]); },
+                                [s](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { p[2] = r; p[1] = g; p[0] = b; },
+                                gamma);
+      break;
   }
 }
 
-static Color_c gammaColor(Color_c c)
-{
-  return Color_c(
-    gammaFor[c.r()]/GAMMA_SCALE,
-    gammaFor[c.g()]/GAMMA_SCALE,
-    gammaFor[c.b()]/GAMMA_SCALE,
-    c.a());
-}
 
 
 void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
@@ -400,16 +197,7 @@ void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
   }
 #endif
 
-  if (g != gamma)
-  {
-    gamma = g;
-
-    for (int i = 0; i < 256; i++)
-      gammaFor[i] = (256*GAMMA_SCALE-1)*pow(i/255.0, g*0.1);
-
-    for (int i = 0; i < 256*GAMMA_SCALE; i++)
-      gammaInv[i] = 255*pow(i/(1.0*256*GAMMA_SCALE-1), 10.0/g);
-  }
+  gamma.setGamma(g);
 
   /* render */
   for (auto & i : l.getData())
@@ -417,7 +205,7 @@ void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
     switch (i.command)
     {
       case CommandData_c::CMD_GLYPH:
-        outputGlyph(sx+i.x, sy+i.y, internal::cache_single_getGlyph(i.font, i.glyphIndex, sp, i.blurr), sp, gammaColor(i.c), s);
+        outputGlyph(sx+i.x, sy+i.y, internal::cache_single_getGlyph(i.font, i.glyphIndex, sp, i.blurr), sp, gamma.forward(i.c), s);
         break;
 
       case CommandData_c::CMD_RECT:
@@ -431,7 +219,7 @@ void showLayoutSDL(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
         }
         else
         {
-          outputGlyph(sx+i.x, sy+i.y, internal::cache_single_getRect(i.w, i.h, sp, i.blurr), sp, gammaColor(i.c), s);
+          outputGlyph(sx+i.x, sy+i.y, internal::cache_single_getRect(i.w, i.h, sp, i.blurr), sp, gamma.forward(i.c), s);
         }
         break;
 
