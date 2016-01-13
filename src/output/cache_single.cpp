@@ -31,6 +31,10 @@
 
 #include <unordered_map>
 
+
+// TODO properly handle it, when FreeType returns an bitmap format that is not supported
+
+
 namespace STLL { namespace internal {
 
 

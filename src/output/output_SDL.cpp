@@ -29,10 +29,6 @@
 #include "gamma.h"
 #include "blitter.h"
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
-// TODO properly handle it, when FreeType returns an bitmap format that is not supported
 
 
 namespace STLL

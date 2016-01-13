@@ -2,7 +2,6 @@
 // STLL needs to be compiled with support for this library
 #define USE_PUGI_XML
 
-#include <stll/layouter.h>
 #include <stll/output_SDL.h>
 #include <stll/layouterXHTML.h>
 
