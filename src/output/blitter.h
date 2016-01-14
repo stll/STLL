@@ -24,36 +24,13 @@
 
 #include <stll/color.h>
 
+#include "../dividers.h"
+
 // blitting routines to output the generated glyphs, template code, should be pretty good for
 // most purposes
 
 namespace STLL
 {
-
-template <class T>
-T intdiv_inf(T x, T y)
-{
-  return x/y - ((x%y && (x%y^y)<0) ? 1 : 0);
-}
-
-template <class T>
-T intmod_inf(T x, T y)
-{
-  T xdivy, xmody;
-
-  xdivy = x / y;
-  xmody = x - xdivy * y;
-  /* If the signs of x and y differ, and the remainder is non-0,
-   * C89 doesn't define whether xdivy is now the floor or the
-   * ceiling of the infinitely precise quotient.  We want the floor,
-   * and we have it iff the remainder's sign matches y's.
-   */
-  if (xmody && ((y ^ xmody) < 0) /* i.e. and signs differ */) {
-    xmody += y;
-  }
-  return xmody;
-}
-
 
 // linear blending of 2 values on a surface without alpha channel
 template <class G>
@@ -83,9 +60,12 @@ void outputGlyph_NONE(int sx, int sy, const internal::PaintData_c & img, Color_c
 {
   // similar to the glyph output below, see comment there, this one is simpler
 
-  int stx = intdiv_inf(sx, 64) + img.left;
-  int sty = intdiv_inf(sy+32, 64) - img.top;
-  int stb = intmod_inf(sx, 64);
+  int stx, stb;
+
+  std::tie(stx, stb) = divmod_inf(sx, 64);
+  stx += img.left;
+
+  int sty = div_inf(sy+32, 64) - img.top;
 
   int yp = sty;
 
@@ -153,10 +133,12 @@ void outputGlyph_HorizontalRGB(int sx, int sy, const internal::PaintData_c & img
                                uint8_t * s, int pitch, int bbp, int w, int h,
                                const P1 & pxget, const P2 & pxput, const G & gamma)
 {
-  int stx = intdiv_inf(sx, 64) + img.left;       // start x pixel position
-  int sty = intdiv_inf(sy+32, 64) - img.top;     // start y pixel position
-  int stc = intmod_inf(intdiv_inf(3*sx, 64), 3); // rgb subpixel column for first pixel
-  int stb = intmod_inf(3*sx, 64);                // blending parameter
+  int stx = div_inf(sx, 64) + img.left;          // start x pixel position
+  int sty = div_inf(sy+32, 64) - img.top;        // start y pixel position
+  int stc, stb;
+
+  std::tie(stc, stb) = divmod_inf(3*sx, 64);
+  stc = mod_inf(stc, 3);
 
   int yp = sty;                                  // current y position
 
