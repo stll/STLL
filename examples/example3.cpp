@@ -110,7 +110,7 @@ void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
 
 #if 0
   auto t = SDL_GetTicks();
-  int i;
+  int i = 0;
 
   while (SDL_GetTicks()-t < 5000)
   {
@@ -123,19 +123,21 @@ void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
   printf("%i runden\n", i);
 #endif
 
-  SDL_FillRect(screen, NULL, 0 );
-
-
-  for (auto & a : data)
-    showLayoutSDL(a.layout, a.sx, a.sy, screen, a.sp, &id);
-
-  SDL_Flip(screen);
 
   /* Our main event/draw loop */
   int done = 0;
 
+  int xx = 0;
+
   while (!done)
   {
+    SDL_FillRect(screen, NULL, 0 );
+
+
+    for (auto & a : data)
+      showLayoutSDL(a.layout, a.sx-xx, a.sy, screen, a.sp, &id);
+
+    SDL_Flip(screen);
 
     /* Handle SDL events */
     SDL_Event event;
@@ -150,7 +152,8 @@ void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
       }
     }
 
-    SDL_Delay(150);
+    SDL_Delay(10);
+    xx++;
   }
 
   SDL_Quit();
@@ -376,10 +379,11 @@ int main ()
     attr.set(0, 100, a);
 
     l2 = layoutParagraph(U"A quick brown fox jumps over the lazy dog", attr, RectangleShape_c(400*64), prop, ypos);
+    ypos = l2.getHeight();
     l.push_back(layoutInfo_c(l2, 0, 0, SUBP_NONE));
     l2 = layoutParagraph(U"A quick brown fox jumps over the lazy dog", attr, RectangleShape_c(400*64), prop, ypos);
     ypos = l2.getHeight();
-    l.push_back(layoutInfo_c(l2, WIN_WIDTH*32, 0, SUBP_RGB));
+    l.push_back(layoutInfo_c(l2, 0, 0, SUBP_RGB));
   }
 
   // Ausgabe mittels SDL
