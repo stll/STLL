@@ -63,8 +63,14 @@ int blend(int a1, int a2, int b1, int b2, int c, const G & g)
 template <class P1, class P2, class G>
 void outputGlyph_NONE(int sx, int sy, const internal::PaintData_c & img, Color_c c,
                       uint8_t * s, int pitch, int bbp, int w, int h,
-                      const P1 & pxget, const P2 & pxput, const G & gamma)
+                      const P1 & pxget, const P2 & pxput, const G & gamma,
+                      int cx = 0, int cy = 0, int cw = std::numeric_limits<int>::max(), int ch = std::numeric_limits<int>::max())
 {
+  if (cx <= 0) { cw += cx; } else { w -= cx; s += bbp*cx; sx -= 64*cx; }
+  if (cy <= 0) { ch += cx; } else { h -= cy; s += pitch*cy; sy -= 64*cy; }
+  if (w > cw) { w = cw; }
+  if (h > ch) { h = ch; }
+
   // similar to the glyph output below, see comment there, this one is simpler
 
   int stx, stb;
@@ -138,8 +144,15 @@ void outputGlyph_NONE(int sx, int sy, const internal::PaintData_c & img, Color_c
 template <class P1, class P2, class G>
 void outputGlyph_HorizontalRGB(int sx, int sy, const internal::PaintData_c & img, Color_c c,
                                uint8_t * s, int pitch, int bbp, int w, int h,
-                               const P1 & pxget, const P2 & pxput, const G & gamma)
+                               const P1 & pxget, const P2 & pxput, const G & gamma,
+                               int cx = 0, int cy = 0, int cw = std::numeric_limits<int>::max(),
+                               int ch = std::numeric_limits<int>::max())
 {
+  if (cx <= 0) { cw += cx; } else { w -= cx; s += bbp*cx; sx -= 64*cx; }
+  if (cy <= 0) { ch += cx; } else { h -= cy; s += pitch*cy; sy -= 64*cy; }
+  if (w > cw) { w = cw; }
+  if (h > ch) { h = ch; }
+
   int stx = div_inf(sx, 64) + img.left;          // start x pixel position
   int sty = div_inf(sy+32, 64) - img.top;        // start y pixel position
   int stc, stb;
