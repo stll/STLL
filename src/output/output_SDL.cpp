@@ -149,16 +149,30 @@ static void outputGlyph(int sx, int sy, const internal::PaintData_c & img, SubPi
       break;
     case calcFormatID(0, SUBP_RGB):
       outputGlyph_HorizontalRGB(
-        sx, sy, img, c, (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
+        sx, sy, img, c.r(), c.g(), c.b(), c.a(), (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
         [s](const uint8_t * p) -> auto { return getpixel(p, s->format); },
         [s](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { putpixel(p, r, g, b, s->format); },
         [](int a1, int a2, int b1, int b2, int c) -> auto { return blend(a1, a2, b1, b2, c, gamma); });
       break;
     case calcFormatID(1, SUBP_RGB):
       outputGlyph_HorizontalRGB(
-        sx, sy, img, c, (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
+        sx, sy, img, c.r(), c.g(), c.b(), c.a(), (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
         [](const uint8_t * p) -> auto { return std::make_tuple(p[2], p[1], p[0]); },
-        [](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { p[2] = r; p[1] = g; p[0] = b; },
+        [](uint8_t * p, uint8_t sp1, uint8_t sp2, uint8_t sp3) -> void { p[2] = sp1; p[1] = sp2; p[0] = sp3; },
+        [](int a1, int a2, int b1, int b2, int c) -> auto { return blend(a1, a2, b1, b2, c, gamma); });
+      break;
+    case calcFormatID(0, SUBP_BGR):
+      outputGlyph_HorizontalRGB(
+        sx, sy, img, c.b(), c.g(), c.r(), c.a(), (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
+        [s](const uint8_t * p) -> auto { auto t = getpixel(p, s->format); return std::make_tuple(std::get<2>(t), std::get<1>(t), std::get<0>(t)); },
+        [s](uint8_t * p, uint8_t sp1, uint8_t sp2, uint8_t sp3) -> void { putpixel(p, sp3, sp2, sp1, s->format); },
+        [](int a1, int a2, int b1, int b2, int c) -> auto { return blend(a1, a2, b1, b2, c, gamma); });
+      break;
+    case calcFormatID(1, SUBP_BGR):
+      outputGlyph_HorizontalRGB(
+        sx, sy, img, c.b(), c.g(), c.r(), c.a(), (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
+        [](const uint8_t * p) -> auto { return std::make_tuple(p[0], p[1], p[2]); },
+        [](uint8_t * p, uint8_t sp1, uint8_t sp2, uint8_t sp3) -> void { p[0] = sp1; p[1] = sp2; p[2] = sp3; },
         [](int a1, int a2, int b1, int b2, int c) -> auto { return blend(a1, a2, b1, b2, c, gamma); });
       break;
   }
