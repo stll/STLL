@@ -60,10 +60,10 @@ int blend(int a1, int a2, int b1, int b2, int c, const G & g)
 }
 
 // glyph rendering without sub-pixel output.
-template <class P1, class P2, class G>
+template <class P1, class P2, class B>
 void outputGlyph_NONE(int sx, int sy, const internal::PaintData_c & img, Color_c c,
                       uint8_t * s, int pitch, int bbp, int w, int h,
-                      const P1 & pxget, const P2 & pxput, const G & gamma,
+                      const P1 & pxget, const P2 & pxput, const B & blend,
                       int cx = 0, int cy = 0, int cw = std::numeric_limits<int>::max(), int ch = std::numeric_limits<int>::max())
 {
   if (cx <= 0) { cw += cx; } else { w -= cx; s += bbp*cx; sx -= 64*cx; }
@@ -123,9 +123,9 @@ void outputGlyph_NONE(int sx, int sy, const internal::PaintData_c & img, Color_c
         uint8_t r, g, b;
         std::tie(r, g, b) = pxget(dst);
 
-        r = blend(r, c.r(), a, aprev, stb, gamma);
-        g = blend(g, c.g(), a, aprev, stb, gamma);
-        b = blend(b, c.b(), a, aprev, stb, gamma);
+        r = blend(r, c.r(), a, aprev, stb);
+        g = blend(g, c.g(), a, aprev, stb);
+        b = blend(b, c.b(), a, aprev, stb);
 
         pxput(dst, r, g, b);
 
@@ -141,10 +141,10 @@ void outputGlyph_NONE(int sx, int sy, const internal::PaintData_c & img, Color_c
 }
 
 // glyph rendering with sub-pixel glyph placement
-template <class P1, class P2, class G>
+template <class P1, class P2, class B>
 void outputGlyph_HorizontalRGB(int sx, int sy, const internal::PaintData_c & img, Color_c c,
                                uint8_t * s, int pitch, int bbp, int w, int h,
-                               const P1 & pxget, const P2 & pxput, const G & gamma,
+                               const P1 & pxget, const P2 & pxput, const B & blend,
                                int cx = 0, int cy = 0, int cw = std::numeric_limits<int>::max(),
                                int ch = std::numeric_limits<int>::max())
 {
@@ -206,9 +206,9 @@ void outputGlyph_HorizontalRGB(int sx, int sy, const internal::PaintData_c & img
 
       switch (stc)                               // do the remaining sub pixels for the first pixel
       {                                          // all remaining ones are complete
-        case 0: a = *src*c.a(); r = blend(r, c.g(), a, aprev, stb, gamma); aprev = a; src++;
-        case 1: a = *src*c.a(); g = blend(g, c.g(), a, aprev, stb, gamma); aprev = a; src++;
-        case 2: a = *src*c.a(); b = blend(b, c.b(), a, aprev, stb, gamma); aprev = a; src++;
+        case 0: a = *src*c.a(); r = blend(r, c.g(), a, aprev, stb); aprev = a; src++;
+        case 1: a = *src*c.a(); g = blend(g, c.g(), a, aprev, stb); aprev = a; src++;
+        case 2: a = *src*c.a(); b = blend(b, c.b(), a, aprev, stb); aprev = a; src++;
       }
 
       pxput(dst, r, g, b);
@@ -219,9 +219,9 @@ void outputGlyph_HorizontalRGB(int sx, int sy, const internal::PaintData_c & img
       {
         std::tie(r, g, b) = pxget(dst);
 
-        a = *src*c.a(); r = blend(r, c.r(), a, aprev, stb, gamma); aprev = a; src++;
-        a = *src*c.a(); g = blend(g, c.g(), a, aprev, stb, gamma); aprev = a; src++;
-        a = *src*c.a(); b = blend(b, c.b(), a, aprev, stb, gamma); aprev = a; src++;
+        a = *src*c.a(); r = blend(r, c.r(), a, aprev, stb); aprev = a; src++;
+        a = *src*c.a(); g = blend(g, c.g(), a, aprev, stb); aprev = a; src++;
+        a = *src*c.a(); b = blend(b, c.b(), a, aprev, stb); aprev = a; src++;
 
         pxput(dst, r, g, b);
         dst += bbp;
