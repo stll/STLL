@@ -16,6 +16,30 @@
  *
  * Current home of the library is at <a href="https://github.com/stll/STLL">github</a>.
  *
+ * \section goals_sec Design Goals
+ * STLL has the following design goals
+ * - support all line based writing systems (as far as I know there is no actively used writing system
+ *   in the world that is purely column based).
+ * - simple interface: the interface for normal tasks should be plain and easy.
+ * - high quality: the output of the library should be as high quality as feasible, which means: exact letter
+ *   placement with interpolation, wherever possible sub-pixel placement of letters, proper gamma calculations
+ *   to get the right glyph strokes
+ * - speed and low memory consumption are not a priority. But as long as you do not want to layout Megabytes
+ *   of text the code should be fast enough
+ *
+ * \section depend_sec Dependencies
+ * STLL depends on some libraries. The following libraries must be installed
+ * - harfbuzz: used for layouting text
+ * - freetype: used for reading and rendering fonts
+ * - boost: some utility functions, the test framework
+ * - linebread or unibreak: implementation of the unicode line-break and word-break algorithm
+ * - fribidi: implementation of the unicode bidi algorithm
+ *
+ * optionally the following needs to be installed
+ * - SDL, OpenGL: when available the corresponding output modules will be included
+ * - pugixml, libxml2: when available XHTML parser using the corresponding xml-library will be build
+ * - doxygen, lconv: used for tests and documentation
+ *
  * \section build_sec Getting started
  * First, install all required libraries and tools.
  *

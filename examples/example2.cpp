@@ -1,19 +1,21 @@
-// you have to define the xml library you want to use
-// STLL needs to be compiled with support for this library
+// you have to define the xml library you want to use for the xml
+// parser. STLL needs to be compiled with this library
 #define USE_PUGI_XML
-
-#include <stll/output_SDL.h>
 #include <stll/layouterXHTML.h>
+#include <stll/output_SDL.h>
 
 using namespace STLL;
 
 int main()
 {
-  // setup a stylesheet
+  // setup a stylesheet, this will automatically creata a font cache
+  // for you. typically you will have one or only a few stylesheets in
+  // your application, if you have more than one you should share the
+  // font cache between them
   TextStyleSheet_c styleSheet;
 
   // add the fonts that are required
-  // we create one font family names "sans" with 2 members, a normal and a bold one
+  // we create one font family named "sans" with 2 members, a normal and a bold one
   styleSheet.font("sans", FontResource_c("tests/FreeSans.ttf"));
   styleSheet.font("sans", FontResource_c("tests/FreeSansBold.ttf"), "normal", "normal", "bold");
 
@@ -31,7 +33,7 @@ int main()
   std::string text = u8"<html><body><h1>Title</h1><p>Some text</p></body></html>";
 
   // layout the XHTML code, in a 200 pixel wide rectangle
-  auto layout = layoutXHTMLPugi(text, styleSheet, RectangleShape_c(200*64) );
+  auto layout = layoutXHTMLPugi(text, styleSheet, RectangleShape_c(200*64));
 
   // again output the layout
   SDL_Surface *screen = SDL_SetVideoMode(800, 600, 32, SDL_SWSURFACE | SDL_DOUBLEBUF);

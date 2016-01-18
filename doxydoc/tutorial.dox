@@ -13,19 +13,19 @@
  * That way it is possible to change a single character to underlined, or red
  * or make is using a different font
  *
- * To use the paragraph layouter only you need to use code like the following
+ * To use the paragraph layouter you need to use code like the following:
  * \include example1.cpp
  *
  * \section tut_xhtml_sec Using the XHTML Layouter
- * The XHTML layouter takes a subsection of HTML as a string and parses it and
+ * The XHTML layouter takes a subsection of XHTML as a string and parses it and
  * uses the paragraph layouter to layout the text. Here you specify the format using
  * html and css-like formatting information.
  *
- * The XHTML Layouter comes with 2 entry pointe. One takes a string, parses that string
+ * The XHTML Layouter comes with 2 entry points. One takes a string, parses that string
  * into a DOM-tree and works with that tree.
  *
  * The other choice is to directly input a DOM-tree on your own.
  *
- * For the XHTML layouter the flow is slightly different
+ * For the XHTML layouter the flow is slightly different:
  * \include example2.cpp
  */
