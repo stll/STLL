@@ -22,7 +22,7 @@
 #ifndef __COLOR_H__
 #define __COLOR_H__
 
-#include <stdint.h>
+#include <cstdint>
 
 /** \file
  *  \brief this file contains just a little helper class for a 4-value colour

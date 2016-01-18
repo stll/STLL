@@ -33,9 +33,19 @@
 #include <string>
 #include <memory>
 
+#include <cassert>
+
 namespace STLL {
 
 // TODO the fontFace_c constructor and library interface is not perfect...
+
+FontFace_c::GlyphSlot_c::GlyphSlot_c(const FT_GlyphSlotRec_* ft) :
+  w(ft->bitmap.width), h(ft->bitmap.rows),
+  top(ft->bitmap_top),
+  left(ft->bitmap_left),
+  pitch(ft->bitmap.pitch),
+  data((uint8_t*)ft->bitmap.buffer)
+  {}
 
 FontFace_c::FontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const internal::FontFileResource_c & r, uint32_t s) :
                 lib(l), rec(r), size(s)
@@ -108,7 +118,7 @@ Font_c FontCache_c::getFont(const FontResource_c & res, uint32_t size)
   return f;
 }
 
-FT_GlyphSlotRec_ * FontFace_c::renderGlyph(glyphIndex_t glyphIndex, SubPixelArrangement sp)
+FontFace_c::GlyphSlot_c FontFace_c::renderGlyph(glyphIndex_t glyphIndex, SubPixelArrangement sp)
 {
   FT_Render_Mode rm;
 
@@ -133,7 +143,12 @@ FT_GlyphSlotRec_ * FontFace_c::renderGlyph(glyphIndex_t glyphIndex, SubPixelArra
   if (FT_Load_Glyph(f, glyphIndex, FT_LOAD_TARGET_LIGHT)) return 0;
   if (FT_Render_Glyph(f->glyph, rm)) return 0;
 
-  return f->glyph;
+    assert(f->glyph->format == FT_GLYPH_FORMAT_BITMAP);
+    assert( sp != SUBP_NONE                       || f->glyph->bitmap.pixel_mode == FT_PIXEL_MODE_GRAY);
+    assert((sp != SUBP_RGB && sp != SUBP_BGR)     || f->glyph->bitmap.pixel_mode == FT_PIXEL_MODE_LCD);
+    assert((sp != SUBP_RGB_V && sp != SUBP_BGR_V) || f->glyph->bitmap.pixel_mode == FT_PIXEL_MODE_LCD_V);
+
+  return GlyphSlot_c(f->glyph);
 }
 
 bool FontFace_c::containsGlyph(char32_t ch)

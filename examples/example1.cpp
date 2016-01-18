@@ -37,7 +37,11 @@ int main()
   // driver functions, e.g. using the SDL driver you can output the text
   // at position 20, 20 on the given surface (also in units of 1/64th)
   SDL_Surface *screen = SDL_SetVideoMode(800, 600, 32, SDL_SWSURFACE | SDL_DOUBLEBUF);
-  showLayoutSDL(layout, 20*64, 20*64, screen);
+
+  // create the output object, with glyph cache and all local storage, keep this
+  // object around for the lifetime of your program
+  showSDL<> show;
+  show.showLayout(layout, 20*64, 20*64, screen);
   SDL_Flip(screen);
   sleep(10);
 

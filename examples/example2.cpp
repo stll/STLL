@@ -35,7 +35,9 @@ int main()
 
   // again output the layout
   SDL_Surface *screen = SDL_SetVideoMode(800, 600, 32, SDL_SWSURFACE | SDL_DOUBLEBUF);
-  showLayoutSDL(layout, 20*64, 20*64, screen);
+
+  showSDL<> show;
+  show.showLayout(layout, 20*64, 20*64, screen);
   SDL_Flip(screen);
   sleep(10);
 }

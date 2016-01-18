@@ -38,16 +38,14 @@ set(stll_SOURCES
   src/layouterFont.cpp
   src/layouterXHTML.cpp
   src/utf-8.cpp
-  src/output/cache_single.cpp
+  src/output/glyphCache.cpp
+  src/output/rectanglepacker.cpp
 )
 if(PUGIXML_LIBRARY)
   list(APPEND stll_SOURCES src/layouterXHTML_Pugi.cpp)
 endif()
 if(LIBXML2_FOUND)
   list(APPEND stll_SOURCES src/layouterXHTML_LibXML2.cpp)
-endif()
-if(SDL_FOUND)
-  list(APPEND stll_SOURCES src/output/output_SDL.cpp)
 endif()
 add_library(stll SHARED ${stll_SOURCES})
 target_compile_options(stll PRIVATE -std=c++14 ${XMLLIBDEFINES})
@@ -69,6 +67,7 @@ target_link_libraries(stll PUBLIC
   ${SDL_LIBRARY}
   ${PUGIXML_LIBRARY}
   ${LIBXML2_LIBRARIES}
+  -lGL
 )
 
 # Tests
@@ -140,6 +139,16 @@ if(SDL_FOUND)
     ${SDL_LIBRARY}
   )
 endif()
+
+add_executable(viewerOpenGL examples/viewerOpenGL.cpp examples/layouterXMLSaveLoad.cpp)
+target_compile_options(viewerOpenGL PRIVATE -std=c++14)
+target_include_directories(viewerOpenGL PRIVATE
+  include
+)
+target_link_libraries(viewerOpenGL PRIVATE stll
+  -lGL
+  -lglfw
+)
 
 # source package
 set(CPACK_PACKAGE_VERSION_MAJOR "0")

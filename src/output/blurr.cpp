@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "blurr.h"
+#include <stll/blurr.h>
 
 #include <array>
 #include <cmath>
@@ -44,52 +44,52 @@ static std::array<uint8_t, BLURR_N> boxesForGauss(double rad)  // standard devia
   return a;
 }
 
-static void boxBlurH_4 (uint8_t * s, uint8_t *d, int w, int h, int r)
+static void boxBlurH_4 (uint8_t * s, int spitch, uint8_t *d, int dpitch, int w, int h, int r)
 {
   double iarr = 1.0 / (r+r+1);
   for(int i = 0; i < h; i++)
   {
-    int ti = i*w;
-    int li = ti;
-    int ri = ti+r;
-    int fv = s[ti];
-    int lv = s[ti+w-1];
+    int ti = i*dpitch;
+    int li = i*spitch;
+    int ri = li+r;
+    int fv = s[li];
+    int lv = s[li+w-1];
     int val = (r+1)*fv;
-    for (int j=0;   j < r; j++) val += s[ti+j];
+    for (int j=0;   j < r; j++) val += s[li+j];
     for (int j=0;   j<= r; j++) { val += s[ri++] - fv     ; d[ti++] = round(val*iarr); }
     for (int j=r+1; j<w-r; j++) { val += s[ri++] - s[li++]; d[ti++] = round(val*iarr); }
     for (int j=w-r; j<w  ; j++) { val += lv      - s[li++]; d[ti++] = round(val*iarr); }
   }
 }
 
-static void boxBlurT_4 (uint8_t * s, uint8_t * d, int w, int h, int r)
+static void boxBlurT_4 (uint8_t * s, int spitch, uint8_t * d, int dpitch, int w, int h, int r)
 {
   double iarr = 1.0 / (r+r+1);
   for(int i=0; i < w; i++)
   {
     int ti = i;
     int li = ti;
-    int ri = ti+r*w;
+    int ri = ti+r*spitch;
     int fv = s[ti];
-    int lv = s[ti+w*(h-1)];
+    int lv = s[ti+spitch*(h-1)];
     int val = (r+1)*fv;
-    for (int j=0;   j < r; j++) val += s[ti+j*w];
-    for (int j=0  ; j<= r; j++) { val += s[ri] - fv   ; d[ti] = round(val*iarr); ri+=w; ti+=w; }
-    for (int j=r+1; j<h-r; j++) { val += s[ri] - s[li]; d[ti] = round(val*iarr); li+=w; ri+=w; ti+=w; }
-    for (int j=h-r; j<h  ; j++) { val += lv    - s[li]; d[ti] = round(val*iarr); li+=w; ti+=w; }
+    for (int j=0;   j < r; j++) val += s[ti+j*spitch];
+    for (int j=0  ; j<= r; j++) { val += s[ri] - fv   ; d[ti] = round(val*iarr); ri+=spitch; ti+=dpitch; }
+    for (int j=r+1; j<h-r; j++) { val += s[ri] - s[li]; d[ti] = round(val*iarr); li+=spitch; ri+=spitch; ti+=dpitch; }
+    for (int j=h-r; j<h  ; j++) { val += lv    - s[li]; d[ti] = round(val*iarr); li+=spitch; ti+=dpitch; }
   }
 }
 
-void gaussBlur (uint8_t * s, int w, int h, double r, int sx, int sy)
+void gaussBlur (uint8_t * s, int pitch, int w, int h, double r, int sx, int sy)
 {
   auto a = boxesForGauss(r/2);
   auto d = std::make_unique<uint8_t[]>(w*h);
-  boxBlurT_4(s, d.get(), w, h, sy*(a[0]-1)/2);
-  boxBlurH_4(d.get(), s, w, h, sx*(a[0]-1)/2);
-  boxBlurT_4(s, d.get(), w, h, sy*(a[1]-1)/2);
-  boxBlurH_4(d.get(), s, w, h, sx*(a[1]-1)/2);
-  boxBlurT_4(s, d.get(), w, h, sy*(a[2]-1)/2);
-  boxBlurH_4(d.get(), s, w, h, sx*(a[2]-1)/2);
+  boxBlurT_4(s, pitch, d.get(), w, w, h, sy*(a[0]-1)/2);
+  boxBlurH_4(d.get(), w, s, pitch, w, h, sx*(a[0]-1)/2);
+  boxBlurT_4(s, pitch, d.get(), w, w, h, sy*(a[1]-1)/2);
+  boxBlurH_4(d.get(), w, s, pitch, w, h, sx*(a[1]-1)/2);
+  boxBlurT_4(s, pitch, d.get(), w, w, h, sy*(a[2]-1)/2);
+  boxBlurH_4(d.get(), w, s, pitch, w, h, sx*(a[2]-1)/2);
 }
 
 } }

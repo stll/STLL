@@ -195,6 +195,18 @@ class FontFace_c : boost::noncopyable
 {
   public:
 
+    class GlyphSlot_c
+    {
+      public:
+        int w, h;
+        int top, left;
+        int pitch;
+        const uint8_t * data;
+
+        GlyphSlot_c(const FT_GlyphSlotRec_ * g);
+        GlyphSlot_c(int width, int height) : w(width), h(height), top(0), left(0), pitch(0), data(0) {}
+    };
+
     FontFace_c(std::shared_ptr<FreeTypeLibrary_c> l, const internal::FontFileResource_c & r, uint32_t size);
     ~FontFace_c();
 
@@ -247,7 +259,7 @@ class FontFace_c : boost::noncopyable
      * \return a pointer to the FreeType glyph slot record, see FreeType documentation
      * \note glyphs are always rendered unhinted 8-bit FreeType bitmaps
      */
-    FT_GlyphSlotRec_ * renderGlyph(glyphIndex_t glyphIndex, SubPixelArrangement sp);
+    GlyphSlot_c renderGlyph(glyphIndex_t glyphIndex, SubPixelArrangement sp);
 
     /** \brief check if a given character is available within this font
      * \param ch the unicode character to check

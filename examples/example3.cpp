@@ -74,7 +74,7 @@ class layoutInfo_c
     SubPixelArrangement sp;
 };
 
-class myImageDrawer_c : public ImageDrawerSDL_c
+class myImageDrawer_c : public showSDL<>::ImageDrawerSDL_c
 {
   void draw(int32_t x, int32_t y, uint32_t w, uint32_t h, SDL_Surface * s, const std::string &)
   {
@@ -108,6 +108,8 @@ void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
 
   myImageDrawer_c id;
 
+  showSDL<> show;
+
 #if 0
   auto t = SDL_GetTicks();
   int i = 0;
@@ -115,7 +117,7 @@ void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
   while (SDL_GetTicks()-t < 5000)
   {
     for (auto & a : data)
-      showLayoutSDL(a.layout, a.sx, a.sy, screen, a.sp, &id);
+      show.showLayout(a.layout, a.sx, a.sy, screen, a.sp, &id);
 
     i++;
   }
@@ -135,7 +137,7 @@ void showLayoutsSelf(int w, int h, const std::vector<layoutInfo_c> & data)
 
 
     for (auto & a : data)
-      showLayoutSDL(a.layout, a.sx-xx, a.sy, screen, a.sp, &id);
+      show.showLayout(a.layout, a.sx-xx, a.sy, screen, a.sp, &id);
 
     SDL_Flip(screen);
 
@@ -384,12 +386,12 @@ int main ()
     l2 = layoutParagraph(U"A quick brown fox jumps over the lazy dog", attr, RectangleShape_c(400*64), prop, ypos);
     ypos = l2.getHeight();
     l.push_back(layoutInfo_c(l2, 0, 0, SUBP_RGB));
+    l2 = layoutParagraph(U"A quick brown fox jumps over the lazy dog", attr, RectangleShape_c(400*64), prop, ypos);
+    ypos = l2.getHeight();
+    l.push_back(layoutInfo_c(l2, 0, 0, SUBP_BGR));
   }
 
   // Ausgabe mittels SDL
   showLayoutsSelf(WIN_WIDTH, 1000, l);
   }
-
-  trimSDLFontCache(1);
-
 }

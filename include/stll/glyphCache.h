@@ -24,11 +24,11 @@
 #define __CACHE_SINGLE_H__
 
 #include <stll/layouterFont.h>
+#include <stll/glyphKey.h>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
+#include <unordered_map>
 #include <cstdint>
+
 
 namespace STLL { namespace internal {
 
@@ -37,13 +37,6 @@ namespace STLL { namespace internal {
 // single rectangles to draw
 class PaintData_c
 {
-  private:
-
-    // copy the buffer and apply a blurr, if needed,
-    // when buffer pointer is nullptr, then the whole buffer is assumed to be completely
-    // filled with 255 value (used for rectangles)
-    void blurrInit(uint8_t * buf_dat, uint16_t buf_pitch, uint16_t buf_rows, uint16_t blurr, SubPixelArrangement sp);
-
   public:
     int32_t left;  // position of the top left corner relative to the baseposition of the image
     int32_t top;
@@ -54,7 +47,7 @@ class PaintData_c
     uint32_t lastUse;
 
     // create from Freetype glyph data
-    PaintData_c(FT_GlyphSlotRec_ * ft, uint16_t blurr, SubPixelArrangement sp);
+    PaintData_c(const FontFace_c::GlyphSlot_c & ft, uint16_t blurr, SubPixelArrangement sp);
 
     // create rectangle data
     PaintData_c(uint16_t width, uint16_t height, uint16_t blurr, SubPixelArrangement sp);
@@ -62,9 +55,22 @@ class PaintData_c
     const uint8_t * getBuffer(void) const { return buffer.get(); }
 };
 
-PaintData_c & cache_single_getGlyph(std::shared_ptr<FontFace_c> face, glyphIndex_t glyph, SubPixelArrangement sp, uint16_t blurr);
-PaintData_c & cache_single_getRect(int w, int h, SubPixelArrangement sp, uint16_t blurr);
-void cache_single_trim(size_t num);
+class GlyphCache_c
+{
+  private:
+    // our glyph cache with all the rendered glyphs
+    std::unordered_map<GlyphKey_c, PaintData_c> glyphCache;
+
+    // each time we access a glyph from the cache we increase this number
+    // and write the value into the lastUse field of the rendered glyph
+    // that is how we can find out glyphs that were not used the longest time
+    uint32_t useCounter = 0;
+
+  public:
+    PaintData_c & getGlyph(std::shared_ptr<FontFace_c> face, glyphIndex_t glyph, SubPixelArrangement sp, uint16_t blurr);
+    PaintData_c & getRect(int w, int h, SubPixelArrangement sp, uint16_t blurr);
+    void trim(size_t num);
+};
 
 } }
 

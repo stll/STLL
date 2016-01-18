@@ -21,6 +21,8 @@
  */
 #include <stll/color.h>
 
+namespace STLL {
+
 // lookup tables for gamma correct output
 // gamma contains the gamma value that the lookup tables are currently
 // set up for
@@ -28,7 +30,7 @@
 // the more exact the output will be, but the bigger the 2nd lookup has to
 // be, and then 2 lookup tables for forward and inverse correction
 // the tables are updated when showLayout is called with a new gamma value
-template <int S>
+template <int S = 8>
 class Gamma_c {
 
   private:
@@ -68,3 +70,5 @@ class Gamma_c {
     uint8_t inverse(uint16_t v) const { return gammaInv[v]; }
     uint16_t scale(void) const { return S; }
 };
+
+}
