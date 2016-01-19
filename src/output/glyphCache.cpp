@@ -20,14 +20,14 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include <stll/glyphCache.h>
+#include <stll/internal/glyphCache.h>
 
 #include <stll/layouter.h>
 #include <stll/color.h>
-#include <stll/blurr.h>
+#include <stll/internal/blurr.h>
 
-#include <stll/glyphKey.h>
-#include <stll/glyphprepare.h>
+#include <stll/internal/glyphKey.h>
+#include <stll/internal/glyphprepare.h>
 
 
 #include <ft2build.h>

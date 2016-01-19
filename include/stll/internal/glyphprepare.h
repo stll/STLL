@@ -1,12 +1,12 @@
 #include "blurr.h"
 
-#include "layouterFont.h"
+#include "../layouterFont.h"
 
 #include <tuple>
 
 #include <cstring>
 
-namespace STLL {
+namespace STLL { namespace internal {
 
 template <class M>
 std::tuple<int, int, int, int, int> glyphPrepare(const FontFace_c::GlyphSlot_c & ft, uint16_t blurr, SubPixelArrangement sp, int frame, bool split, M m)
@@ -82,4 +82,4 @@ std::tuple<int, int, int, int, int> glyphPrepare(const FontFace_c::GlyphSlot_c &
   return std::make_tuple(left, top, width, pitch, rows);
 }
 
-}
+} }

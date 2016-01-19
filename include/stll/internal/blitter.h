@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "color.h"
+#include "../color.h"
 
 #include "dividers.h"
 #include "glyphCache.h"
@@ -28,7 +28,7 @@
 // blitting routines to output the generated glyphs, template code, should be pretty good for
 // most purposes
 
-namespace STLL {
+namespace STLL { namespace internal {
 
 /**
  * blending function to blend a glyph pixel on top of an other pixel
@@ -303,4 +303,4 @@ void outputGlyph_HorizontalRGB(int sx, int sy, const internal::PaintData_c & img
   }
 }
 
-}
+} }

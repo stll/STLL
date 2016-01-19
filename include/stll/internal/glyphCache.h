@@ -24,7 +24,7 @@
 #define __CACHE_SINGLE_H__
 
 #include <stll/layouterFont.h>
-#include <stll/glyphKey.h>
+#include <stll/internal/glyphKey.h>
 
 #include <unordered_map>
 #include <cstdint>

@@ -21,7 +21,7 @@
  */
 #include <stll/color.h>
 
-namespace STLL {
+namespace STLL { namespace internal {
 
 // lookup tables for gamma correct output
 // gamma contains the gamma value that the lookup tables are currently
@@ -71,4 +71,4 @@ class Gamma_c {
     uint16_t scale(void) const { return S; }
 };
 
-}
+} }

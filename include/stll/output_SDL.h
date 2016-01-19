@@ -28,17 +28,17 @@
 
 #include "layouterFont.h"
 #include "layouter.h"
-#include "glyphCache.h"
 #include "color.h"
 
-#include "gamma.h"
-#include "blitter.h"
+#include "internal/glyphCache.h"
+#include "internal/blitter.h"
+#include "internal/gamma.h"
 
 #include <SDL.h>
 
 namespace STLL {
 
-template <class G = Gamma_c<>>
+template <class G = internal::Gamma_c<>>
 class showSDL
 {
   private:
@@ -147,42 +147,42 @@ class showSDL
             sx, sy, img, c, (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
             [s, this](const uint8_t * p) -> auto { return getpixel(p, s->format); },
             [s, this](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { putpixel(p, r, g, b, s->format); },
-            [this](int a1, int a2, int b1, int b2, int c) -> auto { return blend(a1, a2, b1, b2, c, g); });
+            [this](int a1, int a2, int b1, int b2, int c) -> auto { return internal::blend(a1, a2, b1, b2, c, g); });
           break;
         case calcFormatID(1, SUBP_NONE):
           outputGlyph_NONE(
             sx, sy, img, c, (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
             [](const uint8_t * p) -> auto { return std::make_tuple(p[2], p[1], p[0]); },
             [](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { p[2] = r; p[1] = g; p[0] = b; },
-            [this](int a1, int a2, int b1, int b2, int c) -> auto { return blend(a1, a2, b1, b2, c, g); });
+            [this](int a1, int a2, int b1, int b2, int c) -> auto { return internal::blend(a1, a2, b1, b2, c, g); });
           break;
         case calcFormatID(0, SUBP_RGB):
           outputGlyph_HorizontalRGB(
             sx, sy, img, c.r(), c.g(), c.b(), c.a(), (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
             [s, this](const uint8_t * p) -> auto { return getpixel(p, s->format); },
             [s, this](uint8_t * p, uint8_t r, uint8_t g, uint8_t b) -> void { putpixel(p, r, g, b, s->format); },
-            [this](int a1, int a2, int b1, int b2, int c) -> auto { return blend(a1, a2, b1, b2, c, g); });
+            [this](int a1, int a2, int b1, int b2, int c) -> auto { return internal::blend(a1, a2, b1, b2, c, g); });
           break;
         case calcFormatID(1, SUBP_RGB):
           outputGlyph_HorizontalRGB(
             sx, sy, img, c.r(), c.g(), c.b(), c.a(), (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
             [](const uint8_t * p) -> auto { return std::make_tuple(p[2], p[1], p[0]); },
             [](uint8_t * p, uint8_t sp1, uint8_t sp2, uint8_t sp3) -> void { p[2] = sp1; p[1] = sp2; p[0] = sp3; },
-            [this](int a1, int a2, int b1, int b2, int c) -> auto { return blend(a1, a2, b1, b2, c, g); });
+            [this](int a1, int a2, int b1, int b2, int c) -> auto { return internal::blend(a1, a2, b1, b2, c, g); });
           break;
         case calcFormatID(0, SUBP_BGR):
           outputGlyph_HorizontalRGB(
             sx, sy, img, c.b(), c.g(), c.r(), c.a(), (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
             [s, this](const uint8_t * p) -> auto { auto t = getpixel(p, s->format); return std::make_tuple(std::get<2>(t), std::get<1>(t), std::get<0>(t)); },
             [s, this](uint8_t * p, uint8_t sp1, uint8_t sp2, uint8_t sp3) -> void { putpixel(p, sp3, sp2, sp1, s->format); },
-            [this](int a1, int a2, int b1, int b2, int c) -> auto { return blend(a1, a2, b1, b2, c, g); });
+            [this](int a1, int a2, int b1, int b2, int c) -> auto { return internal::blend(a1, a2, b1, b2, c, g); });
           break;
         case calcFormatID(1, SUBP_BGR):
           outputGlyph_HorizontalRGB(
             sx, sy, img, c.b(), c.g(), c.r(), c.a(), (uint8_t*)s->pixels, s->pitch, s->format->BytesPerPixel, s->w, s->h,
             [](const uint8_t * p) -> auto { return std::make_tuple(p[0], p[1], p[2]); },
             [](uint8_t * p, uint8_t sp1, uint8_t sp2, uint8_t sp3) -> void { p[0] = sp1; p[1] = sp2; p[2] = sp3; },
-            [this](int a1, int a2, int b1, int b2, int c) -> auto { return blend(a1, a2, b1, b2, c, g); });
+            [this](int a1, int a2, int b1, int b2, int c) -> auto { return internal::blend(a1, a2, b1, b2, c, g); });
           break;
       }
     }

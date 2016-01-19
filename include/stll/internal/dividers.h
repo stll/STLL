@@ -23,6 +23,8 @@
 #ifndef __DIVIDERS_H__
 #define __DIVIDERS_H__
 
+namespace STLL { namespace internal {
+
 template <class T>
 T div_inf(T x, T y)
 {
@@ -95,5 +97,7 @@ i_divmod(register long x, register long y,
   return DIVMOD_OK;
 }
 #endif
+
+} }
 
 #endif

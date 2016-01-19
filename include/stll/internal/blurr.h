@@ -47,7 +47,7 @@ void gaussBlur (uint8_t * s, int pitch, int w, int h, double r, int sx, int sy);
  */
 int gaussBlurrDist(double r);
 
-}; };
+} }
 
 
 #endif

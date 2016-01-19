@@ -27,15 +27,16 @@
  */
 
 #include "layouterFont.h"
-#include "glyphAtlas.h"
-#include "gamma.h"
+
+#include "internal/glyphAtlas.h"
+#include "internal/gamma.h"
 
 namespace STLL {
 
 // V: OpenGL version minimum
 // C: texture size used for glyphe cache
 // G: gamma convertor
-template <int V, int C, class G = Gamma_c<>>
+template <int V, int C, class G = internal::Gamma_c<>>
 class showOpenGL
 {
   private:

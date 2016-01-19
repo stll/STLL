@@ -1,5 +1,5 @@
 
-#include <stll/rectanglePacker.h>
+#include <stll/internal/rectanglePacker.h>
 
 namespace STLL { namespace internal {
 
