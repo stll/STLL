@@ -45,7 +45,7 @@ class showOpenGL
     G gamma;
 
     // openGL texture it  TODO muss raus
-    unsigned int glTextureId = 0;
+    GLuint glTextureId = 0;
     uint32_t uploadVersion = 0;
 
   public:
@@ -59,6 +59,11 @@ class showOpenGL
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexEnvi(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_REPLACE);
       gamma.setGamma(22);
+    }
+
+    ~showOpenGL(void)
+    {
+        glDeleteTextures(1, &glTextureId);
     }
 
     class imageDrawerOpenGL_c
