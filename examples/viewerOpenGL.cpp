@@ -110,7 +110,7 @@ int main(int argv, char ** args)
     glEnd();
 
     glEnable(GL_FRAMEBUFFER_SRGB);
-    openGL.showLayout(l, 0, 0, SUBP_NONE, 0);
+    openGL.showLayout(l, 0, 0, SUBP_RGB, 0);
     glDisable(GL_FRAMEBUFFER_SRGB);
     glfwSwapBuffers(screen);
     glfwPollEvents();

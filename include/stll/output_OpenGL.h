@@ -32,8 +32,6 @@
 
 namespace STLL {
 
-class TextLayout_c;
-
 // V: OpenGL version minimum
 // C: texture size used for glyphe cache
 // G: gamma convertor
@@ -72,6 +70,28 @@ class showOpenGL
         virtual void draw(int32_t x, int32_t y, uint32_t w, uint32_t h, const std::string & url) = 0;
     };
 
+    void drawGlyph(const CommandData_c & i, int sx, int sy, SubPixelArrangement sp, int subpcol)
+    {
+      auto pos = cache.getGlyph(i.font, i.glyphIndex, sp, i.blurr);
+      int w = pos.width;
+      int wo = 0;
+
+      if (subpcol > 0)
+      {
+        w = pos.width/3;
+        wo = (subpcol-1)*w;
+      }
+
+      glBegin(GL_QUADS);
+      Color_c c = gamma.forward(i.c);
+      glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
+      glTexCoord2f(1.0*(pos.pos_x-0.5+wo)/C,   1.0*(pos.pos_y-0.5)/C);          glVertex3f(0.5+(sx+i.x)/64.0+pos.left-1,   0.5+(sy+i.y+32)/64-pos.top-1,          0);
+      glTexCoord2f(1.0*(pos.pos_x-0.5+wo+w)/C, 1.0*(pos.pos_y-0.5)/C);          glVertex3f(0.5+(sx+i.x)/64.0+pos.left+w-1, 0.5+(sy+i.y+32)/64-pos.top-1,          0);
+      glTexCoord2f(1.0*(pos.pos_x-0.5+wo+w)/C, 1.0*(pos.pos_y-0.5+pos.rows)/C); glVertex3f(0.5+(sx+i.x)/64.0+pos.left+w-1, 0.5+(sy+i.y+32)/64-pos.top+pos.rows-1, 0);
+      glTexCoord2f(1.0*(pos.pos_x-0.5+wo)/C,   1.0*(pos.pos_y-0.5+pos.rows)/C); glVertex3f(0.5+(sx+i.x)/64.0+pos.left-1,   0.5+(sy+i.y+32)/64-pos.top+pos.rows-1, 0);
+      glEnd();
+    }
+
     void showLayout(const TextLayout_c & l, int sx, int sy, SubPixelArrangement sp, imageDrawerOpenGL_c * images)
     {
       // make sure that all required glyphs are on our glyph texture, when necessary recreate it freshly
@@ -81,6 +101,7 @@ class showOpenGL
         switch (i.command)
         {
           case CommandData_c::CMD_GLYPH:
+            // when subpixel placement is on we always create all 3 required images
             cache.getGlyph(i.font, i.glyphIndex, sp, i.blurr);
             break;
           case CommandData_c::CMD_RECT:
@@ -112,15 +133,34 @@ class showOpenGL
           case CommandData_c::CMD_GLYPH:
             {
               glEnable(GL_TEXTURE_2D);
-              auto pos = cache.getGlyph(i.font, i.glyphIndex, sp, i.blurr);
-              glBegin(GL_QUADS);
-              Color_c c = gamma.forward(i.c);
-              glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
-              glTexCoord2f(1.0*(pos.pos_x-0.5)/C,           1.0*(pos.pos_y-0.5)/C);          glVertex3f(0.5+(sx+i.x)/64.0+pos.left-1,           0.5+(sy+i.y+32)/64-pos.top-1,          0);
-              glTexCoord2f(1.0*(pos.pos_x-0.5+pos.width)/C, 1.0*(pos.pos_y-0.5)/C);          glVertex3f(0.5+(sx+i.x)/64.0+pos.left+pos.width-1, 0.5+(sy+i.y+32)/64-pos.top-1,          0);
-              glTexCoord2f(1.0*(pos.pos_x-0.5+pos.width)/C, 1.0*(pos.pos_y-0.5+pos.rows)/C); glVertex3f(0.5+(sx+i.x)/64.0+pos.left+pos.width-1, 0.5+(sy+i.y+32)/64-pos.top+pos.rows-1, 0);
-              glTexCoord2f(1.0*(pos.pos_x-0.5)/C,           1.0*(pos.pos_y-0.5+pos.rows)/C); glVertex3f(0.5+(sx+i.x)/64.0+pos.left-1,           0.5+(sy+i.y+32)/64-pos.top+pos.rows-1, 0);
-              glEnd();
+
+              if (i.blurr > cache.blurrmax)
+              {
+                drawGlyph(i, sx, sy, sp, 0);
+              }
+              else
+              {
+                switch (sp)
+                {
+                  case SUBP_RGB:
+                    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); drawGlyph(i, sx, sy, sp, 1);
+                    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); drawGlyph(i, sx, sy, sp, 2);
+                    glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); drawGlyph(i, sx, sy, sp, 3);
+                    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+                    break;
+
+                  case SUBP_BGR:
+                    glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); drawGlyph(i, sx, sy, sp, 1);
+                    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); drawGlyph(i, sx, sy, sp, 2);
+                    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); drawGlyph(i, sx, sy, sp, 3);
+                    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+                    break;
+
+                  default:
+                    drawGlyph(i, sx, sy, sp, 0);
+                    break;
+                }
+              }
             }
             break;
 
