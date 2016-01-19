@@ -747,8 +747,9 @@ INPUT                  = ../include/stll/color.h \
                          ../include/stll/layouter.h \
                          ../include/stll/layouterCSS.h \
                          ../include/stll/layouterFont.h \
-                         ../include/stll/output_SDL.h \
                          ../include/stll/layouterXHTML.h \
+                         ../include/stll/output_OpenGLL.h \
+                         ../include/stll/output_SDL.h \
                          ../include/stll/utf8.h \
                          ./
 
