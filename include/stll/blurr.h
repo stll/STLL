@@ -43,6 +43,10 @@ namespace STLL { namespace internal {
  */
 void gaussBlur (uint8_t * s, int pitch, int w, int h, double r, int sx, int sy);
 
+/** \brief calculates how far information can spread when applying this blurr
+ */
+int gaussBlurrDist(double r);
+
 }; };
 
 

@@ -47,36 +47,70 @@ static std::array<uint8_t, BLURR_N> boxesForGauss(double rad)  // standard devia
 static void boxBlurH_4 (uint8_t * s, int spitch, uint8_t *d, int dpitch, int w, int h, int r)
 {
   double iarr = 1.0 / (r+r+1);
-  for(int i = 0; i < h; i++)
+  if (r >= w)
   {
-    int ti = i*dpitch;
-    int li = i*spitch;
-    int ri = li+r;
-    int fv = s[li];
-    int lv = s[li+w-1];
-    int val = (r+1)*fv;
-    for (int j=0;   j < r; j++) val += s[li+j];
-    for (int j=0;   j<= r; j++) { val += s[ri++] - fv     ; d[ti++] = round(val*iarr); }
-    for (int j=r+1; j<w-r; j++) { val += s[ri++] - s[li++]; d[ti++] = round(val*iarr); }
-    for (int j=w-r; j<w  ; j++) { val += lv      - s[li++]; d[ti++] = round(val*iarr); }
+    for(int i = 0; i < h; i++)
+    {
+      int ti = i*dpitch;
+      int li = i*spitch;
+      int fv = s[li];
+      int lv = s[li+w-1];
+      int val = (r+1)*fv;
+      for (int j=0;   j < w; j++) val += s[li+j];
+      val += lv * (r-w);
+      for (int j=0;   j<= w; j++) { val += lv - fv; d[ti++] = round(val*iarr); }
+    }
+  }
+  else
+  {
+    for(int i = 0; i < h; i++)
+    {
+      int ti = i*dpitch;
+      int li = i*spitch;
+      int ri = li+r;
+      int fv = s[li];
+      int lv = s[li+w-1];
+      int val = (r+1)*fv;
+      for (int j=0;   j < r; j++) val += s[li+j];
+      for (int j=0;   j<= r; j++) { val += s[ri++] - fv     ; d[ti++] = round(val*iarr); }
+      for (int j=r+1; j<w-r; j++) { val += s[ri++] - s[li++]; d[ti++] = round(val*iarr); }
+      for (int j=w-r; j<w  ; j++) { val += lv      - s[li++]; d[ti++] = round(val*iarr); }
+    }
   }
 }
 
 static void boxBlurT_4 (uint8_t * s, int spitch, uint8_t * d, int dpitch, int w, int h, int r)
 {
   double iarr = 1.0 / (r+r+1);
-  for(int i=0; i < w; i++)
+  if (r >= h)
   {
-    int ti = i;
-    int li = ti;
-    int ri = ti+r*spitch;
-    int fv = s[ti];
-    int lv = s[ti+spitch*(h-1)];
-    int val = (r+1)*fv;
-    for (int j=0;   j < r; j++) val += s[ti+j*spitch];
-    for (int j=0  ; j<= r; j++) { val += s[ri] - fv   ; d[ti] = round(val*iarr); ri+=spitch; ti+=dpitch; }
-    for (int j=r+1; j<h-r; j++) { val += s[ri] - s[li]; d[ti] = round(val*iarr); li+=spitch; ri+=spitch; ti+=dpitch; }
-    for (int j=h-r; j<h  ; j++) { val += lv    - s[li]; d[ti] = round(val*iarr); li+=spitch; ti+=dpitch; }
+    for(int i=0; i < w; i++)
+    {
+      int ti = i;
+      int ri = ti+r*spitch;
+      int fv = s[ti];
+      int lv = s[ti+spitch*(h-1)];
+      int val = (r+1)*fv;
+      for (int j=0;   j < h; j++) val += s[ti+j*spitch];
+      val += lv * (r-h);
+      for (int j=0  ; j<= h; j++) { val += lv - fv   ; d[ti] = round(val*iarr); ri+=spitch; ti+=dpitch; }
+    }
+  }
+  else
+  {
+    for(int i=0; i < w; i++)
+    {
+      int ti = i;
+      int li = ti;
+      int ri = ti+r*spitch;
+      int fv = s[ti];
+      int lv = s[ti+spitch*(h-1)];
+      int val = (r+1)*fv;
+      for (int j=0;   j < r; j++) val += s[ti+j*spitch];
+      for (int j=0  ; j<= r; j++) { val += s[ri] - fv   ; d[ti] = round(val*iarr); ri+=spitch; ti+=dpitch; }
+      for (int j=r+1; j<h-r; j++) { val += s[ri] - s[li]; d[ti] = round(val*iarr); li+=spitch; ri+=spitch; ti+=dpitch; }
+      for (int j=h-r; j<h  ; j++) { val += lv    - s[li]; d[ti] = round(val*iarr); li+=spitch; ti+=dpitch; }
+    }
   }
 }
 
@@ -90,6 +124,13 @@ void gaussBlur (uint8_t * s, int pitch, int w, int h, double r, int sx, int sy)
   boxBlurH_4(d.get(), w, s, pitch, w, h, sx*(a[1]-1)/2);
   boxBlurT_4(s, pitch, d.get(), w, w, h, sy*(a[2]-1)/2);
   boxBlurH_4(d.get(), w, s, pitch, w, h, sx*(a[2]-1)/2);
+}
+
+int gaussBlurrDist(double r)
+{
+  auto a = boxesForGauss(r/2);
+
+  return /*(a[0]-1)/2 + (a[1]-1)/2 +*/ a[2];
 }
 
 } }

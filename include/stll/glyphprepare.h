@@ -15,11 +15,12 @@ std::tuple<int, int, int, int, int> glyphPrepare(const FontFace_c::GlyphSlot_c &
   // and has an additional number of columns on the right so that no additional
   // checks are needed for drawing for the last column
   // so the pitch of the buffered image is always 1 or 2 columns wider than the image width (depending on suppixel)
+  int blurrdist = internal::gaussBlurrDist(blurr/64.0);
   int blurrh = 1;
   int blurrw = 1;
   int addc = 1;
-  int ts = blurr/32;
-  int ls = blurr/32;
+  int ts = blurrdist;
+  int ls = blurrdist;
 
   int left = ft.left - ls;
   int top = ft.top + ts;
