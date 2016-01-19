@@ -81,7 +81,7 @@ class showOpenGL
         switch (i.command)
         {
           case CommandData_c::CMD_GLYPH:
-            cache.getGlyph(i.font, i.glyphIndex, sp, 0/*i.blurr*/);
+            cache.getGlyph(i.font, i.glyphIndex, sp, i.blurr);
             break;
           case CommandData_c::CMD_RECT:
             if (i.blurr > 0)
