@@ -115,9 +115,6 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_free_type_library__c.html">FreeTypeLibrary_c</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This class encapsulates an instance of the FreeType library.  <a href="class_s_t_l_l_1_1_free_type_library__c.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_image_drawer_s_d_l__c.html">ImageDrawerSDL_c</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">class used to encapsulate image drawing  <a href="class_s_t_l_l_1_1_image_drawer_s_d_l__c.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_layout_properties__c.html">LayoutProperties_c</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">this structure contains information for the layouter how to layout the text  <a href="class_s_t_l_l_1_1_layout_properties__c.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -126,6 +123,9 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_shape__c.html">Shape_c</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">base class to define the shape to layout text into  <a href="class_s_t_l_l_1_1_shape__c.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1show_s_d_l.html">showSDL</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">a class to output layouts using SDL  <a href="class_s_t_l_l_1_1show_s_d_l.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_text_layout__c.html">TextLayout_c</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">encapsulates a finished layout.  <a href="class_s_t_l_l_1_1_text_layout__c.html#details">More...</a><br /></td></tr>
@@ -161,12 +161,6 @@ Enumerations</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:ab663fe7dceae4de54ddc5076a4c8c2dc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_s_t_l_l_1_1_text_layout__c.html">TextLayout_c</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#ab663fe7dceae4de54ddc5076a4c8c2dc">layoutParagraph</a> (const std::u32string &amp;txt32, const <a class="el" href="class_s_t_l_l_1_1_attribute_index__c.html">AttributeIndex_c</a> &amp;attr, const <a class="el" href="class_s_t_l_l_1_1_shape__c.html">Shape_c</a> &amp;shape, const <a class="el" href="class_s_t_l_l_1_1_layout_properties__c.html">LayoutProperties_c</a> &amp;prop, int32_t ystart=0)</td></tr>
 <tr class="separator:ab663fe7dceae4de54ddc5076a4c8c2dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad1ddfc4800c23300e6339f7cc6e2cc7e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#ad1ddfc4800c23300e6339f7cc6e2cc7e">showLayoutSDL</a> (const <a class="el" href="class_s_t_l_l_1_1_text_layout__c.html">TextLayout_c</a> &amp;l, int sx, int sy, SDL_Surface *s, <a class="el" href="namespace_s_t_l_l.html#ac0004512e3161f751911cb1352dbd550">SubPixelArrangement</a> sp=<a class="el" href="namespace_s_t_l_l.html#ac0004512e3161f751911cb1352dbd550af07462858707440f31f696d4b3bbcd67">SUBP_NONE</a>, <a class="el" href="class_s_t_l_l_1_1_image_drawer_s_d_l__c.html">ImageDrawerSDL_c</a> *images=0, uint8_t gamma=22)</td></tr>
-<tr class="memdesc:ad1ddfc4800c23300e6339f7cc6e2cc7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">display a single layout  <a href="#ad1ddfc4800c23300e6339f7cc6e2cc7e">More...</a><br /></td></tr>
-<tr class="separator:ad1ddfc4800c23300e6339f7cc6e2cc7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5859df7ef007a003c1c86225a2889bde"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#a5859df7ef007a003c1c86225a2889bde">trimSDLFontCache</a> (size_t num)</td></tr>
-<tr class="memdesc:a5859df7ef007a003c1c86225a2889bde"><td class="mdescLeft">&#160;</td><td class="mdescRight">trims the font cache down to a maximal number of entries  <a href="#a5859df7ef007a003c1c86225a2889bde">More...</a><br /></td></tr>
-<tr class="separator:a5859df7ef007a003c1c86225a2889bde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a27d4d9da637cc1f1494fba65768076f4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_s_t_l_l_1_1_text_layout__c.html">TextLayout_c</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#a27d4d9da637cc1f1494fba65768076f4">layoutXML</a> (pugi::xml_node txt, const <a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html">TextStyleSheet_c</a> &amp;rules, const <a class="el" href="class_s_t_l_l_1_1_shape__c.html">Shape_c</a> &amp;shape)</td></tr>
 <tr class="memdesc:a27d4d9da637cc1f1494fba65768076f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">layout the given preparsed XML tree as an HTML dom tree  <a href="#a27d4d9da637cc1f1494fba65768076f4">More...</a><br /></td></tr>
 <tr class="separator:a27d4d9da637cc1f1494fba65768076f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -426,105 +420,13 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ad1ddfc4800c23300e6339f7cc6e2cc7e"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void STLL::showLayoutSDL </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="class_s_t_l_l_1_1_text_layout__c.html">TextLayout_c</a> &amp;&#160;</td>
-          <td class="paramname"><em>l</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>sx</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>sy</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">SDL_Surface *&#160;</td>
-          <td class="paramname"><em>s</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespace_s_t_l_l.html#ac0004512e3161f751911cb1352dbd550">SubPixelArrangement</a>&#160;</td>
-          <td class="paramname"><em>sp</em> = <code><a class="el" href="namespace_s_t_l_l.html#ac0004512e3161f751911cb1352dbd550af07462858707440f31f696d4b3bbcd67">SUBP_NONE</a></code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="class_s_t_l_l_1_1_image_drawer_s_d_l__c.html">ImageDrawerSDL_c</a> *&#160;</td>
-          <td class="paramname"><em>images</em> = <code>0</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>gamma</em> = <code>22</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">l</td><td>layout to draw </td></tr>
-    <tr><td class="paramname">sx</td><td>x position on the target surface in 1/64th pixels </td></tr>
-    <tr><td class="paramname">sy</td><td>y position on the target surface in 1/64th pixels </td></tr>
-    <tr><td class="paramname">s</td><td>target surface </td></tr>
-    <tr><td class="paramname">sp</td><td>which kind of sub-pixel positioning do you want? </td></tr>
-    <tr><td class="paramname">images</td><td>a pointer to an image drawer class that is used to draw the images, when you give a nullptr here, no images will be drawn </td></tr>
-    <tr><td class="paramname">gamma</td><td>the gamma value of the target surface s in 0.1 increments. Screen surfaces usually have a gamma of 2.2, if you blit to a intermediate surface use a gamma of one, but then you should take care of gamma correction when blitting with alpha values. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>the function uses some lookup tables to quickly calculate the gamma data, that table is checked at the beginning of this function and recalculated, when necessary, so try to stick to the same gamma value for long stretches </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a5859df7ef007a003c1c86225a2889bde"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void STLL::trimSDLFontCache </td>
-          <td>(</td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>num</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>the SDL output module keeps a cache of rendered glyphs to speed up the process of outputting layouts. This cache may get too big on memory. To keep things within limits you can call this function to remove entries. If there are more entries in the cache the ones that were used the longest time ago are removed</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">num</td><td>maximal number of entries, e.g. 0 completely empties the cache </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li>
-    <li class="footer">Generated on Mon Jan 11 2016 21:45:18 for STLL by
+    <li class="footer">Generated on Tue Jan 19 2016 21:17:35 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

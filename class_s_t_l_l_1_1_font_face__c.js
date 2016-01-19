@@ -1,5 +1,6 @@
 var class_s_t_l_l_1_1_font_face__c =
 [
+    [ "GlyphSlot_c", "class_s_t_l_l_1_1_font_face__c_1_1_glyph_slot__c.html", "class_s_t_l_l_1_1_font_face__c_1_1_glyph_slot__c" ],
     [ "FontFace_c", "class_s_t_l_l_1_1_font_face__c.html#a3a55cfe58fbbea9f21f435ad3f5abc3f", null ],
     [ "~FontFace_c", "class_s_t_l_l_1_1_font_face__c.html#a62819694d019e1ac1dd51b681f340f33", null ],
     [ "containsGlyph", "class_s_t_l_l_1_1_font_face__c.html#ad41f6e1ae9e8c483400d7709b2a5e088", null ],
@@ -11,5 +12,5 @@ var class_s_t_l_l_1_1_font_face__c =
     [ "getSize", "class_s_t_l_l_1_1_font_face__c.html#a9c4abca0aa19c876fa558319a581c404", null ],
     [ "getUnderlinePosition", "class_s_t_l_l_1_1_font_face__c.html#af564d6de13a42bdc065b187a1b010b2f", null ],
     [ "getUnderlineThickness", "class_s_t_l_l_1_1_font_face__c.html#a82bcbd26af8eed14a649264e110cb601", null ],
-    [ "renderGlyph", "class_s_t_l_l_1_1_font_face__c.html#a0839b0212f191f44effe265f9bbb4343", null ]
+    [ "renderGlyph", "class_s_t_l_l_1_1_font_face__c.html#ad49b07c85be2b76ca829e221c308bc7c", null ]
 ];

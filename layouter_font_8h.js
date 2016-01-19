@@ -3,6 +3,7 @@ var layouter_font_8h =
     [ "FreetypeException_c", "class_s_t_l_l_1_1_freetype_exception__c.html", "class_s_t_l_l_1_1_freetype_exception__c" ],
     [ "FontResource_c", "class_s_t_l_l_1_1_font_resource__c.html", "class_s_t_l_l_1_1_font_resource__c" ],
     [ "FontFace_c", "class_s_t_l_l_1_1_font_face__c.html", "class_s_t_l_l_1_1_font_face__c" ],
+    [ "GlyphSlot_c", "class_s_t_l_l_1_1_font_face__c_1_1_glyph_slot__c.html", "class_s_t_l_l_1_1_font_face__c_1_1_glyph_slot__c" ],
     [ "Font_c", "class_s_t_l_l_1_1_font__c.html", "class_s_t_l_l_1_1_font__c" ],
     [ "FreeTypeLibrary_c", "class_s_t_l_l_1_1_free_type_library__c.html", "class_s_t_l_l_1_1_free_type_library__c" ],
     [ "FontCache_c", "class_s_t_l_l_1_1_font_cache__c.html", "class_s_t_l_l_1_1_font_cache__c" ],

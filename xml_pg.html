@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>STLL: Drawing the layouts</title>
+<title>STLL: XML</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -57,33 +57,28 @@
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('drawing_pg.html','');});
+$(document).ready(function(){initNavTree('xml_pg.html','');});
 </script>
 <div id="doc-content">
 <div class="header">
   <div class="headertitle">
-<div class="title">Drawing the layouts </div>  </div>
+<div class="title">XML </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>When it comes to drawing the final layout there are quite some choices to make. This page will try to explain some of the available options.</p>
-<p>Not all output drivers will support all the available options. Please read there for further information</p>
-<h1><a class="anchor" id="gamma_sec"></a>
-Gamma</h1>
-<p>Some output drivers support gamma correct blending when drawing. That means they can be used to draw onto surfaces that do have a non linear intensity curve.</p>
-<p>Most consumer level displays do have a non linear intensity curve, that means that the grey with the intensity values 128 is not half as bright as the one with intensity 255.</p>
-<p>This has repercussions on blending. When not correctly done it will result in black shadows along blend lines and in letters that appear too thin.</p>
-<p>To resolve this problem use the following rules:</p><ul>
-<li>when drawing into a display buffer use the gamma value of 2.2</li>
-<li>when drawing into non display buffers use gamma 1 (but make sure that you properly blend when you draw that buffer onto the surface</li>
+<div class="textblock"><p><a class="el" href="namespace_s_t_l_l.html" title="The namespace for the library. Every function and class is within this namespace. ...">STLL</a> tries to be indepentend of the XML library to use for parsing the XHTML code. This is achieved by a little XML abstraction layer that contains functions to access a DOM tree parsed by a certain library.</p>
+<p>For each library to support <a class="el" href="namespace_s_t_l_l.html" title="The namespace for the library. Every function and class is within this namespace. ...">STLL</a> must provide this interface.</p>
+<p>The XHTML parser is written with C++ templates and instantiated once for each library</p>
+<p>Right now <a class="el" href="namespace_s_t_l_l.html" title="The namespace for the library. Every function and class is within this namespace. ...">STLL</a> supports libxml2 and pugixml as XML libraries. The library support is checked at compile time. When a library is available the instance is compiled in, if not it will be left out. If you want to add support for a different library you need to recompile</p>
+<p>If you want to add support for a new library that is not yet supported by <a class="el" href="namespace_s_t_l_l.html" title="The namespace for the library. Every function and class is within this namespace. ...">STLL</a> you have to do the following:</p>
+<ul>
+<li>add check for the library to CMakeList.txt and define a compiler variable USE_xxx for your library</li>
+<li>open xmllibraries.h and add overloaded functions for your library (copy paste adapt)</li>
+<li>create a new file layouterXHTML_xxx for your library and inside create an instantiation of the parser for your library (copy paste adapt)</li>
+<li>add your new parser function to the <a class="el" href="layouter_x_h_t_m_l_8h.html" title="This module contains the XHTML parser and layouter. ">layouterXHTML.h</a> header file (copy paste adapt)</li>
+<li>add a new runtest instance for your library to CMakeList.txt and make sure all tests pass (copy paste adapt)</li>
+<li>send in a patch so that others can profit from your work</li>
 </ul>
-<p>The SDL output driver provides gamma values for output. OpenGL provides the possibility to set Framebuffers to sRGB which results in proper blending when drawn into.</p>
-<h1><a class="anchor" id="subpixel_sec"></a>
-Sub pixel placement</h1>
-<p>Sub pixel placement allows more accurate placement of pixels onto the screen. It requires a 1:1 correspondence between the framebuffer and the display, so it doesn't work on CRTs and it also doesn't work when the display has to scale the framebuffer.</p>
-<p>But when all conditions are met you will get a sharper result and more evenly distributed letters.</p>
-<p>The output routines need to know the sub pixel arrangement though to make the right drawing decisions. So: if you can not find out and don't want to ask the user for that information don't use it. When used wrongly it will result in ugly output.</p>
-<p>Also keep in mind that drawing with sub pixel placement is not possible on surfaces with included alpha channel because the resulting surface can not properly drawn onto any other surface. This would require separate alpha channel for each colour component.</p>
-<p>Sub pixel drawing only properly works when drawing directly onto the target. When drawing onto surfaces with an alpha channel, the alpha of all the pixels are untouched assuming that the background is properly prepared for the glyphs (e.g. opaque) </p>
+<p>Most of it is simple stuff, the hardest is step 2 to create the overloaded functions. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

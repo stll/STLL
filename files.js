@@ -10,5 +10,8 @@ var files =
     ] ],
     [ "layouterFont.h", "layouter_font_8h.html", "layouter_font_8h" ],
     [ "layouterXHTML.h", "layouter_x_h_t_m_l_8h.html", "layouter_x_h_t_m_l_8h" ],
-    [ "output_SDL.h", "output___s_d_l_8h.html", "output___s_d_l_8h" ]
+    [ "output_SDL.h", "output___s_d_l_8h.html", [
+      [ "showSDL", "class_s_t_l_l_1_1show_s_d_l.html", "class_s_t_l_l_1_1show_s_d_l" ],
+      [ "ImageDrawerSDL_c", "class_s_t_l_l_1_1show_s_d_l_1_1_image_drawer_s_d_l__c.html", "class_s_t_l_l_1_1show_s_d_l_1_1_image_drawer_s_d_l__c" ]
+    ] ]
 ];

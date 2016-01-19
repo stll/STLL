@@ -72,6 +72,28 @@ Introduction</h1>
 <p>There is also Pango. But Pango is way too big and way too complicated for smaller applications.</p>
 <p>This library is supposed to be in the middle between the heavyweight Pango and the trivial libraries like SDL_ttf. It is supposed to support all line-based text systems. Column bases support is not planned.</p>
 <p>Current home of the library is at <a href="https://github.com/stll/STLL">github</a>.</p>
+<h1><a class="anchor" id="goals_sec"></a>
+Design Goals</h1>
+<p><a class="el" href="namespace_s_t_l_l.html" title="The namespace for the library. Every function and class is within this namespace. ...">STLL</a> has the following design goals</p><ul>
+<li>support all line based writing systems (as far as I know there is no actively used writing system in the world that is purely column based).</li>
+<li>simple interface: the interface for normal tasks should be plain and easy.</li>
+<li>high quality: the output of the library should be as high quality as feasible, which means: exact letter placement with interpolation, wherever possible sub-pixel placement of letters, proper gamma calculations to get the right glyph strokes</li>
+<li>speed and low memory consumption are not a priority. But as long as you do not want to layout Megabytes of text the code should be fast enough</li>
+</ul>
+<h1><a class="anchor" id="depend_sec"></a>
+Dependencies</h1>
+<p><a class="el" href="namespace_s_t_l_l.html" title="The namespace for the library. Every function and class is within this namespace. ...">STLL</a> depends on some libraries. The following libraries must be installed</p><ul>
+<li>harfbuzz: used for layouting text</li>
+<li>freetype: used for reading and rendering fonts</li>
+<li>boost: some utility functions, the test framework</li>
+<li>linebread or unibreak: implementation of the unicode line-break and word-break algorithm</li>
+<li>fribidi: implementation of the unicode bidi algorithm</li>
+</ul>
+<p>optionally the following needs to be installed</p><ul>
+<li>SDL, OpenGL: when available the corresponding output modules will be included</li>
+<li>pugixml, libxml2: when available XHTML parser using the corresponding xml-library will be build</li>
+<li>doxygen, lconv: used for tests and documentation</li>
+</ul>
 <h1><a class="anchor" id="build_sec"></a>
 Getting started</h1>
 <p>First, install all required libraries and tools.</p>
@@ -124,7 +146,7 @@ Additional Tools</h2>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Jan 11 2016 21:45:18 for STLL by
+    <li class="footer">Generated on Tue Jan 19 2016 21:17:35 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

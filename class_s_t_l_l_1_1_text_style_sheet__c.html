@@ -86,9 +86,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4874825f2a6c37daaa7b40b7f5540556"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a4874825f2a6c37daaa7b40b7f5540556">TextStyleSheet_c</a> (std::shared_ptr&lt; <a class="el" href="class_s_t_l_l_1_1_font_cache__c.html">FontCache_c</a> &gt; c=0)</td></tr>
 <tr class="memdesc:a4874825f2a6c37daaa7b40b7f5540556"><td class="mdescLeft">&#160;</td><td class="mdescRight">create an empty style sheet only with default rules  <a href="#a4874825f2a6c37daaa7b40b7f5540556">More...</a><br /></td></tr>
 <tr class="separator:a4874825f2a6c37daaa7b40b7f5540556"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acc443319cca55245808e1b3fb64b2505"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html#acc443319cca55245808e1b3fb64b2505">font</a> (const std::string &amp;family, const <a class="el" href="class_s_t_l_l_1_1_font_resource__c.html">FontResource_c</a> &amp;res, const std::string &amp;style=&quot;normal&quot;, const std::string &amp;variant=&quot;normal&quot;, const std::string &amp;weight=&quot;normal&quot;, const std::string &amp;stretch=&quot;normal&quot;)</td></tr>
-<tr class="memdesc:acc443319cca55245808e1b3fb64b2505"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a font to a family.  <a href="#acc443319cca55245808e1b3fb64b2505">More...</a><br /></td></tr>
-<tr class="separator:acc443319cca55245808e1b3fb64b2505"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f7e8de26907406e854b770d33a6df99"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a7f7e8de26907406e854b770d33a6df99">addFont</a> (const std::string &amp;family, const <a class="el" href="class_s_t_l_l_1_1_font_resource__c.html">FontResource_c</a> &amp;res, const std::string &amp;style=&quot;normal&quot;, const std::string &amp;variant=&quot;normal&quot;, const std::string &amp;weight=&quot;normal&quot;, const std::string &amp;stretch=&quot;normal&quot;)</td></tr>
+<tr class="memdesc:a7f7e8de26907406e854b770d33a6df99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a font to a family.  <a href="#a7f7e8de26907406e854b770d33a6df99">More...</a><br /></td></tr>
+<tr class="separator:a7f7e8de26907406e854b770d33a6df99"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99f10f4e1af3ce1f618a61490d2e041f"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="class_s_t_l_l_1_1_font_family__c.html">FontFamily_c</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a99f10f4e1af3ce1f618a61490d2e041f">findFamily</a> (const std::string &amp;family) const </td></tr>
 <tr class="memdesc:a99f10f4e1af3ce1f618a61490d2e041f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a font family from the CSS.  <a href="#a99f10f4e1af3ce1f618a61490d2e041f">More...</a><br /></td></tr>
 <tr class="separator:a99f10f4e1af3ce1f618a61490d2e041f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -122,6 +122,69 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a7f7e8de26907406e854b770d33a6df99"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void STLL::TextStyleSheet_c::addFont </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>family</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="class_s_t_l_l_1_1_font_resource__c.html">FontResource_c</a> &amp;&#160;</td>
+          <td class="paramname"><em>res</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>style</em> = <code>&quot;normal&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>variant</em> = <code>&quot;normal&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>weight</em> = <code>&quot;normal&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>stretch</em> = <code>&quot;normal&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This function will add a new font to a family within this stylesheet. If the given family doesn't exist, it will be created</p>
+<p>The class will use the same font cache and thus the same instance of the FreeType library for all the fonts. So you can only use it from one thread.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">family</td><td>The name of the font family that gets a new member </td></tr>
+    <tr><td class="paramname">res</td><td>The resource for the new family member </td></tr>
+    <tr><td class="paramname">style</td><td>See fontFamily_c::getFont() </td></tr>
+    <tr><td class="paramname">variant</td><td>See fontFamily_c::getFont() </td></tr>
+    <tr><td class="paramname">weight</td><td>See fontFamily_c::getFont() </td></tr>
+    <tr><td class="paramname">stretch</td><td>See fontFamily_c::getFont() </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a960a9f109e846aed17a38b914a995545"></a>
 <div class="memitem">
 <div class="memproto">
@@ -194,69 +257,6 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="acc443319cca55245808e1b3fb64b2505"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void STLL::TextStyleSheet_c::font </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>family</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="class_s_t_l_l_1_1_font_resource__c.html">FontResource_c</a> &amp;&#160;</td>
-          <td class="paramname"><em>res</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>style</em> = <code>&quot;normal&quot;</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>variant</em> = <code>&quot;normal&quot;</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>weight</em> = <code>&quot;normal&quot;</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>stretch</em> = <code>&quot;normal&quot;</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>This function will add a new font to a family within this stylesheet. If the given family doesn't exist, it will be created</p>
-<p>The class will use the same font cache and thus the same instance of the FreeType library for all the fonts. So you can only use it from one thread.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">family</td><td>The name of the font family that gets a new member </td></tr>
-    <tr><td class="paramname">res</td><td>The resource for the new family member </td></tr>
-    <tr><td class="paramname">style</td><td>See fontFamily_c::getFont() </td></tr>
-    <tr><td class="paramname">variant</td><td>See fontFamily_c::getFont() </td></tr>
-    <tr><td class="paramname">weight</td><td>See fontFamily_c::getFont() </td></tr>
-    <tr><td class="paramname">stretch</td><td>See fontFamily_c::getFont() </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a class="anchor" id="a193fbb02cd6e6c412bab9965eb4707da"></a>
 <div class="memitem">
 <div class="memproto">
@@ -319,7 +319,7 @@ template&lt;class X &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html">TextStyleSheet_c</a></li>
-    <li class="footer">Generated on Mon Jan 11 2016 21:45:18 for STLL by
+    <li class="footer">Generated on Tue Jan 19 2016 21:17:35 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

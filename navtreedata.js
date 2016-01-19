@@ -2,6 +2,8 @@ var NAVTREE =
 [
   [ "STLL", "index.html", [
     [ "Introduction", "index.html#into_sec", null ],
+    [ "Design Goals", "index.html#goals_sec", null ],
+    [ "Dependencies", "index.html#depend_sec", null ],
     [ "Getting started", "index.html#build_sec", null ],
     [ "Design of the library", "index.html#design_sec", [
       [ "Freetype wrapper", "index.html#freetype_wrapper_sec", null ],
@@ -23,6 +25,7 @@ var NAVTREE =
       [ "Using the Paragraph Layouter", "tutorial_pg.html#tut_basic_sec", null ],
       [ "Using the XHTML Layouter", "tutorial_pg.html#tut_xhtml_sec", null ]
     ] ],
+    [ "XML", "xml_pg.html", null ],
     [ "Namespaces", null, [
       [ "Namespace List", "namespaces.html", "namespaces" ],
       [ "Namespace Members", "namespacemembers.html", [
