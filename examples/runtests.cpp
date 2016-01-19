@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
   STLL::RectangleShape_c r(200*64);
 
   s.addRule("p", "font-size", "16px");
-  s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
+  s.addFont("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
   s.addRule(".font", "font-family", "snas");
 
   // not properly closing tag
@@ -373,7 +373,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   auto c = std::make_shared<STLL::FontCache_c>();
   STLL::TextStyleSheet_c s(c);
 
-  s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
+  s.addFont("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#ffffff");
 
@@ -390,7 +390,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   s.addRule("body", "text-indent", "0px");
 
   // a language with script and at the same time right to left: arabic
-  s.font("sans-ar", STLL::FontResource_c("tests/Amiri.ttf"));
+  s.addFont("sans-ar", STLL::FontResource_c("tests/Amiri.ttf"));
   s.addRule("p[lang|=ar]", "direction", "rtl");
   s.addRule("p[lang|=ar]", "font-family", "sans-ar");
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
@@ -661,7 +661,7 @@ BOOST_AUTO_TEST_CASE( Table_Layouts )
   auto c = std::make_shared<STLL::FontCache_c>();
   STLL::TextStyleSheet_c s(c);
 
-  s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
+  s.addFont("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#ffffff");
   s.addRule(".tc", "width", "100px");
@@ -737,7 +737,7 @@ BOOST_AUTO_TEST_CASE( Frames_Layouts )
   auto c = std::make_shared<STLL::FontCache_c>();
   STLL::TextStyleSheet_c s(c);
 
-  s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
+  s.addFont("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
 
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#FFFFFF");
@@ -823,7 +823,7 @@ BOOST_AUTO_TEST_CASE( Save_Load_Layouts )
   auto c = std::make_shared<STLL::FontCache_c>();
   STLL::TextStyleSheet_c s(c);
 
-  s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
+  s.addFont("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
 
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#FFFFFF");
@@ -849,7 +849,7 @@ BOOST_AUTO_TEST_CASE( Links )
   auto c = std::make_shared<STLL::FontCache_c>();
   STLL::TextStyleSheet_c s(c);
 
-  s.font("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
+  s.addFont("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#ffffff");
 

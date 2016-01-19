@@ -174,7 +174,7 @@ int main ()
     r.addFont("/usr/share/fonts/noto/NotoSansHebrew-Regular.ttf");
     r.addFont("/usr/share/fonts/noto/NotoKufiArabic-Regular.ttf");
 
-    styleSheet.font("sans", r);
+    styleSheet.addFont("sans", r);
   }
   {
     FontResource_c r;
@@ -182,7 +182,7 @@ int main ()
     r.addFont("/usr/share/fonts/noto/NotoSansHebrew-Bold.ttf");
     r.addFont("/usr/share/fonts/noto/NotoKufiArabic-Bold.ttf");
 
-    styleSheet.font("sans", r, "normal", "normal", "bold");
+    styleSheet.addFont("sans", r, "normal", "normal", "bold");
   }
 
   // CSS regeln, immer Selector, attribut, wert

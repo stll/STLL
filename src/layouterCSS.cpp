@@ -380,7 +380,7 @@ static void checkValueFormat(const std::string & attribute, const std::string & 
   if (attribute == "vertical-align") checkValues(value, {"baseline", "top", "middle", "bottom"}, "vertical-align");
 }
 
-void TextStyleSheet_c::font(const std::string& family, const FontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
+void TextStyleSheet_c::addFont(const std::string& family, const FontResource_c & res, const std::string& style, const std::string& variant, const std::string& weight, const std::string& stretch)
 {
   auto i = families.find(family);
 

@@ -16,8 +16,8 @@ int main()
 
   // add the fonts that are required
   // we create one font family named "sans" with 2 members, a normal and a bold one
-  styleSheet.font("sans", FontResource_c("tests/FreeSans.ttf"));
-  styleSheet.font("sans", FontResource_c("tests/FreeSansBold.ttf"), "normal", "normal", "bold");
+  styleSheet.addFont("sans", FontResource_c("tests/FreeSans.ttf"));
+  styleSheet.addFont("sans", FontResource_c("tests/FreeSansBold.ttf"), "normal", "normal", "bold");
 
   // add the CSS rules you need, this should be familiar to everybody knowing CSS
   styleSheet.addRule("body", "color", "#ffffff");
