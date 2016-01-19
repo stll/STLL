@@ -28,12 +28,13 @@
  *  \brief this file contains overloaded interface functions for all supported XML libraries
  */
 
+
 #ifdef USE_PUGI_XML
 #include <pugixml.hpp>
 #include <boost/lexical_cast.hpp>
 #include <memory>
 
-namespace STLL {
+namespace STLL { namespace internal {
 
 inline std::tuple<std::unique_ptr<pugi::xml_document>, std::string> xml_parseStringPugi(const std::string & txt)
 {
@@ -104,7 +105,7 @@ bool xml_forEachAttribute(pugi::xml_node i, F f)
   return false;
 }
 
-};
+} }
 
 #endif
 
@@ -114,7 +115,7 @@ bool xml_forEachAttribute(pugi::xml_node i, F f)
 #ifdef USE_LIBXML2
 #include <libxml/tree.h>
 
-namespace STLL {
+namespace STLL { namespace internal {
 
 class libxml2Doc_c {
   public:
@@ -196,10 +197,8 @@ bool xml_forEachAttribute(const xmlNode * i, F f) {
   return false;
 }
 
-}
+} }
 
 #endif
-
-
 
 #endif

@@ -29,7 +29,7 @@
 #include <stll/layouterCSS.h>
 #include <stll/layouter.h>
 
-#include <stll/xmllibraries.h>
+#include <stll/internal/xmllibraries.h>
 #include <stll/utf-8.h>
 
 #include <string>

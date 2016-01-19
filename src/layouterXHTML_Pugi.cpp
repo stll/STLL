@@ -39,14 +39,14 @@ TextLayout_c layoutXML(pugi::xml_node txt, const TextStyleSheet_c & rules, const
  */
 TextLayout_c layoutXHTMLPugi(const std::string & txt, const TextStyleSheet_c & rules, const Shape_c & shape)
 {
-  auto res = xml_parseStringPugi(txt);
+  auto res = internal::xml_parseStringPugi(txt);
 
   if (std::get<1>(res) != "")
   {
     throw XhtmlException_c(std::get<1>(res));
   }
 
-  return layoutXML(STLL::xml_getHeadNode(std::get<0>(res)), rules, shape);
+  return layoutXML(internal::xml_getHeadNode(std::get<0>(res)), rules, shape);
 }
 
 };

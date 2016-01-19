@@ -28,7 +28,7 @@
 
 #include "layouterFont.h"
 
-#include "xmllibraries.h"
+#include "internal/xmllibraries.h"
 
 #include <string>
 #include <memory>
@@ -192,7 +192,7 @@ class TextStyleSheet_c
       // evaluate rule by priority (look at the CSS priority rules
       // choose the highest priority
 
-      while (!xml_isEmpty(node))
+      while (!internal::xml_isEmpty(node))
       {
         uint16_t prio = 0;
         size_t bestI;
@@ -224,7 +224,7 @@ class TextStyleSheet_c
           }
         }
 
-          node = xml_getParent(node);
+          node = internal::xml_getParent(node);
       }
 
       return internal::getDefault(attribute);
