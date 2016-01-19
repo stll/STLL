@@ -14,6 +14,7 @@ var namespace_s_t_l_l =
     [ "LayoutProperties_c", "class_s_t_l_l_1_1_layout_properties__c.html", "class_s_t_l_l_1_1_layout_properties__c" ],
     [ "RectangleShape_c", "class_s_t_l_l_1_1_rectangle_shape__c.html", "class_s_t_l_l_1_1_rectangle_shape__c" ],
     [ "Shape_c", "class_s_t_l_l_1_1_shape__c.html", "class_s_t_l_l_1_1_shape__c" ],
+    [ "showOpenGL", "class_s_t_l_l_1_1show_open_g_l.html", "class_s_t_l_l_1_1show_open_g_l" ],
     [ "showSDL", "class_s_t_l_l_1_1show_s_d_l.html", "class_s_t_l_l_1_1show_s_d_l" ],
     [ "TextLayout_c", "class_s_t_l_l_1_1_text_layout__c.html", "class_s_t_l_l_1_1_text_layout__c" ],
     [ "TextStyleSheet_c", "class_s_t_l_l_1_1_text_style_sheet__c.html", "class_s_t_l_l_1_1_text_style_sheet__c" ],
