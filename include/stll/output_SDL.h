@@ -38,6 +38,13 @@
 
 namespace STLL {
 
+/** \brief a class to output layouts using SDL
+ *
+ * To output layouts using this class, create an object of it and then
+ * use the showLayout Function to output the layout.
+ *
+ * \tparam G the gamma calculation class to use... normally you don't need to change this, keep the default
+ */
 template <class G = internal::Gamma_c<>>
 class showSDL
 {

@@ -120,19 +120,25 @@ class TextLayout_c
      */
     const std::vector<CommandData_c> getData(void) const { return data; }
 
+    /** \brief a little structure to hold information for one rectangle */
     class Rectangle_c
     {
       public:
         int x, y, w, h;
     };
 
+    /** \brief a helper structure to contain information about the interactive
+     * area for a link */
     class LinkInformation_c
     {
       public:
+        /** \brief the url for the link */
         std::string url;
+        /** \brief the areas where the link is found */
         std::vector<Rectangle_c> areas;
     };
 
+    /** \brief information for all links TODO this interface is bad */
     std::vector<LinkInformation_c> links;
 
     /** \brief add a single drawing command to the end of the command list
@@ -543,7 +549,7 @@ class LayoutProperties_c
      */
     Font_c underlineFont;
 
-    /** \brief link URLs for the links used in the */
+    /** \brief link URLs for the links used in the CodepointAttribute_c */
     std::vector<std::string> links;
 };
 
