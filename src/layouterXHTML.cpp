@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include <stll/layouterXHTML.h>
-#include "layouterXHTML_internals.h"
+#include "layouterXHTML_internal.h"
 
 #include <stll/utf-8.h>
 
