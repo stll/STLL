@@ -270,6 +270,20 @@ class showOpenGL
       return cleared;
     }
 
+    /** \brief helper function to setup the projection matrices for
+     * the showLayout function. It will change the viewport and the
+     * modelview and projection matrix to an orthogonal projection
+     */
+    void setupMatrixes(int width, int height)
+    {
+      glViewport(0, 0, width, height);
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      glOrtho(0, width, height, 0, -1, 1);
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+    }
+
     /** \brief get a pointer to the texture atlas with all the glyphs
      *
      * This is mainly helpful to check how full the texture atlas is

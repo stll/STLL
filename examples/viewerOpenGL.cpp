@@ -78,20 +78,16 @@ int main(int argv, char ** args)
   glfwMakeContextCurrent(screen);
   glfwSetKeyCallback(screen, key_callback);
 
-  showOpenGL<2, 512> openGL;
+  showOpenGL<2, 1024> openGL;
+
+  int width, height;
+  glfwGetFramebufferSize(screen, &width, &height);
+  openGL.setupMatrixes(width, height);
 
   while (!glfwWindowShouldClose(screen))
   {
-    int width, height;
-    glfwGetFramebufferSize(screen, &width, &height);
-    glViewport(0, 0, width, height);
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0,width,height, 0,-1,1);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
 
     glColor3f(50.0/255, 50.0/255, 50.0/255);
     glDisable(GL_TEXTURE_2D);
@@ -118,7 +114,7 @@ int main(int argv, char ** args)
 
   {
     FILE * f = fopen("tex.data", "wb");
-    fwrite(openGL.getData(), 1, 512*512, f);
+    fwrite(openGL.getData(), 1, 1024*1024, f);
     fclose(f);
   }
 
