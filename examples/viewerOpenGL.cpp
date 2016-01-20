@@ -24,11 +24,8 @@
 #include <stll/layouterFont.h>
 #include "layouterXMLSaveLoad.h"
 
-#include <GL/gl.h>
-#include <stll/output_OpenGL.h>
-
 #include <GLFW/glfw3.h>
-
+#include <stll/output_OpenGL.h>  // must be past the gl include
 
 using namespace STLL;
 
