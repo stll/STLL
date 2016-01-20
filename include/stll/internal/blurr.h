@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef __BLURR_H__
-#define __BLURR_H__
+#ifndef STLL_BLURR_H
+#define STLL_BLURR_H
 
 /** \file
  *  \brief a gaussian blurr

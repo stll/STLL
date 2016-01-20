@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef __CACHE_SINGLE_H__
-#define __CACHE_SINGLE_H__
+#ifndef STLL_GLYPH_CACHE_H
+#define STLL_GLYPH_CACHE_H
 
 #include <stll/layouterFont.h>
 #include <stll/internal/glyphKey.h>

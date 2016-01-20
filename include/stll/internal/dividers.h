@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef __DIVIDERS_H__
-#define __DIVIDERS_H__
+#ifndef STLL_DIVIDERS_H
+#define STLL_DIVIDERS_H
 
 namespace STLL { namespace internal {
 

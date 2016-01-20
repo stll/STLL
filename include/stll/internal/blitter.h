@@ -19,6 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#ifndef STLL_BLITTER_H
+#define STLL_BLITTER_H
 
 #include "../color.h"
 
@@ -304,3 +306,5 @@ void outputGlyph_HorizontalRGB(int sx, int sy, const internal::PaintData_c & img
 }
 
 } }
+
+#endif

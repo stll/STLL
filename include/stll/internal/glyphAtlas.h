@@ -19,6 +19,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#ifndef STLL_GLYPH_ATLAS_H
+#define STLL_GLYPH_ATLAS_H
+
 #include "textureAtlas.h"
 #include "glyphKey.h"
 #include "glyphprepare.h"
@@ -110,3 +113,5 @@ class GlyphAtlas_c : public TextureAtlas_c<internal::GlyphKey_c, FontAtlasData_c
 };
 
 } }
+
+#endif

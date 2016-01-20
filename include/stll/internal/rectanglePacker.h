@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef __RECTANGLE_PACKER__
-#define __RECTANGLE_PACKER__
+#ifndef STLL_RECTANGLE_PACKER_H
+#define STLL_RECTANGLE_PACKER_H
 
 #include <vector>
 #include <array>

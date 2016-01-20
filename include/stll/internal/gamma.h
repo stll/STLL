@@ -19,6 +19,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#ifndef STLL_GAMMA_H
+#define STLL_GAMMA_H
+
+
 #include <stll/color.h>
 
 namespace STLL { namespace internal {
@@ -72,3 +76,5 @@ class Gamma_c {
 };
 
 } }
+
+#endif

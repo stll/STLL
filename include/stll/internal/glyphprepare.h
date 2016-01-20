@@ -19,6 +19,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#ifndef STLL_GLYPH_PREPARE_H
+#define STLL_GLYPH_PREPARE_H
+
 #include "blurr.h"
 
 #include "../layouterFont.h"
@@ -104,3 +107,5 @@ std::tuple<int, int, int, int, int> glyphPrepare(const FontFace_c::GlyphSlot_c &
 }
 
 } }
+
+#endif

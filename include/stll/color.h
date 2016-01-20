@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef __COLOR_H__
-#define __COLOR_H__
+#ifndef STLL_COLOR_H
+#define STLL_COLOR_H
 
 #include <cstdint>
 

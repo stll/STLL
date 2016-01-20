@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef __XML_LIBRARIES_H__
-#define __XML_LIBRARIES_H__
+#ifndef STLL_XML_LIBRARIES_H
+#define STLL_XML_LIBRARIES_H
 
 #include <tuple>
 
