@@ -118,6 +118,12 @@ class TextureAtlas_c
     uint32_t height(void) const { return r.height(); }
 
     uint32_t getVersion(void) const { return version; }
+
+    void clear(void) {
+      r.clear();
+      map.clear();
+      std::fill(data.begin(), data.end(), 0);
+    }
 };
 
 } }

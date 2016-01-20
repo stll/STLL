@@ -245,6 +245,8 @@ class showOpenGL
      * This is mainly helpful to check how full the texture atlas is
      */
     const uint8_t * getData(void) const { return cache.getData(); }
+
+    void clear(void) { cache.clear(); }
 };
 
 }

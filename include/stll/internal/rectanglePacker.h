@@ -59,6 +59,9 @@ class RectanglePacker_c
     // allocate a rectangular area of the given size
     // if none such area is available the optional will be empty
     std::experimental::optional<std::array<uint32_t, 2>> allocate(uint32_t w, uint32_t h);
+
+    // release all occupied area
+    void clear(void);
 };
 
 } }

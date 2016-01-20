@@ -42,8 +42,14 @@ int RectanglePacker_c::checkFit(size_t index, int w)
 
 RectanglePacker_c::RectanglePacker_c(int width, int height) : width_(width), height_(height)
 {
+  clear();
+}
+
+void RectanglePacker_c::clear(void)
+{
+  skylines.clear();
   skylines.push_back(skyline {1, 1});
-  skylines.push_back(skyline {width-1, height});
+  skylines.push_back(skyline {width_-1, height_});
 }
 
 std::experimental::optional<std::array<uint32_t, 2>> RectanglePacker_c::allocate(uint32_t w, uint32_t h)
