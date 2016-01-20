@@ -50,7 +50,7 @@ class TextureAtlas_c
   protected:
 
     template <class... A>
-    typename std::unordered_map<K, D>::iterator insert(const K & key, uint32_t w, uint32_t h, A... args)
+    std::tuple<typename std::unordered_map<K, D>::iterator, bool> insert(const K & key, uint32_t w, uint32_t h, A... args)
     {
       auto p = r.allocate(w, h);
 
@@ -60,11 +60,11 @@ class TextureAtlas_c
 
         version++;
 
-        return map.insert(std::make_pair(key, D(pos[0], pos[1], w, h, args...))).first;
+        return std::make_tuple(map.insert(std::make_pair(key, D(pos[0], pos[1], w, h, args...))).first, true);
       }
       else
       {
-        return map.end();
+        return std::make_tuple(map.end(), false);
       }
     }
 

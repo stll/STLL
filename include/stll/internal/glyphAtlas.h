@@ -27,6 +27,7 @@
 #include "glyphprepare.h"
 
 #include <vector>
+#include <experimental/optional>
 
 namespace STLL { namespace internal {
 
@@ -68,8 +69,13 @@ class GlyphAtlas_c : public TextureAtlas_c<internal::GlyphKey_c, FontAtlasData_c
 
         glyphPrepare(g, key.blurr, key.sp, 1, true,
           [this, key, &i](int w, int h, int l, int t) -> auto {
-            i = insert(key, w, h, l, t);
-            return std::make_tuple(getData()+i->second.pos_y*width()+i->second.pos_x, width());});
+            bool valid;
+            std::tie(i, valid) = insert(key, w, h, l, t);
+
+            if (valid)
+              return std::make_tuple(getData()+i->second.pos_y*width()+i->second.pos_x, width());
+            else
+              return std::make_tuple<uint8_t*, uint32_t>(nullptr, 0);});
 
         return i;
       }
@@ -81,34 +87,39 @@ class GlyphAtlas_c : public TextureAtlas_c<internal::GlyphKey_c, FontAtlasData_c
 
         glyphPrepare(g, key.blurr, key.sp, 1, false,
           [this, key, &i](int w, int h, int l, int t) -> auto {
-            i = insert(key, w, h, l, t);
-            return std::make_tuple(getData()+i->second.pos_y*width()+i->second.pos_x, width());});
+            bool valid;
+            std::tie(i, valid) = insert(key, w, h, l, t);
+
+            if (valid)
+              return std::make_tuple(getData()+i->second.pos_y*width()+i->second.pos_x, width());
+            else
+              return std::make_tuple<uint8_t*, uint32_t>(0, 0);});
 
         return i;
       }
     }
 
-    FontAtlasData_c getGlyph(std::shared_ptr<FontFace_c> face, glyphIndex_t glyph, SubPixelArrangement sp, uint16_t blurr)
+    std::experimental::optional<FontAtlasData_c> getGlyph(std::shared_ptr<FontFace_c> face, glyphIndex_t glyph, SubPixelArrangement sp, uint16_t blurr)
     {
       if (blurr > blurrmax)
       {
         // glyphs with a certain blurr are always without subpixel placement,
         // you'd not recognize the difference
         internal::GlyphKey_c k(face, glyph, SUBP_NONE, blurr);
-        return find(k, face).value();
+        return find(k, face);
       }
       else
       {
         internal::GlyphKey_c k(face, glyph, sp, blurr);
-        return find(k, face).value();
+        return find(k, face);
       }
     }
 
-    FontAtlasData_c getRect(int w, int h, SubPixelArrangement, uint16_t blurr)
+    std::experimental::optional<FontAtlasData_c> getRect(int w, int h, SubPixelArrangement, uint16_t blurr)
     {
       // rectangles are always without sub-pixel placement
       internal::GlyphKey_c k(w, h, SUBP_NONE, blurr);
-      return find(k, std::shared_ptr<FontFace_c>()).value();
+      return find(k, std::shared_ptr<FontFace_c>());
     }
 };
 

@@ -39,8 +39,10 @@ namespace STLL {
  * use the showLayout Function to output the layout.
  *
  * The class contains a glyph cache in form of an texture atlas. Once this
- * atlas if full, no further glyphs can be added (right now), so choose the size wisely.
- * The atlas will be destroyed once the class is destroyed. Things to consider:
+ * atlas if full, things available will be output and then the atlas will be cleared
+ * and repopulated for the next section of the output. This will slow down output
+ * considerably, so choose the size wisely. The atlas will be destroyed once the
+ * class is destroyed. Things to consider:
  * - using sub pixel placement triples the space requirements for the glyphs
  * - blurring adds quite some amount of space around the glyphs, but as soon as you blurr the
  *   sub pixel placement will not be used as you will not see the difference anyways
@@ -74,7 +76,7 @@ class showOpenGL
     // Helper function to draw one glyph or one sub pixel color of one glyph
     void drawGlyph(const CommandData_c & i, int sx, int sy, SubPixelArrangement sp, int subpcol)
     {
-      auto pos = cache.getGlyph(i.font, i.glyphIndex, sp, i.blurr);
+      auto pos = cache.getGlyph(i.font, i.glyphIndex, sp, i.blurr).value();
       int w = pos.width;
       int wo = 0;
 
@@ -129,115 +131,143 @@ class showOpenGL
      * \param sp which kind of sub-pixel positioning do you want?
      * \param images a pointer to an image drawer class that is used to draw the images, when you give
      *                a nullptr here, no images will be drawn
+     * \return if true then the cache had to be cleared... which might hint at a problem with your cache
+     * size
      */
-    void showLayout(const TextLayout_c & l, int sx, int sy, SubPixelArrangement sp, imageDrawerOpenGL_c * images)
+    bool showLayout(const TextLayout_c & l, int sx, int sy, SubPixelArrangement sp, imageDrawerOpenGL_c * images)
     {
-      // make sure that all required glyphs are on our glyph texture, when necessary recreate it freshly
-      // bind the texture
-      for (auto & i : l.getData())
-      {
-        switch (i.command)
-        {
-          case CommandData_c::CMD_GLYPH:
-            // when subpixel placement is on we always create all 3 required images
-            cache.getGlyph(i.font, i.glyphIndex, sp, i.blurr);
-            break;
-          case CommandData_c::CMD_RECT:
-            if (i.blurr > 0)
-              cache.getRect(i.w, i.h, sp, i.blurr);
-            break;
-
-          default:
-            break;
-        }
-      }
-
       glBindTexture( GL_TEXTURE_2D, glTextureId );
-
-      if (cache.getVersion() != uploadVersion)
-      {
-        uploadVersion = cache.getVersion();
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, C, C, 0, GL_ALPHA, GL_UNSIGNED_BYTE, cache.getData() );
-      }
-
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-      // output the layout
-      for (auto & i : l.getData())
+      const auto & dat = l.getData();
+      size_t i = 0;
+      bool cleared = false;
+
+      while (i < dat.size())
       {
-        switch (i.command)
+        size_t j = i;
+
+        while (j < dat.size())
         {
-          case CommandData_c::CMD_GLYPH:
-            {
+          auto & ii = dat[j];
+
+          bool found = true;
+
+          switch (ii.command)
+          {
+            case CommandData_c::CMD_GLYPH:
+              // when subpixel placement is on we always create all 3 required images
+              found &= (bool)cache.getGlyph(ii.font, ii.glyphIndex, sp, ii.blurr);
+              break;
+            case CommandData_c::CMD_RECT:
+              if (ii.blurr > 0)
+                found &= (bool)cache.getRect(ii.w, ii.h, sp, ii.blurr);
+              break;
+
+            default:
+              break;
+          }
+
+          if (!found) break;
+
+          j++;
+        }
+
+        if (cache.getVersion() != uploadVersion)
+        {
+          uploadVersion = cache.getVersion();
+          glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, C, C, 0, GL_ALPHA, GL_UNSIGNED_BYTE, cache.getData() );
+        }
+
+        size_t k = i;
+
+        while (k < j)
+        {
+          auto & ii = dat[k];
+
+          switch (ii.command)
+          {
+            case CommandData_c::CMD_GLYPH:
               glEnable(GL_TEXTURE_2D);
 
-              if (i.blurr > cache.blurrmax)
+              if (ii.blurr > cache.blurrmax)
               {
-                drawGlyph(i, sx, sy, sp, 0);
+                drawGlyph(ii, sx, sy, sp, 0);
               }
               else
               {
                 switch (sp)
                 {
                   case SUBP_RGB:
-                    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); drawGlyph(i, sx, sy, sp, 1);
-                    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); drawGlyph(i, sx, sy, sp, 2);
-                    glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); drawGlyph(i, sx, sy, sp, 3);
+                    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); drawGlyph(ii, sx, sy, sp, 1);
+                    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); drawGlyph(ii, sx, sy, sp, 2);
+                    glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); drawGlyph(ii, sx, sy, sp, 3);
                     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
                     break;
 
                   case SUBP_BGR:
-                    glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); drawGlyph(i, sx, sy, sp, 1);
-                    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); drawGlyph(i, sx, sy, sp, 2);
-                    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); drawGlyph(i, sx, sy, sp, 3);
+                    glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); drawGlyph(ii, sx, sy, sp, 1);
+                    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); drawGlyph(ii, sx, sy, sp, 2);
+                    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); drawGlyph(ii, sx, sy, sp, 3);
                     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
                     break;
 
                   default:
-                    drawGlyph(i, sx, sy, sp, 0);
+                    drawGlyph(ii, sx, sy, sp, 0);
                     break;
                 }
               }
-            }
-            break;
+              break;
 
-          case CommandData_c::CMD_RECT:
-            {
-              if (i.blurr == 0)
+            case CommandData_c::CMD_RECT:
+              if (ii.blurr == 0)
               {
                 glDisable(GL_TEXTURE_2D);
-                Color_c c = gamma.forward(i.c);
+                Color_c c = gamma.forward(ii.c);
                 glBegin(GL_QUADS);
                 glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
-                glVertex3f((sx+i.x    +32)/64+0.5, (sy+i.y    +32)/64+0.5, 0);
-                glVertex3f((sx+i.x+i.w+32)/64+0.5, (sy+i.y    +32)/64+0.5, 0);
-                glVertex3f((sx+i.x+i.w+32)/64+0.5, (sy+i.y+i.h+32)/64+0.5, 0);
-                glVertex3f((sx+i.x    +32)/64+0.5, (sy+i.y+i.h+32)/64+0.5, 0);
+                glVertex3f((sx+ii.x     +32)/64+0.5, (sy+ii.y     +32)/64+0.5, 0);
+                glVertex3f((sx+ii.x+ii.w+32)/64+0.5, (sy+ii.y     +32)/64+0.5, 0);
+                glVertex3f((sx+ii.x+ii.w+32)/64+0.5, (sy+ii.y+ii.h+32)/64+0.5, 0);
+                glVertex3f((sx+ii.x     +32)/64+0.5, (sy+ii.y+ii.h+32)/64+0.5, 0);
                 glEnd();
               }
               else
               {
                 glEnable(GL_TEXTURE_2D);
-                auto pos = cache.getRect(i.w, i.h, sp, i.blurr);
+                auto pos = cache.getRect(ii.w, ii.h, sp, ii.blurr).value();
                 glBegin(GL_QUADS);
-                Color_c c = gamma.forward(i.c);
+                Color_c c = gamma.forward(ii.c);
                 glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
-                glTexCoord2f(1.0*(pos.pos_x-0.5)/C,           1.0*(pos.pos_y-0.5)/C);          glVertex3f(0.5+(sx+i.x)/64.0+pos.left-1,           0.5+(sy+i.y+32)/64-pos.top-1,          0);
-                glTexCoord2f(1.0*(pos.pos_x-0.5+pos.width)/C, 1.0*(pos.pos_y-0.5)/C);          glVertex3f(0.5+(sx+i.x)/64.0+pos.left+pos.width-1, 0.5+(sy+i.y+32)/64-pos.top-1,          0);
-                glTexCoord2f(1.0*(pos.pos_x-0.5+pos.width)/C, 1.0*(pos.pos_y-0.5+pos.rows)/C); glVertex3f(0.5+(sx+i.x)/64.0+pos.left+pos.width-1, 0.5+(sy+i.y+32)/64-pos.top+pos.rows-1, 0);
-                glTexCoord2f(1.0*(pos.pos_x-0.5)/C,           1.0*(pos.pos_y-0.5+pos.rows)/C); glVertex3f(0.5+(sx+i.x)/64.0+pos.left-1,           0.5+(sy+i.y+32)/64-pos.top+pos.rows-1, 0);
+                glTexCoord2f(1.0*(pos.pos_x-0.5)/C,           1.0*(pos.pos_y-0.5)/C);          glVertex3f(0.5+(sx+ii.x)/64.0+pos.left-1,           0.5+(sy+ii.y+32)/64-pos.top-1,          0);
+                glTexCoord2f(1.0*(pos.pos_x-0.5+pos.width)/C, 1.0*(pos.pos_y-0.5)/C);          glVertex3f(0.5+(sx+ii.x)/64.0+pos.left+pos.width-1, 0.5+(sy+ii.y+32)/64-pos.top-1,          0);
+                glTexCoord2f(1.0*(pos.pos_x-0.5+pos.width)/C, 1.0*(pos.pos_y-0.5+pos.rows)/C); glVertex3f(0.5+(sx+ii.x)/64.0+pos.left+pos.width-1, 0.5+(sy+ii.y+32)/64-pos.top+pos.rows-1, 0);
+                glTexCoord2f(1.0*(pos.pos_x-0.5)/C,           1.0*(pos.pos_y-0.5+pos.rows)/C); glVertex3f(0.5+(sx+ii.x)/64.0+pos.left-1,           0.5+(sy+ii.y+32)/64-pos.top+pos.rows-1, 0);
                 glEnd();
               }
-            }
-            break;
+              break;
 
-          case CommandData_c::CMD_IMAGE:
-            if (images)
-              images->draw(i.x+sx, i.y+sy, i.w, i.h, i.imageURL);
-            break;
+            case CommandData_c::CMD_IMAGE:
+              if (images)
+                images->draw(ii.x+sx, ii.y+sy, ii.w, ii.h, ii.imageURL);
+              break;
+          }
+          k++;
+        }
+
+        i = j;
+
+        if (i < dat.size())
+        {
+          // atlas is not big enough, it needs to be cleared
+          // and will be repopulated for the next batch of the layout
+          cache.clear();
+          cleared = true;
         }
       }
+
+      return cleared;
     }
 
     /** \brief get a pointer to the texture atlas with all the glyphs
