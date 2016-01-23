@@ -33,7 +33,7 @@
 namespace STLL { namespace internal {
 
 template <class M>
-std::tuple<int, int, int, int, int> glyphPrepare(const FontFace_c::GlyphSlot_c & ft, uint16_t blurr, SubPixelArrangement sp, int frame, bool split, M m)
+std::tuple<int, int, int, int, int> glyphPrepare(const FontFace_c::GlyphSlot_c & ft, uint16_t blurr, SubPixelArrangement sp, int frame, M m)
 {
   // create a buffer that is big enough to hold the complete blurred image
   // and has an additional number of columns on the right so that no additional
@@ -86,23 +86,6 @@ std::tuple<int, int, int, int, int> glyphPrepare(const FontFace_c::GlyphSlot_c &
     if (blurr > 0)
     {
       internal::gaussBlur(outbuf_dat, outbuf_pitch, pitch, rows, blurr/64.0, blurrw, blurrh);
-    }
-
-    if (split && (sp != SUBP_NONE))
-    {
-      // resort image into 3 separate images one for each subpixel
-      // pixel column n has to go to n/3 + w/3*(n%3)
-      // I found no usable inplace algorithm, so copy line by line
-      // into a new array and then copy the array back
-      std::vector<uint8_t> l(pitch);
-
-      for (int j = 0; j < rows; j++)
-      {
-        for (int i = 0; i < pitch; i++)
-          l[(i/3) + (pitch/3)*(i%3)] = outbuf_dat[j*outbuf_pitch+i];
-
-        memcpy(outbuf_dat+j*outbuf_pitch, l.data(), pitch);
-      }
     }
 
     return std::make_tuple(left, top, width, pitch, rows);

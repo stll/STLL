@@ -67,7 +67,7 @@ class GlyphAtlas_c : public TextureAtlas_c<internal::GlyphKey_c, FontAtlasData_c
 
         std::unordered_map<internal::GlyphKey_c, FontAtlasData_c>::iterator i;
 
-        glyphPrepare(g, key.blurr, key.sp, 1, true,
+        glyphPrepare(g, key.blurr, key.sp, 1,
           [this, key, &i](int w, int h, int l, int t) -> auto {
             bool valid;
             std::tie(i, valid) = insert(key, w, h, l, t);
@@ -85,7 +85,7 @@ class GlyphAtlas_c : public TextureAtlas_c<internal::GlyphKey_c, FontAtlasData_c
 
         std::unordered_map<internal::GlyphKey_c, FontAtlasData_c>::iterator i;
 
-        glyphPrepare(g, key.blurr, key.sp, 1, false,
+        glyphPrepare(g, key.blurr, key.sp, 1,
           [this, key, &i](int w, int h, int l, int t) -> auto {
             bool valid;
             std::tie(i, valid) = insert(key, w, h, l, t);

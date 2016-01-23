@@ -77,22 +77,22 @@ class showOpenGL
     void drawGlyph(const CommandData_c & i, int sx, int sy, SubPixelArrangement sp, int subpcol)
     {
       auto pos = cache.getGlyph(i.font, i.glyphIndex, sp, i.blurr).value();
-      int w = pos.width;
-      int wo = 0;
+      double w = pos.width-1;
+      double wo = 0;
 
       if (subpcol > 0)
       {
-        w = pos.width/3;
-        wo = (subpcol-1)*w;
+        w /= 3.0;
+        wo = subpcol-2;
       }
 
       glBegin(GL_QUADS);
       Color_c c = gamma.forward(i.c);
       glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
-      glTexCoord2f(1.0*(pos.pos_x-0.5+wo)/C,   1.0*(pos.pos_y-0.5)/C);          glVertex3f(0.5+(sx+i.x)/64.0+pos.left-1,   0.5+(sy+i.y+32)/64-pos.top-1,          0);
-      glTexCoord2f(1.0*(pos.pos_x-0.5+wo+w)/C, 1.0*(pos.pos_y-0.5)/C);          glVertex3f(0.5+(sx+i.x)/64.0+pos.left+w-1, 0.5+(sy+i.y+32)/64-pos.top-1,          0);
-      glTexCoord2f(1.0*(pos.pos_x-0.5+wo+w)/C, 1.0*(pos.pos_y-0.5+pos.rows)/C); glVertex3f(0.5+(sx+i.x)/64.0+pos.left+w-1, 0.5+(sy+i.y+32)/64-pos.top+pos.rows-1, 0);
-      glTexCoord2f(1.0*(pos.pos_x-0.5+wo)/C,   1.0*(pos.pos_y-0.5+pos.rows)/C); glVertex3f(0.5+(sx+i.x)/64.0+pos.left-1,   0.5+(sy+i.y+32)/64-pos.top+pos.rows-1, 0);
+      glTexCoord2f(1.0*(pos.pos_x+wo)/C,             1.0*(pos.pos_y)/C);            glVertex3f((sx+i.x)/64.0+pos.left,   (sy+i.y+32)/64-pos.top,            0);
+      glTexCoord2f(1.0*(pos.pos_x+wo+pos.width-1)/C, 1.0*(pos.pos_y)/C);            glVertex3f((sx+i.x)/64.0+pos.left+w, (sy+i.y+32)/64-pos.top,            0);
+      glTexCoord2f(1.0*(pos.pos_x+wo+pos.width-1)/C, 1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f((sx+i.x)/64.0+pos.left+w, (sy+i.y+32)/64-pos.top+pos.rows-1, 0);
+      glTexCoord2f(1.0*(pos.pos_x+wo)/C,             1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f((sx+i.x)/64.0+pos.left,   (sy+i.y+32)/64-pos.top+pos.rows-1, 0);
       glEnd();
     }
 
@@ -227,10 +227,14 @@ class showOpenGL
                 Color_c c = gamma.forward(ii.c);
                 glBegin(GL_QUADS);
                 glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
-                glVertex3f((sx+ii.x     +32)/64+0.5, (sy+ii.y     +32)/64+0.5, 0);
-                glVertex3f((sx+ii.x+ii.w+32)/64+0.5, (sy+ii.y     +32)/64+0.5, 0);
-                glVertex3f((sx+ii.x+ii.w+32)/64+0.5, (sy+ii.y+ii.h+32)/64+0.5, 0);
-                glVertex3f((sx+ii.x     +32)/64+0.5, (sy+ii.y+ii.h+32)/64+0.5, 0);
+                int x = (sx+ii.x+32)/64;
+                int y = (sy+ii.y+32)/64;
+                int w = (sx+ii.x+ii.w+32)/64-x;
+                int h = (sy+ii.y+ii.h+32)/64-y;
+                glVertex3f(x+0.1,     y+0.1,     0);
+                glVertex3f(x+w-1+0.9, y+0.1,     0);
+                glVertex3f(x+w-1+0.9, y+h-1+0.9, 0);
+                glVertex3f(x+0.1,     y+h-1+0.9, 0);
                 glEnd();
               }
               else
@@ -240,10 +244,10 @@ class showOpenGL
                 glBegin(GL_QUADS);
                 Color_c c = gamma.forward(ii.c);
                 glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
-                glTexCoord2f(1.0*(pos.pos_x-0.5)/C,           1.0*(pos.pos_y-0.5)/C);          glVertex3f(0.5+(sx+ii.x)/64.0+pos.left-1,           0.5+(sy+ii.y+32)/64-pos.top-1,          0);
-                glTexCoord2f(1.0*(pos.pos_x-0.5+pos.width)/C, 1.0*(pos.pos_y-0.5)/C);          glVertex3f(0.5+(sx+ii.x)/64.0+pos.left+pos.width-1, 0.5+(sy+ii.y+32)/64-pos.top-1,          0);
-                glTexCoord2f(1.0*(pos.pos_x-0.5+pos.width)/C, 1.0*(pos.pos_y-0.5+pos.rows)/C); glVertex3f(0.5+(sx+ii.x)/64.0+pos.left+pos.width-1, 0.5+(sy+ii.y+32)/64-pos.top+pos.rows-1, 0);
-                glTexCoord2f(1.0*(pos.pos_x-0.5)/C,           1.0*(pos.pos_y-0.5+pos.rows)/C); glVertex3f(0.5+(sx+ii.x)/64.0+pos.left-1,           0.5+(sy+ii.y+32)/64-pos.top+pos.rows-1, 0);
+                glTexCoord2f(1.0*(pos.pos_x)/C,             1.0*(pos.pos_y)/C);            glVertex3f((sx+ii.x)/64.0+pos.left,             (sy+ii.y+32)/64-pos.top,            0);
+                glTexCoord2f(1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y)/C);            glVertex3f((sx+ii.x)/64.0+pos.left+pos.width-1, (sy+ii.y+32)/64-pos.top,            0);
+                glTexCoord2f(1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f((sx+ii.x)/64.0+pos.left+pos.width-1, (sy+ii.y+32)/64-pos.top+pos.rows-1, 0);
+                glTexCoord2f(1.0*(pos.pos_x)/C,             1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f((sx+ii.x)/64.0+pos.left,             (sy+ii.y+32)/64-pos.top+pos.rows-1, 0);
                 glEnd();
               }
               break;

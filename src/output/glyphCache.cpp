@@ -42,7 +42,7 @@ namespace STLL { namespace internal {
 // create from glyph data
 PaintData_c::PaintData_c(const FontFace_c::GlyphSlot_c & ft, uint16_t blurr, SubPixelArrangement sp)
 {
-  std::tie(left, top, width, pitch, rows) = glyphPrepare(ft, blurr, sp, 0, false,
+  std::tie(left, top, width, pitch, rows) = glyphPrepare(ft, blurr, sp, 0,
     [this](int w, int h, int, int) -> auto {
       buffer = std::make_unique<uint8_t[]>(w*h);
       return std::make_tuple(buffer.get(), w);});
@@ -53,7 +53,7 @@ PaintData_c::PaintData_c(uint16_t _pitch, uint16_t _rows, uint16_t blurr, SubPix
 {
   FontFace_c::GlyphSlot_c ft(_pitch, _rows);
 
-  std::tie(left, top, width, pitch, rows) = glyphPrepare(ft, blurr, sp, 0, false,
+  std::tie(left, top, width, pitch, rows) = glyphPrepare(ft, blurr, sp, 0,
     [this](int w, int h, int, int) -> auto {
       buffer = std::make_unique<uint8_t[]>(w*h);
       return std::make_tuple(buffer.get(), w);});
