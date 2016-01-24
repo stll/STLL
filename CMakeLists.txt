@@ -18,10 +18,12 @@ find_package(LibXml2)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(HARFBUZZ REQUIRED harfbuzz)
 pkg_check_modules(FRIBIDI REQUIRED fribidi)
+pkg_check_modules(GLEW glew)
 
 # Dependencies without support for neither CMake nor pkg-config
 find_library(UNIBREAK_LIBRARY NAMES unibreak linebreak)
 find_library(PUGIXML_LIBRARY NAMES pugixml)
+find_library(GLFW_LIBRARY NAMES glfw)
 
 if(LIBXML2_FOUND)
   list(APPEND XMLLIBDEFINES -DUSE_LIBXML2)
@@ -67,20 +69,21 @@ target_link_libraries(stll PUBLIC
   ${SDL_LIBRARY}
   ${PUGIXML_LIBRARY}
   ${LIBXML2_LIBRARIES}
-  -lGL
 )
 
 # Tests
-add_executable(runtestsPugi examples/runtests.cpp examples/layouterXMLSaveLoad.cpp)
-target_compile_options(runtestsPugi PRIVATE -std=c++14 -DUSE_PUGI_XML)
-target_include_directories(runtestsPugi PRIVATE
-  ${CMAKE_CURRENT_BINARY_DIR}
-  include
+if(PUGIXML_LIBRARY)
+  add_executable(runtestsPugi examples/runtests.cpp examples/layouterXMLSaveLoad.cpp)
+  target_compile_options(runtestsPugi PRIVATE -std=c++14 -DUSE_PUGI_XML)
+  target_include_directories(runtestsPugi PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}
+    include
+    )
+  target_link_libraries(runtestsPugi PRIVATE stll
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   )
-target_link_libraries(runtestsPugi PRIVATE stll
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-)
-add_test(test_PugiXML runtestsPugi)
+  add_test(test_PugiXML runtestsPugi)
+endif()
 
 if(LIBXML2_FOUND)
   add_executable(runtestsLibXML2 examples/runtests.cpp examples/layouterXMLSaveLoad.cpp)
@@ -140,15 +143,24 @@ if(SDL_FOUND)
   )
 endif()
 
-add_executable(viewerOpenGL examples/viewerOpenGL.cpp examples/layouterXMLSaveLoad.cpp)
-target_compile_options(viewerOpenGL PRIVATE -std=c++14)
-target_include_directories(viewerOpenGL PRIVATE
-  include
-)
-target_link_libraries(viewerOpenGL PRIVATE stll
-  -lGL
-  -lglfw
-)
+if(GLEW_FOUND AND GLFW_LIBRARY)
+set(oglViewerSources examples/viewerOpenGL.cpp examples/layouterXMLSaveLoad.cpp)
+add_executable(viewerOpenGL1 ${oglViewerSources})
+target_compile_options(viewerOpenGL1 PRIVATE -std=c++14 -DOGL1)
+target_include_directories(viewerOpenGL1 PRIVATE include )
+target_link_libraries(viewerOpenGL1 PRIVATE stll ${GLEW_LIBRARIES} ${GLFW_LIBRARY})
+
+add_executable(viewerOpenGL2 ${oglViewerSources})
+target_compile_options(viewerOpenGL2 PRIVATE -std=c++14 -DOGL2)
+target_include_directories(viewerOpenGL2 PRIVATE include )
+target_link_libraries(viewerOpenGL2 PRIVATE stll ${GLEW_LIBRARIES} ${GLFW_LIBRARY})
+
+add_executable(viewerOpenGL3 ${oglViewerSources})
+target_compile_options(viewerOpenGL3 PRIVATE -std=c++14 -DOGL3)
+target_include_directories(viewerOpenGL3 PRIVATE include )
+target_link_libraries(viewerOpenGL3 PRIVATE stll ${GLEW_LIBRARIES} ${GLFW_LIBRARY})
+
+endif()
 
 # source package
 set(CPACK_PACKAGE_VERSION_MAJOR "0")

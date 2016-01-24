@@ -29,7 +29,6 @@
 
 using namespace STLL;
 
-
 int main(int argv, char ** args)
 {
   pugi::xml_document doc;
@@ -91,15 +90,19 @@ int main(int argv, char ** args)
 
   showSDL<> show;
 
-  show.showLayout(l, 0, 0, screen, SUBP_NONE, nullptr);
-
-  SDL_Flip(screen);
 
   /* Our main event/draw loop */
   int done = 0;
 
+  int xx = 20;
+  int startTime = SDL_GetTicks();
+
   while (!done)
   {
+    SDL_FillRect(screen, NULL, 0 );
+    show.showLayout(l, 0, 0, screen, SUBP_RGB, nullptr);
+
+    SDL_Flip(screen);
 
     /* Handle SDL events */
     SDL_Event event;
@@ -114,7 +117,8 @@ int main(int argv, char ** args)
       }
     }
 
-    SDL_Delay(150);
+    xx++;
+    printf("\r %f images per Second", 1.0*xx/((SDL_GetTicks()-startTime)/1000.0));
   }
 
   SDL_Quit();

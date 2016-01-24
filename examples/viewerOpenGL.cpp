@@ -24,8 +24,15 @@
 #include <stll/layouterFont.h>
 #include "layouterXMLSaveLoad.h"
 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <stll/output_OpenGL.h>  // must be past the gl include
+#if defined(OGL1)
+#include <stll/output_OpenGL_1.h>
+#elif defined (OGL2)
+#include <stll/output_OpenGL_2.h>
+#elif defined (OGL3)
+#include <stll/output_OpenGL_3.h>
+#endif
 
 using namespace STLL;
 
@@ -64,6 +71,18 @@ int main(int argv, char ** args)
 
   glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE);
 
+#if defined (OGL1)
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+#elif defined (OGL2)
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+#elif defined (OGL3)
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
   GLFWwindow* screen = glfwCreateWindow(l.getRight()/64, l.getHeight()/64, "OpenGL Layout Viewer", NULL, NULL);
 
   if(!screen)
@@ -75,11 +94,22 @@ int main(int argv, char ** args)
   glfwMakeContextCurrent(screen);
   glfwSetKeyCallback(screen, key_callback);
 
+  glewExperimental = true;
+  GLenum err = glewInit();
+  if (err != GLEW_OK)
+  {
+    fprintf(stderr, "GLEW Error: %s\n", glewGetErrorString(err) );
+    return 1;
+  }
+
   showOpenGL<2, 1024> openGL;
 
   int width, height;
   glfwGetFramebufferSize(screen, &width, &height);
   openGL.setupMatrixes(width, height);
+
+  int x = 0;
+  double startSeconds = glfwGetTime();
 
   while (!glfwWindowShouldClose(screen))
   {
@@ -88,7 +118,7 @@ int main(int argv, char ** args)
 
     glColor3f(50.0/255, 50.0/255, 50.0/255);
     glDisable(GL_TEXTURE_2D);
-    glBegin(GL_QUADS);
+    glBegin(GL_TRIANGLES);
     for (int x = 0; x < 1+(int)l.getRight()/640; x++)
       for (int y = 0; y < 1+(int)l.getHeight()/640; y++)
       {
@@ -97,24 +127,31 @@ int main(int argv, char ** args)
           glVertex3f(0.5+10*x,    0.5+10*y,    0);
           glVertex3f(0.5+10*x+10, 0.5+10*y,    0);
           glVertex3f(0.5+10*x+10, 0.5+10*y+10, 0);
+          glVertex3f(0.5+10*x+10, 0.5+10*y+10, 0);
           glVertex3f(0.5+10*x,    0.5+10*y+10, 0);
+          glVertex3f(0.5+10*x,    0.5+10*y,    0);
         }
       }
     glEnd();
 
     glEnable(GL_FRAMEBUFFER_SRGB);
     openGL.showLayout(l, 0, 0, SUBP_RGB, 0);
+    x++;
     glDisable(GL_FRAMEBUFFER_SRGB);
     glfwSwapBuffers(screen);
     glfwPollEvents();
-  }
 
+    // this number is limited by screen update times, if you want a proper
+    // number comment out the swap
+    printf("\r %f images per Second", 1.0*x/ (glfwGetTime()-startSeconds));
+  }
+#if 0
   {
     FILE * f = fopen("tex.data", "wb");
     fwrite(openGL.getData(), 1, 1024*1024, f);
     fclose(f);
   }
-
+#endif
   glfwDestroyWindow(screen);
   glfwTerminate();
 

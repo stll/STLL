@@ -305,6 +305,8 @@ class showOpenGL
               break;
 
             case CommandData_c::CMD_IMAGE:
+              if (images)
+                images->draw(ii.x+sx, ii.y+sy, ii.w, ii.h, ii.imageURL);
               break;
           }
           k++;
