@@ -115,6 +115,20 @@ class OGL_Program_c
       }
     }
 
+    void setUniform(const std::string & name, float vect1, float vect2)
+    {
+      auto l = glGetUniformLocation(handle, name.c_str());
+      if (l == -1)
+      {
+        printf("uniform %s not found\n", name.c_str());
+      }
+      else
+      {
+        use();
+        glUniform2f(l, vect1, vect2);
+      }
+    }
+
     void setUniform(const std::string & name, float val)
     {
       auto l = glGetUniformLocation(handle, name.c_str());
