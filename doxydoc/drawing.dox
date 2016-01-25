@@ -22,7 +22,7 @@
  * - when drawing into non display buffers use gamma 1 (but make sure that you properly blend when you draw
  *   that buffer onto the surface
  *
- * The SDL output driver provides gamma values for output. OpenGL provides the possibility to set Framebuffers
+ * The SDL output driver provides gamma values for output. OpenGL provides the possibility to set framebuffers
  * to sRGB which results in proper blending when drawn into.
  *
  * \section subpixel_sec Sub pixel placement
@@ -32,16 +32,57 @@
  *
  * But when all conditions are met you will get a sharper result and more evenly distributed letters.
  *
- * The output routines need to know the sub pixel arrangement though to make the right drawing decisions. So:
- * if you can not find out and don't want to ask the user for that information don't use it. When used wrongly it
+ * The output routines need to know the sub pixel arrangement to make the right drawing decisions. 
+ * If you can not find out and don't want to ask the user for that information don't use it. When used wrongly it
  * will result in ugly output.
  *
- * Also keep in mind that drawing with sub pixel placement is not possible on surfaces with included alpha
+ * Also keep in mind that drawing with sub pixel placement is not possible on surfaces that include an alpha
  * channel because the resulting surface can not properly drawn onto any other surface. This would require
  * separate alpha channel for each colour component.
  *
  * Sub pixel drawing only properly works when drawing directly onto the target. When drawing onto surfaces
  * with an alpha channel, the alpha of all the pixels are untouched assuming that the background is properly
  * prepared for the glyphs (e.g. opaque)
+ *
+ * \section outputclasses_sec Output Classes
+ * Output functions are always a member of a class. These classes encapsulate the state for drawing, but more
+ * importantly they encapsulate the glyph cache. 
+ *
+ * The glyph cache is there to avoid unnecessary re-rasterization of the glyphs. Each output class might come
+ * with its own type of cache.
+ *
+ * When you want to draw you create an instance of those classes and then use the draw function of that
+ * instance.
+ *
+ * \section opengl_sec OpenGL drawing
+ * STLL comes with 3 different OpenGL output classes. Each one is intended for usage with a certain version
+ * of OpenGL. All classes have the same name, the only thing that changes is the header that you need to
+ * include.
+ * - output_OpenGL_1.h contains an OpenGL output class for OpenGL up to version 1.1. It uses the fixed function
+ *   pipeline and display lists. Sub-pixel placement requires 3 drawing passes
+ * - output_OpenGL_2.h contains the output class for OpenGL 2.0 - 2.1. It uses vertex buffers and shaders
+ *   for output. It also requires 3 drawing passes
+ * - output_OpenGL_3.h is intended for OpenGL starting with version 3.0. It uses vertex array objects and
+ *   the ARB_BlendFuncExtended extension for single pass sub-pixel placement
+ *
+ * All 3 OpenGL output classes use the same type of glyph-cache: a texture atlas. The functions will place
+ * as many glyphs of the layout to show into the atlas output that portion, wipe the atlas and refill it
+ * with the next batch until it is filled and so on. So it is important for performance to have a texture
+ * atlas that is big enough to hold all required glyphs.
+ *
+ * All OpenGL classes return an object that you can store together with the layout and that you can give as 
+ * a parameter to the drawing function for an additional performance gain. This object contains the display
+ * lists or vertex arrays created. When the drawing function is called with a valid instance of this class
+ * and it can confirm that the texture atlas used then is still valid it will not recreate the vertex
+ * buffer and instead directly draw what is in there.
+ * 
+ * But this only works when the texture cache has not been invalidated since the creation of the vertex buffer
+ * and if the drawing command can be done in one pass. So keep your texture atlas the right size.
+ *
+ * A few tips regarding texture atlas usage:
+ * - stay away from blurr, it occupies quite a bit more space than a normal glyph. It also requires 
+ *   underlines to be within the cache, or at least keep the blurr very small
+ * - sub-pixel output reqires 3 times as much space as normal antialiased output
+ * - you can get a pointer to the cache with the getData funtion to see how much is occupied
  *
  */
