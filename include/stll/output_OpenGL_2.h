@@ -58,13 +58,11 @@ namespace STLL {
  * Gamma correct output is not handled by this class directly. You need to activate the sRGB
  * property for the target that this paints on
  *
- * \tparam V The OpenGL version you want to use... the class will adapt accordingly and use the
- * available features
  * \tparam C size of the texture cache. The cache is square C time C pixels.
  * \tparam G the gamma calculation function, if you use sRGB output... normally you don't need
  * to change this, keep the default
  */
-template <int V, int C, class G = internal::Gamma_c<>>
+template <int C, class G = internal::Gamma_c<>>
 class showOpenGL
 {
   private:
@@ -222,6 +220,7 @@ class showOpenGL
         }
 
         std::vector<vertex> vb;
+        vb.reserve(dat.size()*4);
 
         size_t k = i;
 

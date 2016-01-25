@@ -102,7 +102,7 @@ int main(int argv, char ** args)
     return 1;
   }
 
-  showOpenGL<2, 1024> openGL;
+  showOpenGL<1024> openGL;
 
   int width, height;
   glfwGetFramebufferSize(screen, &width, &height);

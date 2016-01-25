@@ -58,13 +58,11 @@ namespace STLL {
  * Gamma correct output is not handled by this class directly. You need to activate the sRGB
  * property for the target that this paints on
  *
- * \tparam V The OpenGL version you want to use... the class will adapt accordingly and use the
- * available features
  * \tparam C size of the texture cache. The cache is square C time C pixels.
  * \tparam G the gamma calculation function, if you use sRGB output... normally you don't need
  * to change this, keep the default
  */
-template <int V, int C, class G = internal::Gamma_c<>>
+template <int C, class G = internal::Gamma_c<>>
 class showOpenGL
 {
   private:
@@ -75,7 +73,7 @@ class showOpenGL
     uint32_t uploadVersion = 0; // a counter changed each time the texture changes to know when to update
 
     internal::OGL_Program_c program;
-    GLuint vertexBuffer, vertexArray;
+    GLuint vertexBuffer, vertexArray, vertexElement;
 
     class vertex
     {
@@ -153,12 +151,13 @@ class showOpenGL
       program.setUniform("texture", 0);
 
       glGenVertexArrays(1, &vertexArray);
-
       glBindVertexArray(vertexArray);
 
       glGenBuffers(1, &vertexBuffer);
-
       glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+
+      glGenBuffers(1, &vertexElement);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexElement);
 
       glEnableVertexAttribArray(0); glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, x));
       glEnableVertexAttribArray(1); glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, u));
@@ -170,6 +169,7 @@ class showOpenGL
     {
         glDeleteTextures(1, &glTextureId);
         glDeleteBuffers(1, &vertexBuffer);
+        glDeleteBuffers(1, &vertexElement);
     }
 
     /** \brief helper class used to draw images */
@@ -243,6 +243,10 @@ class showOpenGL
         }
 
         std::vector<vertex> vb;
+        std::vector<GLuint> vbe;
+
+        vb.reserve(dat.size()*4);
+        vbe.reserve(dat.size()*6);
 
         size_t k = i;
 
@@ -259,21 +263,23 @@ class showOpenGL
 
                 if ((sp == SUBP_RGB || sp == SUBP_BGR) && (ii.blurr <= cache.blurrmax))
                 {
+                  GLshort si = vb.size();
                   vb.push_back(vertex((sx+ii.x)/64.0+pos.left,                   (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,             1.0*(pos.pos_y)/C,          c, 1));
                   vb.push_back(vertex((sx+ii.x)/64.0+pos.left+(pos.width-1)/3.0, (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y)/C,          c, 1));
                   vb.push_back(vertex((sx+ii.x)/64.0+pos.left+(pos.width-1)/3.0, (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 1));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left+(pos.width-1)/3.0, (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 1));
                   vb.push_back(vertex((sx+ii.x)/64.0+pos.left,                   (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,             1.0*(pos.pos_y+pos.rows)/C, c, 1));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left,                   (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,             1.0*(pos.pos_y)/C,          c, 1));
+                  vbe.push_back(si+0); vbe.push_back(si+1); vbe.push_back(si+2);
+                  vbe.push_back(si+0); vbe.push_back(si+2); vbe.push_back(si+3);
                 }
                 else
                 {
+                  GLshort si = vb.size();
                   vb.push_back(vertex((sx+ii.x)/64.0+pos.left,           (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c, 0));
                   vb.push_back(vertex((sx+ii.x)/64.0+pos.left+pos.width, (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c, 0));
                   vb.push_back(vertex((sx+ii.x)/64.0+pos.left+pos.width, (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 0));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left+pos.width, (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 0));
                   vb.push_back(vertex((sx+ii.x)/64.0+pos.left,           (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c, 0));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left,           (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c, 0));
+                  vbe.push_back(si+0); vbe.push_back(si+1); vbe.push_back(si+2);
+                  vbe.push_back(si+0); vbe.push_back(si+2); vbe.push_back(si+3);
                 }
               }
               break;
@@ -284,23 +290,25 @@ class showOpenGL
               {
                 auto pos = cache.getRect(640, 640, SUBP_NONE, 0).value();
                 Color_c c = gamma.forward(ii.c);
+                GLshort si = vb.size();
                 vb.push_back(vertex((sx+ii.x+32)/64,      (sy+ii.y+32)/64,      1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+5)/C,          c, 0));
                 vb.push_back(vertex((sx+ii.x+32+ii.w)/64, (sy+ii.y+32)/64,      1.0*(pos.pos_x+pos.width-6)/C, 1.0*(pos.pos_y+5)/C,          c, 0));
                 vb.push_back(vertex((sx+ii.x+32+ii.w)/64, (sy+ii.y+32+ii.h)/64, 1.0*(pos.pos_x+pos.width-6)/C, 1.0*(pos.pos_y+pos.rows-6)/C, c, 0));
-                vb.push_back(vertex((sx+ii.x+32+ii.w)/64, (sy+ii.y+32+ii.h)/64, 1.0*(pos.pos_x+pos.width-6)/C, 1.0*(pos.pos_y+pos.rows-6)/C, c, 0));
                 vb.push_back(vertex((sx+ii.x+32)/64,      (sy+ii.y+32+ii.h)/64, 1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+pos.rows-6)/C, c, 0));
-                vb.push_back(vertex((sx+ii.x+32)/64,      (sy+ii.y+32)/64,      1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+5)/C,          c, 0));
+                vbe.push_back(si+0); vbe.push_back(si+1); vbe.push_back(si+2);
+                vbe.push_back(si+0); vbe.push_back(si+2); vbe.push_back(si+3);
               }
               else
               {
                 auto pos = cache.getRect(ii.w, ii.h, sp, ii.blurr).value();
                 Color_c c = gamma.forward(ii.c);
+                GLshort si = vb.size();
                 vb.push_back(vertex((sx+ii.x+32)/64+pos.left,           (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c, 1));
                 vb.push_back(vertex((sx+ii.x+32)/64+pos.left+pos.width, (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c, 1));
                 vb.push_back(vertex((sx+ii.x+32)/64+pos.left+pos.width, (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 1));
-                vb.push_back(vertex((sx+ii.x+32)/64+pos.left+pos.width, (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 1));
                 vb.push_back(vertex((sx+ii.x+32)/64+pos.left,           (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c, 1));
-                vb.push_back(vertex((sx+ii.x+32)/64+pos.left,           (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c, 1));
+                vbe.push_back(si+0); vbe.push_back(si+1); vbe.push_back(si+2);
+                vbe.push_back(si+0); vbe.push_back(si+2); vbe.push_back(si+3);
               }
               break;
 
@@ -315,6 +323,9 @@ class showOpenGL
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.size(), vb.data(), GL_STREAM_DRAW);
 
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexElement);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint)*vbe.size(), vbe.data(), GL_STREAM_DRAW);
+
         switch (sp)
         {
           default:
@@ -322,21 +333,21 @@ class showOpenGL
             program.setUniform("texRshift", 0.0f, 0.0f);
             program.setUniform("texGshift", 0.0f, 0.0f);
             program.setUniform("texBshift", 0.0f, 0.0f);
-            glDrawArrays(GL_TRIANGLES, 0, vb.size());
+            glDrawElements(GL_TRIANGLES, vbe.size(), GL_UNSIGNED_INT, 0);
             break;
 
           case SUBP_RGB:
             program.setUniform("texRshift", 0.0f, 0.0f);
             program.setUniform("texGshift", 1.0f/C, 0.0f);
             program.setUniform("texBshift", 2.0f/C, 0.0f);
-            glDrawArrays(GL_TRIANGLES, 0, vb.size());
+            glDrawElements(GL_TRIANGLES, vbe.size(), GL_UNSIGNED_INT, 0);
             break;
 
           case SUBP_BGR:
             program.setUniform("texRshift", 2.0f/C, 0.0f);
             program.setUniform("texGshift", 1.0f/C, 0.0f);
             program.setUniform("texBshift", 0.0f/C, 0.0f);
-            glDrawArrays(GL_TRIANGLES, 0, vb.size());
+            glDrawElements(GL_TRIANGLES, vbe.size(), GL_UNSIGNED_INT, 0);
             break;
         }
 
