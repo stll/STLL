@@ -111,6 +111,8 @@ int main(int argv, char ** args)
   int x = 0;
   double startSeconds = glfwGetTime();
 
+  showOpenGL<1024>::DrawCache_c dc;
+
   while (!glfwWindowShouldClose(screen))
   {
     glClearColor(0, 0, 0, 0);
@@ -135,7 +137,8 @@ int main(int argv, char ** args)
     glEnd();
 
     glEnable(GL_FRAMEBUFFER_SRGB);
-    openGL.showLayout(l, 0, 0, SUBP_RGB, 0);
+    // openGL.showLayout(l, x, 0, SUBP_RGB); uncached version, much slower
+    openGL.showLayout(l, x, 0, SUBP_RGB, nullptr, &dc);
     x++;
     glDisable(GL_FRAMEBUFFER_SRGB);
     glfwSwapBuffers(screen);
@@ -147,6 +150,8 @@ int main(int argv, char ** args)
   }
 #if 0
   {
+    // write out the texture map, the data files can be load with gimp and you will need to specify
+    // the right size and graylevel as parameters in the dialog that pops up
     FILE * f = fopen("tex.data", "wb");
     fwrite(openGL.getData(), 1, 1024*1024, f);
     fclose(f);

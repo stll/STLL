@@ -71,6 +71,7 @@ class showOpenGL
 
     GLuint glTextureId = 0;     // OpenGL texture id
     uint32_t uploadVersion = 0; // a counter changed each time the texture changes to know when to update
+    uint32_t atlasId = 1;
 
     internal::OGL_Program_c program;
     GLuint vertexBuffer, vertexArray, vertexElement;
@@ -87,10 +88,80 @@ class showOpenGL
       x(_x), y(_y), u(_u), v(_v), r(c.r()), g(c.g()), b(c.b()), a(c.a()), sp(_sp) {}
     };
 
+    void drawBuffers(SubPixelArrangement sp, size_t s, int sx, int sy)
+    {
+      program.setUniform("offset", 1.0*sx/64.0, sy/64);
+      switch (sp)
+      {
+        default:
+        case SUBP_NONE:
+          program.setUniform("texRshift", 0.0f, 0.0f);
+          program.setUniform("texGshift", 0.0f, 0.0f);
+          program.setUniform("texBshift", 0.0f, 0.0f);
+          glDrawElements(GL_TRIANGLES, s, GL_UNSIGNED_INT, 0);
+          break;
+
+        case SUBP_RGB:
+          program.setUniform("texRshift", 0.0f, 0.0f);
+          program.setUniform("texGshift", 1.0f/C, 0.0f);
+          program.setUniform("texBshift", 2.0f/C, 0.0f);
+          glDrawElements(GL_TRIANGLES, s, GL_UNSIGNED_INT, 0);
+          break;
+
+        case SUBP_BGR:
+          program.setUniform("texRshift", 2.0f/C, 0.0f);
+          program.setUniform("texGshift", 1.0f/C, 0.0f);
+          program.setUniform("texBshift", 0.0f/C, 0.0f);
+          glDrawElements(GL_TRIANGLES, s, GL_UNSIGNED_INT, 0);
+          break;
+      }
+    }
+
+
   public:
 
+    /** \brief class to store a layout in a cached format for even faster repaint */
+    class DrawCache_c
+    {
+      public:
+
+        GLuint vArray, vBuffer, vElements;
+        size_t elements;
+        uint32_t atlasId;
+
+        ~DrawCache_c(void)
+        {
+          glDeleteBuffers(1, &vBuffer);
+          glDeleteBuffers(1, &vElements);
+          glDeleteVertexArrays(1, &vArray);
+        }
+
+        DrawCache_c(void) : vArray(0), vBuffer(0), vElements(0), elements(0), atlasId(0) {}
+
+        DrawCache_c(const DrawCache_c &) = delete;
+
+        DrawCache_c(DrawCache_c && orig)
+        {
+          vArray = orig.vArray; orig.vArray = 0;
+          vBuffer = orig.vBuffer; orig.vBuffer = 0;
+          vElements = orig.vElements; orig.vElements = 0;
+          elements = orig.elements; orig.elements = 0;
+          atlasId = orig.atlasId; orig.atlasId = 0;
+        }
+
+        void operator=(DrawCache_c && orig)
+        {
+          vArray = orig.vArray; orig.vArray = 0;
+          vBuffer = orig.vBuffer; orig.vBuffer = 0;
+          vElements = orig.vElements; orig.vElements = 0;
+          elements = orig.elements; orig.elements = 0;
+          atlasId = orig.atlasId; orig.atlasId = 0;
+        }
+    };
+
     /** \brief constructor */
-    showOpenGL(void) : cache(C, C) {
+    showOpenGL(void) : cache(C, C)
+    {
       glActiveTexture(GL_TEXTURE0);
       glGenTextures(1, &glTextureId);
       glBindTexture(GL_TEXTURE_2D, glTextureId);
@@ -127,6 +198,7 @@ class showOpenGL
       program.attachShader(GL_VERTEX_SHADER, "330 core",
         "uniform float width;"
         "uniform float height;"
+        "uniform vec2 offset;"
 
         "layout (location = 0) in vec3 vertex;"
         "layout (location = 1) in vec2 tex_coord;"
@@ -141,7 +213,7 @@ class showOpenGL
         "{"
         "  ourColor = vec4(color.r/255.0, color.g/255.0, color.b/255.0, color.a/255.0);"
         "  TexCoord = vec2(tex_coord.x, tex_coord.y);"
-        "  gl_Position = vec4((vertex.x-width)/width, 1.0-vertex.y/height, 0, 1.0);"
+        "  gl_Position = vec4((vertex.x-width+offset.x)/width, 1.0-(vertex.y+offset.y)/height, 0, 1.0);"
         "  sp = subpixels;"
         "}"
       );
@@ -170,6 +242,7 @@ class showOpenGL
         glDeleteTextures(1, &glTextureId);
         glDeleteBuffers(1, &vertexBuffer);
         glDeleteBuffers(1, &vertexElement);
+        glDeleteVertexArrays(1, &vertexArray);
     }
 
     /** \brief helper class used to draw images */
@@ -188,15 +261,27 @@ class showOpenGL
      * \param sp which kind of sub-pixel positioning do you want?
      * \param images a pointer to an image drawer class that is used to draw the images, when you give
      *                a nullptr here, no images will be drawn
-     * \return if true then the cache had to be cleared... which might hint at a problem with your cache
+     * \param dc a drawing cache, reinsert the return value of this function in here to get a speed boost
+     *           when this is used sx, sy, sp and images don't matter any more and will be completely ignored
+     *           the output will happen exactly the same way as it did when it was created
+     * \return a drawing cache element that you can reinsert into this function as parameter dc for faster drawing
      * size
      */
-    bool showLayout(const TextLayout_c & l, int sx, int sy, SubPixelArrangement sp, imageDrawerOpenGL_c * images)
+    void showLayout(const TextLayout_c & l, int sx, int sy, SubPixelArrangement sp,
+                    imageDrawerOpenGL_c * images = nullptr, DrawCache_c * dc = nullptr)
     {
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, glTextureId );
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC1_COLOR, GL_ONE_MINUS_SRC1_COLOR);
+      program.use();
+
+      if (dc && dc->atlasId == atlasId)
+      {
+        glBindVertexArray(dc->vArray);
+        drawBuffers(sp, dc->elements, sx, sy);
+        return;
+      }
 
       const auto & dat = l.getData();
       size_t i = 0;
@@ -264,20 +349,20 @@ class showOpenGL
                 if ((sp == SUBP_RGB || sp == SUBP_BGR) && (ii.blurr <= cache.blurrmax))
                 {
                   GLshort si = vb.size();
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left,                   (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,             1.0*(pos.pos_y)/C,          c, 1));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left+(pos.width-1)/3.0, (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y)/C,          c, 1));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left+(pos.width-1)/3.0, (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 1));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left,                   (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,             1.0*(pos.pos_y+pos.rows)/C, c, 1));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left,                   (ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,             1.0*(pos.pos_y)/C,          c, 1));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left+(pos.width-1)/3.0, (ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y)/C,          c, 1));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left+(pos.width-1)/3.0, (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 1));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left,                   (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,             1.0*(pos.pos_y+pos.rows)/C, c, 1));
                   vbe.push_back(si+0); vbe.push_back(si+1); vbe.push_back(si+2);
                   vbe.push_back(si+0); vbe.push_back(si+2); vbe.push_back(si+3);
                 }
                 else
                 {
                   GLshort si = vb.size();
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left,           (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c, 0));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left+pos.width, (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c, 0));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left+pos.width, (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 0));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left,           (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c, 0));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left,           (ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c, 0));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left+pos.width, (ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c, 0));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left+pos.width, (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 0));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left,           (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c, 0));
                   vbe.push_back(si+0); vbe.push_back(si+1); vbe.push_back(si+2);
                   vbe.push_back(si+0); vbe.push_back(si+2); vbe.push_back(si+3);
                 }
@@ -291,10 +376,10 @@ class showOpenGL
                 auto pos = cache.getRect(640, 640, SUBP_NONE, 0).value();
                 Color_c c = gamma.forward(ii.c);
                 GLshort si = vb.size();
-                vb.push_back(vertex((sx+ii.x+32)/64,      (sy+ii.y+32)/64,      1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+5)/C,          c, 0));
-                vb.push_back(vertex((sx+ii.x+32+ii.w)/64, (sy+ii.y+32)/64,      1.0*(pos.pos_x+pos.width-6)/C, 1.0*(pos.pos_y+5)/C,          c, 0));
-                vb.push_back(vertex((sx+ii.x+32+ii.w)/64, (sy+ii.y+32+ii.h)/64, 1.0*(pos.pos_x+pos.width-6)/C, 1.0*(pos.pos_y+pos.rows-6)/C, c, 0));
-                vb.push_back(vertex((sx+ii.x+32)/64,      (sy+ii.y+32+ii.h)/64, 1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+pos.rows-6)/C, c, 0));
+                vb.push_back(vertex((ii.x+32)/64,      (ii.y+32)/64,      1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+5)/C,          c, 0));
+                vb.push_back(vertex((ii.x+32+ii.w)/64, (ii.y+32)/64,      1.0*(pos.pos_x+pos.width-6)/C, 1.0*(pos.pos_y+5)/C,          c, 0));
+                vb.push_back(vertex((ii.x+32+ii.w)/64, (ii.y+32+ii.h)/64, 1.0*(pos.pos_x+pos.width-6)/C, 1.0*(pos.pos_y+pos.rows-6)/C, c, 0));
+                vb.push_back(vertex((ii.x+32)/64,      (ii.y+32+ii.h)/64, 1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+pos.rows-6)/C, c, 0));
                 vbe.push_back(si+0); vbe.push_back(si+1); vbe.push_back(si+2);
                 vbe.push_back(si+0); vbe.push_back(si+2); vbe.push_back(si+3);
               }
@@ -303,10 +388,10 @@ class showOpenGL
                 auto pos = cache.getRect(ii.w, ii.h, sp, ii.blurr).value();
                 Color_c c = gamma.forward(ii.c);
                 GLshort si = vb.size();
-                vb.push_back(vertex((sx+ii.x+32)/64+pos.left,           (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c, 1));
-                vb.push_back(vertex((sx+ii.x+32)/64+pos.left+pos.width, (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c, 1));
-                vb.push_back(vertex((sx+ii.x+32)/64+pos.left+pos.width, (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 1));
-                vb.push_back(vertex((sx+ii.x+32)/64+pos.left,           (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c, 1));
+                vb.push_back(vertex((ii.x+32)/64+pos.left,           (ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c, 1));
+                vb.push_back(vertex((ii.x+32)/64+pos.left+pos.width, (ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c, 1));
+                vb.push_back(vertex((ii.x+32)/64+pos.left+pos.width, (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 1));
+                vb.push_back(vertex((ii.x+32)/64+pos.left,           (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c, 1));
                 vbe.push_back(si+0); vbe.push_back(si+1); vbe.push_back(si+2);
                 vbe.push_back(si+0); vbe.push_back(si+2); vbe.push_back(si+3);
               }
@@ -320,35 +405,32 @@ class showOpenGL
           k++;
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.size(), vb.data(), GL_STREAM_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexElement);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint)*vbe.size(), vbe.data(), GL_STREAM_DRAW);
-
-        switch (sp)
+        if (dc && !cleared && j == dat.size())
         {
-          default:
-          case SUBP_NONE:
-            program.setUniform("texRshift", 0.0f, 0.0f);
-            program.setUniform("texGshift", 0.0f, 0.0f);
-            program.setUniform("texBshift", 0.0f, 0.0f);
-            glDrawElements(GL_TRIANGLES, vbe.size(), GL_UNSIGNED_INT, 0);
-            break;
+          if (dc->vArray == 0)    { glGenVertexArrays(1, &dc->vArray); } glBindVertexArray(dc->vArray);
+          if (dc->vBuffer == 0)   { glGenBuffers(1, &dc->vBuffer);     } glBindBuffer(GL_ARRAY_BUFFER, dc->vBuffer);
+          if (dc->vElements == 0) { glGenBuffers(1, &dc->vElements);   } glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, dc->vElements);
 
-          case SUBP_RGB:
-            program.setUniform("texRshift", 0.0f, 0.0f);
-            program.setUniform("texGshift", 1.0f/C, 0.0f);
-            program.setUniform("texBshift", 2.0f/C, 0.0f);
-            glDrawElements(GL_TRIANGLES, vbe.size(), GL_UNSIGNED_INT, 0);
-            break;
+          glEnableVertexAttribArray(0); glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, x));
+          glEnableVertexAttribArray(1); glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, u));
+          glEnableVertexAttribArray(2); glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, r));
+          glEnableVertexAttribArray(3); glVertexAttribPointer(3, 1, GL_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, sp));
 
-          case SUBP_BGR:
-            program.setUniform("texRshift", 2.0f/C, 0.0f);
-            program.setUniform("texGshift", 1.0f/C, 0.0f);
-            program.setUniform("texBshift", 0.0f/C, 0.0f);
-            glDrawElements(GL_TRIANGLES, vbe.size(), GL_UNSIGNED_INT, 0);
-            break;
+          glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.size(), vb.data(), GL_STATIC_DRAW);
+          glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint)*vbe.size(), vbe.data(), GL_STATIC_DRAW);
+          drawBuffers(sp, vbe.size(), sx, sy);
+
+          dc->atlasId = atlasId;
+          dc->elements = vbe.size();
+
+          return;
+        }
+        else
+        {
+          glBindVertexArray(vertexArray);
+          glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.size(), vb.data(), GL_STREAM_DRAW);
+          glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint)*vbe.size(), vbe.data(), GL_STREAM_DRAW);
+          drawBuffers(sp, vbe.size(), sx, sy);
         }
 
         i = j;
@@ -358,11 +440,12 @@ class showOpenGL
           // atlas is not big enough, it needs to be cleared
           // and will be repopulated for the next batch of the layout
           cache.clear();
+          atlasId++;
           cleared = true;
         }
       }
 
-      return cleared;
+      return;
     }
 
     /** \brief helper function to setup the projection matrices for
@@ -382,7 +465,11 @@ class showOpenGL
      */
     const uint8_t * getData(void) const { return cache.getData(); }
 
-    void clear(void) { cache.clear(); }
+    void clear(void)
+    {
+      cache.clear();
+      atlasId++;
+    }
 };
 
 }

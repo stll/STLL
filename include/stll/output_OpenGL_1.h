@@ -70,9 +70,10 @@ class showOpenGL
 
     GLuint glTextureId = 0;     // OpenGL texture id
     uint32_t uploadVersion = 0; // a counter changed each time the texture changes to know when to update
+    uint32_t atlasId = 1;
 
     // Helper function to draw one glyph or one sub pixel color of one glyph
-    void drawGlyph(const CommandData_c & i, int sx, int sy, SubPixelArrangement sp, int subpcol)
+    void drawGlyph(const CommandData_c & i, SubPixelArrangement sp, int subpcol)
     {
       auto pos = cache.getGlyph(i.font, i.glyphIndex, sp, i.blurr).value();
       double w = pos.width-1;
@@ -87,15 +88,51 @@ class showOpenGL
       glBegin(GL_QUADS);
       Color_c c = gamma.forward(i.c);
       glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
-      glTexCoord2f(1.0*(pos.pos_x+wo)/C,             1.0*(pos.pos_y)/C);            glVertex3f((sx+i.x)/64.0+pos.left,   (sy+i.y+32)/64-pos.top,            0);
-      glTexCoord2f(1.0*(pos.pos_x+wo+pos.width-1)/C, 1.0*(pos.pos_y)/C);            glVertex3f((sx+i.x)/64.0+pos.left+w, (sy+i.y+32)/64-pos.top,            0);
-      glTexCoord2f(1.0*(pos.pos_x+wo+pos.width-1)/C, 1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f((sx+i.x)/64.0+pos.left+w, (sy+i.y+32)/64-pos.top+pos.rows-1, 0);
-      glTexCoord2f(1.0*(pos.pos_x+wo)/C,             1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f((sx+i.x)/64.0+pos.left,   (sy+i.y+32)/64-pos.top+pos.rows-1, 0);
+      glTexCoord2f(1.0*(pos.pos_x+wo)/C,             1.0*(pos.pos_y)/C);            glVertex3f(i.x/64.0+pos.left,   (i.y+32)/64-pos.top,            0);
+      glTexCoord2f(1.0*(pos.pos_x+wo+pos.width-1)/C, 1.0*(pos.pos_y)/C);            glVertex3f(i.x/64.0+pos.left+w, (i.y+32)/64-pos.top,            0);
+      glTexCoord2f(1.0*(pos.pos_x+wo+pos.width-1)/C, 1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f(i.x/64.0+pos.left+w, (i.y+32)/64-pos.top+pos.rows-1, 0);
+      glTexCoord2f(1.0*(pos.pos_x+wo)/C,             1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f(i.x/64.0+pos.left,   (i.y+32)/64-pos.top+pos.rows-1, 0);
       glEnd();
+    }
+
+    void drawBuffers(GLuint displayList, SubPixelArrangement sp, int sx, int sy)
+    {
+      glPushMatrix();
+      glTranslated(sx/64.0, sy/64, 0);
+      glCallList(displayList);
+      glPopMatrix();
     }
 
   public:
 
+    /** \brief class to store a layout in a cached format for even faster repaint */
+    class DrawCache_c
+    {
+    public:
+
+      GLuint vDisplayList;
+      uint32_t atlasId;
+
+      ~DrawCache_c(void)
+      {
+        glDeleteLists(vDisplayList, 1);
+      }
+
+      DrawCache_c(void) : vDisplayList(0), atlasId(0) {}
+
+      DrawCache_c(const DrawCache_c &) = delete;
+
+      DrawCache_c(DrawCache_c && orig)
+      {
+        vDisplayList = orig.vDisplayList; orig.vDisplayList = 0;
+      }
+
+      void operator=(DrawCache_c && orig)
+      {
+        vDisplayList = orig.vDisplayList; orig.vDisplayList = 0;
+        atlasId = orig.atlasId; orig.atlasId = 0;
+      }
+    };
     /** \brief constructor */
     showOpenGL(void) : cache(C, C) {
       glGenTextures(1, &glTextureId);
@@ -132,11 +169,18 @@ class showOpenGL
      * \return if true then the cache had to be cleared... which might hint at a problem with your cache
      * size
      */
-    bool showLayout(const TextLayout_c & l, int sx, int sy, SubPixelArrangement sp, imageDrawerOpenGL_c * images)
+    void showLayout(const TextLayout_c & l, int sx, int sy, SubPixelArrangement sp,
+                    imageDrawerOpenGL_c * images = nullptr, DrawCache_c * dc = nullptr)
     {
       glBindTexture( GL_TEXTURE_2D, glTextureId );
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+      if (dc && dc->atlasId == atlasId)
+      {
+        drawBuffers(dc->vDisplayList, sp, sx, sy);
+        return;
+      }
 
       const auto & dat = l.getData();
       size_t i = 0;
@@ -180,6 +224,20 @@ class showOpenGL
 
         size_t k = i;
 
+        if (dc && !cleared && j == dat.size())
+        {
+          if (dc->vDisplayList == 0)
+          {
+            dc->vDisplayList = glGenLists(1);
+          }
+          glNewList(dc->vDisplayList, GL_COMPILE);
+        }
+        else
+        {
+          glPushMatrix();
+          glTranslated(sx/64.0, sy/64, 0);
+        }
+
         while (k < j)
         {
           auto & ii = dat[k];
@@ -191,28 +249,28 @@ class showOpenGL
 
               if (ii.blurr > cache.blurrmax)
               {
-                drawGlyph(ii, sx, sy, sp, 0);
+                drawGlyph(ii, sp, 0);
               }
               else
               {
                 switch (sp)
                 {
                   case SUBP_RGB:
-                    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); drawGlyph(ii, sx, sy, sp, 1);
-                    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); drawGlyph(ii, sx, sy, sp, 2);
-                    glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); drawGlyph(ii, sx, sy, sp, 3);
+                    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); drawGlyph(ii, sp, 1);
+                    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); drawGlyph(ii, sp, 2);
+                    glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); drawGlyph(ii, sp, 3);
                     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
                     break;
 
                   case SUBP_BGR:
-                    glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); drawGlyph(ii, sx, sy, sp, 1);
-                    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); drawGlyph(ii, sx, sy, sp, 2);
-                    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); drawGlyph(ii, sx, sy, sp, 3);
+                    glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); drawGlyph(ii, sp, 1);
+                    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); drawGlyph(ii, sp, 2);
+                    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); drawGlyph(ii, sp, 3);
                     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
                     break;
 
                   default:
-                    drawGlyph(ii, sx, sy, sp, 0);
+                    drawGlyph(ii, sp, 0);
                     break;
                 }
               }
@@ -225,14 +283,14 @@ class showOpenGL
                 Color_c c = gamma.forward(ii.c);
                 glBegin(GL_QUADS);
                 glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
-                int x = (sx+ii.x+32)/64;
-                int y = (sy+ii.y+32)/64;
-                int w = (sx+ii.x+ii.w+32)/64-x;
-                int h = (sy+ii.y+ii.h+32)/64-y;
-                glVertex3f(x+0.1,     y+0.1,     0);
-                glVertex3f(x+w-1+0.9, y+0.1,     0);
-                glVertex3f(x+w-1+0.9, y+h-1+0.9, 0);
-                glVertex3f(x+0.1,     y+h-1+0.9, 0);
+                int x = (ii.x+32)/64;
+                int y = (ii.y+32)/64;
+                int w = (ii.x+ii.w+32)/64;
+                int h = (ii.y+ii.h+32)/64;
+                glVertex3f(x, y, 0);
+                glVertex3f(w, y, 0);
+                glVertex3f(w, h, 0);
+                glVertex3f(x, h, 0);
                 glEnd();
               }
               else
@@ -242,10 +300,10 @@ class showOpenGL
                 glBegin(GL_QUADS);
                 Color_c c = gamma.forward(ii.c);
                 glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
-                glTexCoord2f(1.0*(pos.pos_x)/C,             1.0*(pos.pos_y)/C);            glVertex3f((sx+ii.x)/64.0+pos.left,             (sy+ii.y+32)/64-pos.top,            0);
-                glTexCoord2f(1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y)/C);            glVertex3f((sx+ii.x)/64.0+pos.left+pos.width-1, (sy+ii.y+32)/64-pos.top,            0);
-                glTexCoord2f(1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f((sx+ii.x)/64.0+pos.left+pos.width-1, (sy+ii.y+32)/64-pos.top+pos.rows-1, 0);
-                glTexCoord2f(1.0*(pos.pos_x)/C,             1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f((sx+ii.x)/64.0+pos.left,             (sy+ii.y+32)/64-pos.top+pos.rows-1, 0);
+                glTexCoord2f(1.0*(pos.pos_x)/C,             1.0*(pos.pos_y)/C);            glVertex3f(ii.x/64.0+pos.left,             (ii.y+32)/64-pos.top,            0);
+                glTexCoord2f(1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y)/C);            glVertex3f(ii.x/64.0+pos.left+pos.width-1, (ii.y+32)/64-pos.top,            0);
+                glTexCoord2f(1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f(ii.x/64.0+pos.left+pos.width-1, (ii.y+32)/64-pos.top+pos.rows-1, 0);
+                glTexCoord2f(1.0*(pos.pos_x)/C,             1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f(ii.x/64.0+pos.left,             (ii.y+32)/64-pos.top+pos.rows-1, 0);
                 glEnd();
               }
               break;
@@ -258,6 +316,18 @@ class showOpenGL
           k++;
         }
 
+        if (dc && !cleared && j == dat.size())
+        {
+          glEndList();
+          drawBuffers(dc->vDisplayList, sp, sx, sy);
+
+          dc->atlasId = atlasId;
+        }
+        else
+        {
+          glPopMatrix();
+        }
+
         i = j;
 
         if (i < dat.size())
@@ -265,11 +335,12 @@ class showOpenGL
           // atlas is not big enough, it needs to be cleared
           // and will be repopulated for the next batch of the layout
           cache.clear();
+          atlasId++;
           cleared = true;
         }
       }
 
-      return cleared;
+      return;
     }
 
     /** \brief helper function to setup the projection matrices for
@@ -292,7 +363,11 @@ class showOpenGL
      */
     const uint8_t * getData(void) const { return cache.getData(); }
 
-    void clear(void) { cache.clear(); }
+    void clear(void)
+    {
+      cache.clear();
+      atlasId++;
+    }
 };
 
 }

@@ -71,6 +71,7 @@ class showOpenGL
 
     GLuint glTextureId = 0;     // OpenGL texture id
     uint32_t uploadVersion = 0; // a counter changed each time the texture changes to know when to update
+    uint32_t atlasId = 1;
 
     internal::OGL_Program_c program;
     GLuint vertexBuffer;
@@ -86,7 +87,72 @@ class showOpenGL
       x(_x), y(_y), u(_u), v(_v), r(c.r()), g(c.g()), b(c.b()), a(c.a()) {}
     };
 
+
+    void drawBuffers(SubPixelArrangement sp, size_t s, int sx, int sy)
+    {
+      glEnableVertexAttribArray(0); glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, x));
+      glEnableVertexAttribArray(1); glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, u));
+      glEnableVertexAttribArray(2); glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, r));
+
+      program.setUniform("offset", sx/64.0, sy/64);
+
+      switch (sp)
+      {
+        default:
+        case SUBP_NONE:
+          program.setUniform("ashift", 0);
+          glDrawArrays(GL_QUADS, 0, s);
+          break;
+
+        case SUBP_RGB:
+          glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -1.0f/C); glDrawArrays(GL_QUADS, 0, s);
+          glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -0.0f/C); glDrawArrays(GL_QUADS, 0, s);
+          glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); program.setUniform("ashift",  1.0f/C); glDrawArrays(GL_QUADS, 0, s);
+          glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+          break;
+
+        case SUBP_BGR:
+          glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); program.setUniform("ashift", -1.0f/C); glDrawArrays(GL_QUADS, 0, s);
+          glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -0.0f/C); glDrawArrays(GL_QUADS, 0, s);
+          glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); program.setUniform("ashift",  1.0f/C); glDrawArrays(GL_QUADS, 0, s);
+          glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+          break;
+      }    }
+
   public:
+
+    /** \brief class to store a layout in a cached format for even faster repaint */
+    class DrawCache_c
+    {
+    public:
+
+      GLuint vBuffer;
+      size_t elements;
+      uint32_t atlasId;
+
+      ~DrawCache_c(void)
+      {
+        glDeleteBuffers(1, &vBuffer);
+      }
+
+      DrawCache_c(void) : vBuffer(0), elements(0), atlasId(0) {}
+
+      DrawCache_c(const DrawCache_c &) = delete;
+
+      DrawCache_c(DrawCache_c && orig)
+      {
+        vBuffer = orig.vBuffer; orig.vBuffer = 0;
+        elements = orig.elements; orig.elements = 0;
+        atlasId = orig.atlasId; orig.atlasId = 0;
+      }
+
+      void operator=(DrawCache_c && orig)
+      {
+        vBuffer = orig.vBuffer; orig.vBuffer = 0;
+        elements = orig.elements; orig.elements = 0;
+        atlasId = orig.atlasId; orig.atlasId = 0;
+      }
+    };
 
     /** \brief constructor */
     showOpenGL(void) : cache(C, C) {
@@ -115,6 +181,8 @@ class showOpenGL
         "uniform float width;"
         "uniform float height;"
         "uniform float ashift;"
+        "uniform vec2 offset;"
+
         "attribute vec2 vertex;"
         "attribute vec4 color;"
         "attribute vec2 tex_coord;"
@@ -122,7 +190,7 @@ class showOpenGL
         "{"
         "  gl_FrontColor = vec4(color.r/255.0, color.g/255.0, color.b/255.0, color.a/255.0);"
         "  gl_TexCoord[0].xy = vec2(tex_coord.x+ashift, tex_coord.y);"
-        "  gl_Position = vec4((vertex.x-width)/width, 1.0-vertex.y/height, 0, 1.0);"
+        "  gl_Position = vec4((vertex.x-width+offset.x)/width, 1.0-(vertex.y+offset.y)/height, 0, 1.0);"
         "}"
       );
 
@@ -135,12 +203,6 @@ class showOpenGL
       program.setUniform("texture", 0);
 
       glGenBuffers(1, &vertexBuffer);
-
-      glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-
-      glEnableVertexAttribArray(0); glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, x));
-      glEnableVertexAttribArray(1); glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, u));
-      glEnableVertexAttribArray(2); glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, r));
     }
 
     ~showOpenGL(void)
@@ -168,12 +230,21 @@ class showOpenGL
      * \return if true then the cache had to be cleared... which might hint at a problem with your cache
      * size
      */
-    bool showLayout(const TextLayout_c & l, int sx, int sy, SubPixelArrangement sp, imageDrawerOpenGL_c * images)
+    void showLayout(const TextLayout_c & l, int sx, int sy, SubPixelArrangement sp,
+                    imageDrawerOpenGL_c * images = nullptr, DrawCache_c * dc = nullptr)
     {
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, glTextureId );
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+      if (dc && dc->atlasId == atlasId)
+      {
+        glBindBuffer(GL_ARRAY_BUFFER, dc->vBuffer);
+
+        drawBuffers(sp, dc->elements, sx, sy);
+        return;
+      }
 
       const auto & dat = l.getData();
       size_t i = 0;
@@ -237,17 +308,17 @@ class showOpenGL
 
                 if ((sp == SUBP_RGB || sp == SUBP_BGR) && (ii.blurr <= cache.blurrmax))
                 {
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left,               (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left+pos.width/3.0, (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left+pos.width/3.0, (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left,               (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left,               (ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left+pos.width/3.0, (ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left+pos.width/3.0, (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left,               (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c));
                 }
                 else
                 {
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left,           (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left+pos.width, (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left+pos.width, (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c));
-                  vb.push_back(vertex((sx+ii.x)/64.0+pos.left,           (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left,           (ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left+pos.width, (ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left+pos.width, (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c));
+                  vb.push_back(vertex((ii.x)/64.0+pos.left,           (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c));
                 }
               }
               break;
@@ -258,19 +329,19 @@ class showOpenGL
               {
                 auto pos = cache.getRect(640, 640, SUBP_NONE, 0).value();
                 Color_c c = gamma.forward(ii.c);
-                vb.push_back(vertex((sx+ii.x+32)/64,      (sy+ii.y+32)/64,      1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+5)/C,          c));
-                vb.push_back(vertex((sx+ii.x+32+ii.w)/64, (sy+ii.y+32)/64,      1.0*(pos.pos_x+pos.width-5)/C, 1.0*(pos.pos_y+5)/C,          c));
-                vb.push_back(vertex((sx+ii.x+32+ii.w)/64, (sy+ii.y+32+ii.h)/64, 1.0*(pos.pos_x+pos.width-5)/C, 1.0*(pos.pos_y+pos.rows-5)/C, c));
-                vb.push_back(vertex((sx+ii.x+32)/64,      (sy+ii.y+32+ii.h)/64, 1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+pos.rows-5)/C, c));
+                vb.push_back(vertex((ii.x+32)/64,      (ii.y+32)/64,      1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+5)/C,          c));
+                vb.push_back(vertex((ii.x+32+ii.w)/64, (ii.y+32)/64,      1.0*(pos.pos_x+pos.width-5)/C, 1.0*(pos.pos_y+5)/C,          c));
+                vb.push_back(vertex((ii.x+32+ii.w)/64, (ii.y+32+ii.h)/64, 1.0*(pos.pos_x+pos.width-5)/C, 1.0*(pos.pos_y+pos.rows-5)/C, c));
+                vb.push_back(vertex((ii.x+32)/64,      (ii.y+32+ii.h)/64, 1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+pos.rows-5)/C, c));
               }
               else
               {
                 auto pos = cache.getRect(ii.w, ii.h, sp, ii.blurr).value();
                 Color_c c = gamma.forward(ii.c);
-                vb.push_back(vertex((sx+ii.x+32)/64+pos.left,           (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c));
-                vb.push_back(vertex((sx+ii.x+32)/64+pos.left+pos.width, (sy+ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c));
-                vb.push_back(vertex((sx+ii.x+32)/64+pos.left+pos.width, (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c));
-                vb.push_back(vertex((sx+ii.x+32)/64+pos.left,           (sy+ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c));
+                vb.push_back(vertex((ii.x+32)/64+pos.left,           (ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c));
+                vb.push_back(vertex((ii.x+32)/64+pos.left+pos.width, (ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c));
+                vb.push_back(vertex((ii.x+32)/64+pos.left+pos.width, (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c));
+                vb.push_back(vertex((ii.x+32)/64+pos.left,           (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c));
               }
               break;
 
@@ -282,30 +353,24 @@ class showOpenGL
           k++;
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.size(), vb.data(), GL_STREAM_DRAW);
-
-        switch (sp)
+        if (dc && !cleared && j == dat.size())
         {
-          default:
-          case SUBP_NONE:
-            program.setUniform("ashift", 0);
-            glDrawArrays(GL_QUADS, 0, vb.size());
-            break;
+          if (dc->vBuffer == 0) { glGenBuffers(1, &dc->vBuffer); } glBindBuffer(GL_ARRAY_BUFFER, dc->vBuffer);
+          glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.size(), vb.data(), GL_STATIC_DRAW);
 
-          case SUBP_RGB:
-            glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -1.0f/C); glDrawArrays(GL_QUADS, 0, vb.size());
-            glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -0.0f/C); glDrawArrays(GL_QUADS, 0, vb.size());
-            glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); program.setUniform("ashift",  1.0f/C); glDrawArrays(GL_QUADS, 0, vb.size());
-            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-            break;
+          drawBuffers(sp, vb.size(), sx, sy);
 
-          case SUBP_BGR:
-            glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); program.setUniform("ashift", -1.0f/C); glDrawArrays(GL_QUADS, 0, vb.size());
-            glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -0.0f/C); glDrawArrays(GL_QUADS, 0, vb.size());
-            glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); program.setUniform("ashift",  1.0f/C); glDrawArrays(GL_QUADS, 0, vb.size());
-            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-            break;
+          dc->atlasId = atlasId;
+          dc->elements = vb.size();
+
+          return;
+        }
+        else
+        {
+          glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+          glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.size(), vb.data(), GL_STREAM_DRAW);
+
+          drawBuffers(sp, vb.size(), sx, sy);
         }
 
         i = j;
@@ -315,11 +380,12 @@ class showOpenGL
           // atlas is not big enough, it needs to be cleared
           // and will be repopulated for the next batch of the layout
           cache.clear();
+          atlasId++;
           cleared = true;
         }
       }
 
-      return cleared;
+      return;
     }
 
     /** \brief helper function to setup the projection matrices for
@@ -339,7 +405,11 @@ class showOpenGL
      */
     const uint8_t * getData(void) const { return cache.getData(); }
 
-    void clear(void) { cache.clear(); }
+    void clear(void)
+    {
+      cache.clear();
+      atlasId++;
+    }
 };
 
 }
