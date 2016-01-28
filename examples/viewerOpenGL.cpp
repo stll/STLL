@@ -26,12 +26,14 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#if defined(OGL1)
-#include <stll/output_OpenGL_1.h>
+#include <stll/output_OpenGL.h>
+
+#if defined (OGL1)
+#define OGL_VER 1
 #elif defined (OGL2)
-#include <stll/output_OpenGL_2.h>
+#define OGL_VER 2
 #elif defined (OGL3)
-#include <stll/output_OpenGL_3.h>
+#define OGL_VER 3
 #endif
 
 using namespace STLL;
@@ -102,7 +104,7 @@ int main(int argv, char ** args)
     return 1;
   }
 
-  showOpenGL<1024> openGL;
+  showOpenGL<OGL_VER, 1024> openGL;
 
   int width, height;
   glfwGetFramebufferSize(screen, &width, &height);
@@ -111,7 +113,7 @@ int main(int argv, char ** args)
   int x = 0;
   double startSeconds = glfwGetTime();
 
-  showOpenGL<1024>::DrawCache_c dc;
+  showOpenGL<OGL_VER, 1024>::DrawCache_c dc;
 
   while (!glfwWindowShouldClose(screen))
   {

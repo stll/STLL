@@ -58,12 +58,13 @@ namespace STLL {
  * Gamma correct output is not handled by this class directly. You need to activate the sRGB
  * property for the target that this paints on
  *
+ * \tparam V Major version of OpenGL to use
  * \tparam C size of the texture cache. The cache is square C time C pixels.
  * \tparam G the gamma calculation function, if you use sRGB output... normally you don't need
  * to change this, keep the default
  */
-template <int C, class G = internal::Gamma_c<>>
-class showOpenGL : internal::openGL_internals<1>
+template <int V, int C, class G = internal::Gamma_c<>>
+class showOpenGL : internal::openGL_internals<V>
 {
   private:
     internal::GlyphAtlas_c cache;
@@ -75,7 +76,11 @@ class showOpenGL : internal::openGL_internals<1>
 
   public:
 
-    typedef DrawCacheInternal_c DrawCache_c;
+    /** \brief type to keep the caching information for redrawing layouts extra fast. You
+     * dont't need to know anything about its internals, just git a pointer to an object of
+     * this class to the show function for extra speedup.
+     */
+    using DrawCache_c = typename internal::openGL_internals<V>::DrawCacheInternal_c;
 
     /** \brief constructor */
     showOpenGL(void) : cache(C, C)
@@ -90,13 +95,13 @@ class showOpenGL : internal::openGL_internals<1>
       glTexEnvi(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_REPLACE);
       gamma.setGamma(22);
 
-      setup();
+      internal::openGL_internals<V>::setup();
     }
 
     ~showOpenGL(void)
     {
-        glDeleteTextures(1, &glTextureId);
-        cleanup();
+      glDeleteTextures(1, &glTextureId);
+      internal::openGL_internals<V>::cleanup();
     }
 
     /** \brief helper class used to draw images */
@@ -115,8 +120,7 @@ class showOpenGL : internal::openGL_internals<1>
      * \param sp which kind of sub-pixel positioning do you want?
      * \param images a pointer to an image drawer class that is used to draw the images, when you give
      *                a nullptr here, no images will be drawn
-     * \return if true then the cache had to be cleared... which might hint at a problem with your cache
-     * size
+     * \param dc pointer to a cache object that will speed up drawing by reusing OpenGL buffers
      */
     void showLayout(const TextLayout_c & l, int sx, int sy, SubPixelArrangement sp,
                     imageDrawerOpenGL_c * images = nullptr, DrawCache_c * dc = nullptr)
@@ -127,7 +131,7 @@ class showOpenGL : internal::openGL_internals<1>
 
       if (dc && dc->atlasId == atlasId)
       {
-        drawCache(*dc, sp, sx, sy, C);
+        internal::openGL_internals<V>::drawCache(*dc, sp, sx, sy, C);
         return;
       }
 
@@ -169,23 +173,28 @@ class showOpenGL : internal::openGL_internals<1>
           j++;
         }
 
+        // check, if the texture cache has been changed to include
+        // glyphs from this layout, if so re-upload it to the graphics memory
         if (cache.getVersion() != uploadVersion)
         {
           uploadVersion = cache.getVersion();
-          updateTexture(cache.getData(), C);
+          internal::openGL_internals<V>::updateTexture(cache.getData(), C);
         }
 
-        CreateInternal_c vb(dat.size());
+        typename internal::openGL_internals<V>::CreateInternal_c vb(dat.size());
 
         size_t k = i;
 
+        // check if the user wants caching and if we are able to provide it
+        // we can only use caching, if all the layout completely fits into
+        // one drawing batch
         if (dc && !cleared && j == dat.size())
         {
-          startCachePreparation(*dc);
+          internal::openGL_internals<V>::startCachePreparation(*dc);
         }
         else
         {
-          startPreparation(sx, sy);
+          internal::openGL_internals<V>::startPreparation(sx, sy);
         }
 
         while (k < j)
@@ -201,27 +210,29 @@ class showOpenGL : internal::openGL_internals<1>
 
                 if ((sp == SUBP_RGB || sp == SUBP_BGR) && (ii.blurr <= cache.blurrmax))
                 {
-                  drawSubpGlyph(vb, sp, ii, pos, c, C);
+                  internal::openGL_internals<V>::drawSubpGlyph(vb, sp, ii, pos, c, C);
                 }
                 else
                 {
-                  drawNormalGlyph(vb, ii, pos, c, C);
+                  internal::openGL_internals<V>::drawNormalGlyph(vb, ii, pos, c, C);
                 }
               }
               break;
 
             case CommandData_c::CMD_RECT:
-              if (ii.blurr == 0)
               {
-                auto pos = cache.getRect(640, 640, SUBP_NONE, 0).value();
                 Color_c c = gamma.forward(ii.c);
-                drawRectangle(vb, ii, pos, c, C);
-              }
-              else
-              {
-                auto pos = cache.getRect(ii.w, ii.h, sp, ii.blurr).value();
-                Color_c c = gamma.forward(ii.c);
-                drawSmoothRectangle(vb, ii, pos, c, C);
+
+                if (ii.blurr == 0)
+                {
+                  auto pos = cache.getRect(640, 640, SUBP_NONE, 0).value();
+                  internal::openGL_internals<V>::drawRectangle(vb, ii, pos, c, C);
+                }
+                else
+                {
+                  auto pos = cache.getRect(ii.w, ii.h, sp, ii.blurr).value();
+                  internal::openGL_internals<V>::drawSmoothRectangle(vb, ii, pos, c, C);
+                }
               }
               break;
 
@@ -233,26 +244,28 @@ class showOpenGL : internal::openGL_internals<1>
           k++;
         }
 
+        // depending on the drawing options finish the drawing either
+        // by finishing the cache, drawing and leaving the function
+        // or by just completing the drawing batch without cache
         if (dc && !cleared && j == dat.size())
         {
-          endCachePreparation(*dc, vb, sp, sx, sy, atlasId, C);
-          return;
+          internal::openGL_internals<V>::endCachePreparation(*dc, vb, sp, sx, sy, atlasId, C);
         }
         else
         {
-          endPreparation(vb, sp, sx, sy, C);
-        }
+          internal::openGL_internals<V>::endPreparation(vb, sp, sx, sy, C);
 
+          if (j < dat.size())
+          {
+            // atlas is not big enough, it needs to be cleared
+            // and will be repopulated for the next batch of the layout
+            cache.clear();
+            atlasId++;
+            cleared = true;
+          }
+        }
+       
         i = j;
-
-        if (i < dat.size())
-        {
-          // atlas is not big enough, it needs to be cleared
-          // and will be repopulated for the next batch of the layout
-          cache.clear();
-          atlasId++;
-          cleared = true;
-        }
       }
 
       return;
@@ -264,7 +277,7 @@ class showOpenGL : internal::openGL_internals<1>
      */
     void setupMatrixes(int width, int height)
     {
-      setupProjection(width, height);
+      internal::openGL_internals<V>::setupProjection(width, height);
     }
 
     /** \brief get a pointer to the texture atlas with all the glyphs
