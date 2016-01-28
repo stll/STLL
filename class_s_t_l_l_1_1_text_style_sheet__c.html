@@ -101,7 +101,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a193fbb02cd6e6c412bab9965eb4707da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>This class contains a list of normal CSS rules as well as a list of font families to use for outputting text. </p>
+<div class="textblock"><p>this class encapsulates information for how to format a text, just like the style sheets in html are doing. </p>
+<p>This class contains a list of normal CSS rules as well as a list of font families to use for outputting text. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a4874825f2a6c37daaa7b40b7f5540556"></a>
 <div class="memitem">
@@ -116,6 +117,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>create an empty style sheet only with default rules </p>
 <p>If you do not specify a default cache, the style sheet will create its own cache with its own library instance</p>
 <p>This cache will be used for all fonts of the style sheet. </p>
 
@@ -169,6 +172,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Add a font to a family. </p>
 <p>This function will add a new font to a family within this stylesheet. If the given family doesn't exist, it will be created</p>
 <p>The class will use the same font cache and thus the same instance of the FreeType library for all the fonts. So you can only use it from one thread.</p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -214,6 +219,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>add a rule to the stylesheet </p>
 <p>The rule will be checked as much as possible against syntactic and semantic Problems, when a problem is detected (e.g. invalid values) the <a class="el" href="class_s_t_l_l_1_1_xhtml_exception__c.html" title="exception thrown on XHTML and CSS problems ">XhtmlException_c</a> is thrown.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -247,6 +254,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Get a font family from the CSS. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">family</td><td>The family you want to get </td></tr>
@@ -296,6 +305,8 @@ template&lt;class X &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>get the value for an attribute for a given xml-node </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">node</td><td>The xml node that the attribute value is requested for </td></tr>
@@ -319,7 +330,7 @@ template&lt;class X &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html">TextStyleSheet_c</a></li>
-    <li class="footer">Generated on Tue Jan 19 2016 21:24:52 for STLL by
+    <li class="footer">Generated on Thu Jan 28 2016 21:45:13 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

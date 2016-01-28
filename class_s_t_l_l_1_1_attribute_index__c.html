@@ -99,7 +99,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a48ee6e1087e813fc7bf4b61ada3af6d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>This class behaves a bit like a vector of codepointAttributed in that you can get an attribute for an index. The index is of type size_t </p>
+<div class="textblock"><p>collection of codepointAttributes for the layouter. </p>
+<p>This class behaves a bit like a vector of codepointAttributed in that you can get an attribute for an index. The index is of type size_t </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a806cdec34d81d8fea996e0143c06692e"></a>
 <div class="memitem">
@@ -122,6 +123,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>create an empty index </p>
 <dl class="section attention"><dt>Attention</dt><dd>you have to add at least one attribute </dd></dl>
 
 </div>
@@ -147,6 +150,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>create an index where all entries have the same attribute </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">a</td><td>the attribute that all will share </td></tr>
@@ -178,6 +183,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>get the attribute for given index </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">i</td><td>the index for which the attribute is requested </td></tr>
@@ -219,6 +226,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>set attributes for a single indices </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">i</td><td>index that will have the attribute </td></tr>
@@ -266,6 +275,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>set attributes for a range of indices </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">start</td><td>first index that should have the attribute </td></tr>
@@ -286,7 +297,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1_attribute_index__c.html">AttributeIndex_c</a></li>
-    <li class="footer">Generated on Tue Jan 19 2016 21:24:52 for STLL by
+    <li class="footer">Generated on Thu Jan 28 2016 21:45:13 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

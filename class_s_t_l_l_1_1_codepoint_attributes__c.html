@@ -81,7 +81,7 @@ $(document).ready(function(){initNavTree('class_s_t_l_l_1_1_codepoint_attributes
 <div class="contents">
 
 <p>this structure contains all attributes that a single glyph can get assigned  
-</p>
+ <a href="class_s_t_l_l_1_1_codepoint_attributes__c.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
@@ -134,7 +134,9 @@ Static Public Attributes</h2></td></tr>
 <tr class="memdesc:a208f3686159d96dbb64fefdfddd776b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">bit for the flags variable, if set the glyph will be underlined  <a href="#a208f3686159d96dbb64fefdfddd776b9">More...</a><br /></td></tr>
 <tr class="separator:a208f3686159d96dbb64fefdfddd776b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>this structure contains all attributes that a single glyph can get assigned </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a3918b45c92f76552bfef22a9220f4fa1"></a>
 <div class="memitem">
 <div class="memproto">
@@ -156,6 +158,8 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>create an empty attribute, no font, no language, no flags, no inlay, no baseline shift </p>
 
 </div>
 </div>
@@ -181,6 +185,8 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>this operator is required for the interval container within the attributeIndex_c class, do not use it </p>
 <dl class="section note"><dt>Note</dt><dd>the interval container wants to accumulate information but as we can not do that here, we simply replace the old values </dd></dl>
 
 </div>
@@ -207,6 +213,8 @@ Static Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>comparison operator </p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -220,6 +228,8 @@ Static Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>do you want to move the baseline of this character or inlay relative to the baseline of the line? A positive value means to move it up. It is given in units of 1/64th pixel. </p>
+
 </div>
 </div>
 <a class="anchor" id="a90967aca24ccb9148956dfa80c4361fa"></a>
@@ -231,6 +241,8 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>colour of the letter </p>
 
 </div>
 </div>
@@ -252,6 +264,8 @@ Static Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>bit for the flags variable, if set the glyph will be underlined </p>
+
 </div>
 </div>
 <a class="anchor" id="ae5bb7412d267908a115f20c4919d5c55"></a>
@@ -263,6 +277,8 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>some flags for the glyph, use FL_xxx constants to change the value </p>
 
 </div>
 </div>
@@ -276,6 +292,8 @@ Static Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>font of the letter </p>
+
 </div>
 </div>
 <a class="anchor" id="a4d5c0a4ffdebd6a6ae1bd4edd5ff3171"></a>
@@ -287,6 +305,8 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>sometimes you want to place something different instead of a glyph (e.g. an image). This can be done with an inlay. </p>
 <p>The inlay is a layout that will be placed instead of an actual glyph. If you define the inlay, the font information will be ignored. How the inlay interacts with line breaks depends on the character that is given as the place holder. Line breaks are done as if there was the given place holder character and not the inlay.</p>
 <p>The vertical alignment of the inlay is controlled by baseline_shift. If baseline_shift is 0 the inlay is placed on the baseline. </p>
 
@@ -302,6 +322,8 @@ Static Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>current language at this letter </p>
+
 </div>
 </div>
 <a class="anchor" id="abde9bd2f257b1490cf55e9e9337070db"></a>
@@ -313,6 +335,8 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>which link does this letter belong to </p>
 <p>To specify the link use the links array in the layoutProperties class. This value is an index into that vector, the value 0 means no link, all the others are reduced by one to represent the link </p>
 
 </div>
@@ -327,6 +351,8 @@ Static Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>the shadows to draw behind the real glyph. The shadows are drawn in the order within this vector and on top of that the real glyph will be drawn inlays will have no shadow </p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -338,7 +364,7 @@ Static Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1_codepoint_attributes__c.html">CodepointAttributes_c</a></li>
-    <li class="footer">Generated on Tue Jan 19 2016 21:24:52 for STLL by
+    <li class="footer">Generated on Thu Jan 28 2016 21:45:13 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

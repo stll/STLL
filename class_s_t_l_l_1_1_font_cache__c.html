@@ -79,7 +79,7 @@ $(document).ready(function(){initNavTree('class_s_t_l_l_1_1_font_cache__c.html',
 <div class="contents">
 
 <p>this class encapsulates open fonts of a single library, it makes sure that each font is open only once  
-</p>
+ <a href="class_s_t_l_l_1_1_font_cache__c.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -98,7 +98,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:aaf066f2304f3bfde44619ff98c0562f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">remove all fonts from the cache, fonts that are still in use will be kept, but all others are removed  <a href="#aaf066f2304f3bfde44619ff98c0562f5">More...</a><br /></td></tr>
 <tr class="separator:aaf066f2304f3bfde44619ff98c0562f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>this class encapsulates open fonts of a single library, it makes sure that each font is open only once </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a1a489a49ae13cbd8fa6d62e56bd2e918"></a>
 <div class="memitem">
 <div class="memproto">
@@ -120,6 +122,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Create a cache using a specific library. </p>
 <p>I am not really sure where is might be useful to use multiple caches on one library... though </p>
 
 </div>
@@ -145,6 +149,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Create a cache using an instance of the FreeType library that is created specifically for this cache instance. </p>
 <p>This is usually the thing you need, create one instance of this class per thread of your application that needs to access the library </p>
 
 </div>
@@ -172,6 +178,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>remove all fonts from the cache, fonts that are still in use will be kept, but all others are removed </p>
+
 </div>
 </div>
 <a class="anchor" id="a15da3357ff0b5336f97960ee7949991f"></a>
@@ -197,6 +205,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Get a font face from this cache with the given resource and size. </p>
 <p>If there is already one instance of this font open, it will be used otherwise a new one will be opened.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -245,7 +255,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1_font_cache__c.html">FontCache_c</a></li>
-    <li class="footer">Generated on Tue Jan 19 2016 21:24:52 for STLL by
+    <li class="footer">Generated on Thu Jan 28 2016 21:45:13 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

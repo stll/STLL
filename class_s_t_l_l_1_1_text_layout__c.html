@@ -165,7 +165,8 @@ Public Attributes</h2></td></tr>
 <tr class="separator:ac44e9c399bf0a7143d9151e44ee5edf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>This class encapsulates a layout, it is a list of drawing commands. </p>
+<div class="textblock"><p>encapsulates a finished layout. </p>
+<p>This class encapsulates a layout, it is a list of drawing commands. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a240a4963a33f540d3d7fb20a68283e2f"></a>
 <div class="memitem">
@@ -205,6 +206,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>create empty layout </p>
+
 </div>
 </div>
 <a class="anchor" id="a4939fe96fa0d0686e51287dc9e86f66a"></a>
@@ -221,6 +224,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>copy constructor </p>
+
 </div>
 </div>
 <a class="anchor" id="a4c4d17b604467b024d227aed91dd398b"></a>
@@ -236,6 +241,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>move constructor </p>
 
 </div>
 </div>
@@ -263,6 +270,8 @@ template&lt;class... Args&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>add a single drawing command to the end of the command list </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">args</td><td>this is a forwarding function that will give all arguments to the constructor of the <a class="el" href="class_s_t_l_l_1_1_command_data__c.html" title="This structure encapsulates a drawing command. ">CommandData_c</a> class that will be added</td></tr>
@@ -294,6 +303,8 @@ template&lt;class... Args&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>add a single drawing command to the end of the command list </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">c</td><td>the command to add</td></tr>
@@ -327,6 +338,8 @@ template&lt;class... Args&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>add a single drawing command to the start of the command list </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">args</td><td>this is a forwarding function that will give all arguments to the constructor of the <a class="el" href="class_s_t_l_l_1_1_command_data__c.html" title="This structure encapsulates a drawing command. ">CommandData_c</a> class that will be added</td></tr>
@@ -358,6 +371,8 @@ template&lt;class... Args&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>add a single drawing command to the start of the command list </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">d</td><td>the command to add</td></tr>
@@ -397,6 +412,8 @@ template&lt;class... Args&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>append a layout to this layout, which means that the drawing commands of the 2nd layout are copied into this layout </p>
 <p>The height, left and right border are adjusted to completely accommodate all of the new layout, the firstBaseline is copied over, when this layout is currently empty, else it is left untouched </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">l</td><td>the layout to append </td></tr>
@@ -430,6 +447,8 @@ template&lt;class... Args&gt; </div>
 </table>
 </div><div class="memdoc">
 
+<p>get the command vector </p>
+
 </div>
 </div>
 <a class="anchor" id="af9ded63be1c601c6f4f10313e8055d65"></a>
@@ -453,6 +472,8 @@ template&lt;class... Args&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>get the y position of the first baseline </p>
 
 </div>
 </div>
@@ -478,6 +499,8 @@ template&lt;class... Args&gt; </div>
 </table>
 </div><div class="memdoc">
 
+<p>the height of the layout. This is supposed to be the vertical space that this layout takes up in 1/64th pixels </p>
+
 </div>
 </div>
 <a class="anchor" id="a97115780b2062d27c90ee4c4bb06c2a9"></a>
@@ -501,6 +524,8 @@ template&lt;class... Args&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>get the left edge of the layout in 1/64th pixels </p>
 
 </div>
 </div>
@@ -526,6 +551,8 @@ template&lt;class... Args&gt; </div>
 </table>
 </div><div class="memdoc">
 
+<p>get the right edge of the layout in 1/64th pixels </p>
+
 </div>
 </div>
 <a class="anchor" id="ad3512314f3d1cad30a9077bae039f0b2"></a>
@@ -549,6 +576,8 @@ template&lt;class... Args&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>move assignment </p>
 
 </div>
 </div>
@@ -574,6 +603,8 @@ template&lt;class... Args&gt; </div>
 </table>
 </div><div class="memdoc">
 
+<p>copy assignment </p>
+
 </div>
 </div>
 <a class="anchor" id="ae15ad454624019af4fae4e66fe54c095"></a>
@@ -597,6 +628,8 @@ template&lt;class... Args&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>set the y position of the first baseline </p>
 
 </div>
 </div>
@@ -622,6 +655,8 @@ template&lt;class... Args&gt; </div>
 </table>
 </div><div class="memdoc">
 
+<p>set the height in 1/64th pixels </p>
+
 </div>
 </div>
 <a class="anchor" id="a7f70ab2cc57617f077a5d795788e9e49"></a>
@@ -646,6 +681,8 @@ template&lt;class... Args&gt; </div>
 </table>
 </div><div class="memdoc">
 
+<p>set the left edge in 1/64th pixels </p>
+
 </div>
 </div>
 <a class="anchor" id="a25e273d4e81a138e2d410905d4e7a0aa"></a>
@@ -669,6 +706,8 @@ template&lt;class... Args&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>get the right edge in 1/64th pixels </p>
 
 </div>
 </div>
@@ -695,6 +734,8 @@ template&lt;class... Args&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>shift all the commands within the layout by the given amount </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">dx</td><td>x-offset in 1/64th pixels </td></tr>
@@ -716,6 +757,8 @@ template&lt;class... Args&gt; </div>
       </table>
 </div><div class="memdoc">
 
+<p>information for all links TODO this interface is bad </p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -727,7 +770,7 @@ template&lt;class... Args&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1_text_layout__c.html">TextLayout_c</a></li>
-    <li class="footer">Generated on Tue Jan 19 2016 21:24:52 for STLL by
+    <li class="footer">Generated on Thu Jan 28 2016 21:45:13 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

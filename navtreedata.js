@@ -14,7 +14,9 @@ var NAVTREE =
     ] ],
     [ "Drawing the layouts", "drawing_pg.html", [
       [ "Gamma", "drawing_pg.html#gamma_sec", null ],
-      [ "Sub pixel placement", "drawing_pg.html#subpixel_sec", null ]
+      [ "Sub pixel placement", "drawing_pg.html#subpixel_sec", null ],
+      [ "Output Classes", "drawing_pg.html#outputclasses_sec", null ],
+      [ "OpenGL drawing", "drawing_pg.html#opengl_sec", null ]
     ] ],
     [ "Fonts in STLL", "fonts_pg.html", null ],
     [ "HTML and CSS", "_h_t_m_l__c_s_s_pg.html", [
@@ -44,6 +46,7 @@ var NAVTREE =
         [ "All", "functions.html", null ],
         [ "Functions", "functions_func.html", null ],
         [ "Variables", "functions_vars.html", null ],
+        [ "Typedefs", "functions_type.html", null ],
         [ "Enumerator", "functions_eval.html", null ]
       ] ]
     ] ],
@@ -60,7 +63,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_h_t_m_l__c_s_s_pg.html",
-"pages.html"
+"namespacemembers_type.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

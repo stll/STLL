@@ -100,6 +100,7 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><h3>template&lt;class G = internal::Gamma_c&lt;&gt;&gt;<br />
 class STLL::showSDL&lt; G &gt;</h3>
 
+<p>a class to output layouts using SDL </p>
 <p>To output layouts using this class, create an object of it and then use the showLayout Function to output the layout.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
@@ -171,6 +172,8 @@ template&lt;class G = internal::Gamma_c&lt;&gt;&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>display a single layout </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">l</td><td>layout to draw </td></tr>
@@ -210,6 +213,8 @@ template&lt;class G = internal::Gamma_c&lt;&gt;&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>trims the font cache down to a maximal number of entries </p>
 <p>the SDL output module keeps a cache of rendered glyphs to speed up the process of outputting layouts. This cache may get too big on memory. To keep things within limits you can call this function to remove entries. If there are more entries in the cache the ones that were used the longest time ago are removed</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -229,7 +234,7 @@ template&lt;class G = internal::Gamma_c&lt;&gt;&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1show_s_d_l.html">showSDL</a></li>
-    <li class="footer">Generated on Tue Jan 19 2016 21:24:52 for STLL by
+    <li class="footer">Generated on Thu Jan 28 2016 21:45:13 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>
