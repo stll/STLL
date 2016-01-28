@@ -58,7 +58,7 @@ namespace STLL {
  * Gamma correct output is not handled by this class directly. You need to activate the sRGB
  * property for the target that this paints on
  *
- * \tparam V Major version of OpenGL to use
+ * \tparam V Major version of OpenGL to use, supported are 1, 2 and 3, use 3 as well for OpenGL 4
  * \tparam C size of the texture cache. The cache is square C time C pixels.
  * \tparam G the gamma calculation function, if you use sRGB output... normally you don't need
  * to change this, keep the default
@@ -121,6 +121,10 @@ class showOpenGL : internal::openGL_internals<V>
      * \param images a pointer to an image drawer class that is used to draw the images, when you give
      *                a nullptr here, no images will be drawn
      * \param dc pointer to a cache object that will speed up drawing by reusing OpenGL buffers
+     *           when nullptr is given here, no caching will be don. If you know you will ouput something
+     *           many times, give the pointer. You will not loose much speed on the creation of this
+     *           cache, except for OpenGL 1, so you can simply always specify this and forget about it
+     *           later on.
      */
     void showLayout(const TextLayout_c & l, int sx, int sy, SubPixelArrangement sp,
                     imageDrawerOpenGL_c * images = nullptr, DrawCache_c * dc = nullptr)
@@ -264,7 +268,7 @@ class showOpenGL : internal::openGL_internals<V>
             cleared = true;
           }
         }
-       
+
         i = j;
       }
 
@@ -286,6 +290,10 @@ class showOpenGL : internal::openGL_internals<V>
      */
     const uint8_t * getData(void) const { return cache.getData(); }
 
+    /** \brief clear the glyph cache. This might be useful when you change
+     * the fonts that you use for output, or any other reason that will
+     * make the cache content useless
+     */
     void clear(void)
     {
       cache.clear();
