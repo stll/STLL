@@ -9,10 +9,10 @@ template <int V>
 class openGL_internals
 {
   public:
-    void setupProjection(int width, int height) { }
     void setup(void) { }
     void cleanup(void) { }
 
+    void setupProjection(int width, int height) { }
     void updateTexture(const uint8_t * data, int C) { }
 
     class DrawCacheInternal_c { };
@@ -36,63 +36,7 @@ class openGL_internals
 template <>
 class openGL_internals<1>
 {
-
-  public:
-
-    void setupProjection(int width, int height)
-    {
-      glViewport(0, 0, width, height);
-      glMatrixMode(GL_PROJECTION);
-      glLoadIdentity();
-      glOrtho(0, width, height, 0, -1, 1);
-      glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity();
-    }
-
-    void setup(void) { }
-    void cleanup(void) { }
-    void updateTexture(const uint8_t * data, int C)
-    {
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, C, C, 0, GL_ALPHA, GL_UNSIGNED_BYTE, data);
-    }
-
-    /** \brief class to store a layout in a cached format for even faster repaint */
-    class DrawCacheInternal_c
-    {
-    public:
-
-      GLuint vDisplayList;
-      uint32_t atlasId;
-
-      ~DrawCacheInternal_c(void)
-      {
-        glDeleteLists(vDisplayList, 1);
-      }
-
-      DrawCacheInternal_c(void) : vDisplayList(0), atlasId(0) {}
-
-      DrawCacheInternal_c(const DrawCacheInternal_c &) = delete;
-
-      DrawCacheInternal_c(DrawCacheInternal_c && orig)
-      {
-        vDisplayList = orig.vDisplayList; orig.vDisplayList = 0;
-      }
-
-      void operator=(DrawCacheInternal_c && orig)
-      {
-        vDisplayList = orig.vDisplayList; orig.vDisplayList = 0;
-        atlasId = orig.atlasId; orig.atlasId = 0;
-      }
-    };
-
-    void drawCache(DrawCacheInternal_c & dc, SubPixelArrangement sp, int sx, int sy, int C)
-    {
-      glEnable(GL_TEXTURE_2D);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      drawBuffers(dc.vDisplayList, sp, sx, sy);
-    }
-
-
+  private:
     // Helper function to draw one glyph or one sub pixel color of one glyph
     void drawGlyph(const CommandData_c & i, int subpcol, const FontAtlasData_c & pos, Color_c c, int C)
     {
@@ -120,6 +64,61 @@ class openGL_internals<1>
       glTranslated(sx/64.0, sy/64, 0);
       glCallList(displayList);
       glPopMatrix();
+    }
+
+
+  public:
+
+    void setup(void) { }
+    void cleanup(void) { }
+
+    void setupProjection(int width, int height)
+    {
+      glViewport(0, 0, width, height);
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      glOrtho(0, width, height, 0, -1, 1);
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+    }
+
+    void updateTexture(const uint8_t * data, int C)
+    {
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, C, C, 0, GL_ALPHA, GL_UNSIGNED_BYTE, data);
+    }
+
+    class DrawCacheInternal_c
+    {
+      public:
+        GLuint vDisplayList;
+        uint32_t atlasId;
+
+        ~DrawCacheInternal_c(void)
+        {
+          glDeleteLists(vDisplayList, 1);
+        }
+
+        DrawCacheInternal_c(void) : vDisplayList(0), atlasId(0) {}
+
+        DrawCacheInternal_c(const DrawCacheInternal_c &) = delete;
+
+        DrawCacheInternal_c(DrawCacheInternal_c && orig)
+        {
+          vDisplayList = orig.vDisplayList; orig.vDisplayList = 0;
+        }
+
+        void operator=(DrawCacheInternal_c && orig)
+        {
+          vDisplayList = orig.vDisplayList; orig.vDisplayList = 0;
+          atlasId = orig.atlasId; orig.atlasId = 0;
+        }
+    };
+
+    void drawCache(DrawCacheInternal_c & dc, SubPixelArrangement sp, int sx, int sy, int C)
+    {
+      glEnable(GL_TEXTURE_2D);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      drawBuffers(dc.vDisplayList, sp, sx, sy);
     }
 
     class CreateInternal_c
@@ -224,7 +223,8 @@ class openGL_internals<1>
 template <>
 class openGL_internals<2>
 {
-  public:
+  private:
+
     internal::OGL_Program_c program;
 
     GLuint vertexBuffer;
@@ -240,12 +240,40 @@ class openGL_internals<2>
       x(_x), y(_y), u(_u), v(_v), r(c.r()), g(c.g()), b(c.b()), a(c.a()) {}
     };
 
-    void setupProjection(int width, int height)
+    void drawBuffers(SubPixelArrangement sp, size_t s, int sx, int sy, int C)
     {
-      glViewport(0, 0, width, height);
-      program.setUniform("width", width/2.0f);
-      program.setUniform("height", height/2.0f);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glEnableVertexAttribArray(0); glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, x));
+      glEnableVertexAttribArray(1); glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, u));
+      glEnableVertexAttribArray(2); glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, r));
+
+      program.setUniform("offset", sx/64.0, sy/64);
+
+      switch (sp)
+      {
+        default:
+        case SUBP_NONE:
+          program.setUniform("ashift", 0);
+          glDrawArrays(GL_QUADS, 0, s);
+          break;
+
+        case SUBP_RGB:
+          glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -1.0f/C); glDrawArrays(GL_QUADS, 0, s);
+          glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -0.0f/C); glDrawArrays(GL_QUADS, 0, s);
+          glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); program.setUniform("ashift",  1.0f/C); glDrawArrays(GL_QUADS, 0, s);
+          glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+          break;
+
+        case SUBP_BGR:
+          glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); program.setUniform("ashift", -1.0f/C); glDrawArrays(GL_QUADS, 0, s);
+          glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -0.0f/C); glDrawArrays(GL_QUADS, 0, s);
+          glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); program.setUniform("ashift",  1.0f/C); glDrawArrays(GL_QUADS, 0, s);
+          glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+          break;
+      }
     }
+
+  public:
 
     void setup(void)
     {
@@ -293,6 +321,13 @@ class openGL_internals<2>
       glDeleteBuffers(1, &vertexBuffer);
     }
 
+    void setupProjection(int width, int height)
+    {
+      glViewport(0, 0, width, height);
+      program.setUniform("width", width/2.0f);
+      program.setUniform("height", height/2.0f);
+    }
+
     void updateTexture(const uint8_t * data, int C)
     {
       glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, C, C, 0, GL_ALPHA, GL_UNSIGNED_BYTE, data);
@@ -331,38 +366,6 @@ class openGL_internals<2>
       }
     };
 
-    void drawBuffers(SubPixelArrangement sp, size_t s, int sx, int sy, int C)
-    {
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glEnableVertexAttribArray(0); glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, x));
-      glEnableVertexAttribArray(1); glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, u));
-      glEnableVertexAttribArray(2); glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, r));
-
-      program.setUniform("offset", sx/64.0, sy/64);
-
-      switch (sp)
-      {
-        default:
-        case SUBP_NONE:
-          program.setUniform("ashift", 0);
-          glDrawArrays(GL_QUADS, 0, s);
-          break;
-
-        case SUBP_RGB:
-          glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -1.0f/C); glDrawArrays(GL_QUADS, 0, s);
-          glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -0.0f/C); glDrawArrays(GL_QUADS, 0, s);
-          glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); program.setUniform("ashift",  1.0f/C); glDrawArrays(GL_QUADS, 0, s);
-          glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-          break;
-
-        case SUBP_BGR:
-          glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); program.setUniform("ashift", -1.0f/C); glDrawArrays(GL_QUADS, 0, s);
-          glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -0.0f/C); glDrawArrays(GL_QUADS, 0, s);
-          glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); program.setUniform("ashift",  1.0f/C); glDrawArrays(GL_QUADS, 0, s);
-          glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-          break;
-      }
-    }
 
     class CreateInternal_c
     {
@@ -384,7 +387,8 @@ class openGL_internals<2>
     void startCachePreparation(DrawCacheInternal_c & dc) { }
     void endCachePreparation(DrawCacheInternal_c & dc, CreateInternal_c & vb, SubPixelArrangement sp, int sx, int sy, uint32_t atlasId, int C)
     {
-      if (dc.vBuffer == 0) { glGenBuffers(1, &dc.vBuffer); } glBindBuffer(GL_ARRAY_BUFFER, dc.vBuffer);
+      if (dc.vBuffer == 0) { glGenBuffers(1, &dc.vBuffer); }
+      glBindBuffer(GL_ARRAY_BUFFER, dc.vBuffer);
       glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.vb.size(), vb.vb.data(), GL_STATIC_DRAW);
 
       drawBuffers(sp, vb.vb.size(), sx, sy, C);
@@ -438,7 +442,7 @@ class openGL_internals<2>
 template <>
 class openGL_internals<3>
 {
-  public:
+  private:
     internal::OGL_Program_c program;
 
     GLuint vertexBuffer, vertexArray, vertexElement;
@@ -455,13 +459,37 @@ class openGL_internals<3>
       x(_x), y(_y), u(_u), v(_v), r(c.r()), g(c.g()), b(c.b()), a(c.a()), sp(_sp) {}
     };
 
-    void setupProjection(int width, int height)
+    void drawBuffers(SubPixelArrangement sp, size_t s, int sx, int sy, int C)
     {
-      glViewport(0, 0, width, height);
-      program.setUniform("width", width/2.0f);
-      program.setUniform("height", height/2.0f);
+      glBlendFunc(GL_SRC1_COLOR, GL_ONE_MINUS_SRC1_COLOR);
+      program.setUniform("offset", 1.0*sx/64.0, sy/64);
+      switch (sp)
+      {
+        default:
+        case SUBP_NONE:
+          program.setUniform("texRshift", 0.0f, 0.0f);
+          program.setUniform("texGshift", 0.0f, 0.0f);
+          program.setUniform("texBshift", 0.0f, 0.0f);
+          glDrawElements(GL_TRIANGLES, s, GL_UNSIGNED_INT, 0);
+          break;
+
+        case SUBP_RGB:
+          program.setUniform("texRshift", 0.0f, 0.0f);
+          program.setUniform("texGshift", 1.0f/C, 0.0f);
+          program.setUniform("texBshift", 2.0f/C, 0.0f);
+          glDrawElements(GL_TRIANGLES, s, GL_UNSIGNED_INT, 0);
+          break;
+
+        case SUBP_BGR:
+          program.setUniform("texRshift", 2.0f/C, 0.0f);
+          program.setUniform("texGshift", 1.0f/C, 0.0f);
+          program.setUniform("texBshift", 0.0f/C, 0.0f);
+          glDrawElements(GL_TRIANGLES, s, GL_UNSIGNED_INT, 0);
+          break;
+      }
     }
 
+  public:
     void setup(void)
     {
       program.attachShader(GL_FRAGMENT_SHADER, "330 core",
@@ -541,6 +569,13 @@ class openGL_internals<3>
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, C, C, 0, GL_RED, GL_UNSIGNED_BYTE, data);
     }
 
+    void setupProjection(int width, int height)
+    {
+      glViewport(0, 0, width, height);
+      program.setUniform("width", width/2.0f);
+      program.setUniform("height", height/2.0f);
+    }
+
     /** \brief class to store a layout in a cached format for even faster repaint */
     class DrawCacheInternal_c
     {
@@ -584,36 +619,6 @@ class openGL_internals<3>
     {
       glBindVertexArray(dc.vArray);
       drawBuffers(sp, dc.elements, sx, sy, C);
-    }
-
-    void drawBuffers(SubPixelArrangement sp, size_t s, int sx, int sy, int C)
-    {
-      glBlendFunc(GL_SRC1_COLOR, GL_ONE_MINUS_SRC1_COLOR);
-      program.setUniform("offset", 1.0*sx/64.0, sy/64);
-      switch (sp)
-      {
-        default:
-        case SUBP_NONE:
-          program.setUniform("texRshift", 0.0f, 0.0f);
-          program.setUniform("texGshift", 0.0f, 0.0f);
-          program.setUniform("texBshift", 0.0f, 0.0f);
-          glDrawElements(GL_TRIANGLES, s, GL_UNSIGNED_INT, 0);
-          break;
-
-        case SUBP_RGB:
-          program.setUniform("texRshift", 0.0f, 0.0f);
-          program.setUniform("texGshift", 1.0f/C, 0.0f);
-          program.setUniform("texBshift", 2.0f/C, 0.0f);
-          glDrawElements(GL_TRIANGLES, s, GL_UNSIGNED_INT, 0);
-          break;
-
-        case SUBP_BGR:
-          program.setUniform("texRshift", 2.0f/C, 0.0f);
-          program.setUniform("texGshift", 1.0f/C, 0.0f);
-          program.setUniform("texBshift", 0.0f/C, 0.0f);
-          glDrawElements(GL_TRIANGLES, s, GL_UNSIGNED_INT, 0);
-          break;
-      }
     }
 
     class CreateInternal_c
@@ -701,7 +706,6 @@ class openGL_internals<3>
       vb.vbe.push_back(si+0); vb.vbe.push_back(si+1); vb.vbe.push_back(si+2);
       vb.vbe.push_back(si+0); vb.vbe.push_back(si+2); vb.vbe.push_back(si+3);
     }
-
 };
 
 } }
