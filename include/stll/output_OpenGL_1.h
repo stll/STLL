@@ -27,9 +27,11 @@
  */
 
 #include "layouterFont.h"
+#include "color.h"
 
 #include "internal/glyphAtlas.h"
 #include "internal/gamma.h"
+#include "internal/openGL_internal.h"
 
 namespace STLL {
 
@@ -61,80 +63,24 @@ namespace STLL {
  * to change this, keep the default
  */
 template <int C, class G = internal::Gamma_c<>>
-class showOpenGL
+class showOpenGL : internal::openGL_internals<1>
 {
   private:
     internal::GlyphAtlas_c cache;
     G gamma;
 
-
     GLuint glTextureId = 0;     // OpenGL texture id
     uint32_t uploadVersion = 0; // a counter changed each time the texture changes to know when to update
     uint32_t atlasId = 1;
 
-    // Helper function to draw one glyph or one sub pixel color of one glyph
-    void drawGlyph(const CommandData_c & i, SubPixelArrangement sp, int subpcol)
-    {
-      auto pos = cache.getGlyph(i.font, i.glyphIndex, sp, i.blurr).value();
-      double w = pos.width-1;
-      double wo = 0;
-
-      if (subpcol > 0)
-      {
-        w /= 3.0;
-        wo = subpcol-2;
-      }
-
-      glBegin(GL_QUADS);
-      Color_c c = gamma.forward(i.c);
-      glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
-      glTexCoord2f(1.0*(pos.pos_x+wo)/C,             1.0*(pos.pos_y)/C);            glVertex3f(i.x/64.0+pos.left,   (i.y+32)/64-pos.top,            0);
-      glTexCoord2f(1.0*(pos.pos_x+wo+pos.width-1)/C, 1.0*(pos.pos_y)/C);            glVertex3f(i.x/64.0+pos.left+w, (i.y+32)/64-pos.top,            0);
-      glTexCoord2f(1.0*(pos.pos_x+wo+pos.width-1)/C, 1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f(i.x/64.0+pos.left+w, (i.y+32)/64-pos.top+pos.rows-1, 0);
-      glTexCoord2f(1.0*(pos.pos_x+wo)/C,             1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f(i.x/64.0+pos.left,   (i.y+32)/64-pos.top+pos.rows-1, 0);
-      glEnd();
-    }
-
-    void drawBuffers(GLuint displayList, SubPixelArrangement sp, int sx, int sy)
-    {
-      glPushMatrix();
-      glTranslated(sx/64.0, sy/64, 0);
-      glCallList(displayList);
-      glPopMatrix();
-    }
-
   public:
 
-    /** \brief class to store a layout in a cached format for even faster repaint */
-    class DrawCache_c
-    {
-    public:
+    typedef DrawCacheInternal_c DrawCache_c;
 
-      GLuint vDisplayList;
-      uint32_t atlasId;
-
-      ~DrawCache_c(void)
-      {
-        glDeleteLists(vDisplayList, 1);
-      }
-
-      DrawCache_c(void) : vDisplayList(0), atlasId(0) {}
-
-      DrawCache_c(const DrawCache_c &) = delete;
-
-      DrawCache_c(DrawCache_c && orig)
-      {
-        vDisplayList = orig.vDisplayList; orig.vDisplayList = 0;
-      }
-
-      void operator=(DrawCache_c && orig)
-      {
-        vDisplayList = orig.vDisplayList; orig.vDisplayList = 0;
-        atlasId = orig.atlasId; orig.atlasId = 0;
-      }
-    };
     /** \brief constructor */
-    showOpenGL(void) : cache(C, C) {
+    showOpenGL(void) : cache(C, C)
+    {
+      glActiveTexture(GL_TEXTURE0);
       glGenTextures(1, &glTextureId);
       glBindTexture(GL_TEXTURE_2D, glTextureId);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -143,11 +89,14 @@ class showOpenGL
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexEnvi(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_REPLACE);
       gamma.setGamma(22);
+
+      setup();
     }
 
     ~showOpenGL(void)
     {
         glDeleteTextures(1, &glTextureId);
+        cleanup();
     }
 
     /** \brief helper class used to draw images */
@@ -172,13 +121,13 @@ class showOpenGL
     void showLayout(const TextLayout_c & l, int sx, int sy, SubPixelArrangement sp,
                     imageDrawerOpenGL_c * images = nullptr, DrawCache_c * dc = nullptr)
     {
+      glActiveTexture(GL_TEXTURE0);
       glBindTexture( GL_TEXTURE_2D, glTextureId );
       glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
       if (dc && dc->atlasId == atlasId)
       {
-        drawBuffers(dc->vDisplayList, sp, sx, sy);
+        drawCache(*dc, sp, sx, sy, C);
         return;
       }
 
@@ -189,6 +138,10 @@ class showOpenGL
       while (i < dat.size())
       {
         size_t j = i;
+
+        // make sure that there is a small completely filled rectangle
+        // used for drawing filled rectangles
+        cache.getRect(640, 640, SUBP_NONE, 0);
 
         while (j < dat.size())
         {
@@ -219,23 +172,20 @@ class showOpenGL
         if (cache.getVersion() != uploadVersion)
         {
           uploadVersion = cache.getVersion();
-          glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, C, C, 0, GL_ALPHA, GL_UNSIGNED_BYTE, cache.getData() );
+          updateTexture(cache.getData(), C);
         }
+
+        CreateInternal_c vb(dat.size());
 
         size_t k = i;
 
         if (dc && !cleared && j == dat.size())
         {
-          if (dc->vDisplayList == 0)
-          {
-            dc->vDisplayList = glGenLists(1);
-          }
-          glNewList(dc->vDisplayList, GL_COMPILE);
+          startCachePreparation(*dc);
         }
         else
         {
-          glPushMatrix();
-          glTranslated(sx/64.0, sy/64, 0);
+          startPreparation(sx, sy);
         }
 
         while (k < j)
@@ -245,33 +195,17 @@ class showOpenGL
           switch (ii.command)
           {
             case CommandData_c::CMD_GLYPH:
-              glEnable(GL_TEXTURE_2D);
+              {
+                auto pos = cache.getGlyph(ii.font, ii.glyphIndex, sp, ii.blurr).value();
+                Color_c c = gamma.forward(ii.c);
 
-              if (ii.blurr > cache.blurrmax)
-              {
-                drawGlyph(ii, sp, 0);
-              }
-              else
-              {
-                switch (sp)
+                if ((sp == SUBP_RGB || sp == SUBP_BGR) && (ii.blurr <= cache.blurrmax))
                 {
-                  case SUBP_RGB:
-                    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); drawGlyph(ii, sp, 1);
-                    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); drawGlyph(ii, sp, 2);
-                    glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); drawGlyph(ii, sp, 3);
-                    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-                    break;
-
-                  case SUBP_BGR:
-                    glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); drawGlyph(ii, sp, 1);
-                    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); drawGlyph(ii, sp, 2);
-                    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); drawGlyph(ii, sp, 3);
-                    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-                    break;
-
-                  default:
-                    drawGlyph(ii, sp, 0);
-                    break;
+                  drawSubpGlyph(vb, sp, ii, pos, c, C);
+                }
+                else
+                {
+                  drawNormalGlyph(vb, ii, pos, c, C);
                 }
               }
               break;
@@ -279,32 +213,15 @@ class showOpenGL
             case CommandData_c::CMD_RECT:
               if (ii.blurr == 0)
               {
-                glDisable(GL_TEXTURE_2D);
+                auto pos = cache.getRect(640, 640, SUBP_NONE, 0).value();
                 Color_c c = gamma.forward(ii.c);
-                glBegin(GL_QUADS);
-                glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
-                int x = (ii.x+32)/64;
-                int y = (ii.y+32)/64;
-                int w = (ii.x+ii.w+32)/64;
-                int h = (ii.y+ii.h+32)/64;
-                glVertex3f(x, y, 0);
-                glVertex3f(w, y, 0);
-                glVertex3f(w, h, 0);
-                glVertex3f(x, h, 0);
-                glEnd();
+                drawRectangle(vb, ii, pos, c, C);
               }
               else
               {
-                glEnable(GL_TEXTURE_2D);
                 auto pos = cache.getRect(ii.w, ii.h, sp, ii.blurr).value();
-                glBegin(GL_QUADS);
                 Color_c c = gamma.forward(ii.c);
-                glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
-                glTexCoord2f(1.0*(pos.pos_x)/C,             1.0*(pos.pos_y)/C);            glVertex3f(ii.x/64.0+pos.left,             (ii.y+32)/64-pos.top,            0);
-                glTexCoord2f(1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y)/C);            glVertex3f(ii.x/64.0+pos.left+pos.width-1, (ii.y+32)/64-pos.top,            0);
-                glTexCoord2f(1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f(ii.x/64.0+pos.left+pos.width-1, (ii.y+32)/64-pos.top+pos.rows-1, 0);
-                glTexCoord2f(1.0*(pos.pos_x)/C,             1.0*(pos.pos_y+pos.rows-1)/C); glVertex3f(ii.x/64.0+pos.left,             (ii.y+32)/64-pos.top+pos.rows-1, 0);
-                glEnd();
+                drawSmoothRectangle(vb, ii, pos, c, C);
               }
               break;
 
@@ -318,14 +235,12 @@ class showOpenGL
 
         if (dc && !cleared && j == dat.size())
         {
-          glEndList();
-          drawBuffers(dc->vDisplayList, sp, sx, sy);
-
-          dc->atlasId = atlasId;
+          endCachePreparation(*dc, vb, sp, sx, sy, atlasId, C);
+          return;
         }
         else
         {
-          glPopMatrix();
+          endPreparation(vb, sp, sx, sy, C);
         }
 
         i = j;
@@ -349,12 +264,7 @@ class showOpenGL
      */
     void setupMatrixes(int width, int height)
     {
-      glViewport(0, 0, width, height);
-      glMatrixMode(GL_PROJECTION);
-      glLoadIdentity();
-      glOrtho(0, width, height, 0, -1, 1);
-      glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity();
+      setupProjection(width, height);
     }
 
     /** \brief get a pointer to the texture atlas with all the glyphs

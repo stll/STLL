@@ -31,7 +31,7 @@
 
 #include "internal/glyphAtlas.h"
 #include "internal/gamma.h"
-#include "internal/ogl_shader.h"
+#include "internal/openGL_internal.h"
 
 namespace STLL {
 
@@ -63,7 +63,7 @@ namespace STLL {
  * to change this, keep the default
  */
 template <int C, class G = internal::Gamma_c<>>
-class showOpenGL
+class showOpenGL : internal::openGL_internals<2>
 {
   private:
     internal::GlyphAtlas_c cache;
@@ -73,89 +73,13 @@ class showOpenGL
     uint32_t uploadVersion = 0; // a counter changed each time the texture changes to know when to update
     uint32_t atlasId = 1;
 
-    internal::OGL_Program_c program;
-    GLuint vertexBuffer;
-
-    class vertex
-    {
-    public:
-      GLfloat x, y;   // position
-      GLfloat u, v;   // texture
-      uint8_t r, g, b, a; // colour
-
-      vertex (GLfloat _x, GLfloat _y, GLfloat _u, GLfloat _v, Color_c c) :
-      x(_x), y(_y), u(_u), v(_v), r(c.r()), g(c.g()), b(c.b()), a(c.a()) {}
-    };
-
-
-    void drawBuffers(SubPixelArrangement sp, size_t s, int sx, int sy)
-    {
-      glEnableVertexAttribArray(0); glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, x));
-      glEnableVertexAttribArray(1); glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, u));
-      glEnableVertexAttribArray(2); glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, r));
-
-      program.setUniform("offset", sx/64.0, sy/64);
-
-      switch (sp)
-      {
-        default:
-        case SUBP_NONE:
-          program.setUniform("ashift", 0);
-          glDrawArrays(GL_QUADS, 0, s);
-          break;
-
-        case SUBP_RGB:
-          glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -1.0f/C); glDrawArrays(GL_QUADS, 0, s);
-          glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -0.0f/C); glDrawArrays(GL_QUADS, 0, s);
-          glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); program.setUniform("ashift",  1.0f/C); glDrawArrays(GL_QUADS, 0, s);
-          glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-          break;
-
-        case SUBP_BGR:
-          glColorMask(GL_FALSE, GL_FALSE, GL_TRUE, GL_FALSE); program.setUniform("ashift", -1.0f/C); glDrawArrays(GL_QUADS, 0, s);
-          glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_FALSE); program.setUniform("ashift", -0.0f/C); glDrawArrays(GL_QUADS, 0, s);
-          glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); program.setUniform("ashift",  1.0f/C); glDrawArrays(GL_QUADS, 0, s);
-          glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-          break;
-      }    }
-
   public:
 
-    /** \brief class to store a layout in a cached format for even faster repaint */
-    class DrawCache_c
-    {
-    public:
-
-      GLuint vBuffer;
-      size_t elements;
-      uint32_t atlasId;
-
-      ~DrawCache_c(void)
-      {
-        glDeleteBuffers(1, &vBuffer);
-      }
-
-      DrawCache_c(void) : vBuffer(0), elements(0), atlasId(0) {}
-
-      DrawCache_c(const DrawCache_c &) = delete;
-
-      DrawCache_c(DrawCache_c && orig)
-      {
-        vBuffer = orig.vBuffer; orig.vBuffer = 0;
-        elements = orig.elements; orig.elements = 0;
-        atlasId = orig.atlasId; orig.atlasId = 0;
-      }
-
-      void operator=(DrawCache_c && orig)
-      {
-        vBuffer = orig.vBuffer; orig.vBuffer = 0;
-        elements = orig.elements; orig.elements = 0;
-        atlasId = orig.atlasId; orig.atlasId = 0;
-      }
-    };
+    typedef DrawCacheInternal_c DrawCache_c;
 
     /** \brief constructor */
-    showOpenGL(void) : cache(C, C) {
+    showOpenGL(void) : cache(C, C)
+    {
       glActiveTexture(GL_TEXTURE0);
       glGenTextures(1, &glTextureId);
       glBindTexture(GL_TEXTURE_2D, glTextureId);
@@ -166,49 +90,13 @@ class showOpenGL
       glTexEnvi(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_REPLACE);
       gamma.setGamma(22);
 
-      program.attachShader(GL_FRAGMENT_SHADER, "110",
-        "uniform sampler2D texture;"
-
-        "void main()"
-        "{"
-        "  vec2 uv = gl_TexCoord[0].xy;"
-        "  vec4 current = texture2D(texture, uv);"
-        "  gl_FragColor = vec4(gl_Color.r, gl_Color.g, gl_Color.b, current.a);"
-        "}"
-      );
-
-      program.attachShader(GL_VERTEX_SHADER, "110",
-        "uniform float width;"
-        "uniform float height;"
-        "uniform float ashift;"
-        "uniform vec2 offset;"
-
-        "attribute vec2 vertex;"
-        "attribute vec4 color;"
-        "attribute vec2 tex_coord;"
-        "void main()"
-        "{"
-        "  gl_FrontColor = vec4(color.r/255.0, color.g/255.0, color.b/255.0, color.a/255.0);"
-        "  gl_TexCoord[0].xy = vec2(tex_coord.x+ashift, tex_coord.y);"
-        "  gl_Position = vec4((vertex.x-width+offset.x)/width, 1.0-(vertex.y+offset.y)/height, 0, 1.0);"
-        "}"
-      );
-
-      program.bindAttributeLocation(0, "vertex");
-      program.bindAttributeLocation(1, "tex_coord");
-      program.bindAttributeLocation(2, "color");
-
-      program.link();
-
-      program.setUniform("texture", 0);
-
-      glGenBuffers(1, &vertexBuffer);
+      setup();
     }
 
     ~showOpenGL(void)
     {
         glDeleteTextures(1, &glTextureId);
-        glDeleteBuffers(1, &vertexBuffer);
+        cleanup();
     }
 
     /** \brief helper class used to draw images */
@@ -236,13 +124,10 @@ class showOpenGL
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, glTextureId );
       glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
       if (dc && dc->atlasId == atlasId)
       {
-        glBindBuffer(GL_ARRAY_BUFFER, dc->vBuffer);
-
-        drawBuffers(sp, dc->elements, sx, sy);
+        drawCache(*dc, sp, sx, sy, C);
         return;
       }
 
@@ -287,13 +172,21 @@ class showOpenGL
         if (cache.getVersion() != uploadVersion)
         {
           uploadVersion = cache.getVersion();
-          glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, C, C, 0, GL_ALPHA, GL_UNSIGNED_BYTE, cache.getData() );
+          updateTexture(cache.getData(), C);
         }
 
-        std::vector<vertex> vb;
-        vb.reserve(dat.size()*4);
+        CreateInternal_c vb(dat.size());
 
         size_t k = i;
+
+        if (dc && !cleared && j == dat.size())
+        {
+          startCachePreparation(*dc);
+        }
+        else
+        {
+          startPreparation(sx, sy);
+        }
 
         while (k < j)
         {
@@ -308,17 +201,11 @@ class showOpenGL
 
                 if ((sp == SUBP_RGB || sp == SUBP_BGR) && (ii.blurr <= cache.blurrmax))
                 {
-                  vb.push_back(vertex((ii.x)/64.0+pos.left,               (ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c));
-                  vb.push_back(vertex((ii.x)/64.0+pos.left+pos.width/3.0, (ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c));
-                  vb.push_back(vertex((ii.x)/64.0+pos.left+pos.width/3.0, (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c));
-                  vb.push_back(vertex((ii.x)/64.0+pos.left,               (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c));
+                  drawSubpGlyph(vb, sp, ii, pos, c, C);
                 }
                 else
                 {
-                  vb.push_back(vertex((ii.x)/64.0+pos.left,           (ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c));
-                  vb.push_back(vertex((ii.x)/64.0+pos.left+pos.width, (ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c));
-                  vb.push_back(vertex((ii.x)/64.0+pos.left+pos.width, (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c));
-                  vb.push_back(vertex((ii.x)/64.0+pos.left,           (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c));
+                  drawNormalGlyph(vb, ii, pos, c, C);
                 }
               }
               break;
@@ -329,19 +216,14 @@ class showOpenGL
               {
                 auto pos = cache.getRect(640, 640, SUBP_NONE, 0).value();
                 Color_c c = gamma.forward(ii.c);
-                vb.push_back(vertex((ii.x+32)/64,      (ii.y+32)/64,      1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+5)/C,          c));
-                vb.push_back(vertex((ii.x+32+ii.w)/64, (ii.y+32)/64,      1.0*(pos.pos_x+pos.width-5)/C, 1.0*(pos.pos_y+5)/C,          c));
-                vb.push_back(vertex((ii.x+32+ii.w)/64, (ii.y+32+ii.h)/64, 1.0*(pos.pos_x+pos.width-5)/C, 1.0*(pos.pos_y+pos.rows-5)/C, c));
-                vb.push_back(vertex((ii.x+32)/64,      (ii.y+32+ii.h)/64, 1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+pos.rows-5)/C, c));
+                drawRectangle(vb, ii, pos, c, C);
               }
               else
               {
                 auto pos = cache.getRect(ii.w, ii.h, sp, ii.blurr).value();
                 Color_c c = gamma.forward(ii.c);
-                vb.push_back(vertex((ii.x+32)/64+pos.left,           (ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c));
-                vb.push_back(vertex((ii.x+32)/64+pos.left+pos.width, (ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c));
-                vb.push_back(vertex((ii.x+32)/64+pos.left+pos.width, (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c));
-                vb.push_back(vertex((ii.x+32)/64+pos.left,           (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c));
+
+                drawSmoothRectangle(vb, ii, pos, c, C);
               }
               break;
 
@@ -355,22 +237,12 @@ class showOpenGL
 
         if (dc && !cleared && j == dat.size())
         {
-          if (dc->vBuffer == 0) { glGenBuffers(1, &dc->vBuffer); } glBindBuffer(GL_ARRAY_BUFFER, dc->vBuffer);
-          glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.size(), vb.data(), GL_STATIC_DRAW);
-
-          drawBuffers(sp, vb.size(), sx, sy);
-
-          dc->atlasId = atlasId;
-          dc->elements = vb.size();
-
+          endCachePreparation(*dc, vb, sp, sx, sy, atlasId, C);
           return;
         }
         else
         {
-          glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-          glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.size(), vb.data(), GL_STREAM_DRAW);
-
-          drawBuffers(sp, vb.size(), sx, sy);
+          endPreparation(vb, sp, sx, sy, C);
         }
 
         i = j;
@@ -394,9 +266,7 @@ class showOpenGL
      */
     void setupMatrixes(int width, int height)
     {
-      glViewport(0, 0, width, height);
-      program.setUniform("width", width/2.0f);
-      program.setUniform("height", height/2.0f);
+      setupProjection(width, height);
     }
 
     /** \brief get a pointer to the texture atlas with all the glyphs
