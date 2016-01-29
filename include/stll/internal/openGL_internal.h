@@ -5,29 +5,56 @@
 
 namespace STLL { namespace internal {
 
+// base class that implements the OpenGL functionality
+// all OpenGL classes are specialisations of this class
 template <int V>
 class openGL_internals
 {
   public:
+    // setup the openGL stuff, get buffers prepared here, and shaders, ...
     void setup(void) { }
+
+    // free everything
     void cleanup(void) { }
 
+    // setup the projection, this might be called only once and then many
+    // outputs are performed
     void setupProjection(int width, int height) { }
+
+    // when the texture has changed this will be called and you will need
+    // to reuploade it, texture size might change as well
     void updateTexture(const uint8_t * data, int C) { }
 
+    // this is a class you must declare for cached drawing put all variables
+    // in here for your cache. Make sure that it can either properly copy
+    // or only move and make sure you free all your resources when the objects
+    // are freed
     class DrawCacheInternal_c { };
+
+    // this class must contain information you need when doing a draw, e.g. buffers
+    // for vertices or such
     class CreateInternal_c { };
 
+    // this is called, when a cache is drawn, at first it is checked, whether
+    // the cache that was used to create this drawcache is still useful and if
+    // so this drawing function is called
     void drawCache(DrawCacheInternal_c & dc, SubPixelArrangement sp, int sx, int sy, int C) { }
+
+    // when a proper drawing cache is created for a layout to render, this will be
+    // called before starting the drawing operations, the draw functions must then
+    // add to the cache when end cache preparation is called and you also need to
+    // draw the cache
     void startCachePreparation(DrawCacheInternal_c &) { }
     void endCachePreparation(DrawCacheInternal_c & dc, CreateInternal_c &, SubPixelArrangement sp, int sx, int sy, uint32_t atlasId, int C) { }
 
+    // this pair is used, when no cache is going to be made (e.g, the user provided
+    // no cache object, or the layout is too complex and requires texture atlas flushes
     void startPreparation(int sx, int sy) { }
     void endPreparation(CreateInternal_c &, SubPixelArrangement sp, int sx, int sy, int C) { }
 
+    // drawing functions for normal rectangles, smooth rectangles, and glyphs
     void drawRectangle(CreateInternal_c & vb, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C) { }
     void drawSmoothRectangle(CreateInternal_c & vb, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C) { }
-
     void drawSubpGlyph() { }
     void drawNormalGlyph(CreateInternal_c & vb, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C) { }
 };
@@ -384,11 +411,13 @@ class openGL_internals<2>
       drawBuffers(sp, dc.elements, sx, sy, C);
     }
 
-    void startCachePreparation(DrawCacheInternal_c & dc) { }
-    void endCachePreparation(DrawCacheInternal_c & dc, CreateInternal_c & vb, SubPixelArrangement sp, int sx, int sy, uint32_t atlasId, int C)
+    void startCachePreparation(DrawCacheInternal_c & dc)
     {
       if (dc.vBuffer == 0) { glGenBuffers(1, &dc.vBuffer); }
       glBindBuffer(GL_ARRAY_BUFFER, dc.vBuffer);
+    }
+    void endCachePreparation(DrawCacheInternal_c & dc, CreateInternal_c & vb, SubPixelArrangement sp, int sx, int sy, uint32_t atlasId, int C)
+    {
       glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.vb.size(), vb.vb.data(), GL_STATIC_DRAW);
 
       drawBuffers(sp, vb.vb.size(), sx, sy, C);
@@ -397,10 +426,12 @@ class openGL_internals<2>
       dc.elements = vb.vb.size();
     }
 
-    void startPreparation(int sx, int sy) { }
-    void endPreparation(CreateInternal_c & vb, SubPixelArrangement sp, int sx, int sy, int C)
+    void startPreparation(int sx, int sy)
     {
       glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    }
+    void endPreparation(CreateInternal_c & vb, SubPixelArrangement sp, int sx, int sy, int C)
+    {
       glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.vb.size(), vb.vb.data(), GL_STREAM_DRAW);
 
       drawBuffers(sp, vb.vb.size(), sx, sy, C);
@@ -489,6 +520,14 @@ class openGL_internals<3>
       }
     }
 
+    void setupAttributes(void)
+    {
+      glEnableVertexAttribArray(0); glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, x));
+      glEnableVertexAttribArray(1); glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, u));
+      glEnableVertexAttribArray(2); glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, r));
+      glEnableVertexAttribArray(3); glVertexAttribPointer(3, 1, GL_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, sp));
+    }
+
   public:
     void setup(void)
     {
@@ -542,19 +581,11 @@ class openGL_internals<3>
 
       program.setUniform("texture", 0);
 
-      glGenVertexArrays(1, &vertexArray);
-      glBindVertexArray(vertexArray);
+      glGenVertexArrays(1, &vertexArray); glBindVertexArray(vertexArray);
+      glGenBuffers(1, &vertexBuffer);     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+      glGenBuffers(1, &vertexElement);    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexElement);
 
-      glGenBuffers(1, &vertexBuffer);
-      glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-
-      glGenBuffers(1, &vertexElement);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexElement);
-
-      glEnableVertexAttribArray(0); glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, x));
-      glEnableVertexAttribArray(1); glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, u));
-      glEnableVertexAttribArray(2); glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, r));
-      glEnableVertexAttribArray(3); glVertexAttribPointer(3, 1, GL_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, sp));
+      setupAttributes();
     }
 
     void cleanup(void)
@@ -634,78 +665,95 @@ class openGL_internals<3>
         }
     };
 
-    void startCachePreparation(DrawCacheInternal_c & dc) { }
-    void endCachePreparation(DrawCacheInternal_c & dc, CreateInternal_c & vb, SubPixelArrangement sp, int sx, int sy, uint32_t atlasId, int C)
+    void startCachePreparation(DrawCacheInternal_c & dc)
     {
       if (dc.vArray == 0)    { glGenVertexArrays(1, &dc.vArray); } glBindVertexArray(dc.vArray);
       if (dc.vBuffer == 0)   { glGenBuffers(1, &dc.vBuffer);     } glBindBuffer(GL_ARRAY_BUFFER, dc.vBuffer);
       if (dc.vElements == 0) { glGenBuffers(1, &dc.vElements);   } glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, dc.vElements);
 
-      glEnableVertexAttribArray(0); glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, x));
-      glEnableVertexAttribArray(1); glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, u));
-      glEnableVertexAttribArray(2); glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, r));
-      glEnableVertexAttribArray(3); glVertexAttribPointer(3, 1, GL_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, sp));
-
-      glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.vb.size(), vb.vb.data(), GL_STATIC_DRAW);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint)*vb.vbe.size(), vb.vbe.data(), GL_STATIC_DRAW);
-      drawBuffers(sp, vb.vbe.size(), sx, sy, C);
+      setupAttributes();
+    }
+    void endCachePreparation(DrawCacheInternal_c & dc, CreateInternal_c & vb, SubPixelArrangement sp, int sx, int sy, uint32_t atlasId, int C)
+    {
+      uploadAndDraw(vb, sp, sx, sy, C, GL_STATIC_DRAW);
 
       dc.atlasId = atlasId;
       dc.elements = vb.vbe.size();
     }
 
-    void startPreparation(int sx, int sy) { }
-    void endPreparation(CreateInternal_c & vb, SubPixelArrangement sp, int sx, int sy, int C)
+    void startPreparation(int sx, int sy)
     {
       glBindVertexArray(vertexArray);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.vb.size(), vb.vb.data(), GL_STREAM_DRAW);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint)*vb.vbe.size(), vb.vbe.data(), GL_STREAM_DRAW);
-      drawBuffers(sp, vb.vbe.size(), sx, sy, C);
+    }
+    void endPreparation(CreateInternal_c & vb, SubPixelArrangement sp, int sx, int sy, int C)
+    {
+      uploadAndDraw(vb, sp, sx, sy, C, GL_STREAM_DRAW);
     }
 
     void drawRectangle(CreateInternal_c & vb, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
     {
-      GLshort si = vb.vb.size();
-      vb.vb.push_back(vertex((ii.x+32)/64,      (ii.y+32)/64,      1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+5)/C,          c, 0));
-      vb.vb.push_back(vertex((ii.x+32+ii.w)/64, (ii.y+32)/64,      1.0*(pos.pos_x+pos.width-6)/C, 1.0*(pos.pos_y+5)/C,          c, 0));
-      vb.vb.push_back(vertex((ii.x+32+ii.w)/64, (ii.y+32+ii.h)/64, 1.0*(pos.pos_x+pos.width-6)/C, 1.0*(pos.pos_y+pos.rows-6)/C, c, 0));
-      vb.vb.push_back(vertex((ii.x+32)/64,      (ii.y+32+ii.h)/64, 1.0*(pos.pos_x+5)/C,           1.0*(pos.pos_y+pos.rows-6)/C, c, 0));
-      vb.vbe.push_back(si+0); vb.vbe.push_back(si+1); vb.vbe.push_back(si+2);
-      vb.vbe.push_back(si+0); vb.vbe.push_back(si+2); vb.vbe.push_back(si+3);
+      std::array<float, 8> data;
+      data[0] = (ii.x+32)/64;         data[1] = (ii.x+32+ii.w)/64;
+      data[2] = (ii.y+32)/64;         data[3] = (ii.y+32+ii.h)/64;
+      data[4] = 1.0*(pos.pos_x+5)/C;  data[5] = 1.0*(pos.pos_x+pos.width-6)/C;
+      data[6] = 1.0*(pos.pos_y+5)/C;  data[7] = 1.0*(pos.pos_y+pos.rows-6)/C;
+
+      addQuad(vb, data, c, 0);
     }
 
     void drawSmoothRectangle(CreateInternal_c & vb, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
     {
-      GLshort si = vb.vb.size();
-      vb.vb.push_back(vertex((ii.x+32)/64+pos.left,           (ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c, 1));
-      vb.vb.push_back(vertex((ii.x+32)/64+pos.left+pos.width, (ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c, 1));
-      vb.vb.push_back(vertex((ii.x+32)/64+pos.left+pos.width, (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 1));
-      vb.vb.push_back(vertex((ii.x+32)/64+pos.left,           (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c, 1));
-      vb.vbe.push_back(si+0); vb.vbe.push_back(si+1); vb.vbe.push_back(si+2);
-      vb.vbe.push_back(si+0); vb.vbe.push_back(si+2); vb.vbe.push_back(si+3);
+      std::array<float, 8> data;
+      data[0] = (ii.x+32)/64+pos.left; data[1] = (ii.x+32)/64+pos.left+pos.width;
+      data[2] = (ii.y+32)/64-pos.top;  data[3] = (ii.y+32)/64-pos.top+pos.rows;
+      data[4] = 1.0*(pos.pos_x)/C;     data[5] = 1.0*(pos.pos_x+pos.width)/C;
+      data[6] = 1.0*(pos.pos_y)/C;     data[7] = 1.0*(pos.pos_y+pos.rows)/C;
+
+      addQuad(vb, data, c, 1);
     }
 
     void drawNormalGlyph(CreateInternal_c & vb, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
     {
-      GLshort si = vb.vb.size();
-      vb.vb.push_back(vertex((ii.x)/64.0+pos.left,           (ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c, 0));
-      vb.vb.push_back(vertex((ii.x)/64.0+pos.left+pos.width, (ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c, 0));
-      vb.vb.push_back(vertex((ii.x)/64.0+pos.left+pos.width, (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 0));
-      vb.vb.push_back(vertex((ii.x)/64.0+pos.left,           (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c, 0));
-      vb.vbe.push_back(si+0); vb.vbe.push_back(si+1); vb.vbe.push_back(si+2);
-      vb.vbe.push_back(si+0); vb.vbe.push_back(si+2); vb.vbe.push_back(si+3);
+      std::array<float, 8> data;
+      data[0] = (ii.x)/64.0+pos.left; data[1] = (ii.x)/64.0+pos.left+pos.width;
+      data[2] = (ii.y+32)/64-pos.top; data[3] = (ii.y+32)/64-pos.top+pos.rows;
+      data[4] = 1.0*(pos.pos_x)/C;    data[5] = 1.0*(pos.pos_x+pos.width)/C;
+      data[6] = 1.0*(pos.pos_y)/C;    data[7] = 1.0*(pos.pos_y+pos.rows)/C;
+
+      addQuad(vb, data, c, 0);
     }
 
     void drawSubpGlyph(CreateInternal_c & vb, SubPixelArrangement sp, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
     {
+      std::array<float, 8> data;
+      data[0] = ii.x/64.0+pos.left;   data[1] = ii.x/64.0+pos.left+(pos.width-1)/3.0;
+      data[2] = (ii.y+32)/64-pos.top; data[3] = (ii.y+32)/64-pos.top+pos.rows;
+      data[4] = 1.0*(pos.pos_x)/C;    data[5] = 1.0*(pos.pos_x+pos.width-1)/C;
+      data[6] = 1.0*(pos.pos_y)/C;    data[7] = 1.0*(pos.pos_y+pos.rows)/C;
+
+      addQuad(vb, data, c, 1);
+    }
+
+  private:
+
+    void uploadAndDraw(const CreateInternal_c & vb, SubPixelArrangement sp, int sx, int sy, int C, int drawMode)
+    {
+      glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.vb.size(), vb.vb.data(), drawMode);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint)*vb.vbe.size(), vb.vbe.data(), drawMode);
+      drawBuffers(sp, vb.vbe.size(), sx, sy, C);
+    }
+
+    void addQuad(CreateInternal_c & vb, std::array<float, 8> & data, Color_c c, int sp)
+    {
       GLshort si = vb.vb.size();
-      vb.vb.push_back(vertex((ii.x)/64.0+pos.left,                   (ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,             1.0*(pos.pos_y)/C,          c, 1));
-      vb.vb.push_back(vertex((ii.x)/64.0+pos.left+(pos.width-1)/3.0, (ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y)/C,          c, 1));
-      vb.vb.push_back(vertex((ii.x)/64.0+pos.left+(pos.width-1)/3.0, (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x+pos.width-1)/C, 1.0*(pos.pos_y+pos.rows)/C, c, 1));
-      vb.vb.push_back(vertex((ii.x)/64.0+pos.left,                   (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,             1.0*(pos.pos_y+pos.rows)/C, c, 1));
+      vb.vb.push_back(vertex(data[0], data[2], data[4], data[6], c, sp));
+      vb.vb.push_back(vertex(data[1], data[2], data[5], data[6], c, sp));
+      vb.vb.push_back(vertex(data[1], data[3], data[5], data[7], c, sp));
+      vb.vb.push_back(vertex(data[0], data[3], data[4], data[7], c, sp));
       vb.vbe.push_back(si+0); vb.vbe.push_back(si+1); vb.vbe.push_back(si+2);
       vb.vbe.push_back(si+0); vb.vbe.push_back(si+2); vb.vbe.push_back(si+3);
     }
+
 };
 
 } }
