@@ -85,12 +85,19 @@ class openGL_internals<1>
       glEnd();
     }
 
-    void drawBuffers(GLuint displayList, SubPixelArrangement sp, int sx, int sy)
+    void drawBuffers(GLuint displayList, SubPixelArrangement sp, int sx, int sy, float texscaler)
     {
+      glMatrixMode(GL_TEXTURE);
+      glScalef(1.0f/texscaler, 1.0f/texscaler, 1);
+
+      glMatrixMode(GL_MODELVIEW);
       glPushMatrix();
       glTranslated(sx/64.0, sy/64, 0);
       glCallList(displayList);
       glPopMatrix();
+
+      glMatrixMode(GL_TEXTURE);
+      glLoadIdentity();
     }
 
 
@@ -119,6 +126,7 @@ class openGL_internals<1>
       public:
         GLuint vDisplayList;
         uint32_t atlasId;
+        uint32_t scale;
 
         ~DrawCacheInternal_c(void)
         {
@@ -145,7 +153,7 @@ class openGL_internals<1>
     {
       glEnable(GL_TEXTURE_2D);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      drawBuffers(dc.vDisplayList, sp, sx, sy);
+      drawBuffers(dc.vDisplayList, sp, sx, sy, C/dc.scale);
     }
 
     class CreateInternal_c
@@ -163,13 +171,14 @@ class openGL_internals<1>
       glNewList(dc.vDisplayList, GL_COMPILE);
     }
 
-    void endCachePreparation(DrawCacheInternal_c & dc, CreateInternal_c &, SubPixelArrangement sp, int sx, int sy, uint32_t atlasId, int)
+    void endCachePreparation(DrawCacheInternal_c & dc, CreateInternal_c &, SubPixelArrangement sp, int sx, int sy, uint32_t atlasId, int C)
     {
       glEndList();
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      drawBuffers(dc.vDisplayList, sp, sx, sy);
+      drawBuffers(dc.vDisplayList, sp, sx, sy, 1);
 
       dc.atlasId = atlasId;
+      dc.scale = C;
     }
 
     void startPreparation(int sx, int sy)
@@ -267,7 +276,7 @@ class openGL_internals<2>
       x(_x), y(_y), u(_u), v(_v), r(c.r()), g(c.g()), b(c.b()), a(c.a()) {}
     };
 
-    void drawBuffers(SubPixelArrangement sp, size_t s, int sx, int sy, int C)
+    void drawBuffers(SubPixelArrangement sp, size_t s, int sx, int sy, int C, float texscaler)
     {
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glEnableVertexAttribArray(0); glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, x));
@@ -275,6 +284,7 @@ class openGL_internals<2>
       glEnableVertexAttribArray(2); glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, r));
 
       program.setUniform("offset", sx/64.0, sy/64);
+      program.setUniform("texscaler", texscaler);
 
       switch (sp)
       {
@@ -319,6 +329,7 @@ class openGL_internals<2>
         "uniform float width;"
         "uniform float height;"
         "uniform float ashift;"
+        "uniform float texscaler;"
         "uniform vec2 offset;"
 
         "attribute vec2 vertex;"
@@ -327,7 +338,7 @@ class openGL_internals<2>
         "void main()"
         "{"
         "  gl_FrontColor = vec4(color.r/255.0, color.g/255.0, color.b/255.0, color.a/255.0);"
-        "  gl_TexCoord[0].xy = vec2(tex_coord.x+ashift, tex_coord.y);"
+        "  gl_TexCoord[0].xy = vec2(tex_coord.x/texscaler+ashift, tex_coord.y/texscaler);"
         "  gl_Position = vec4((vertex.x-width+offset.x)/width, 1.0-(vertex.y+offset.y)/height, 0, 1.0);"
         "}"
       );
@@ -339,6 +350,7 @@ class openGL_internals<2>
       program.link();
 
       program.setUniform("texture", 0);
+      program.setUniform("texscaler", 1.0f);
 
       glGenBuffers(1, &vertexBuffer);
     }
@@ -368,6 +380,7 @@ class openGL_internals<2>
       GLuint vBuffer;
       size_t elements;
       uint32_t atlasId;
+      uint32_t scale;
 
       ~DrawCacheInternal_c(void)
       {
@@ -408,7 +421,7 @@ class openGL_internals<2>
     void drawCache(DrawCacheInternal_c & dc, SubPixelArrangement sp, int sx, int sy, int C)
     {
       glBindBuffer(GL_ARRAY_BUFFER, dc.vBuffer);
-      drawBuffers(sp, dc.elements, sx, sy, C);
+      drawBuffers(sp, dc.elements, sx, sy, C, C/dc.scale);
     }
 
     void startCachePreparation(DrawCacheInternal_c & dc)
@@ -420,10 +433,11 @@ class openGL_internals<2>
     {
       glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.vb.size(), vb.vb.data(), GL_STATIC_DRAW);
 
-      drawBuffers(sp, vb.vb.size(), sx, sy, C);
+      drawBuffers(sp, vb.vb.size(), sx, sy, C, 1);
 
       dc.atlasId = atlasId;
       dc.elements = vb.vb.size();
+      dc.scale = C;
     }
 
     void startPreparation(int sx, int sy)
@@ -434,7 +448,7 @@ class openGL_internals<2>
     {
       glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.vb.size(), vb.vb.data(), GL_STREAM_DRAW);
 
-      drawBuffers(sp, vb.vb.size(), sx, sy, C);
+      drawBuffers(sp, vb.vb.size(), sx, sy, C, 1);
     }
 
     void drawRectangle(CreateInternal_c & vb, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
@@ -490,10 +504,11 @@ class openGL_internals<3>
       x(_x), y(_y), u(_u), v(_v), r(c.r()), g(c.g()), b(c.b()), a(c.a()), sp(_sp) {}
     };
 
-    void drawBuffers(SubPixelArrangement sp, size_t s, int sx, int sy, int C)
+    void drawBuffers(SubPixelArrangement sp, size_t s, int sx, int sy, int C, float texscale)
     {
       glBlendFunc(GL_SRC1_COLOR, GL_ONE_MINUS_SRC1_COLOR);
       program.setUniform("offset", 1.0*sx/64.0, sy/64);
+      program.setUniform("texscaler", texscale);
       switch (sp)
       {
         default:
@@ -557,6 +572,7 @@ class openGL_internals<3>
       program.attachShader(GL_VERTEX_SHADER, "330 core",
         "uniform float width;"
         "uniform float height;"
+        "uniform float texscaler;"
         "uniform vec2 offset;"
 
         "layout (location = 0) in vec3 vertex;"
@@ -571,7 +587,7 @@ class openGL_internals<3>
         "void main()"
         "{"
         "  ourColor = vec4(color.r/255.0, color.g/255.0, color.b/255.0, color.a/255.0);"
-        "  TexCoord = vec2(tex_coord.x, tex_coord.y);"
+        "  TexCoord = vec2(tex_coord.x, tex_coord.y)/texscaler;"
         "  gl_Position = vec4((vertex.x-width+offset.x)/width, 1.0-(vertex.y+offset.y)/height, 0, 1.0);"
         "  sp = subpixels;"
         "}"
@@ -580,6 +596,7 @@ class openGL_internals<3>
       program.link();
 
       program.setUniform("texture", 0);
+      program.setUniform("texscaler", 1.0f);
 
       glGenVertexArrays(1, &vertexArray); glBindVertexArray(vertexArray);
       glGenBuffers(1, &vertexBuffer);     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -615,6 +632,7 @@ class openGL_internals<3>
         GLuint vArray, vBuffer, vElements;
         size_t elements;
         uint32_t atlasId;
+        uint32_t scale;
 
         ~DrawCacheInternal_c(void)
         {
@@ -649,7 +667,7 @@ class openGL_internals<3>
     void drawCache(DrawCacheInternal_c & dc, SubPixelArrangement sp, int sx, int sy, int C)
     {
       glBindVertexArray(dc.vArray);
-      drawBuffers(sp, dc.elements, sx, sy, C);
+      drawBuffers(sp, dc.elements, sx, sy, C, C/dc.scale);
     }
 
     class CreateInternal_c
@@ -679,6 +697,7 @@ class openGL_internals<3>
 
       dc.atlasId = atlasId;
       dc.elements = vb.vbe.size();
+      dc.scale = C;
     }
 
     void startPreparation(int sx, int sy)
@@ -740,7 +759,7 @@ class openGL_internals<3>
     {
       glBufferData(GL_ARRAY_BUFFER, sizeof(vertex)*vb.vb.size(), vb.vb.data(), drawMode);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint)*vb.vbe.size(), vb.vbe.data(), drawMode);
-      drawBuffers(sp, vb.vbe.size(), sx, sy, C);
+      drawBuffers(sp, vb.vbe.size(), sx, sy, C, 1);
     }
 
     void addQuad(CreateInternal_c & vb, std::array<float, 8> & data, Color_c c, int sp)

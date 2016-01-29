@@ -123,4 +123,13 @@ std::experimental::optional<std::array<uint32_t, 2>> RectanglePacker_c::allocate
   return std::array<uint32_t, 2>{(uint32_t)bestX, (uint32_t)bestY};
 }
 
+void RectanglePacker_c::doubleSize(void)
+{
+  width_ *= 2;
+  height_ *= 2;
+
+  skylines.rbegin()->y = 1;
+  skylines.push_back(skyline {width_-1, height_});
+}
+
 } }

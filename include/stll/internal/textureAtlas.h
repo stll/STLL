@@ -124,6 +124,23 @@ class TextureAtlas_c
       map.clear();
       std::fill(data.begin(), data.end(), 0);
     }
+
+    void doubleSize(void)
+    {
+      int oldw = r.width();
+      int oldh = r.height();
+      r.doubleSize();
+      int neww = r.width();
+
+      std::vector<uint8_t> d(neww*r.height()*B, 0);
+
+      for (int y = 0; y < oldh; y++)
+      {
+        memcpy(d.data()+y*neww*B, data.data()+y*oldw*B, oldw*B);
+      }
+
+      data.swap(d);
+    }
 };
 
 } }

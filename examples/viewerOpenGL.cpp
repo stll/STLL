@@ -104,7 +104,7 @@ int main(int argv, char ** args)
     return 1;
   }
 
-  showOpenGL<OGL_VER, 1024> openGL;
+  showOpenGL<OGL_VER> openGL;
 
   int width, height;
   glfwGetFramebufferSize(screen, &width, &height);
@@ -113,7 +113,7 @@ int main(int argv, char ** args)
   int x = 0;
   double startSeconds = glfwGetTime();
 
-  showOpenGL<OGL_VER, 1024>::DrawCache_c dc;
+  showOpenGL<OGL_VER>::DrawCache_c dc;
 
   while (!glfwWindowShouldClose(screen))
   {
@@ -155,7 +155,7 @@ int main(int argv, char ** args)
     // write out the texture map, the data files can be load with gimp and you will need to specify
     // the right size and graylevel as parameters in the dialog that pops up
     FILE * f = fopen("tex.data", "wb");
-    fwrite(openGL.getData(), 1, 1024*1024, f);
+    fwrite(openGL.getData(), 1, openGL.cacheWidth()*openGL.cacheHeight(), f);
     fclose(f);
   }
 #endif

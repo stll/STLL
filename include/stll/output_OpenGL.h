@@ -59,11 +59,10 @@ namespace STLL {
  * property for the target that this paints on
  *
  * \tparam V Major version of OpenGL to use, supported are 1, 2 and 3, use 3 as well for OpenGL 4
- * \tparam C size of the texture cache. The cache is square C time C pixels.
  * \tparam G the gamma calculation function, if you use sRGB output... normally you don't need
  * to change this, keep the default
  */
-template <int V, int C, class G = internal::Gamma_c<>>
+template <int V, class G = internal::Gamma_c<>>
 class showOpenGL : internal::openGL_internals<V>
 {
   private:
@@ -73,6 +72,7 @@ class showOpenGL : internal::openGL_internals<V>
     GLuint glTextureId = 0;     // OpenGL texture id
     uint32_t uploadVersion = 0; // a counter changed each time the texture changes to know when to update
     uint32_t atlasId = 1;
+    uint32_t cacheMax;
 
   public:
 
@@ -82,8 +82,15 @@ class showOpenGL : internal::openGL_internals<V>
      */
     using DrawCache_c = typename internal::openGL_internals<V>::DrawCacheInternal_c;
 
-    /** \brief constructor */
-    showOpenGL(void) : cache(C, C)
+    /** \brief constructor
+     *
+     * \param cStart initial size of the texture cache for the glyphs, the cache will be a square
+     *               image with the dimensions of cStart
+     * \param cMax once the cache is full its dimensions will be doubled, quadrupling the area until
+     *             it has reached at least this value (it may get bigger, depending on what values you
+     *             get by doubling cStart again and again
+     */
+    showOpenGL(uint32_t cStart = 256, uint32_t cMax = 1024) : cache(cStart, cStart), cacheMax(cMax)
     {
       glActiveTexture(GL_TEXTURE0);
       glGenTextures(1, &glTextureId);
@@ -135,7 +142,7 @@ class showOpenGL : internal::openGL_internals<V>
 
       if (dc && dc->atlasId == atlasId)
       {
-        internal::openGL_internals<V>::drawCache(*dc, sp, sx, sy, C);
+        internal::openGL_internals<V>::drawCache(*dc, sp, sx, sy, cache.width());
         return;
       }
 
@@ -172,9 +179,24 @@ class showOpenGL : internal::openGL_internals<V>
               break;
           }
 
-          if (!found) break;
-
-          j++;
+          if (!found)
+          {
+            // glyph not found means there was no space to include it inside
+            // the current cache, so try to double its size, if the cache
+            // is already at least cacheMax size, we'll have to split the layout
+            if (cache.width() < cacheMax)
+            {
+              cache.doubleSize();
+            }
+            else
+            {
+              break;
+            }
+          }
+          else
+          {
+            j++;
+          }
         }
 
         // check, if the texture cache has been changed to include
@@ -182,7 +204,7 @@ class showOpenGL : internal::openGL_internals<V>
         if (cache.getVersion() != uploadVersion)
         {
           uploadVersion = cache.getVersion();
-          internal::openGL_internals<V>::updateTexture(cache.getData(), C);
+          internal::openGL_internals<V>::updateTexture(cache.getData(), cache.width());
         }
 
         typename internal::openGL_internals<V>::CreateInternal_c vb(dat.size());
@@ -214,11 +236,11 @@ class showOpenGL : internal::openGL_internals<V>
 
                 if ((sp == SUBP_RGB || sp == SUBP_BGR) && (ii.blurr <= cache.blurrmax))
                 {
-                  internal::openGL_internals<V>::drawSubpGlyph(vb, sp, ii, pos, c, C);
+                  internal::openGL_internals<V>::drawSubpGlyph(vb, sp, ii, pos, c, cache.width());
                 }
                 else
                 {
-                  internal::openGL_internals<V>::drawNormalGlyph(vb, ii, pos, c, C);
+                  internal::openGL_internals<V>::drawNormalGlyph(vb, ii, pos, c, cache.width());
                 }
               }
               break;
@@ -230,12 +252,12 @@ class showOpenGL : internal::openGL_internals<V>
                 if (ii.blurr == 0)
                 {
                   auto pos = cache.getRect(640, 640, SUBP_NONE, 0).value();
-                  internal::openGL_internals<V>::drawRectangle(vb, ii, pos, c, C);
+                  internal::openGL_internals<V>::drawRectangle(vb, ii, pos, c, cache.width());
                 }
                 else
                 {
                   auto pos = cache.getRect(ii.w, ii.h, sp, ii.blurr).value();
-                  internal::openGL_internals<V>::drawSmoothRectangle(vb, ii, pos, c, C);
+                  internal::openGL_internals<V>::drawSmoothRectangle(vb, ii, pos, c, cache.width());
                 }
               }
               break;
@@ -253,11 +275,11 @@ class showOpenGL : internal::openGL_internals<V>
         // or by just completing the drawing batch without cache
         if (dc && !cleared && j == dat.size())
         {
-          internal::openGL_internals<V>::endCachePreparation(*dc, vb, sp, sx, sy, atlasId, C);
+          internal::openGL_internals<V>::endCachePreparation(*dc, vb, sp, sx, sy, atlasId, cache.width());
         }
         else
         {
-          internal::openGL_internals<V>::endPreparation(vb, sp, sx, sy, C);
+          internal::openGL_internals<V>::endPreparation(vb, sp, sx, sy, cache.width());
 
           if (j < dat.size())
           {
@@ -289,6 +311,9 @@ class showOpenGL : internal::openGL_internals<V>
      * This is mainly helpful to check how full the texture atlas is
      */
     const uint8_t * getData(void) const { return cache.getData(); }
+
+    uint32_t cacheWidth(void) const { return cache.width(); }
+    uint32_t cacheHeight(void) const { return cache.height(); }
 
     /** \brief clear the glyph cache. This might be useful when you change
      * the fonts that you use for output, or any other reason that will

@@ -62,6 +62,8 @@ class RectanglePacker_c
 
     // release all occupied area
     void clear(void);
+
+    void doubleSize(void);
 };
 
 } }
