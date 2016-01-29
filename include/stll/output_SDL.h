@@ -203,7 +203,7 @@ class showSDL
      *
      * Derive from this function and implement the draw function to handle image drawing in your application
      */
-    class ImageDrawerSDL_c
+    class ImageDrawer_c
     {
       public:
         /** \brief function called to draw an image
@@ -234,7 +234,7 @@ class showSDL
      *        to stick to the same gamma value for long stretches
      */
     void showLayout(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
-                    SubPixelArrangement sp = SUBP_NONE, ImageDrawerSDL_c * images = 0, uint8_t gamma = 22)
+                    SubPixelArrangement sp = SUBP_NONE, ImageDrawer_c * images = 0, uint8_t gamma = 22)
     {
       SDL_Rect r;
 
@@ -281,7 +281,7 @@ class showSDL
      *
      * \param num maximal number of entries, e.g. 0 completely empties the cache
      */
-    void trimSDLFontCache(size_t num)
+    void trimCache(size_t num)
     {
       cache.trim(num);
     }

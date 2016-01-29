@@ -112,7 +112,7 @@ class showOpenGL : internal::openGL_internals<V>
     }
 
     /** \brief helper class used to draw images */
-    class imageDrawerOpenGL_c
+    class imageDrawer_c
     {
       public:
         virtual void draw(int32_t x, int32_t y, uint32_t w, uint32_t h, const std::string & url) = 0;
@@ -134,7 +134,7 @@ class showOpenGL : internal::openGL_internals<V>
      *           later on.
      */
     void showLayout(const TextLayout_c & l, int sx, int sy, SubPixelArrangement sp,
-                    imageDrawerOpenGL_c * images = nullptr, DrawCache_c * dc = nullptr)
+                    imageDrawer_c * images = nullptr, DrawCache_c * dc = nullptr)
     {
       glActiveTexture(GL_TEXTURE0);
       glBindTexture( GL_TEXTURE_2D, glTextureId );

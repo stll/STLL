@@ -74,7 +74,7 @@ class layoutInfo_c
     SubPixelArrangement sp;
 };
 
-class myImageDrawer_c : public showSDL<>::ImageDrawerSDL_c
+class myImageDrawer_c : public showSDL<>::ImageDrawer_c
 {
   void draw(int32_t x, int32_t y, uint32_t w, uint32_t h, SDL_Surface * s, const std::string &)
   {
