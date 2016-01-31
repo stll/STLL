@@ -5,7 +5,7 @@
  * - use the paragraph layouter
  * - use the XHTML layouter
  *
- * \section tut_basic_sec Using the Paragraph Layouter
+ * \section tut_basic_sec Using the Paragraph Layouter and the SDL output
  * The paragraph layouter is a basic layouter for
  * one or more paragraphs of text. Its input is a unicode string, some settings
  * and a set of properties for each and every character in the string to format.
@@ -16,7 +16,7 @@
  * To use the paragraph layouter you need to use code like the following:
  * \include example1.cpp
  *
- * \section tut_xhtml_sec Using the XHTML Layouter
+ * \section tut_xhtml_sec Using the XHTML Layouter and the OpenGL output
  * The XHTML layouter takes a subsection of XHTML as a string and parses it and
  * uses the paragraph layouter to layout the text. Here you specify the format using
  * html and css-like formatting information.

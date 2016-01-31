@@ -110,16 +110,6 @@ if(SDL_FOUND)
     ${SDL_LIBRARY}
   )
 
-  add_executable(example2 examples/example2.cpp)
-  target_compile_options(example2 PRIVATE -std=c++14)
-  target_include_directories(example2 PRIVATE
-    ${SDL_INCLUDE_DIR}
-    include
-  )
-  target_link_libraries(example2 PRIVATE stll
-    ${SDL_LIBRARY}
-  )
-
   add_executable(example3 examples/example3.cpp examples/layouterXMLSaveLoad.cpp)
   target_compile_options(example3 PRIVATE -std=c++14)
   target_include_directories(example3 PRIVATE
@@ -144,21 +134,30 @@ if(SDL_FOUND)
 endif()
 
 if(GLEW_FOUND AND GLFW_LIBRARY)
-set(oglViewerSources examples/viewerOpenGL.cpp examples/layouterXMLSaveLoad.cpp)
-add_executable(viewerOpenGL1 ${oglViewerSources})
-target_compile_options(viewerOpenGL1 PRIVATE -std=c++14 -DOGL1)
-target_include_directories(viewerOpenGL1 PRIVATE include )
-target_link_libraries(viewerOpenGL1 PRIVATE stll ${GLEW_LIBRARIES} ${GLFW_LIBRARY})
+  set(oglViewerSources examples/viewerOpenGL.cpp examples/layouterXMLSaveLoad.cpp)
+  add_executable(viewerOpenGL1 ${oglViewerSources})
+  target_compile_options(viewerOpenGL1 PRIVATE -std=c++14 -DOGL1)
+  target_include_directories(viewerOpenGL1 PRIVATE include )
+  target_link_libraries(viewerOpenGL1 PRIVATE stll ${GLEW_LIBRARIES} ${GLFW_LIBRARY})
 
-add_executable(viewerOpenGL2 ${oglViewerSources})
-target_compile_options(viewerOpenGL2 PRIVATE -std=c++14 -DOGL2)
-target_include_directories(viewerOpenGL2 PRIVATE include )
-target_link_libraries(viewerOpenGL2 PRIVATE stll ${GLEW_LIBRARIES} ${GLFW_LIBRARY})
+  add_executable(viewerOpenGL2 ${oglViewerSources})
+  target_compile_options(viewerOpenGL2 PRIVATE -std=c++14 -DOGL2)
+  target_include_directories(viewerOpenGL2 PRIVATE include )
+  target_link_libraries(viewerOpenGL2 PRIVATE stll ${GLEW_LIBRARIES} ${GLFW_LIBRARY})
 
-add_executable(viewerOpenGL3 ${oglViewerSources})
-target_compile_options(viewerOpenGL3 PRIVATE -std=c++14 -DOGL3)
-target_include_directories(viewerOpenGL3 PRIVATE include )
-target_link_libraries(viewerOpenGL3 PRIVATE stll ${GLEW_LIBRARIES} ${GLFW_LIBRARY})
+  add_executable(viewerOpenGL3 ${oglViewerSources})
+  target_compile_options(viewerOpenGL3 PRIVATE -std=c++14 -DOGL3)
+  target_include_directories(viewerOpenGL3 PRIVATE include )
+  target_link_libraries(viewerOpenGL3 PRIVATE stll ${GLEW_LIBRARIES} ${GLFW_LIBRARY})
+
+  add_executable(example2 examples/example2.cpp)
+  target_compile_options(example2 PRIVATE -std=c++14)
+  target_include_directories(example2 PRIVATE
+    include
+  )
+  target_link_libraries(example2 PRIVATE stll
+    ${GLEW_LIBRARIES} ${GLFW_LIBRARY}
+  )
 
 endif()
 

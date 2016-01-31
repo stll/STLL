@@ -55,8 +55,9 @@ namespace STLL {
  * functionality you will need to include the proper OpenGL before including the header file
  * for this class.
  *
- * Gamma correct output is not handled by this class directly. You need to activate the sRGB
- * property for the target that this paints on
+ * You need to activate the sRGB framebuffer for the framebuffer that this class paints on
+ *
+ * For more details look at example 2 \ref tut_xhtml_sec and at the drawing page:  \ref opengl_sec
  *
  * \tparam V Major version of OpenGL to use, supported are 1, 2 and 3, use 3 as well for OpenGL 4
  * \tparam G the gamma calculation function, if you use sRGB output... normally you don't need
