@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>STLL: STLL::showSDL&lt; G &gt;::ImageDrawerSDL_c Class Reference</title>
+<title>STLL: STLL::showOpenGL&lt; V, G &gt;::imageDrawer_c Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -65,46 +65,43 @@
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('class_s_t_l_l_1_1show_s_d_l_1_1_image_drawer_s_d_l__c.html','');});
+$(document).ready(function(){initNavTree('class_s_t_l_l_1_1show_open_g_l_1_1image_drawer__c.html','');});
 </script>
 <div id="doc-content">
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="class_s_t_l_l_1_1show_s_d_l_1_1_image_drawer_s_d_l__c-members.html">List of all members</a>  </div>
+<a href="class_s_t_l_l_1_1show_open_g_l_1_1image_drawer__c-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">STLL::showSDL&lt; G &gt;::ImageDrawerSDL_c Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
+<div class="title">STLL::showOpenGL&lt; V, G &gt;::imageDrawer_c Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>class used to encapsulate image drawing  
- <a href="class_s_t_l_l_1_1show_s_d_l_1_1_image_drawer_s_d_l__c.html#details">More...</a></p>
+<p>helper class used to draw images  
+ <a href="class_s_t_l_l_1_1show_open_g_l_1_1image_drawer__c.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a10f9655671f01c8bc3c867f43b2c22a0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1show_s_d_l_1_1_image_drawer_s_d_l__c.html#a10f9655671f01c8bc3c867f43b2c22a0">draw</a> (int32_t x, int32_t y, uint32_t w, uint32_t h, SDL_Surface *s, const std::string &amp;url)=0</td></tr>
-<tr class="memdesc:a10f9655671f01c8bc3c867f43b2c22a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">function called to draw an image  <a href="#a10f9655671f01c8bc3c867f43b2c22a0">More...</a><br /></td></tr>
-<tr class="separator:a10f9655671f01c8bc3c867f43b2c22a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36ee3b3e369c80345e262ca9bf86844f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1show_open_g_l_1_1image_drawer__c.html#a36ee3b3e369c80345e262ca9bf86844f">draw</a> (int32_t x, int32_t y, uint32_t w, uint32_t h, const std::string &amp;url)=0</td></tr>
+<tr class="separator:a36ee3b3e369c80345e262ca9bf86844f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><h3>template&lt;class G = internal::Gamma_c&lt;&gt;&gt;<br />
-class STLL::showSDL&lt; G &gt;::ImageDrawerSDL_c</h3>
+<div class="textblock"><h3>template&lt;int V, class G = internal::Gamma_c&lt;&gt;&gt;<br />
+class STLL::showOpenGL&lt; V, G &gt;::imageDrawer_c</h3>
 
-<p>class used to encapsulate image drawing </p>
-<p>When the routine showLayoutSDL needs to draw an image it will call the draw function in this class to do the job. This allows you to do your own image loading and caching and such stuff.</p>
-<p>Derive from this function and implement the draw function to handle image drawing in your application </p>
+<p>helper class used to draw images </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a10f9655671f01c8bc3c867f43b2c22a0"></a>
+<a class="anchor" id="a36ee3b3e369c80345e262ca9bf86844f"></a>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class G = internal::Gamma_c&lt;&gt;&gt; </div>
+template&lt;int V, class G = internal::Gamma_c&lt;&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void <a class="el" href="class_s_t_l_l_1_1show_s_d_l.html">STLL::showSDL</a>&lt; G &gt;::ImageDrawerSDL_c::draw </td>
+          <td class="memname">virtual void <a class="el" href="class_s_t_l_l_1_1show_open_g_l.html">STLL::showOpenGL</a>&lt; V, G &gt;::imageDrawer_c::draw </td>
           <td>(</td>
           <td class="paramtype">int32_t&#160;</td>
           <td class="paramname"><em>x</em>, </td>
@@ -130,12 +127,6 @@ template&lt;class G = internal::Gamma_c&lt;&gt;&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">SDL_Surface *&#160;</td>
-          <td class="paramname"><em>s</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>url</em>&#160;</td>
         </tr>
@@ -152,31 +143,18 @@ template&lt;class G = internal::Gamma_c&lt;&gt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>function called to draw an image </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">x</td><td>x-position to draw the image in 1/64 pixels </td></tr>
-    <tr><td class="paramname">y</td><td>y-position to draw the image in 1/64 pixels </td></tr>
-    <tr><td class="paramname">w</td><td>width of the image to draw </td></tr>
-    <tr><td class="paramname">h</td><td>height of the image to draw </td></tr>
-    <tr><td class="paramname">s</td><td>the SDL-Surface to draw the image on </td></tr>
-    <tr><td class="paramname">url</td><td>the url of the image to draw </td></tr>
-  </table>
-  </dd>
-</dl>
-
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li><a class="el" href="output___s_d_l_8h_source.html">output_SDL.h</a></li>
+<li><a class="el" href="output___open_g_l_8h_source.html">output_OpenGL.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1show_s_d_l.html">showSDL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1show_s_d_l_1_1_image_drawer_s_d_l__c.html">ImageDrawerSDL_c</a></li>
-    <li class="footer">Generated on Thu Jan 28 2016 21:45:13 for STLL by
+    <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1show_open_g_l.html">showOpenGL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1show_open_g_l_1_1image_drawer__c.html">imageDrawer_c</a></li>
+    <li class="footer">Generated on Sun Jan 31 2016 18:06:00 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

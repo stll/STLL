@@ -12,10 +12,10 @@ var files =
     [ "layouterXHTML.h", "layouter_x_h_t_m_l_8h.html", "layouter_x_h_t_m_l_8h" ],
     [ "output_OpenGL.h", "output___open_g_l_8h.html", [
       [ "showOpenGL", "class_s_t_l_l_1_1show_open_g_l.html", "class_s_t_l_l_1_1show_open_g_l" ],
-      [ "imageDrawerOpenGL_c", "class_s_t_l_l_1_1show_open_g_l_1_1image_drawer_open_g_l__c.html", "class_s_t_l_l_1_1show_open_g_l_1_1image_drawer_open_g_l__c" ]
+      [ "imageDrawer_c", "class_s_t_l_l_1_1show_open_g_l_1_1image_drawer__c.html", "class_s_t_l_l_1_1show_open_g_l_1_1image_drawer__c" ]
     ] ],
     [ "output_SDL.h", "output___s_d_l_8h.html", [
       [ "showSDL", "class_s_t_l_l_1_1show_s_d_l.html", "class_s_t_l_l_1_1show_s_d_l" ],
-      [ "ImageDrawerSDL_c", "class_s_t_l_l_1_1show_s_d_l_1_1_image_drawer_s_d_l__c.html", "class_s_t_l_l_1_1show_s_d_l_1_1_image_drawer_s_d_l__c" ]
+      [ "ImageDrawer_c", "class_s_t_l_l_1_1show_s_d_l_1_1_image_drawer__c.html", "class_s_t_l_l_1_1show_s_d_l_1_1_image_drawer__c" ]
     ] ]
 ];

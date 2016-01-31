@@ -70,7 +70,7 @@ $(document).ready(function(){initNavTree('tutorial_pg.html','');});
 <li>use the XHTML layouter</li>
 </ul>
 <h1><a class="anchor" id="tut_basic_sec"></a>
-Using the Paragraph Layouter</h1>
+Using the Paragraph Layouter and the SDL output</h1>
 <p>The paragraph layouter is a basic layouter for one or more paragraphs of text. Its input is a unicode string, some settings and a set of properties for each and every character in the string to format.</p>
 <p>That way it is possible to change a single character to underlined, or red or make is using a different font</p>
 <p>To use the paragraph layouter you need to use code like the following: </p><div class="fragment"><div class="line"><span class="comment">// includes for the layouter and the SDL output functions, if you want to</span></div>
@@ -126,14 +126,14 @@ Using the Paragraph Layouter</h1>
 <div class="line">  <span class="comment">// create the output object, with glyph cache and all local storage, keep this</span></div>
 <div class="line">  <span class="comment">// object around for the lifetime of your program</span></div>
 <div class="line">  <a class="code" href="class_s_t_l_l_1_1show_s_d_l.html">showSDL&lt;&gt;</a> show;</div>
-<div class="line">  show.<a class="code" href="class_s_t_l_l_1_1show_s_d_l.html#ab2700b9c5c42c9e8d6c0d5479a913d84">showLayout</a>(layout, 20*64, 20*64, screen);</div>
+<div class="line">  show.<a class="code" href="class_s_t_l_l_1_1show_s_d_l.html#a6297de618239c433e4866187c1237cc3">showLayout</a>(layout, 20*64, 20*64, screen);</div>
 <div class="line">  SDL_Flip(screen);</div>
 <div class="line">  sleep(10);</div>
 <div class="line"></div>
 <div class="line">  <span class="comment">// now you can get rid of the cache, if you want</span></div>
 <div class="line">}</div>
 </div><!-- fragment --><h1><a class="anchor" id="tut_xhtml_sec"></a>
-Using the XHTML Layouter</h1>
+Using the XHTML Layouter and the OpenGL output</h1>
 <p>The XHTML layouter takes a subsection of XHTML as a string and parses it and uses the paragraph layouter to layout the text. Here you specify the format using html and css-like formatting information.</p>
 <p>The XHTML Layouter comes with 2 entry points. One takes a string, parses that string into a DOM-tree and works with that tree.</p>
 <p>The other choice is to directly input a DOM-tree on your own.</p>
@@ -141,7 +141,12 @@ Using the XHTML Layouter</h1>
 <div class="line"><span class="comment">// parser. STLL needs to be compiled with this library</span></div>
 <div class="line"><span class="preprocessor">#define USE_PUGI_XML</span></div>
 <div class="line"><span class="preprocessor">#include &lt;<a class="code" href="layouter_x_h_t_m_l_8h.html">stll/layouterXHTML.h</a>&gt;</span></div>
-<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="output___s_d_l_8h.html">stll/output_SDL.h</a>&gt;</span></div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor">#include &lt;GL/glew.h&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;GLFW/glfw3.h&gt;</span></div>
+<div class="line"><span class="comment">// include your OpenGL stuff _before_ this header</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="output___open_g_l_8h.html">stll/output_OpenGL.h</a>&gt;</span></div>
+<div class="line"></div>
 <div class="line"></div>
 <div class="line"><span class="keyword">using namespace </span><a class="code" href="namespace_s_t_l_l.html">STLL</a>;</div>
 <div class="line"></div>
@@ -174,20 +179,65 @@ Using the XHTML Layouter</h1>
 <div class="line">  <span class="comment">// layout the XHTML code, in a 200 pixel wide rectangle</span></div>
 <div class="line">  <span class="keyword">auto</span> layout = <a class="code" href="namespace_s_t_l_l.html#a6b3018805d08e36d166c6247c1d0783b">layoutXHTMLPugi</a>(text, styleSheet, <a class="code" href="class_s_t_l_l_1_1_rectangle_shape__c.html">RectangleShape_c</a>(200*64));</div>
 <div class="line"></div>
-<div class="line">  <span class="comment">// again output the layout</span></div>
-<div class="line">  SDL_Surface *screen = SDL_SetVideoMode(800, 600, 32, SDL_SWSURFACE | SDL_DOUBLEBUF);</div>
 <div class="line"></div>
-<div class="line">  <a class="code" href="class_s_t_l_l_1_1show_s_d_l.html">showSDL&lt;&gt;</a> show;</div>
-<div class="line">  show.<a class="code" href="class_s_t_l_l_1_1show_s_d_l.html#ab2700b9c5c42c9e8d6c0d5479a913d84">showLayout</a>(layout, 20*64, 20*64, screen);</div>
-<div class="line">  SDL_Flip(screen);</div>
-<div class="line">  sleep(10);</div>
+<div class="line"> </div>
+<div class="line">  <span class="comment">// output the layout using OpenGL... this is a bit more complicated than SDL</span></div>
+<div class="line">  <span class="comment">// the example uses glfw for the context creation and glew for extensions</span></div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// initialite glfw, setup window hints</span></div>
+<div class="line">  <span class="keywordflow">if</span> (!glfwInit()) <span class="keywordflow">return</span> 1;</div>
+<div class="line">  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);</div>
+<div class="line">  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);</div>
+<div class="line">  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);</div>
+<div class="line">  <span class="comment">// this hint is important for sRGB correct output</span></div>
+<div class="line">  glfwWindowHint(GLFW_SRGB_CAPABLE, GL_TRUE);</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// create the context and activate it</span></div>
+<div class="line">  GLFWwindow* screen = glfwCreateWindow(800, 600, <span class="stringliteral">&quot;OpenGL example&quot;</span>, NULL, NULL);</div>
+<div class="line">  <span class="keywordflow">if</span>(!screen) <span class="keywordflow">return</span> 1;</div>
+<div class="line">  glfwMakeContextCurrent(screen);</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// glew needs to be initialized _after_ the context has been created, also</span></div>
+<div class="line">  <span class="comment">// this strange experimental flag has to be active... otherwise it will not</span></div>
+<div class="line">  <span class="comment">// work, at least for the current version</span></div>
+<div class="line">  glewExperimental = <span class="keyword">true</span>;</div>
+<div class="line">  <span class="keywordflow">if</span> (glewInit() != GLEW_OK) <span class="keywordflow">return</span> 1;</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// create out output object using OpenGL 3 features, use the default values for</span></div>
+<div class="line">  <span class="comment">// the texture cache... which is too big here, but should be good for normal usage</span></div>
+<div class="line">  <a class="code" href="class_s_t_l_l_1_1show_open_g_l.html">showOpenGL&lt;3&gt;</a> openGL;</div>
+<div class="line">  <span class="comment">// this sets up the projection matrix, or the shader equivalents for them, you</span></div>
+<div class="line">  <span class="comment">// need to call it only once for OpenGL3, except when you change the viewport</span></div>
+<div class="line">  <span class="comment">// for OpenGL 1 you need to call it whenever you start outputting as it sets up</span></div>
+<div class="line">  <span class="comment">// modelview and projection matricies</span></div>
+<div class="line">  openGL.<a class="code" href="class_s_t_l_l_1_1show_open_g_l.html#a869d2e13e08f3515139987cc0d5423e6">setupMatrixes</a>(800, 600);</div>
+<div class="line">  <span class="comment">// this is the drawing cache, we don&#39;t need it for this example, as we only draw once</span></div>
+<div class="line">  <span class="comment">// but to show how it is supposed to work...</span></div>
+<div class="line">  <a class="code" href="class_s_t_l_l_1_1show_open_g_l.html#a30f8e3aa941d00239668d0ed137d5ec0">showOpenGL&lt;3&gt;::DrawCache_c</a> dc;</div>
+<div class="line"></div>
+<div class="line">  glClearColor(0, 0, 0, 0);</div>
+<div class="line">  glClear(GL_COLOR_BUFFER_BIT);</div>
+<div class="line">  <span class="comment">// don&#39;t forget to actually enable the sRGB framebuffer...</span></div>
+<div class="line">  glEnable(GL_FRAMEBUFFER_SRGB);</div>
+<div class="line">  <span class="comment">// this is the actual draw call for the layout, if you don&#39;t want a cache, simply</span></div>
+<div class="line">  <span class="comment">// give a nullptr to the function instead of &amp;dc</span></div>
+<div class="line">  <span class="comment">// after this call the cache is &quot;bound&quot; to the layout. You may only use it with this</span></div>
+<div class="line">  <span class="comment">// layout, everything else will not work</span></div>
+<div class="line">  openGL.<a class="code" href="class_s_t_l_l_1_1show_open_g_l.html#abb41ad4cbfc5502a2a311f8813d30029">showLayout</a>(layout, 20*64, 20*64, <a class="code" href="namespace_s_t_l_l.html#ac0004512e3161f751911cb1352dbd550a7cd968714b637b39ec9397c0120cedb7">SUBP_RGB</a>, <span class="keyword">nullptr</span>, &amp;dc);</div>
+<div class="line">  glfwSwapBuffers(screen);</div>
+<div class="line">  <span class="comment">// wait until user closed the window</span></div>
+<div class="line">  <span class="keywordflow">while</span> (!glfwWindowShouldClose(screen)) glfwPollEvents();</div>
+<div class="line">  glfwDestroyWindow(screen);</div>
+<div class="line">  glfwTerminate();</div>
+<div class="line"></div>
+<div class="line">  <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
 </div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Jan 28 2016 21:45:13 for STLL by
+    <li class="footer">Generated on Sun Jan 31 2016 18:06:00 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

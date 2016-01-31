@@ -24,8 +24,8 @@ var NAVTREE =
       [ "CSS", "_h_t_m_l__c_s_s_pg.html#css_sec", null ]
     ] ],
     [ "Tutorial", "tutorial_pg.html", [
-      [ "Using the Paragraph Layouter", "tutorial_pg.html#tut_basic_sec", null ],
-      [ "Using the XHTML Layouter", "tutorial_pg.html#tut_xhtml_sec", null ]
+      [ "Using the Paragraph Layouter and the SDL output", "tutorial_pg.html#tut_basic_sec", null ],
+      [ "Using the XHTML Layouter and the OpenGL output", "tutorial_pg.html#tut_xhtml_sec", null ]
     ] ],
     [ "XML", "xml_pg.html", null ],
     [ "Namespaces", null, [
@@ -63,7 +63,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_h_t_m_l__c_s_s_pg.html",
-"namespacemembers_type.html"
+"namespacemembers_eval.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

@@ -9,8 +9,8 @@ var hierarchy =
     [ "STLL::FontFamily_c", "class_s_t_l_l_1_1_font_family__c.html", null ],
     [ "STLL::FontResource_c", "class_s_t_l_l_1_1_font_resource__c.html", null ],
     [ "STLL::FontFace_c::GlyphSlot_c", "class_s_t_l_l_1_1_font_face__c_1_1_glyph_slot__c.html", null ],
-    [ "STLL::showOpenGL< V, C, G >::imageDrawerOpenGL_c", "class_s_t_l_l_1_1show_open_g_l_1_1image_drawer_open_g_l__c.html", null ],
-    [ "STLL::showSDL< G >::ImageDrawerSDL_c", "class_s_t_l_l_1_1show_s_d_l_1_1_image_drawer_s_d_l__c.html", null ],
+    [ "STLL::showOpenGL< V, G >::imageDrawer_c", "class_s_t_l_l_1_1show_open_g_l_1_1image_drawer__c.html", null ],
+    [ "STLL::showSDL< G >::ImageDrawer_c", "class_s_t_l_l_1_1show_s_d_l_1_1_image_drawer__c.html", null ],
     [ "STLL::LayoutProperties_c", "class_s_t_l_l_1_1_layout_properties__c.html", null ],
     [ "STLL::TextLayout_c::LinkInformation_c", "class_s_t_l_l_1_1_text_layout__c_1_1_link_information__c.html", null ],
     [ "noncopyable", null, [
@@ -18,7 +18,7 @@ var hierarchy =
       [ "STLL::FreeTypeLibrary_c", "class_s_t_l_l_1_1_free_type_library__c.html", null ]
     ] ],
     [ "openGL_internals", null, [
-      [ "STLL::showOpenGL< V, C, G >", "class_s_t_l_l_1_1show_open_g_l.html", null ]
+      [ "STLL::showOpenGL< V, G >", "class_s_t_l_l_1_1show_open_g_l.html", null ]
     ] ],
     [ "STLL::TextLayout_c::Rectangle_c", "class_s_t_l_l_1_1_text_layout__c_1_1_rectangle__c.html", null ],
     [ "runtime_error", null, [
