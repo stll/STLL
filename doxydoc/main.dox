@@ -12,7 +12,7 @@
  *
  * This library is supposed to be in the middle between the heavyweight Pango
  * and the trivial libraries like SDL_ttf. It is supposed to support all line-based
- * text systems. Column bases support is not planned.
+ * text systems. Column based support is not planned.
  *
  * Current home of the library is at <a href="https://github.com/stll/STLL">github</a>.
  *
@@ -32,11 +32,11 @@
  * - harfbuzz: used for layouting text
  * - freetype: used for reading and rendering fonts
  * - boost: some utility functions, the test framework
- * - linebread or unibreak: implementation of the unicode line-break and word-break algorithm
+ * - linebreak or unibreak: implementation of the unicode line-break and word-break algorithm
  * - fribidi: implementation of the unicode bidi algorithm
  *
  * optionally the following needs to be installed
- * - SDL, OpenGL: when available the corresponding output modules will be included
+ * - SDL, glfw, glew: when available the corresponding examples are build
  * - pugixml, libxml2: when available XHTML parser using the corresponding xml-library will be build
  * - doxygen, lconv: used for tests and documentation
  *
@@ -77,6 +77,10 @@ make test
  *
  * This part of the library has only freetype and boost as a dependency.
  *
+ * \subsection xml_wrapper_sec XML Library wrapper
+ * STLL is written in such a way that it can use different XML libraries. There is one
+ * header that abstracts away the DOM tree creation and traversing.
+ *
  * \subsection layouter_sec Paragraph Layouter
  * The next part of the library is the layouter. The layouter will create a text layout
  * out of a given text with additional layouting information.
@@ -93,26 +97,20 @@ make test
  *
  * \subsection xhtml_sec XHTML Layouter
  * This part of the library contains a more complex layouter that can be used for more
- * complicated text output like an online help system.
+ * complicated text output like an on-line help system.
  *
  * It implements a part of the HTML5 specification but uses XHTML syntax for it. It
  * uses a simple CSS emulation to define the looks of your text.
  *
  * The XHTML layouter uses the paragraph layouter to layout single paragraphs of text.
  *
- * This part introduces pugixml as dependency for the parsing.
+ * This part introduces pugixml or libxml2 as dependency for the parsing.
  *
  * \subsection output_sec Output Drivers
  * The library also contains a few drivers for different graphic libraries to output
  * the generated layouts. Right now we have drivers for
  * - SDL
- *
- * Additional drivers for
- * - OpenGL (different versions of the library)
- * - Clanlib
- * - directX
- *
- * Are possible.
+ * - OpenGL (different versions of the API)
  *
  * Of course these drivers will add a dependency on the corresponding graphics library.
  *
