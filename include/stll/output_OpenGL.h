@@ -68,7 +68,7 @@ class showOpenGL : internal::openGL_internals<V>
 {
   private:
     internal::GlyphAtlas_c cache;
-    G gamma;
+    G g;
 
     GLuint glTextureId = 0;     // OpenGL texture id
     uint32_t uploadVersion = 0; // a counter changed each time the texture changes to know when to update
@@ -101,7 +101,7 @@ class showOpenGL : internal::openGL_internals<V>
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexEnvi(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-      gamma.setGamma(22);
+      g.setGamma(22);
 
       internal::openGL_internals<V>::setup();
     }
@@ -233,7 +233,7 @@ class showOpenGL : internal::openGL_internals<V>
             case CommandData_c::CMD_GLYPH:
               {
                 auto pos = cache.getGlyph(ii.font, ii.glyphIndex, sp, ii.blurr).value();
-                Color_c c = gamma.forward(ii.c);
+                Color_c c = g.forward(ii.c);
 
                 if ((sp == SUBP_RGB || sp == SUBP_BGR) && (ii.blurr <= cache.blurrmax))
                 {
@@ -248,7 +248,7 @@ class showOpenGL : internal::openGL_internals<V>
 
             case CommandData_c::CMD_RECT:
               {
-                Color_c c = gamma.forward(ii.c);
+                Color_c c = g.forward(ii.c);
 
                 if (ii.blurr == 0)
                 {
@@ -315,6 +315,18 @@ class showOpenGL : internal::openGL_internals<V>
 
     uint32_t cacheWidth(void) const { return cache.width(); }
     uint32_t cacheHeight(void) const { return cache.height(); }
+
+    /** \brief update the gamma value used for output
+     *
+     * Default value for the class is 22, which is good for sRGB output, which
+     * should be your default for high quality output. See \ref gamma_sec for details.
+     *
+     * \param gamma the new gamma value in 1/10th units. Use 22 for sRGB and 10 for normal linear
+     */
+    void setGamma(uint8_t gamma = 22)
+    {
+      g.setGamma(gamma);
+    }
 
     /** \brief clear the glyph cache. This might be useful when you change
      * the fonts that you use for output, or any other reason that will

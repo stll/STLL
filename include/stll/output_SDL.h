@@ -196,6 +196,8 @@ class showSDL
 
   public:
 
+    showSDL(void) { g.setGamma(22); }
+
     /** \brief class used to encapsulate image drawing
      *
      * When the routine showLayoutSDL needs to draw an image it will call the draw function in this
@@ -234,11 +236,9 @@ class showSDL
      *        to stick to the same gamma value for long stretches
      */
     void showLayout(const TextLayout_c & l, int sx, int sy, SDL_Surface * s,
-                    SubPixelArrangement sp = SUBP_NONE, ImageDrawer_c * images = 0, uint8_t gamma = 22)
+                    SubPixelArrangement sp = SUBP_NONE, ImageDrawer_c * images = 0)
     {
       SDL_Rect r;
-
-      g.setGamma(gamma);
 
       /* render */
       for (auto & i : l.getData())
@@ -270,6 +270,18 @@ class showSDL
             break;
         }
       }
+    }
+
+    /** \brief update the gamma value used for output
+     *
+     * Default value for the class is 22, which is good for sRGB output, which
+     * should be your default for high quality output. See \ref gamma_sec for details.
+     *
+     * \param gamma the new gamma value in 1/10th units. Use 22 for sRGB and 10 for normal linear
+     */
+    void setGamma(uint8_t gamma = 22)
+    {
+      g.setGamma(gamma);
     }
 
     /** \brief trims the font cache down to a maximal number of entries
