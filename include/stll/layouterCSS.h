@@ -121,6 +121,15 @@ class TextStyleSheet_c
      */
     void addRule(const std::string sel, const std::string attr, const std::string val);
 
+    /** \brief enable or disable usage of the optimizing layouter. See LayoutProperties_c for details
+     */
+    void setUseOptimizingLayouter(bool on)
+    {
+      useOptimizingLayouter = on;
+    }
+
+    /** \brief get status of optimizing layouter */
+    bool getUseOptimizingLayouter(void) const { return useOptimizingLayouter; }
 
     /** \brief get the value for an attribute for a given xml-node
      *
@@ -186,6 +195,7 @@ class TextStyleSheet_c
     std::vector<rule> rules;
     std::map<std::string, std::shared_ptr<FontFamily_c> > families;
     std::shared_ptr<FontCache_c> cache;
+    bool useOptimizingLayouter = true;
 };
 
 }

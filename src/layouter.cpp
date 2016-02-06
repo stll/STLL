@@ -557,6 +557,174 @@ static void mergeLinks(TextLayout_c & txt, const std::vector<TextLayout_c::LinkI
   }
 }
 
+typedef enum { FL_FIRST, FL_BREAK, FL_NORMAL } fl;
+
+static void addLine(const int runstart, const int spos, std::vector<runInfo> & runs, TextLayout_c & l,
+                    std::vector<size_t> & runorder, const int max_level, int & ypos, const int curAscend,
+                    const int curDescend, const int curWidth, const Shape_c & shape, const fl firstline,
+                    int numSpace, const LayoutProperties_c & prop, const bool forcebreak, int spacePart
+)
+{
+  // this normally doesn't happen because the final run will never be a space
+  // because the line-break will then happen before that space, but just in case
+  // remove it from the space counter
+  if (runs[spos-1].space) numSpace--;
+
+  // reorder runs for current line
+  for (int i = max_level-1; i >= 0; i--)
+  {
+    // find starts of regions to reverse
+    for (size_t j = runstart; j < spos; j++)
+    {
+      if (runs[runorder[j]].embeddingLevel > i)
+      {
+        // find the end of the current regions
+        size_t k = j+1;
+        while (k < spos && runs[runorder[k]].embeddingLevel > i)
+        {
+          k++;
+        }
+
+        std::reverse(runorder.begin()+j, runorder.begin()+k);
+        j = k;
+      }
+    }
+  }
+
+  // calculate how many pixels are left on the line (for justification)
+  int32_t spaceLeft = shape.getRight(ypos, ypos+curAscend-curDescend) -
+                      shape.getLeft(ypos, ypos+curAscend-curDescend) - curWidth;
+
+  // output of runs is always left to right, so depending on the paragraph alignment
+  // settings we calculate where at the x-axis we start with the runs and how many
+  // additional pixels we add to each space
+  int32_t xpos;
+  double spaceadder = 0;
+
+  switch (prop.align)
+  {
+    default:
+    case LayoutProperties_c::ALG_LEFT:
+      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
+      if (firstline != FL_NORMAL) xpos += prop.indent;
+      break;
+
+    case LayoutProperties_c::ALG_RIGHT:
+      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft;
+      break;
+
+    case LayoutProperties_c::ALG_CENTER:
+      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft/2;
+      break;
+
+    case LayoutProperties_c::ALG_JUSTIFY_LEFT:
+      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
+      // don't justify last paragraph
+      if (numSpace > 1 && spos < runs.size() && !forcebreak)
+        spaceadder = 1.0 * spaceLeft / numSpace;
+
+      if (firstline != FL_NORMAL) xpos += prop.indent;
+
+      break;
+
+    case LayoutProperties_c::ALG_JUSTIFY_RIGHT:
+      // don't justify last paragraph
+      if (numSpace > 1 && spos < runs.size() && !forcebreak)
+      {
+        xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
+        spaceadder = 1.0 * spaceLeft / numSpace;
+      }
+      else
+      {
+        xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft;
+      }
+      break;
+  }
+
+  // go down to the baseline
+  ypos += curAscend;
+
+  // find the number of layers that we need to output
+  size_t maxlayer = 0;
+  for (size_t i = runstart; i < spos; i++)
+    for (auto & r : runs[runorder[i]].run)
+      maxlayer = std::max(maxlayer, r.first+1);
+
+  // output all the layers one after the other
+  for (uint32_t layer = 0; layer < maxlayer; layer++)
+  {
+    int32_t xpos2 = xpos;
+    numSpace = 0;
+
+    // output runs of current layer
+    for (size_t i = runstart; i < spos; i++)
+    {
+      if (!runs[runorder[i]].shy || i+1 == spos)
+      {
+        // output only non-space runs
+        if (!runs[runorder[i]].space)
+        {
+          for (auto & cc : runs[runorder[i]].run)
+          {
+            if (cc.first == layer)
+            {
+              cc.second.x += xpos2+spaceadder*numSpace;
+              cc.second.y += ypos;
+              l.addCommand(cc.second);
+            }
+          }
+        }
+        else
+        {
+          // in space runs, there may be an rectangular command that represents
+          // the underline, make that underline longer by spaceadder
+          for (auto & cc : runs[runorder[i]].run)
+          {
+            if (   (cc.first == layer)
+                && (cc.second.command == CommandData_c::CMD_RECT)
+               )
+            {
+              cc.second.w += spaceadder;
+              cc.second.x += xpos2+spaceadder*numSpace;
+              cc.second.y += ypos;
+              l.addCommand(cc.second);
+            }
+          }
+
+          // the link rectangle in spaces also needs to get longer
+          if (!runs[runorder[i]].links.empty() && !runs[runorder[i]].links[0].areas.empty())
+          {
+            runs[runorder[i]].links[0].areas[0].w += spaceadder;
+          }
+        }
+
+        // merge in the links, but only do this once, for the layer 0
+        if (layer == 0)
+          mergeLinks(l, runs[runorder[i]].links, xpos2+spaceadder*numSpace, ypos);
+
+        // count the spaces
+        if (runs[runorder[i]].space) numSpace++;
+
+        // advance the x-position
+        if (!runs[runorder[i]].space)
+          xpos2 += runs[runorder[i]].dx;
+        else
+          xpos2 += spacePart*runs[runorder[i]].dx/10;
+      }
+    }
+  }
+
+  // store the baseline position for the first line
+  if (firstline == FL_FIRST)
+  {
+    l.setFirstBaseline(ypos);
+  }
+
+  // go the the top of the next line
+  ypos -= curDescend;
+
+}
+
 // do the line breaking using the runs created before
 static TextLayout_c breakLines(std::vector<runInfo> & runs,
                                const Shape_c & shape,
@@ -578,7 +746,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
   size_t runstart = 0;
   int32_t ypos = ystart;
   TextLayout_c l;
-  enum { FL_FIRST, FL_BREAK, FL_NORMAL } firstline = FL_FIRST;
+  fl firstline = FL_FIRST;
   bool forcebreak = false;
 
   // while there are runs left to do
@@ -691,160 +859,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
       }
     }
 
-    // this normally doesn't happen because the final run will never be a space
-    // because the line-break will then happen before that space, but just in case
-    // remove it from the space counter
-    if (runs[spos-1].space) numSpace--;
-
-    // reorder runs for current line
-    for (int i = max_level-1; i >= 0; i--)
-    {
-      // find starts of regions to reverse
-      for (size_t j = runstart; j < spos; j++)
-      {
-        if (runs[runorder[j]].embeddingLevel > i)
-        {
-          // find the end of the current regions
-          size_t k = j+1;
-          while (k < spos && runs[runorder[k]].embeddingLevel > i)
-          {
-            k++;
-          }
-
-          std::reverse(runorder.begin()+j, runorder.begin()+k);
-          j = k;
-        }
-      }
-    }
-
-    // calculate how many pixels are left on the line (for justification)
-    int32_t spaceLeft = shape.getRight(ypos, ypos+curAscend-curDescend) -
-                        shape.getLeft(ypos, ypos+curAscend-curDescend) - curWidth;
-
-    // output of runs is always left to right, so depending on the paragraph alignment
-    // settings we calculate where at the x-axis we start with the runs and how many
-    // additional pixels we add to each space
-    int32_t xpos;
-    double spaceadder = 0;
-
-    switch (prop.align)
-    {
-      default:
-      case LayoutProperties_c::ALG_LEFT:
-        xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
-        if (firstline != FL_NORMAL) xpos += prop.indent;
-        break;
-
-      case LayoutProperties_c::ALG_RIGHT:
-        xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft;
-        break;
-
-      case LayoutProperties_c::ALG_CENTER:
-        xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft/2;
-        break;
-
-      case LayoutProperties_c::ALG_JUSTIFY_LEFT:
-        xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
-        // don't justify last paragraph
-        if (numSpace > 1 && spos < runs.size() && !forcebreak)
-          spaceadder = 1.0 * spaceLeft / numSpace;
-
-        if (firstline != FL_NORMAL) xpos += prop.indent;
-
-        break;
-
-      case LayoutProperties_c::ALG_JUSTIFY_RIGHT:
-        // don't justify last paragraph
-        if (numSpace > 1 && spos < runs.size() && !forcebreak)
-        {
-          xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
-          spaceadder = 1.0 * spaceLeft / numSpace;
-        }
-        else
-        {
-          xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft;
-        }
-        break;
-    }
-
-    // go down to the baseline
-    ypos += curAscend;
-
-    // find the number of layers that we need to output
-    size_t maxlayer = 0;
-    for (size_t i = runstart; i < spos; i++)
-      for (auto & r : runs[runorder[i]].run)
-        maxlayer = std::max(maxlayer, r.first+1);
-
-    // output all the layers one after the other
-    for (uint32_t layer = 0; layer < maxlayer; layer++)
-    {
-      int32_t xpos2 = xpos;
-      numSpace = 0;
-
-      // output runs of current layer
-      for (size_t i = runstart; i < spos; i++)
-      {
-        if (!runs[runorder[i]].shy || i+1 == spos)
-        {
-          // output only non-space runs
-          if (!runs[runorder[i]].space)
-          {
-            for (auto & cc : runs[runorder[i]].run)
-            {
-              if (cc.first == layer)
-              {
-                cc.second.x += xpos2+spaceadder*numSpace;
-                cc.second.y += ypos;
-                l.addCommand(cc.second);
-              }
-            }
-          }
-          else
-          {
-            // in space runs, there may be an rectangular command that represents
-            // the underline, make that underline longer by spaceadder
-            for (auto & cc : runs[runorder[i]].run)
-            {
-              if (   (cc.first == layer)
-                  && (cc.second.command == CommandData_c::CMD_RECT)
-                 )
-              {
-                cc.second.w += spaceadder;
-                cc.second.x += xpos2+spaceadder*numSpace;
-                cc.second.y += ypos;
-                l.addCommand(cc.second);
-              }
-            }
-
-            // the link rectangle in spaces also needs to get longer
-            if (!runs[runorder[i]].links.empty() && !runs[runorder[i]].links[0].areas.empty())
-            {
-              runs[runorder[i]].links[0].areas[0].w += spaceadder;
-            }
-          }
-
-          // merge in the links, but only do this once, for the layer 0
-          if (layer == 0)
-            mergeLinks(l, runs[runorder[i]].links, xpos2+spaceadder*numSpace, ypos);
-
-          // count the spaces
-          if (runs[runorder[i]].space) numSpace++;
-
-          // advance the x-position
-          xpos2 += runs[runorder[i]].dx;
-        }
-      }
-    }
-
-    // store the baseline position for the first line
-    if (firstline == FL_FIRST)
-    {
-      l.setFirstBaseline(ypos);
-    }
-
-    // go the the top of the next line
-    ypos -= curDescend;
+    addLine(runstart, spos, runs, l, runorder, max_level, ypos, curAscend, curDescend, curWidth, shape, firstline, numSpace, prop, forcebreak, 10);
 
     // set the runstart at the next run and skip space runs
     runstart = spos;
@@ -861,6 +876,215 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
   l.setHeight(ypos);
   l.setLeft(shape.getLeft2(ystart, ypos));
   l.setRight(shape.getRight2(ystart, ypos));
+
+  return l;
+}
+
+// do the line breaking using the runs created before
+static TextLayout_c breakLinesOptimize(std::vector<runInfo> & runs,
+                                       const Shape_c & shape,
+                                       FriBidiLevel max_level,
+                                       const LayoutProperties_c & prop, int32_t ystart)
+{
+  // this vector is used for the reordering of the runs
+  // it contains the index of the run that should go in
+  // the n-th position.
+  // Theoretically this could be reused for each line, but
+  // that makes things more complicated, so we use one array
+  // for all the runs but reorder only the current line
+  std::vector<size_t> runorder(runs.size());
+  int n(0);
+  // initialize the array with 1...n
+  std::generate(runorder.begin(), runorder.end(), [&]{ return n++; });
+
+  // layout a paragraph line by line
+  TextLayout_c l;
+
+  typedef struct
+  {
+    size_t from; // optimal line starting position
+    float demerits; // penalty when coming from there
+
+    // properties of the line, when coming from there
+    int ascend;
+    int descend;
+    int width;
+    int spaces;
+    int32_t ypos;
+    bool forcebreak;
+    int linetype; // line categorisation 0: tight, 1: decent, 2: loose, 3: very loose
+    bool hypen;
+    bool start;
+  } lineinfo;
+
+  std::vector<lineinfo> li (runs.size()+1);
+
+  li[0].from = 0;
+  li[0].demerits = 0;
+  li[0].ypos = ystart;
+  li[0].start = true;
+
+  // find the best paths to all the line break positions
+  for (size_t i = 1; i < runs.size()+1; i++)
+  {
+    li[i].demerits = std::numeric_limits<int>::max();
+
+    if (runs[i-1].linebreak == LINEBREAK_ALLOWBREAK || runs[i-1].linebreak == LINEBREAK_MUSTBREAK)
+    {
+      for (size_t start = i; start > 0; start--)
+      {
+        // no need to look at lines with this infinite penalty
+        if (li[start-1].demerits == std::numeric_limits<int>::max())
+          continue;
+
+        int32_t Ascend = 0;
+        int32_t Descend = 0;
+        int32_t Width = 0;
+        size_t Space = 0;
+        bool force = false;
+        int optimalStretch = 0;
+        int spaceWidth = 0;
+
+        if (start == 1)
+        {
+          if (prop.align != LayoutProperties_c::ALG_CENTER)
+            Width = prop.indent;
+        }
+
+        // ignore spaces at the start end end of the line
+        int s1 = start-1;
+        int s2 = i;
+        while (runs[s1].space) s1++;
+        while (runs[s2-1].space) s2--;
+
+        for (int j = s1; j < s2; j++)
+        {
+          if (!runs[j].shy || j == s2-1)
+          {
+            Ascend = std::max(Ascend, runs[j].ascender);
+            Descend = std::min(Descend, runs[j].descender);
+            if (runs[j].space)
+            {
+              Space++;
+              Width += runs[j].dx*9/10;
+              optimalStretch += runs[j].dx/10;
+              spaceWidth += runs[j].dx;
+            }
+            else
+            {
+              Width += runs[j].dx;
+            }
+          }
+        }
+
+        // line has become too long, no need to go further back from here
+        if (shape.getLeft(li[start-1].ypos, li[start-1].ypos+Ascend-Descend)+Width >
+          shape.getRight(li[start-1].ypos, li[start-1].ypos+Ascend-Descend))
+          break;
+
+        //  how much do we need to stretch the line
+        float fillin = shape.getRight(li[start-1].ypos, li[start-1].ypos+Ascend-Descend) -
+        shape.getLeft(li[start-1].ypos, li[start-1].ypos+Ascend-Descend) - Width;
+
+        // what would be the optimum fillin to get exactly the right space size
+        float optimalFillin = spaceWidth-Width;
+
+        float fillinDifference = fabs(fillin-optimalFillin);
+
+        float badness = 100.0*pow(1.0*fillinDifference/optimalFillin, 3);
+
+        int linetype = 1;
+
+        if (badness >= 100) linetype = 3;
+        else if (badness >= 13)
+          if (fillin > optimalFillin) linetype = 2; else linetype = 0;
+
+        float penalty = 0;
+
+        float demerits = (10+badness)*(10+badness);
+
+        // hypen demerits
+        if (runs[s2-1].shy && li[start-1].hypen)
+        {
+          demerits += 10000;
+        }
+        else if (runs[s2-1].shy)
+        {
+          demerits += 1000;
+        }
+
+        if (abs(linetype - li[start-1].linetype) > 1) demerits += 10000;
+
+        if (runs[i-1].linebreak == LINEBREAK_MUSTBREAK || i == runs.size())
+        {
+          if (Width > (shape.getRight(li[start-1].ypos, li[start-1].ypos+Ascend-Descend) -
+                       shape.getLeft(li[start-1].ypos, li[start-1].ypos+Ascend-Descend))/3)
+          {
+            demerits = 0;
+          }
+          else
+          {
+            demerits = 100000;
+          }
+          force = true;
+        }
+
+        demerits += li[start-1].demerits;
+
+        if (demerits < li[i].demerits)
+        {
+          li[i].from = start-1;
+          li[i].demerits = demerits;
+
+          li[i].ascend = Ascend;
+          li[i].descend = Descend;
+          li[i].width = Width;
+          li[i].spaces = Space;
+          li[i].ypos = li[start-1].ypos + Ascend - Descend;
+          li[i].forcebreak = force;
+          li[i].linetype = linetype;
+          li[i].hypen = runs[s2-1].shy;
+          li[i].start = false;
+        }
+      }
+    }
+
+    if (runs[i-1].linebreak == LINEBREAK_MUSTBREAK || i == runs.size())
+    {
+      // store breaking points
+      size_t ii = i;
+      std::vector<size_t> breaks;
+
+      while (!li[ii].start)
+      {
+        breaks.push_back(ii);
+        ii = li[ii].from;
+      }
+      breaks.push_back(ii);
+
+      for (ii = breaks.size()-1; ii > 0; ii--)
+      {
+        auto & bb = li[breaks[ii-1]];
+        auto & cc = li[breaks[ii]];
+
+        int s1 = breaks[ii];
+        int s2 = breaks[ii-1];
+        while (runs[s1].space) s1++;
+        while (runs[s2-1].space) s2--;
+        addLine(s1, s2, runs, l, runorder, max_level, cc.ypos, bb.ascend, bb.descend, bb.width,
+                shape, ii == breaks.size()-1 ? FL_FIRST : FL_NORMAL, bb.spaces, prop, ii == 1, 9);
+      }
+
+      runs.erase(runs.begin(), runs.begin()+i);
+      li[0].ypos = li[i].ypos;
+
+      i = 0;
+    }
+  }
+
+  l.setHeight(li[0].ypos);
+  l.setLeft(shape.getLeft2(ystart, li[0].ypos));
+  l.setRight(shape.getRight2(ystart, li[0].ypos));
 
   return l;
 }
@@ -919,7 +1143,10 @@ TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_
   std::vector<runInfo> runs = createTextRuns(txt32, attr, embedding_levels, linebreaks, prop);
 
   // layout the runs into lines
-  return breakLines(runs, shape, max_level, prop, ystart);
+  if (prop.optimizeLinebreaks)
+    return breakLinesOptimize(runs, shape, max_level, prop, ystart);
+  else
+    return breakLines(runs, shape, max_level, prop, ystart);
 }
 
 

@@ -551,6 +551,14 @@ class LayoutProperties_c
 
     /** \brief link URLs for the links used in the CodepointAttribute_c */
     std::vector<std::string> links;
+
+    /** \brief Choose between fast and optimizing linebreak algorithm
+     *
+     * The fast linebreak algorithm simply breaks a line as soon as the next part
+     * doesn't fit onto the line. The optimizing algorithm tries to limit raggedness
+     * of the lines and tries to avoid hyphenating words
+     */
+    bool optimizeLinebreaks = true;
 };
 
 

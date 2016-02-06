@@ -187,6 +187,7 @@ static boost::test_tools::predicate_result layouts_identical(const  STLL::TextLa
 BOOST_AUTO_TEST_CASE( Stylesheet_Resource_Tests )
 {
   STLL::TextStyleSheet_c s;
+  s.setUseOptimizingLayouter(false);
 
   //************************************
   // check invalid selectors
@@ -289,6 +290,7 @@ BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
   s.addRule("p", "font-size", "16px");
   s.addFont("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
   s.addRule(".font", "font-family", "snas");
+  s.setUseOptimizingLayouter(false);
 
   // not properly closing tag
   BOOST_CHECK_THROW(layoutXHTML(XMLLIB, "<html><body><p>Text</p></body></htm>", s, r), STLL::XhtmlException_c);
@@ -376,6 +378,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   s.addFont("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#ffffff");
+  s.setUseOptimizingLayouter(false);
 
   // simple text
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
@@ -642,6 +645,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   l.align = STLL::LayoutProperties_c::ALG_JUSTIFY_LEFT;
   l.ltr = true;
   l.indent = 0;
+  l.optimizeLinebreaks = false;
 
   BOOST_CHECK(layouts_identical(STLL::layoutParagraph(U"TestITest", attr, STLL::RectangleShape_c(300*64), l),
                                 "tests/simple-31.lay"));
@@ -665,6 +669,7 @@ BOOST_AUTO_TEST_CASE( Table_Layouts )
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#ffffff");
   s.addRule(".tc", "width", "100px");
+  s.setUseOptimizingLayouter(false);
 
   // basic table with 2x2 cells
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
@@ -743,6 +748,7 @@ BOOST_AUTO_TEST_CASE( Frames_Layouts )
   s.addRule("body", "color", "#FFFFFF");
   s.addRule("body", "border-color", "#FFFF00");
   s.addRule("body", "background-color", "#000040");
+  s.setUseOptimizingLayouter(false);
 
   // top border
   s.addRule("body", "border-top-width", "10px");
@@ -829,6 +835,7 @@ BOOST_AUTO_TEST_CASE( Save_Load_Layouts )
   s.addRule("body", "color", "#FFFFFF");
   s.addRule("body", "border-color", "#FFFF00");
   s.addRule("body", "background-color", "#000040");
+  s.setUseOptimizingLayouter(false);
 
   // top border
   s.addRule("body", "border-top-width", "10px");
@@ -852,6 +859,7 @@ BOOST_AUTO_TEST_CASE( Links )
   s.addFont("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#ffffff");
+  s.setUseOptimizingLayouter(false);
 
   // simple one link layout
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
