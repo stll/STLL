@@ -690,6 +690,7 @@ TextLayout_c layoutXML_Phrasing(X & xml, const TextStyleSheet_c & rules, const S
   lprop.ltr = rules.getValue(xml, "direction") == "ltr";
   lprop.underlineFont = getFontForNode(xml_getParent(xml), rules);
   lprop.optimizeLinebreaks = rules.getUseOptimizingLayouter();
+  lprop.hyphenate = rules.getHyphenate();
 
   xml = xml2;
 

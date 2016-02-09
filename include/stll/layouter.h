@@ -460,6 +460,11 @@ class AttributeIndex_c
     {
       return attr.find(i)->second;
     }
+
+    bool hasAttribute(size_t i) const
+    {
+      return attr.find(i) != attr.end();
+    }
 };
 
 /** \brief base class to define the shape to layout text into
@@ -559,6 +564,14 @@ class LayoutProperties_c
      * of the lines and tries to avoid hyphenating words
      */
     bool optimizeLinebreaks = true;
+
+    /** \brief automatically find hyphenation points
+     *
+     * This requires a bit of time but will increase text layout quality dramatically.
+     * Only words that don't contain a shy will be consiedered
+     * The attribute must contain language information or no hyphenation will take place
+     */
+    bool hyphenate = true;
 };
 
 

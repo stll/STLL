@@ -188,6 +188,7 @@ BOOST_AUTO_TEST_CASE( Stylesheet_Resource_Tests )
 {
   STLL::TextStyleSheet_c s;
   s.setUseOptimizingLayouter(false);
+  s.setHyphenate(false);
 
   //************************************
   // check invalid selectors
@@ -291,6 +292,7 @@ BOOST_AUTO_TEST_CASE( Faulty_XHTML_Code )
   s.addFont("sans", STLL::FontResource_c("tests/FreeSans.ttf"));
   s.addRule(".font", "font-family", "snas");
   s.setUseOptimizingLayouter(false);
+  s.setHyphenate(false);
 
   // not properly closing tag
   BOOST_CHECK_THROW(layoutXHTML(XMLLIB, "<html><body><p>Text</p></body></htm>", s, r), STLL::XhtmlException_c);
@@ -379,6 +381,7 @@ BOOST_AUTO_TEST_CASE( Simple_Layouts )
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#ffffff");
   s.setUseOptimizingLayouter(false);
+  s.setHyphenate(false);
 
   // simple text
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
@@ -670,6 +673,7 @@ BOOST_AUTO_TEST_CASE( Table_Layouts )
   s.addRule("body", "color", "#ffffff");
   s.addRule(".tc", "width", "100px");
   s.setUseOptimizingLayouter(false);
+  s.setHyphenate(false);
 
   // basic table with 2x2 cells
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,
@@ -749,6 +753,7 @@ BOOST_AUTO_TEST_CASE( Frames_Layouts )
   s.addRule("body", "border-color", "#FFFF00");
   s.addRule("body", "background-color", "#000040");
   s.setUseOptimizingLayouter(false);
+  s.setHyphenate(false);
 
   // top border
   s.addRule("body", "border-top-width", "10px");
@@ -836,6 +841,7 @@ BOOST_AUTO_TEST_CASE( Save_Load_Layouts )
   s.addRule("body", "border-color", "#FFFF00");
   s.addRule("body", "background-color", "#000040");
   s.setUseOptimizingLayouter(false);
+  s.setHyphenate(false);
 
   // top border
   s.addRule("body", "border-top-width", "10px");
@@ -860,6 +866,7 @@ BOOST_AUTO_TEST_CASE( Links )
   s.addRule("body", "font-size", "16px");
   s.addRule("body", "color", "#ffffff");
   s.setUseOptimizingLayouter(false);
+  s.setHyphenate(false);
 
   // simple one link layout
   BOOST_CHECK(layouts_identical(STLL::layoutXHTML(XMLLIB,

@@ -131,6 +131,16 @@ class TextStyleSheet_c
     /** \brief get status of optimizing layouter */
     bool getUseOptimizingLayouter(void) const { return useOptimizingLayouter; }
 
+    /** \brief enable or disable hyphenation. See LayoutProperties_c for details
+     */
+    void setHyphenate(bool on)
+    {
+      hyphenate = on;
+    }
+
+    /** \brief get status of hyphenation setting */
+    bool getHyphenate(void) const { return hyphenate; }
+
     /** \brief get the value for an attribute for a given xml-node
      *
      * \param node The xml node that the attribute value is requested for
@@ -196,6 +206,7 @@ class TextStyleSheet_c
     std::map<std::string, std::shared_ptr<FontFamily_c> > families;
     std::shared_ptr<FontCache_c> cache;
     bool useOptimizingLayouter = true;
+    bool hyphenate = true;
 };
 
 }

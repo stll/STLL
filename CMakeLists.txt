@@ -21,7 +21,7 @@ pkg_check_modules(FRIBIDI REQUIRED fribidi)
 pkg_check_modules(GLEW glew)
 
 # Dependencies without support for neither CMake nor pkg-config
-find_library(UNIBREAK_LIBRARY NAMES unibreak linebreak)
+find_library(UNIBREAK_LIBRARY NAMES unibreak)
 find_library(PUGIXML_LIBRARY NAMES pugixml)
 find_library(GLFW_LIBRARY NAMES glfw)
 
@@ -42,6 +42,7 @@ set(stll_SOURCES
   src/utf-8.cpp
   src/output/glyphCache.cpp
   src/output/rectanglepacker.cpp
+  src/hyphendictionaries.cpp
 )
 if(PUGIXML_LIBRARY)
   list(APPEND stll_SOURCES src/layouterXHTML_Pugi.cpp)

@@ -28,8 +28,13 @@
 #include <fribidi/fribidi.h>
 
 #include <linebreak.h>
+#include <wordbreak.h>
+
+#include "hyphen/hyphen.h"
+#include "hyphendictionaries_internal.h"
 
 #include <algorithm>
+#include <map>
 
 namespace STLL {
 
@@ -170,6 +175,275 @@ static bool isBidiCharacter(char32_t c)
     return false;
 }
 
+static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runstart,
+                         const AttributeIndex_c & attr, hb_buffer_t *buf,
+                         const LayoutProperties_c & prop,
+                         std::shared_ptr<FontFace_c> & font,
+                         hb_font_t * hb_ft_font,
+                         char linebreak,
+                         FriBidiLevel embedding_level,
+                         size_t normalLayer
+)
+{
+  runInfo run;
+
+  // check, if this is a space run, on line ends space runs will be removed
+  if (txt32[spos-1] == U' ' || txt32[spos-1] == U'\n')
+  {
+    run.space = true;
+  }
+  else
+  {
+    run.space = false;
+  }
+
+  // check, if this run is a soft hyphen. Soft hyphens are ignored and not output, except on line endings
+  run.shy = txt32[runstart] == U'\u00AD';
+
+  std::string language = attr.get(runstart).lang;
+
+  // setup the language for the harfbuzz shaper
+  // reset is not required, when no language is set, the buffer
+  // reset automatically resets the language and script info as well
+  if (language != "")
+  {
+    size_t i = language.find_first_of('-');
+
+    if (i != std::string::npos)
+    {
+      hb_script_t scr = hb_script_from_iso15924_tag(HB_TAG(language[i+1], language[i+2],
+                                                           language[i+3], language[i+4]));
+      hb_buffer_set_script(buf, scr);
+
+      hb_buffer_set_language(buf, hb_language_from_string(language.c_str(), i-1));
+    }
+    else
+    {
+      hb_buffer_set_language(buf, hb_language_from_string(language.c_str(), language.length()));
+    }
+  }
+
+  // send the text to harfbuzz, in a normal run, send the normal text
+  // for a shy, send a hyphen
+  if (!run.shy)
+    hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(txt32.c_str())+runstart, spos-runstart, 0, spos-runstart);
+  else
+  {
+    // we want to append a hyphen, sadly not all fonts contain the proper character for
+    // this simple symbol, so we first try the proper one, and if that is not available
+    // we use hyphen-minus, which all should have
+    if (font->containsGlyph(U'\u2010'))
+    {
+      hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(U"\u2010"), 1, 0, 1);
+    }
+    else
+    {
+      hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(U"\u002D"), 1, 0, 1);
+    }
+  }
+
+  // set text direction for this run
+  if (embedding_level % 2 == 0)
+  {
+    hb_buffer_set_direction(buf, HB_DIRECTION_LTR);
+  }
+  else
+  {
+    hb_buffer_set_direction(buf, HB_DIRECTION_RTL);
+  }
+
+  // get the right font for this run and do the shaping
+  if (hb_ft_font)
+    hb_shape(hb_ft_font, buf, NULL, 0);
+
+  // get the output
+  unsigned int         glyph_count;
+  hb_glyph_info_t     *glyph_info   = hb_buffer_get_glyph_infos(buf, &glyph_count);
+  hb_glyph_position_t *glyph_pos    = hb_buffer_get_glyph_positions(buf, &glyph_count);
+
+  // fill in some of the run information
+  run.dx = run.dy = 0;
+  run.embeddingLevel = embedding_level;
+  run.linebreak = linebreak;
+  run.font = font;
+  if (attr.get(runstart).inlay)
+  {
+    // for inlays the ascender and descender depends on the size of the inlay
+    run.ascender = attr.get(runstart).inlay->getHeight()+attr.get(runstart).baseline_shift;
+    run.descender = attr.get(runstart).inlay->getHeight()-run.ascender;
+  }
+  else
+  {
+    // for normal text ascender and descender are taken from the font
+    run.ascender = run.font->getAscender()+attr.get(runstart).baseline_shift;
+    run.descender = run.font->getDescender()+attr.get(runstart).baseline_shift;
+  }
+#ifndef NDEBUG
+  run.text = txt32.substr(runstart, spos-runstart);
+#endif
+
+  size_t curLink = 0;
+  TextLayout_c::Rectangle_c linkRect;
+  int linkStart = 0;
+
+  // off we go creating the drawing commands
+  for (size_t j=0; j < glyph_count; ++j)
+  {
+    // bidi characters are skipped
+    if (isBidiCharacter(txt32[glyph_info[j].cluster + runstart]))
+      continue;
+
+    // get the attribute for the current character
+    auto a = attr.get(glyph_info[j].cluster + runstart);
+
+    // when a new link is started, we save the current x-position within the run
+    if ((!curLink && a.link) || (curLink != a.link))
+    {
+      linkStart = run.dx;
+    }
+
+    if (a.inlay)
+    {
+      // copy the drawing commands from the inlay, shift them
+      // to the right position
+      for (auto in : a.inlay->getData())
+      {
+        // if ascender is 0 we want to be below the baseline
+        // but if we leave the inlay where is is the top line of them
+        // image will be _on_ the baseline, which is not what we want
+        // so we actually need to go one below
+        in.y -= (run.ascender-1);
+        in.x += run.dx;
+
+        run.run.push_back(std::make_pair(normalLayer, in));
+      }
+
+      // create the underline for the inlay
+      // TODO try to merge this with the underline of a normal glyph
+      if (a.flags & CodepointAttributes_c::FL_UNDERLINE)
+      {
+        int32_t rx = run.dx;
+        int32_t ry;
+        int32_t rw = a.inlay->getRight();
+        int32_t rh;
+
+        if (prop.underlineFont)
+        {
+          ry = -((prop.underlineFont.getUnderlinePosition()+prop.underlineFont.getUnderlineThickness()/2));
+          rh = std::max(64, prop.underlineFont.getUnderlineThickness());
+        }
+        else
+        {
+          ry = -((a.font.getUnderlinePosition()+a.font.getUnderlineThickness()/2));
+          rh = std::max(64, a.font.getUnderlineThickness());
+        }
+
+        for (size_t j = 0; j < a.shadows.size(); j++)
+        {
+          run.run.push_back(std::make_pair(j,
+              CommandData_c(rx+a.shadows[j].dx, ry+a.shadows[j].dy, rw, rh, a.shadows[j].c, a.shadows[j].blurr)));
+        }
+
+        run.run.push_back(std::make_pair(normalLayer, CommandData_c(rx, ry, rw, rh, a.c, 0)));
+      }
+
+      run.dx += a.inlay->getRight();
+    }
+    else
+    {
+      // output the glyph
+      glyphIndex_t gi = glyph_info[j].codepoint;
+
+      int32_t gx = run.dx + (glyph_pos[j].x_offset);
+      int32_t gy = run.dy - (glyph_pos[j].y_offset)-attr.get(runstart).baseline_shift;
+
+      // output all shadows of the glyph
+      for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
+      {
+        run.run.push_back(std::make_pair(j,
+            CommandData_c(font, gi, gx+a.shadows[j].dx, gy+a.shadows[j].dy, a.shadows[j].c, a.shadows[j].blurr)));
+      }
+
+      // calculate the new position and round it
+      run.dx += glyph_pos[j].x_advance;
+      run.dy -= glyph_pos[j].y_advance;
+
+      // output the final glyph
+      run.run.push_back(std::make_pair(normalLayer, CommandData_c(font, gi, gx, gy, a.c, 0)));
+
+      // create underline commands
+      if (a.flags & CodepointAttributes_c::FL_UNDERLINE)
+      {
+        int32_t gw = glyph_pos[j].x_advance+64;
+        int32_t gh;
+
+        if (prop.underlineFont)
+        {
+          gh = std::max(64, prop.underlineFont.getUnderlineThickness());
+          gy = -((prop.underlineFont.getUnderlinePosition()+prop.underlineFont.getUnderlineThickness()/2));
+        }
+        else
+        {
+          gh = std::max(64, a.font.getUnderlineThickness());
+          gy = -((a.font.getUnderlinePosition()+a.font.getUnderlineThickness()/2));
+        }
+
+        for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
+        {
+          run.run.push_back(std::make_pair(j,
+              CommandData_c(gx+a.shadows[j].dx, gy+a.shadows[j].dy, gw, gh, a.shadows[j].c, a.shadows[j].blurr)));
+        }
+
+        run.run.push_back(std::make_pair(normalLayer, CommandData_c(gx, gy, gw, gh, a.c, 0)));
+      }
+    }
+
+    // if we have a link, we include that information within the run
+    if (a.link)
+    {
+      // link has changed
+      if (curLink && curLink != a.link)
+      {
+        // store information for current link
+        TextLayout_c::LinkInformation_c l;
+        l.url = prop.links[curLink-1];
+        l.areas.push_back(linkRect);
+        run.links.push_back(l);
+        curLink = 0;
+      }
+
+      if (!curLink)
+      {
+        // start new link
+        linkRect.x = linkStart;
+        linkRect.y = -run.ascender;
+        linkRect.w = run.dx-linkStart;
+        linkRect.h = run.ascender-run.descender;
+        curLink = a.link;
+      }
+      else
+      {
+        // make link box for current link wider
+        linkRect.w = run.dx-linkStart;
+      }
+    }
+  }
+
+  // finalize an open link
+  if (curLink)
+  {
+    TextLayout_c::LinkInformation_c l;
+    l.url = prop.links[curLink-1];
+    l.areas.push_back(linkRect);
+    run.links.push_back(l);
+    curLink = 0;
+  }
+
+  hb_buffer_reset(buf);
+
+  return run;
+}
+
 // use harfbuzz to layout runs of text
 // txt32 is the test to break into runs
 // attr contains the attributes for each character of txt32
@@ -180,7 +454,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
                                            const AttributeIndex_c & attr,
                                            const std::vector<FriBidiLevel> & embedding_levels,
                                            const std::vector<char> & linebreaks,
-                                           const LayoutProperties_c & prop
+                                           const LayoutProperties_c & prop,
+                                           const std::vector<int> & hyphens
                                           )
 {
   // Get our harfbuzz font structs
@@ -246,6 +521,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
                   && (txt32[spos] != U'\n')                                                 //  also end run on forced line-breaks
                   && (txt32[spos-1] != U'\n')
                   && (txt32[spos] != U'\u00AD')                                             //  and on soft hyphen
+                  && (hyphens[spos] == 0)
                   )
                )
           )
@@ -253,268 +529,24 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       spos++;
     }
 
-    runInfo run;
-
-    // check, if this is a space run, on line ends space runs will be removed
-    if (txt32[spos-1] == U' ' || txt32[spos-1] == U'\n')
-    {
-      run.space = true;
-    }
-    else
-    {
-      run.space = false;
-    }
-
-    // check, if this run is a soft hyphen. Soft hyphens are ignored and not output, except on line endings
-    run.shy = txt32[runstart] == U'\u00AD';
-
-    std::string language = attr.get(runstart).lang;
-
-    // setup the language for the harfbuzz shaper
-    // reset is not required, when no language is set, the buffer
-    // reset automatically resets the language and script info as well
-    if (language != "")
-    {
-      size_t i = language.find_first_of('-');
-
-      if (i != std::string::npos)
-      {
-        hb_script_t scr = hb_script_from_iso15924_tag(HB_TAG(language[i+1], language[i+2],
-                                                             language[i+3], language[i+4]));
-        hb_buffer_set_script(buf, scr);
-
-        hb_buffer_set_language(buf, hb_language_from_string(language.c_str(), i-1));
-      }
-      else
-      {
-        hb_buffer_set_language(buf, hb_language_from_string(language.c_str(), language.length()));
-      }
-    }
-
-    // send the text to harfbuzz, in a normal run, send the normal text
-    // for a shy, send a hyphen
-    if (!run.shy)
-      hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(txt32.c_str())+runstart, spos-runstart, 0, spos-runstart);
-    else
-    {
-      // we want to append a hyphen, sadly not all fonts contain the proper character for
-      // this simple symbol, so we first try the proper one, and if that is not available
-      // we use hyphen-minus, which all should have
-      if (font->containsGlyph(U'\u2010'))
-      {
-        hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(U"\u2010"), 1, 0, 1);
-      }
-      else
-      {
-        hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(U"\u002D"), 1, 0, 1);
-      }
-    }
-
-    // set text direction for this run
-    if (embedding_levels[runstart] % 2 == 0)
-    {
-      hb_buffer_set_direction(buf, HB_DIRECTION_LTR);
-    }
-    else
-    {
-      hb_buffer_set_direction(buf, HB_DIRECTION_RTL);
-    }
-
-    // get the right font for this run and do the shaping
-    if (font)
-      hb_shape(hb_ft_fonts[font], buf, NULL, 0);
-
-    // get the output
-    unsigned int         glyph_count;
-    hb_glyph_info_t     *glyph_info   = hb_buffer_get_glyph_infos(buf, &glyph_count);
-    hb_glyph_position_t *glyph_pos    = hb_buffer_get_glyph_positions(buf, &glyph_count);
-
-    // fill in some of the run information
-    run.dx = run.dy = 0;
-    run.embeddingLevel = embedding_levels[runstart];
-    run.linebreak = linebreaks[spos-1];
-    run.font = font;
-    if (attr.get(runstart).inlay)
-    {
-      // for inlays the ascender and descender depends on the size of the inlay
-      run.ascender = attr.get(runstart).inlay->getHeight()+attr.get(runstart).baseline_shift;
-      run.descender = attr.get(runstart).inlay->getHeight()-run.ascender;
-    }
-    else
-    {
-      // for normal text ascender and descender are taken from the font
-      run.ascender = run.font->getAscender()+attr.get(runstart).baseline_shift;
-      run.descender = run.font->getDescender()+attr.get(runstart).baseline_shift;
-    }
-#ifndef NDEBUG
-    run.text = txt32.substr(runstart, spos-runstart);
-#endif
-
-    size_t curLink = 0;
-    TextLayout_c::Rectangle_c linkRect;
-    int linkStart = 0;
-
-    // off we go creating the drawing commands
-    for (size_t j=0; j < glyph_count; ++j)
-    {
-      // bidi characters are skipped
-      if (isBidiCharacter(txt32[glyph_info[j].cluster + runstart]))
-        continue;
-
-      // get the attribute for the current character
-      auto a = attr.get(glyph_info[j].cluster + runstart);
-
-      // when a new link is started, we save the current x-position within the run
-      if ((!curLink && a.link) || (curLink != a.link))
-      {
-        linkStart = run.dx;
-      }
-
-      if (a.inlay)
-      {
-        // copy the drawing commands from the inlay, shift them
-        // to the right position
-        for (auto in : a.inlay->getData())
-        {
-          // if ascender is 0 we want to be below the baseline
-          // but if we leave the inlay where is is the top line of them
-          // image will be _on_ the baseline, which is not what we want
-          // so we actually need to go one below
-          in.y -= (run.ascender-1);
-          in.x += run.dx;
-
-          run.run.push_back(std::make_pair(normalLayer, in));
-        }
-
-        // create the underline for the inlay
-        // TODO try to merge this with the underline of a normal glyph
-        if (a.flags & CodepointAttributes_c::FL_UNDERLINE)
-        {
-          int32_t rx = run.dx;
-          int32_t ry;
-          int32_t rw = a.inlay->getRight();
-          int32_t rh;
-
-          if (prop.underlineFont)
-          {
-            ry = -((prop.underlineFont.getUnderlinePosition()+prop.underlineFont.getUnderlineThickness()/2));
-            rh = std::max(64, prop.underlineFont.getUnderlineThickness());
-          }
-          else
-          {
-            ry = -((a.font.getUnderlinePosition()+a.font.getUnderlineThickness()/2));
-            rh = std::max(64, a.font.getUnderlineThickness());
-          }
-
-          for (size_t j = 0; j < a.shadows.size(); j++)
-          {
-            run.run.push_back(std::make_pair(j,
-                CommandData_c(rx+a.shadows[j].dx, ry+a.shadows[j].dy, rw, rh, a.shadows[j].c, a.shadows[j].blurr)));
-          }
-
-          run.run.push_back(std::make_pair(normalLayer, CommandData_c(rx, ry, rw, rh, a.c, 0)));
-        }
-
-        run.dx += a.inlay->getRight();
-      }
-      else
-      {
-        // output the glyph
-        glyphIndex_t gi = glyph_info[j].codepoint;
-
-        int32_t gx = run.dx + (glyph_pos[j].x_offset);
-        int32_t gy = run.dy - (glyph_pos[j].y_offset)-attr.get(runstart).baseline_shift;
-
-        // output all shadows of the glyph
-        for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
-        {
-          run.run.push_back(std::make_pair(j,
-              CommandData_c(font, gi, gx+a.shadows[j].dx, gy+a.shadows[j].dy, a.shadows[j].c, a.shadows[j].blurr)));
-        }
-
-        // calculate the new position and round it
-        run.dx += glyph_pos[j].x_advance;
-        run.dy -= glyph_pos[j].y_advance;
-
-        // output the final glyph
-        run.run.push_back(std::make_pair(normalLayer, CommandData_c(font, gi, gx, gy, a.c, 0)));
-
-        // create underline commands
-        if (a.flags & CodepointAttributes_c::FL_UNDERLINE)
-        {
-          int32_t gw = glyph_pos[j].x_advance+64;
-          int32_t gh;
-
-          if (prop.underlineFont)
-          {
-            gh = std::max(64, prop.underlineFont.getUnderlineThickness());
-            gy = -((prop.underlineFont.getUnderlinePosition()+prop.underlineFont.getUnderlineThickness()/2));
-          }
-          else
-          {
-            gh = std::max(64, a.font.getUnderlineThickness());
-            gy = -((a.font.getUnderlinePosition()+a.font.getUnderlineThickness()/2));
-          }
-
-          for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
-          {
-            run.run.push_back(std::make_pair(j,
-                CommandData_c(gx+a.shadows[j].dx, gy+a.shadows[j].dy, gw, gh, a.shadows[j].c, a.shadows[j].blurr)));
-          }
-
-          run.run.push_back(std::make_pair(normalLayer, CommandData_c(gx, gy, gw, gh, a.c, 0)));
-        }
-      }
-
-      // if we have a link, we include that information within the run
-      if (a.link)
-      {
-        // link has changed
-        if (curLink && curLink != a.link)
-        {
-          // store information for current link
-          TextLayout_c::LinkInformation_c l;
-          l.url = prop.links[curLink-1];
-          l.areas.push_back(linkRect);
-          run.links.push_back(l);
-          curLink = 0;
-        }
-
-        if (!curLink)
-        {
-          // start new link
-          linkRect.x = linkStart;
-          linkRect.y = -run.ascender;
-          linkRect.w = run.dx-linkStart;
-          linkRect.h = run.ascender-run.descender;
-          curLink = a.link;
-        }
-        else
-        {
-          // make link box for current link wider
-          linkRect.w = run.dx-linkStart;
-        }
-      }
-    }
-
-    // finalize an open link
-    if (curLink)
-    {
-      TextLayout_c::LinkInformation_c l;
-      l.url = prop.links[curLink-1];
-      l.areas.push_back(linkRect);
-      run.links.push_back(l);
-      curLink = 0;
-    }
-
     // save the run
-    runs.push_back(run);
+    hb_font_t * hbfont = nullptr;
+    if (font) hbfont = hb_ft_fonts[font];
+
+    runs.emplace_back(createRun(txt32, spos, runstart, attr, buf, prop, font, hbfont, linebreaks[spos-1], embedding_levels[runstart], normalLayer));
     runstart = spos;
+
+    if (spos < hyphens.size() && hyphens[spos] != 0)
+    {
+      // add a run containing a soft hypen after the current run
+      std::u32string txt32a = U"\u00AD";
+      AttributeIndex_c attra(attr.get(runstart));
+
+      runs.emplace_back(createRun(txt32a, 1, 0, attra, buf, prop, font, hbfont, LINEBREAK_ALLOWBREAK, embedding_levels[runstart], normalLayer));
+    }
 
     // skip bidi characters
     while (runstart < txt32.length() && isBidiCharacter(txt32[runstart])) runstart++;
-
-    hb_buffer_reset(buf);
   }
 
   // free harfbuzz buffer and fonts
@@ -559,7 +591,7 @@ static void mergeLinks(TextLayout_c & txt, const std::vector<TextLayout_c::LinkI
 
 typedef enum { FL_FIRST, FL_BREAK, FL_NORMAL } fl;
 
-static void addLine(const int runstart, const int spos, std::vector<runInfo> & runs, TextLayout_c & l,
+static void addLine(const int runstart, const size_t spos, std::vector<runInfo> & runs, TextLayout_c & l,
                     std::vector<size_t> & runorder, const int max_level, int & ypos, const int curAscend,
                     const int curDescend, const int curWidth, const Shape_c & shape, const fl firstline,
                     int numSpace, const LayoutProperties_c & prop, const bool forcebreak, int spacePart
@@ -620,7 +652,7 @@ static void addLine(const int runstart, const int spos, std::vector<runInfo> & r
     case LayoutProperties_c::ALG_JUSTIFY_LEFT:
       xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
       // don't justify last paragraph
-      if (numSpace > 1 && spos < runs.size() && !forcebreak)
+      if (numSpace > 0 && spos < runs.size() && !forcebreak)
         spaceadder = 1.0 * spaceLeft / numSpace;
 
       if (firstline != FL_NORMAL) xpos += prop.indent;
@@ -629,7 +661,7 @@ static void addLine(const int runstart, const int spos, std::vector<runInfo> & r
 
     case LayoutProperties_c::ALG_JUSTIFY_RIGHT:
       // don't justify last paragraph
-      if (numSpace > 1 && spos < runs.size() && !forcebreak)
+      if (numSpace > 0 && spos < runs.size() && !forcebreak)
       {
         xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
         spaceadder = 1.0 * spaceLeft / numSpace;
@@ -995,11 +1027,14 @@ static TextLayout_c breakLinesOptimize(std::vector<runInfo> & runs,
 
         int linetype = 1;
 
-        if (badness >= 100) linetype = 3;
+        if (badness >= 100) { linetype = 3; }
         else if (badness >= 13)
-          if (fillin > optimalFillin) linetype = 2; else linetype = 0;
-
-        float penalty = 0;
+        {
+          if (fillin > optimalFillin)
+            linetype = 2;
+          else
+            linetype = 0;
+        }
 
         float demerits = (10+badness)*(10+badness);
 
@@ -1008,12 +1043,9 @@ static TextLayout_c breakLinesOptimize(std::vector<runInfo> & runs,
         {
           demerits += 10000;
         }
-        else if (runs[s2-1].shy)
-        {
-          demerits += 1000;
-        }
 
         if (abs(linetype - li[start-1].linetype) > 1) demerits += 10000;
+        if (linetype != li[start-1].linetype) demerits += 5000;
 
         if (runs[i-1].linebreak == LINEBREAK_MUSTBREAK || i == runs.size())
         {
@@ -1067,8 +1099,8 @@ static TextLayout_c breakLinesOptimize(std::vector<runInfo> & runs,
         auto & bb = li[breaks[ii-1]];
         auto & cc = li[breaks[ii]];
 
-        int s1 = breaks[ii];
-        int s2 = breaks[ii-1];
+        size_t s1 = breaks[ii];
+        size_t s2 = breaks[ii-1];
         while (runs[s1].space) s1++;
         while (runs[s2-1].space) s2--;
         addLine(s1, s2, runs, l, runorder, max_level, cc.ypos, bb.ascend, bb.descend, bb.width,
@@ -1127,6 +1159,62 @@ static std::vector<char> getLinebreaks(const std::u32string & txt32, const Attri
   return linebreaks;
 }
 
+std::vector<int> getHyphens(const std::u32string & txt32, const AttributeIndex_c & attr)
+{
+  // simply initial stuff: separate words on spaces, find English words
+  size_t sectionstart = 0;
+  std::string curLang;
+
+  if (attr.hasAttribute(0))
+    curLang = attr.get(0).lang;
+
+  std::vector<int> result(txt32.length());
+  std::vector<internal::HyphenDict<char32_t>::Hyphens> hyphens;
+
+  for (size_t i = 1; i < txt32.length(); i++)
+  {
+    // find sections within txt32 that have the same language information attached
+    if (!attr.hasAttribute(i) || i == txt32.length()-1 || curLang != attr.get(i).lang)
+    {
+      auto dict = internal::getHyphenDict(curLang);
+
+      if (dict)
+      {
+        std::vector<char> breaks(i-sectionstart);
+
+        set_wordbreaks_utf32(reinterpret_cast<const utf32_t*>(txt32.c_str()+sectionstart),
+                             i-sectionstart, curLang.c_str(), breaks.data());
+
+        // now find the words and feed them to the hyphenator
+        size_t wordstart = 0;
+        for (size_t j = 1; j < breaks.size(); j++)
+        {
+          if (breaks[j] == WORDBREAK_BREAK)
+          {
+            // assume a word from wordstart to j
+            dict->hyphenate(txt32.substr(wordstart, j-wordstart), hyphens);
+
+            for (size_t l = 0; l < j-wordstart+1; l++)
+              if ((hyphens[l].hyphens % 2) && (hyphens[l].rep->length() == 0))
+                result[wordstart+l+1] = 1;
+
+            wordstart = j+1;
+          }
+        }
+      }
+
+      while (!attr.hasAttribute(i) && i < txt32.length()) i++;
+
+      if (attr.hasAttribute(i))
+        curLang = attr.get(i).lang;
+
+      sectionstart = i;
+    }
+  }
+
+  return result;
+}
+
 TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_c & attr,
                              const Shape_c & shape, const LayoutProperties_c & prop, int32_t ystart)
 {
@@ -1138,9 +1226,16 @@ TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_
   // calculate the possible line-break positions
   auto linebreaks = getLinebreaks(txt32, attr);
 
+  std::vector<int> hyphens;
+
+  if (prop.hyphenate)
+    hyphens = getHyphens(txt32, attr);
+  else
+    hyphens.resize(txt32.length());
+
   // create runs of layout text. Each run is a cohesive set, e.g. a word with a single
   // font, ...
-  std::vector<runInfo> runs = createTextRuns(txt32, attr, embedding_levels, linebreaks, prop);
+  std::vector<runInfo> runs = createTextRuns(txt32, attr, embedding_levels, linebreaks, prop, hyphens);
 
   // layout the runs into lines
   if (prop.optimizeLinebreaks)
