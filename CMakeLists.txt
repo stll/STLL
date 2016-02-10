@@ -72,6 +72,20 @@ target_link_libraries(stll PUBLIC
   ${LIBXML2_LIBRARIES}
 )
 
+add_executable(example-hyphen-utf32 src/hyphen/example.cpp src/utf-8.cpp)
+target_compile_options(example-hyphen-utf32 PRIVATE -std=c++14 -DUTF32)
+target_include_directories(example-hyphen-utf32 PRIVATE
+  ${CMAKE_CURRENT_BINARY_DIR}
+  include
+)
+
+add_executable(example-hyphen-utf8 src/hyphen/example.cpp src/utf-8.cpp)
+target_compile_options(example-hyphen-utf8 PRIVATE -std=c++14 -DUTF8)
+target_include_directories(example-hyphen-utf8 PRIVATE
+  ${CMAKE_CURRENT_BINARY_DIR}
+  include
+)
+
 # Tests
 if(PUGIXML_LIBRARY)
   add_executable(runtestsPugi examples/runtests.cpp examples/layouterXMLSaveLoad.cpp)

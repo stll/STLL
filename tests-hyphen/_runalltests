@@ -1,0 +1,11 @@
+for i in *.test
+do
+  echo -n $i
+  ./$i > /dev/null
+  if [ $? == 0 ]
+  then
+    echo "  PASS"
+  else
+    echo "  FAIL"
+  fi
+done
