@@ -4,6 +4,7 @@
 *.so
 *.kdev4
 *~
+*.swp
 /CMakeCache.txt
 /CMakeFiles/
 /CTestTestfile.cmake
