@@ -85,7 +85,7 @@ class openGL_internals<1>
       glEnd();
     }
 
-    void drawBuffers(GLuint displayList, SubPixelArrangement sp, int sx, int sy, float texscaler)
+    void drawBuffers(GLuint displayList, SubPixelArrangement /*sp*/, int sx, int sy, float texscaler)
     {
       glMatrixMode(GL_TEXTURE);
       glScalef(1.0f/texscaler, 1.0f/texscaler, 1);
@@ -159,7 +159,7 @@ class openGL_internals<1>
     class CreateInternal_c
     {
       public:
-        CreateInternal_c(size_t s) { }
+        CreateInternal_c(size_t /*s*/) { }
     };
 
     void startCachePreparation(DrawCacheInternal_c & dc)
@@ -188,12 +188,12 @@ class openGL_internals<1>
       glTranslated(sx/64.0, sy/64, 0);
 
     }
-    void endPreparation(CreateInternal_c &, SubPixelArrangement sp, int sx, int sy, int C)
+    void endPreparation(CreateInternal_c &, SubPixelArrangement /*sp*/, int /*sx*/, int /*sy*/, int /*C*/)
     {
       glPopMatrix();
     }
 
-    void drawRectangle(CreateInternal_c & vb, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
+    void drawRectangle(CreateInternal_c & /*vb*/, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
     {
       glBegin(GL_QUADS);
       glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
@@ -208,7 +208,7 @@ class openGL_internals<1>
       glEnd();
     }
 
-    void drawSmoothRectangle(CreateInternal_c & vb, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
+    void drawSmoothRectangle(CreateInternal_c & /*vb*/, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
     {
       glBegin(GL_QUADS);
       glColor3f(c.r()/255.0, c.g()/255.0, c.b()/255.0);
@@ -219,12 +219,12 @@ class openGL_internals<1>
       glEnd();
     }
 
-    void drawNormalGlyph(CreateInternal_c & vb, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
+    void drawNormalGlyph(CreateInternal_c & /*vb*/, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
     {
       drawGlyph(ii, 0, pos, c, C);
     }
 
-    void drawSubpGlyph(CreateInternal_c & vb, SubPixelArrangement sp, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
+    void drawSubpGlyph(CreateInternal_c & /*vb*/, SubPixelArrangement sp, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
     {
       switch (sp)
       {
@@ -440,7 +440,7 @@ class openGL_internals<2>
       dc.scale = C;
     }
 
-    void startPreparation(int sx, int sy)
+    void startPreparation(int /*sx*/, int /*sy*/)
     {
       glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     }
@@ -475,7 +475,7 @@ class openGL_internals<2>
       vb.vb.push_back(vertex((ii.x)/64.0+pos.left,           (ii.y+32)/64-pos.top+pos.rows,1.0*(pos.pos_x)/C,           1.0*(pos.pos_y+pos.rows)/C, c));
     }
 
-    void drawSubpGlyph(CreateInternal_c & vb, SubPixelArrangement sp, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
+    void drawSubpGlyph(CreateInternal_c & vb, SubPixelArrangement /*sp*/, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
     {
       vb.vb.push_back(vertex((ii.x)/64.0+pos.left,               (ii.y+32)/64-pos.top,         1.0*(pos.pos_x)/C,           1.0*(pos.pos_y)/C,          c));
       vb.vb.push_back(vertex((ii.x)/64.0+pos.left+pos.width/3.0, (ii.y+32)/64-pos.top,         1.0*(pos.pos_x+pos.width)/C, 1.0*(pos.pos_y)/C,          c));
@@ -700,7 +700,7 @@ class openGL_internals<3>
       dc.scale = C;
     }
 
-    void startPreparation(int sx, int sy)
+    void startPreparation(int /*sx*/, int /*sy*/)
     {
       glBindVertexArray(vertexArray);
     }
@@ -742,7 +742,7 @@ class openGL_internals<3>
       addQuad(vb, data, c, 0);
     }
 
-    void drawSubpGlyph(CreateInternal_c & vb, SubPixelArrangement sp, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
+    void drawSubpGlyph(CreateInternal_c & vb, SubPixelArrangement /*sp*/, const CommandData_c & ii, const FontAtlasData_c & pos, Color_c c, int C)
     {
       std::array<float, 8> data;
       data[0] = ii.x/64.0+pos.left;   data[1] = ii.x/64.0+pos.left+(pos.width-1)/3.0;
