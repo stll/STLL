@@ -75,6 +75,21 @@ class Gamma_c {
     uint16_t scale(void) const { return S; }
 };
 
+class GammaNone_c {
+
+  public:
+
+    GammaNone_c(void) { }
+
+    void setGamma(uint8_t /*g*/) { }
+
+    STLL::Color_c forward(STLL::Color_c c) const { return c; }
+
+    uint16_t forward(uint8_t v) const { return v; }
+    uint8_t inverse(uint16_t v) const { return v; }
+    uint16_t scale(void) const { return 1; }
+};
+
 } }
 
 #endif
