@@ -10,7 +10,7 @@ set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE " ${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fpr
 
 # Dependencies with direct support for CMake
 find_package(Freetype REQUIRED)
-find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+find_package(Boost COMPONENTS unit_test_framework iostreams)
 find_package(SDL)
 find_package(LibXml2)
 
@@ -87,7 +87,7 @@ target_include_directories(example-hyphen-utf8 PRIVATE
 )
 
 # Tests
-if(PUGIXML_LIBRARY)
+if(PUGIXML_LIBRARY AND Boost_UNIT_TEST_FRAMEWORK_FOUND)
   add_executable(runtestsPugi examples/runtests.cpp examples/layouterXMLSaveLoad.cpp)
   target_compile_options(runtestsPugi PRIVATE -std=c++14 -DUSE_PUGI_XML)
   target_include_directories(runtestsPugi PRIVATE
@@ -100,7 +100,7 @@ if(PUGIXML_LIBRARY)
   add_test(test_PugiXML runtestsPugi)
 endif()
 
-if(LIBXML2_FOUND)
+if(LIBXML2_FOUND AND Boost_UNIT_TEST_FRAMEWORK_FOUND)
   add_executable(runtestsLibXML2 examples/runtests.cpp examples/layouterXMLSaveLoad.cpp)
   target_compile_options(runtestsLibXML2 PRIVATE -std=c++14 -DUSE_LIBXML2)
   target_include_directories(runtestsLibXML2 PRIVATE
@@ -125,13 +125,26 @@ if(SDL_FOUND)
     ${SDL_LIBRARY}
   )
 
-  add_executable(example3 examples/example3.cpp examples/layouterXMLSaveLoad.cpp)
-  target_compile_options(example3 PRIVATE -std=c++14)
-  target_include_directories(example3 PRIVATE
+  if (Boost_IOSTREAMS_FOUND)
+    add_executable(example3 examples/example3.cpp)
+    target_compile_options(example3 PRIVATE -std=c++14)
+    target_include_directories(example3 PRIVATE
+      ${SDL_INCLUDE_DIR}
+      include
+    )
+    target_link_libraries(example3 PRIVATE stll
+      ${SDL_LIBRARY}
+      ${Boost_IOSTREAMS_LIBRARIES}
+    )
+  endif()
+
+  add_executable(example-big examples/example-big.cpp examples/layouterXMLSaveLoad.cpp)
+  target_compile_options(example-big PRIVATE -std=c++14)
+  target_include_directories(example-big PRIVATE
     ${SDL_INCLUDE_DIR}
     include
   )
-  target_link_libraries(example3 PRIVATE stll
+  target_link_libraries(example-big PRIVATE stll
     ${SDL_LIBRARY}
   )
 endif()

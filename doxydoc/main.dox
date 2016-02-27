@@ -31,7 +31,6 @@
  * STLL depends on some libraries. The following libraries must be installed
  * - harfbuzz: used for layouting text
  * - freetype: used for reading and rendering fonts
- * - boost: some utility functions, the test framework
  * - linebreak or unibreak: implementation of the unicode line-break and word-break algorithm
  * - fribidi: implementation of the unicode bidi algorithm
  *
@@ -39,6 +38,7 @@
  * - SDL, glfw, glew: when available the corresponding examples are build
  * - pugixml, libxml2: when available XHTML parser using the corresponding xml-library will be build
  * - doxygen, lconv: used for tests and documentation
+ * - boost: used to compile the tests and in example 3 to load the compressed hyphenation dictionary
  *
  * \section build_sec Getting started
  * First, install all required libraries and tools.

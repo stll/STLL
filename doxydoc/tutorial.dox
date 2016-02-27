@@ -28,4 +28,12 @@
  *
  * For the XHTML layouter the flow is slightly different:
  * \include example2.cpp
+ *
+ * \section tut_hyph_sec Using hyphenation dictionaries
+ * The following example shows how to use hyphenation. There are only 2 things to do:
+ * - register the dictionaries required for your language
+ * - provide a language information, either as an attribute in the XHTML code, or to the
+ *   member variable lang in the CodepointAttributes_c of you text
+ *
+ * \include example3.cpp
  */

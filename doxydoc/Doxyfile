@@ -744,6 +744,7 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ../include/stll/color.h \
+                         ../include/stll/hyphendictionaries.h \
                          ../include/stll/layouter.h \
                          ../include/stll/layouterCSS.h \
                          ../include/stll/layouterFont.h \
