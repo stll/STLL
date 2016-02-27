@@ -31,13 +31,13 @@ namespace STLL {
 
 static std::map<std::string, std::shared_ptr<internal::HyphenDict<char32_t>>> dictionaries;
 
-void addHyphendDictionary(const std::vector<std::string> & langs, std::istream & str)
+void addHyphenDictionary(const std::vector<std::string> & langs, std::istream & str)
 {
   auto dict = std::make_shared<internal::HyphenDict<char32_t>>(str);
   for (auto & l : langs) dictionaries[l] = dict;
 }
 
-void addHyphendDictionary(const std::vector<std::string> & langs, std::istream && str)
+void addHyphenDictionary(const std::vector<std::string> & langs, std::istream && str)
 {
   auto dict = std::make_shared<internal::HyphenDict<char32_t>>(str);
   for (auto & l : langs) dictionaries[l] = dict;

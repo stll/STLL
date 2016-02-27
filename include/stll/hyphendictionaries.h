@@ -47,11 +47,11 @@ namespace STLL {
  *            must be an UTF-8 encoded Open Office hyphen dictionary, nothing
  *            else is not supported
  */
-void addHyphendDictionary(const std::vector<std::string> & langs, std::istream & str);
+void addHyphenDictionary(const std::vector<std::string> & langs, std::istream & str);
 
 /** \brief see the other addHyphenDictionary function
  */
-void addHyphendDictionary(const std::vector<std::string> & langs, std::istream && str);
+void addHyphenDictionary(const std::vector<std::string> & langs, std::istream && str);
 
 }
 
