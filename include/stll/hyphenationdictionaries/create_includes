@@ -1,0 +1,31 @@
+#!/bin/sh
+
+for i in *.dic
+do
+
+n=`basename $i .dic`
+
+echo handling $n
+
+# create remporary file that removes all comments (lines starting with % or # or empty lines)
+grep -v '^#' $i > temp0.dic
+grep -v '^%' temp0.dic > temp1.dic
+grep -v '^$' temp1.dic > temp2.dic
+echo -e -n "\x00" > null
+
+cat temp2.dic null > $n
+
+xxd -i $n | head -n -1 > $n.h
+
+mv temp2.dic $n
+zopfli --i50 $n
+
+xxd -i $n.gz > ${n}_gz.h
+
+rm temp0.dic
+rm temp1.dic
+rm null
+rm $n
+rm ${n}.gz
+
+done
