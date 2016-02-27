@@ -30,8 +30,8 @@ void hnj_hyphen_hyphword(const char32_t * word, int l, const std::vector<HyphenD
 {
   int hyphenslen = l + 5;
 
-  int i, j;
-  for (i = 0, j = 0; i < hyphens.size(); i++, j++)
+  int j = 0;
+  for (size_t i = 0; i < hyphens.size(); i++, j++)
   {
     if ((hyphens[i].hyphens % 2) == 1)
     {
