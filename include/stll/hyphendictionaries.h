@@ -39,9 +39,9 @@ namespace STLL {
  *              ones that you use in the lang xml attributes or in the lang
  *              member of the AttributeIndex class. If the language to be looked
  *              for when looking for a dictionary to do the hyphenation contains
- *              an underscore stll will also look for a dictionary with the text
- *              just before the underscore. So if you register a dictionary
- *              for the language "en" and use "en_US" in your language tag
+ *              an dash stll will also look for a dictionary with the text
+ *              just before that dash. So if you register a dictionary
+ *              for the language "en" and use "en-US" in your language tag
  *              it will use your hyphenation dictionary
  * \param str must point to an input stream of a hyphen dictionary, the file
  *            must be an UTF-8 encoded Open Office hyphen dictionary, nothing
