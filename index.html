@@ -70,7 +70,7 @@ Introduction</h1>
 <p><a class="el" href="namespace_s_t_l_l.html" title="The namespace for the library. Every function and class is within this namespace. ...">STLL</a> is a simple text layouting engine specifically designed for all the applications that need good text output with support for many languages including ones with writing systems that to right to left (like Hebrew).</p>
 <p>There are a lot of simple text output libraries out there, but all of them only support basic left to right text, not formatting no font organisation.</p>
 <p>There is also Pango. But Pango is way too big and way too complicated for smaller applications.</p>
-<p>This library is supposed to be in the middle between the heavyweight Pango and the trivial libraries like SDL_ttf. It is supposed to support all line-based text systems. Column bases support is not planned.</p>
+<p>This library is supposed to be in the middle between the heavyweight Pango and the trivial libraries like SDL_ttf. It is supposed to support all line-based text systems. Column based support is not planned.</p>
 <p>Current home of the library is at <a href="https://github.com/stll/STLL">github</a>.</p>
 <h1><a class="anchor" id="goals_sec"></a>
 Design Goals</h1>
@@ -85,14 +85,14 @@ Dependencies</h1>
 <p><a class="el" href="namespace_s_t_l_l.html" title="The namespace for the library. Every function and class is within this namespace. ...">STLL</a> depends on some libraries. The following libraries must be installed</p><ul>
 <li>harfbuzz: used for layouting text</li>
 <li>freetype: used for reading and rendering fonts</li>
-<li>boost: some utility functions, the test framework</li>
-<li>linebread or unibreak: implementation of the unicode line-break and word-break algorithm</li>
+<li>linebreak or unibreak: implementation of the unicode line-break and word-break algorithm</li>
 <li>fribidi: implementation of the unicode bidi algorithm</li>
 </ul>
 <p>optionally the following needs to be installed</p><ul>
-<li>SDL, OpenGL: when available the corresponding output modules will be included</li>
+<li>SDL, glfw, glew: when available the corresponding examples are build</li>
 <li>pugixml, libxml2: when available XHTML parser using the corresponding xml-library will be build</li>
 <li>doxygen, lconv: used for tests and documentation</li>
+<li>boost: used to compile the tests and in example 3 to load the compressed hyphenation dictionary</li>
 </ul>
 <h1><a class="anchor" id="build_sec"></a>
 Getting started</h1>
@@ -111,6 +111,9 @@ Design of the library</h1>
 Freetype wrapper</h2>
 <p>The first part is a small Freetype 2 wrapper, that only wraps the library and font face structures of the library into classes. It also provides some helper functions to handle fonts and to avoid loading the same font multiple times.</p>
 <p>This part of the library has only freetype and boost as a dependency.</p>
+<h2><a class="anchor" id="xml_wrapper_sec"></a>
+XML Library wrapper</h2>
+<p><a class="el" href="namespace_s_t_l_l.html" title="The namespace for the library. Every function and class is within this namespace. ...">STLL</a> is written in such a way that it can use different XML libraries. There is one header that abstracts away the DOM tree creation and traversing.</p>
 <h2><a class="anchor" id="layouter_sec"></a>
 Paragraph Layouter</h2>
 <p>The next part of the library is the layouter. The layouter will create a text layout out of a given text with additional layouting information.</p>
@@ -119,21 +122,16 @@ Paragraph Layouter</h2>
 <p>This part of the library has additional dependencies: fribidi, harfbuzz and liblinebreak or libunibreak. All these libraries are used to layout the text according to unicode specifications.</p>
 <h2><a class="anchor" id="xhtml_sec"></a>
 XHTML Layouter</h2>
-<p>This part of the library contains a more complex layouter that can be used for more complicated text output like an online help system.</p>
+<p>This part of the library contains a more complex layouter that can be used for more complicated text output like an on-line help system.</p>
 <p>It implements a part of the HTML5 specification but uses XHTML syntax for it. It uses a simple CSS emulation to define the looks of your text.</p>
 <p>The XHTML layouter uses the paragraph layouter to layout single paragraphs of text.</p>
-<p>This part introduces pugixml as dependency for the parsing.</p>
+<p>This part introduces pugixml or libxml2 as dependency for the parsing.</p>
 <h2><a class="anchor" id="output_sec"></a>
 Output Drivers</h2>
 <p>The library also contains a few drivers for different graphic libraries to output the generated layouts. Right now we have drivers for</p><ul>
 <li>SDL</li>
+<li>OpenGL (different versions of the API)</li>
 </ul>
-<p>Additional drivers for</p><ul>
-<li>OpenGL (different versions of the library)</li>
-<li>Clanlib</li>
-<li>directX</li>
-</ul>
-<p>Are possible.</p>
 <p>Of course these drivers will add a dependency on the corresponding graphics library.</p>
 <h2><a class="anchor" id="tools_sec"></a>
 Additional Tools</h2>
@@ -146,7 +144,7 @@ Additional Tools</h2>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Jan 31 2016 18:06:00 for STLL by
+    <li class="footer">Generated on Sat Feb 27 2016 20:56:34 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

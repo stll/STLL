@@ -109,7 +109,7 @@ $(document).ready(function(){initNavTree('output___open_g_l_8h_source.html','');
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;{</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  <span class="keyword">private</span>:</div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    internal::GlyphAtlas_c cache;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    G gamma;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    G g;</div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    GLuint glTextureId = 0;     <span class="comment">// OpenGL texture id</span></div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    uint32_t uploadVersion = 0; <span class="comment">// a counter changed each time the texture changes to know when to update</span></div>
@@ -130,7 +130,7 @@ $(document).ready(function(){initNavTree('output___open_g_l_8h_source.html','');
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);</div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;      glTexEnvi(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_REPLACE);</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;      gamma.setGamma(22);</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;      g.setGamma(22);</div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;</div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;      internal::openGL_internals&lt;V&gt;::setup();</div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    }</div>
@@ -247,7 +247,7 @@ $(document).ready(function(){initNavTree('output___open_g_l_8h_source.html','');
 <div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;            <span class="keywordflow">case</span> <a class="code" href="class_s_t_l_l_1_1_command_data__c.html#a8b531c1ede7bdf3300b9ecb3cfb470d2af778e1b57ee502a22aab8c67398dba17">CommandData_c::CMD_GLYPH</a>:</div>
 <div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;              {</div>
 <div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;                <span class="keyword">auto</span> pos = cache.getGlyph(ii.font, ii.glyphIndex, sp, ii.blurr).value();</div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;                <a class="code" href="class_s_t_l_l_1_1_color__c.html">Color_c</a> c = gamma.forward(ii.c);</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;                <a class="code" href="class_s_t_l_l_1_1_color__c.html">Color_c</a> c = g.forward(ii.c);</div>
 <div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;</div>
 <div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;                <span class="keywordflow">if</span> ((sp == <a class="code" href="namespace_s_t_l_l.html#ac0004512e3161f751911cb1352dbd550a7cd968714b637b39ec9397c0120cedb7">SUBP_RGB</a> || sp == <a class="code" href="namespace_s_t_l_l.html#ac0004512e3161f751911cb1352dbd550aaac35f704cc043c66d8f93e6c3d67448">SUBP_BGR</a>) &amp;&amp; (ii.blurr &lt;= cache.blurrmax))</div>
 <div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;                {</div>
@@ -262,7 +262,7 @@ $(document).ready(function(){initNavTree('output___open_g_l_8h_source.html','');
 <div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;</div>
 <div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;            <span class="keywordflow">case</span> <a class="code" href="class_s_t_l_l_1_1_command_data__c.html#a8b531c1ede7bdf3300b9ecb3cfb470d2a734e1c67387f36cc47d375a062182b6e">CommandData_c::CMD_RECT</a>:</div>
 <div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;              {</div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;                <a class="code" href="class_s_t_l_l_1_1_color__c.html">Color_c</a> c = gamma.forward(ii.c);</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;                <a class="code" href="class_s_t_l_l_1_1_color__c.html">Color_c</a> c = g.forward(ii.c);</div>
 <div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;</div>
 <div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;                <span class="keywordflow">if</span> (ii.blurr == 0)</div>
 <div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;                {</div>
@@ -322,19 +322,25 @@ $(document).ready(function(){initNavTree('output___open_g_l_8h_source.html','');
 <div class="line"><a name="l00316"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1show_open_g_l.html#a2e99c7b6dd877a66f810295d94b4f869">  316</a></span>&#160;    uint32_t <a class="code" href="class_s_t_l_l_1_1show_open_g_l.html#a2e99c7b6dd877a66f810295d94b4f869">cacheWidth</a>(<span class="keywordtype">void</span>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> cache.width(); }</div>
 <div class="line"><a name="l00317"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1show_open_g_l.html#a998330819cfb0da864597d665f51770e">  317</a></span>&#160;    uint32_t <a class="code" href="class_s_t_l_l_1_1show_open_g_l.html#a998330819cfb0da864597d665f51770e">cacheHeight</a>(<span class="keywordtype">void</span>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> cache.height(); }</div>
 <div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;</div>
-<div class="line"><a name="l00323"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1show_open_g_l.html#a4605410fc07cf9a3854ffab16ee1b1aa">  323</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_s_t_l_l_1_1show_open_g_l.html#a4605410fc07cf9a3854ffab16ee1b1aa">clear</a>(<span class="keywordtype">void</span>)</div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;    {</div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;      cache.clear();</div>
-<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;      atlasId++;</div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;    }</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;};</div>
-<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;}</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;</div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00326"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1show_open_g_l.html#a0a0157a02e236e05bb25873e04e7f070">  326</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_s_t_l_l_1_1show_open_g_l.html#a0a0157a02e236e05bb25873e04e7f070">setGamma</a>(uint8_t gamma = 22)</div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;    {</div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;      g.setGamma(gamma);</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;    }</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;</div>
+<div class="line"><a name="l00335"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1show_open_g_l.html#a4605410fc07cf9a3854ffab16ee1b1aa">  335</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_s_t_l_l_1_1show_open_g_l.html#a4605410fc07cf9a3854ffab16ee1b1aa">clear</a>(<span class="keywordtype">void</span>)</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;    {</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;      cache.clear();</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;      atlasId++;</div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;    }</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;};</div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;</div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;}</div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="class_s_t_l_l_1_1show_open_g_l_html_ab2a04734b0e73cc1e485890b8dcda808"><div class="ttname"><a href="class_s_t_l_l_1_1show_open_g_l.html#ab2a04734b0e73cc1e485890b8dcda808">STLL::showOpenGL::showOpenGL</a></div><div class="ttdeci">showOpenGL(uint32_t cStart=256, uint32_t cMax=1024)</div><div class="ttdoc">constructor </div><div class="ttdef"><b>Definition:</b> output_OpenGL.h:94</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1_color__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1_color__c.html">STLL::Color_c</a></div><div class="ttdoc">a little class representing an RGBA colour value, an a value of 255 is assumed to be opaque ...</div><div class="ttdef"><b>Definition:</b> color.h:36</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1_text_layout__c_html_a67db675579e7fdb49612065e86852d39"><div class="ttname"><a href="class_s_t_l_l_1_1_text_layout__c.html#a67db675579e7fdb49612065e86852d39">STLL::TextLayout_c::getData</a></div><div class="ttdeci">const std::vector&lt; CommandData_c &gt; getData(void) const </div><div class="ttdoc">get the command vector </div><div class="ttdef"><b>Definition:</b> layouter.h:121</div></div>
+<div class="ttc" id="class_s_t_l_l_1_1show_open_g_l_html_a0a0157a02e236e05bb25873e04e7f070"><div class="ttname"><a href="class_s_t_l_l_1_1show_open_g_l.html#a0a0157a02e236e05bb25873e04e7f070">STLL::showOpenGL::setGamma</a></div><div class="ttdeci">void setGamma(uint8_t gamma=22)</div><div class="ttdoc">update the gamma value used for output </div><div class="ttdef"><b>Definition:</b> output_OpenGL.h:326</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1show_open_g_l_1_1image_drawer__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1show_open_g_l_1_1image_drawer__c.html">STLL::showOpenGL::imageDrawer_c</a></div><div class="ttdoc">helper class used to draw images </div><div class="ttdef"><b>Definition:</b> output_OpenGL.h:116</div></div>
 <div class="ttc" id="namespace_s_t_l_l_html_ac0004512e3161f751911cb1352dbd550a7cd968714b637b39ec9397c0120cedb7"><div class="ttname"><a href="namespace_s_t_l_l.html#ac0004512e3161f751911cb1352dbd550a7cd968714b637b39ec9397c0120cedb7">STLL::SUBP_RGB</a></div><div class="ttdoc">use horizontal RGB </div><div class="ttdef"><b>Definition:</b> layouterFont.h:62</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1show_open_g_l_html_a30f8e3aa941d00239668d0ed137d5ec0"><div class="ttname"><a href="class_s_t_l_l_1_1show_open_g_l.html#a30f8e3aa941d00239668d0ed137d5ec0">STLL::showOpenGL::DrawCache_c</a></div><div class="ttdeci">typename internal::openGL_internals&lt; V &gt;::DrawCacheInternal_c DrawCache_c</div><div class="ttdoc">type to keep the caching information for redrawing layouts extra fast. You dont&#39;t need to know anythi...</div><div class="ttdef"><b>Definition:</b> output_OpenGL.h:84</div></div>
@@ -354,7 +360,7 @@ $(document).ready(function(){initNavTree('output___open_g_l_8h_source.html','');
 <div class="ttc" id="class_s_t_l_l_1_1show_open_g_l_html_a998330819cfb0da864597d665f51770e"><div class="ttname"><a href="class_s_t_l_l_1_1show_open_g_l.html#a998330819cfb0da864597d665f51770e">STLL::showOpenGL::cacheHeight</a></div><div class="ttdeci">uint32_t cacheHeight(void) const </div><div class="ttdef"><b>Definition:</b> output_OpenGL.h:317</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1_command_data__c_html_a8b531c1ede7bdf3300b9ecb3cfb470d2ab4e4b0fe4596b887843003eaae3ffa6f"><div class="ttname"><a href="class_s_t_l_l_1_1_command_data__c.html#a8b531c1ede7bdf3300b9ecb3cfb470d2ab4e4b0fe4596b887843003eaae3ffa6f">STLL::CommandData_c::CMD_IMAGE</a></div><div class="ttdoc">draw an image </div><div class="ttdef"><b>Definition:</b> layouter.h:56</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1_command_data__c_html_a8b531c1ede7bdf3300b9ecb3cfb470d2af778e1b57ee502a22aab8c67398dba17"><div class="ttname"><a href="class_s_t_l_l_1_1_command_data__c.html#a8b531c1ede7bdf3300b9ecb3cfb470d2af778e1b57ee502a22aab8c67398dba17">STLL::CommandData_c::CMD_GLYPH</a></div><div class="ttdoc">draw a glyph from a font </div><div class="ttdef"><b>Definition:</b> layouter.h:54</div></div>
-<div class="ttc" id="class_s_t_l_l_1_1show_open_g_l_html_a4605410fc07cf9a3854ffab16ee1b1aa"><div class="ttname"><a href="class_s_t_l_l_1_1show_open_g_l.html#a4605410fc07cf9a3854ffab16ee1b1aa">STLL::showOpenGL::clear</a></div><div class="ttdeci">void clear(void)</div><div class="ttdoc">clear the glyph cache. This might be useful when you change the fonts that you use for output...</div><div class="ttdef"><b>Definition:</b> output_OpenGL.h:323</div></div>
+<div class="ttc" id="class_s_t_l_l_1_1show_open_g_l_html_a4605410fc07cf9a3854ffab16ee1b1aa"><div class="ttname"><a href="class_s_t_l_l_1_1show_open_g_l.html#a4605410fc07cf9a3854ffab16ee1b1aa">STLL::showOpenGL::clear</a></div><div class="ttdeci">void clear(void)</div><div class="ttdoc">clear the glyph cache. This might be useful when you change the fonts that you use for output...</div><div class="ttdef"><b>Definition:</b> output_OpenGL.h:335</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1show_open_g_l_html"><div class="ttname"><a href="class_s_t_l_l_1_1show_open_g_l.html">STLL::showOpenGL</a></div><div class="ttdoc">a class to output layouts using OpenGL </div><div class="ttdef"><b>Definition:</b> output_OpenGL.h:67</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1show_open_g_l_html_abb41ad4cbfc5502a2a311f8813d30029"><div class="ttname"><a href="class_s_t_l_l_1_1show_open_g_l.html#abb41ad4cbfc5502a2a311f8813d30029">STLL::showOpenGL::showLayout</a></div><div class="ttdeci">void showLayout(const TextLayout_c &amp;l, int sx, int sy, SubPixelArrangement sp, imageDrawer_c *images=nullptr, DrawCache_c *dc=nullptr)</div><div class="ttdoc">paint the layout </div><div class="ttdef"><b>Definition:</b> output_OpenGL.h:137</div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -363,7 +369,7 @@ $(document).ready(function(){initNavTree('output___open_g_l_8h_source.html','');
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_c28736f5fcbc55beb92dee0f757d1075.html">stll</a></li><li class="navelem"><a class="el" href="output___open_g_l_8h.html">output_OpenGL.h</a></li>
-    <li class="footer">Generated on Sun Jan 31 2016 18:06:00 for STLL by
+    <li class="footer">Generated on Sat Feb 27 2016 20:56:34 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

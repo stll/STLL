@@ -111,6 +111,12 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a7d6dbb19686cb56ed9c8de4e92faff32"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_layout_properties__c.html#a7d6dbb19686cb56ed9c8de4e92faff32">links</a></td></tr>
 <tr class="memdesc:a7d6dbb19686cb56ed9c8de4e92faff32"><td class="mdescLeft">&#160;</td><td class="mdescRight">link URLs for the links used in the CodepointAttribute_c  <a href="#a7d6dbb19686cb56ed9c8de4e92faff32">More...</a><br /></td></tr>
 <tr class="separator:a7d6dbb19686cb56ed9c8de4e92faff32"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a774a4bfee27e7f47751bdec58a8bd327"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_layout_properties__c.html#a774a4bfee27e7f47751bdec58a8bd327">optimizeLinebreaks</a> = true</td></tr>
+<tr class="memdesc:a774a4bfee27e7f47751bdec58a8bd327"><td class="mdescLeft">&#160;</td><td class="mdescRight">Choose between fast and optimizing linebreak algorithm.  <a href="#a774a4bfee27e7f47751bdec58a8bd327">More...</a><br /></td></tr>
+<tr class="separator:a774a4bfee27e7f47751bdec58a8bd327"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af965cd216d1fe81418559b62cfa9033f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_layout_properties__c.html#af965cd216d1fe81418559b62cfa9033f">hyphenate</a> = true</td></tr>
+<tr class="memdesc:af965cd216d1fe81418559b62cfa9033f"><td class="mdescLeft">&#160;</td><td class="mdescRight">automatically find hyphenation points  <a href="#af965cd216d1fe81418559b62cfa9033f">More...</a><br /></td></tr>
+<tr class="separator:af965cd216d1fe81418559b62cfa9033f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>this structure contains information for the layouter how to layout the text </p>
@@ -159,6 +165,21 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="af965cd216d1fe81418559b62cfa9033f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool STLL::LayoutProperties_c::hyphenate = true</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>automatically find hyphenation points </p>
+<p>This requires a bit of time but will increase text layout quality dramatically. Only words that don't contain a shy will be consiedered The attribute must contain language information or no hyphenation will take place </p>
+
+</div>
+</div>
 <a class="anchor" id="aa2a485e479d450261b5b775d655d6d30"></a>
 <div class="memitem">
 <div class="memproto">
@@ -201,6 +222,21 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a774a4bfee27e7f47751bdec58a8bd327"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool STLL::LayoutProperties_c::optimizeLinebreaks = true</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Choose between fast and optimizing linebreak algorithm. </p>
+<p>The fast linebreak algorithm simply breaks a line as soon as the next part doesn't fit onto the line. The optimizing algorithm tries to limit raggedness of the lines and tries to avoid hyphenating words </p>
+
+</div>
+</div>
 <a class="anchor" id="adbf184d43c276708f26e75177d962260"></a>
 <div class="memitem">
 <div class="memproto">
@@ -226,7 +262,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1_layout_properties__c.html">LayoutProperties_c</a></li>
-    <li class="footer">Generated on Sun Jan 31 2016 18:06:00 for STLL by
+    <li class="footer">Generated on Sat Feb 27 2016 20:56:34 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

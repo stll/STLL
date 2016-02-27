@@ -122,6 +122,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2e99c7b6dd877a66f810295d94b4f869"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a998330819cfb0da864597d665f51770e"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1show_open_g_l.html#a998330819cfb0da864597d665f51770e">cacheHeight</a> (void) const </td></tr>
 <tr class="separator:a998330819cfb0da864597d665f51770e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a0157a02e236e05bb25873e04e7f070"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1show_open_g_l.html#a0a0157a02e236e05bb25873e04e7f070">setGamma</a> (uint8_t gamma=22)</td></tr>
+<tr class="memdesc:a0a0157a02e236e05bb25873e04e7f070"><td class="mdescLeft">&#160;</td><td class="mdescRight">update the gamma value used for output  <a href="#a0a0157a02e236e05bb25873e04e7f070">More...</a><br /></td></tr>
+<tr class="separator:a0a0157a02e236e05bb25873e04e7f070"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4605410fc07cf9a3854ffab16ee1b1aa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1show_open_g_l.html#a4605410fc07cf9a3854ffab16ee1b1aa">clear</a> (void)</td></tr>
 <tr class="memdesc:a4605410fc07cf9a3854ffab16ee1b1aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">clear the glyph cache. This might be useful when you change the fonts that you use for output, or any other reason that will make the cache content useless  <a href="#a4605410fc07cf9a3854ffab16ee1b1aa">More...</a><br /></td></tr>
 <tr class="separator:a4605410fc07cf9a3854ffab16ee1b1aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -347,6 +350,41 @@ template&lt;int V, class G = internal::Gamma_c&lt;&gt;&gt; </div>
 
 </div>
 </div>
+<a class="anchor" id="a0a0157a02e236e05bb25873e04e7f070"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;int V, class G = internal::Gamma_c&lt;&gt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="class_s_t_l_l_1_1show_open_g_l.html">STLL::showOpenGL</a>&lt; V, G &gt;::setGamma </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>gamma</em> = <code>22</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>update the gamma value used for output </p>
+<p>Default value for the class is 22, which is good for sRGB output, which should be your default for high quality output. See <a class="el" href="drawing_pg.html#gamma_sec">Gamma</a> for details.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">gamma</td><td>the new gamma value in 1/10th units. Use 22 for sRGB and 10 for normal linear </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a869d2e13e08f3515139987cc0d5423e6"></a>
 <div class="memitem">
 <div class="memproto">
@@ -467,7 +505,7 @@ template&lt;int V, class G = internal::Gamma_c&lt;&gt;&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1show_open_g_l.html">showOpenGL</a></li>
-    <li class="footer">Generated on Sun Jan 31 2016 18:06:00 for STLL by
+    <li class="footer">Generated on Sat Feb 27 2016 20:56:34 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

@@ -95,6 +95,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a960a9f109e846aed17a38b914a995545"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a> (const std::string sel, const std::string attr, const std::string val)</td></tr>
 <tr class="memdesc:a960a9f109e846aed17a38b914a995545"><td class="mdescLeft">&#160;</td><td class="mdescRight">add a rule to the stylesheet  <a href="#a960a9f109e846aed17a38b914a995545">More...</a><br /></td></tr>
 <tr class="separator:a960a9f109e846aed17a38b914a995545"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa33f08cafe379df1b6796efb80ee5e38"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html#aa33f08cafe379df1b6796efb80ee5e38">setUseOptimizingLayouter</a> (bool on)</td></tr>
+<tr class="memdesc:aa33f08cafe379df1b6796efb80ee5e38"><td class="mdescLeft">&#160;</td><td class="mdescRight">enable or disable usage of the optimizing layouter. See <a class="el" href="class_s_t_l_l_1_1_layout_properties__c.html" title="this structure contains information for the layouter how to layout the text ">LayoutProperties_c</a> for details  <a href="#aa33f08cafe379df1b6796efb80ee5e38">More...</a><br /></td></tr>
+<tr class="separator:aa33f08cafe379df1b6796efb80ee5e38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e2a020be209c16359df0077dd59d2b5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a0e2a020be209c16359df0077dd59d2b5">getUseOptimizingLayouter</a> (void) const </td></tr>
+<tr class="memdesc:a0e2a020be209c16359df0077dd59d2b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">get status of optimizing layouter  <a href="#a0e2a020be209c16359df0077dd59d2b5">More...</a><br /></td></tr>
+<tr class="separator:a0e2a020be209c16359df0077dd59d2b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0189c155bb810d14e603f2005a0b2c2e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a0189c155bb810d14e603f2005a0b2c2e">setHyphenate</a> (bool on)</td></tr>
+<tr class="memdesc:a0189c155bb810d14e603f2005a0b2c2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">enable or disable hyphenation. See <a class="el" href="class_s_t_l_l_1_1_layout_properties__c.html" title="this structure contains information for the layouter how to layout the text ">LayoutProperties_c</a> for details  <a href="#a0189c155bb810d14e603f2005a0b2c2e">More...</a><br /></td></tr>
+<tr class="separator:a0189c155bb810d14e603f2005a0b2c2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10adad34f625112a54276eaa3b3e0cdd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a10adad34f625112a54276eaa3b3e0cdd">getHyphenate</a> (void) const </td></tr>
+<tr class="memdesc:a10adad34f625112a54276eaa3b3e0cdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">get status of hyphenation setting  <a href="#a10adad34f625112a54276eaa3b3e0cdd">More...</a><br /></td></tr>
+<tr class="separator:a10adad34f625112a54276eaa3b3e0cdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a193fbb02cd6e6c412bab9965eb4707da"><td class="memTemplParams" colspan="2">template&lt;class X &gt; </td></tr>
 <tr class="memitem:a193fbb02cd6e6c412bab9965eb4707da"><td class="memTemplItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a193fbb02cd6e6c412bab9965eb4707da">getValue</a> (X node, const std::string &amp;attribute, const std::string &amp;def=&quot;&quot;) const </td></tr>
 <tr class="memdesc:a193fbb02cd6e6c412bab9965eb4707da"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the value for an attribute for a given xml-node  <a href="#a193fbb02cd6e6c412bab9965eb4707da">More...</a><br /></td></tr>
@@ -266,6 +278,58 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a10adad34f625112a54276eaa3b3e0cdd"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool STLL::TextStyleSheet_c::getHyphenate </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>get status of hyphenation setting </p>
+
+</div>
+</div>
+<a class="anchor" id="a0e2a020be209c16359df0077dd59d2b5"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool STLL::TextStyleSheet_c::getUseOptimizingLayouter </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>get status of optimizing layouter </p>
+
+</div>
+</div>
 <a class="anchor" id="a193fbb02cd6e6c412bab9965eb4707da"></a>
 <div class="memitem">
 <div class="memproto">
@@ -321,6 +385,58 @@ template&lt;class X &gt; </div>
 
 </div>
 </div>
+<a class="anchor" id="a0189c155bb810d14e603f2005a0b2c2e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void STLL::TextStyleSheet_c::setHyphenate </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>on</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>enable or disable hyphenation. See <a class="el" href="class_s_t_l_l_1_1_layout_properties__c.html" title="this structure contains information for the layouter how to layout the text ">LayoutProperties_c</a> for details </p>
+
+</div>
+</div>
+<a class="anchor" id="aa33f08cafe379df1b6796efb80ee5e38"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void STLL::TextStyleSheet_c::setUseOptimizingLayouter </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>on</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>enable or disable usage of the optimizing layouter. See <a class="el" href="class_s_t_l_l_1_1_layout_properties__c.html" title="this structure contains information for the layouter how to layout the text ">LayoutProperties_c</a> for details </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="layouter_c_s_s_8h_source.html">layouterCSS.h</a></li>
 </ul>
@@ -330,7 +446,7 @@ template&lt;class X &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li><li class="navelem"><a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html">TextStyleSheet_c</a></li>
-    <li class="footer">Generated on Sun Jan 31 2016 18:06:00 for STLL by
+    <li class="footer">Generated on Sat Feb 27 2016 20:56:34 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

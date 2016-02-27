@@ -145,79 +145,98 @@ $(document).ready(function(){initNavTree('layouter_c_s_s_8h_source.html','');});
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;</div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="keyword">const</span> std::string sel, <span class="keyword">const</span> std::string attr, <span class="keyword">const</span> std::string val);</div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> X&gt;</div>
-<div class="line"><a name="l00141"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a193fbb02cd6e6c412bab9965eb4707da">  141</a></span>&#160;    <span class="keyword">const</span> std::string &amp; <a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a193fbb02cd6e6c412bab9965eb4707da">getValue</a>(X node, <span class="keyword">const</span> std::string &amp; attribute, <span class="keyword">const</span> std::string &amp; def = <span class="stringliteral">&quot;&quot;</span>)<span class="keyword"> const</span></div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;<span class="keyword">    </span>{</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;      <span class="comment">// go through all rules, check only the ones that give a value to the requested attribute</span></div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;      <span class="comment">// evaluate rule by priority (look at the CSS priority rules</span></div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;      <span class="comment">// choose the highest priority</span></div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;      <span class="keywordflow">while</span> (!internal::xml_isEmpty(node))</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;      {</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;        uint16_t prio = 0;</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;        <span class="keywordtype">size_t</span> bestI;</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; rules.size(); i++)</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;        {</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;          <span class="keywordflow">if</span> (   rules[i].attribute == attribute</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;            &amp;&amp; internal::ruleFits(rules[i].selector, node)</div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;            &amp;&amp; internal::rulePrio(rules[i].selector) &gt; prio</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;          )</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;          {</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;            prio = internal::rulePrio(rules[i].selector);</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;            bestI = i;</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;          }</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;        }</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;        <span class="keywordflow">if</span> (prio)</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;          <span class="keywordflow">return</span> rules[bestI].value;</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;        <span class="keywordflow">if</span> (!internal::isInheriting(attribute))</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;        {</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;          <span class="keywordflow">if</span> (def.empty())</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;          {</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;            <span class="keywordflow">return</span> internal::getDefault(attribute);</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;          }</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;          <span class="keywordflow">else</span></div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;          {</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;            <span class="keywordflow">return</span> def;</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;          }</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;        }</div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;          node = internal::xml_getParent(node);</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;      }</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;      <span class="keywordflow">return</span> internal::getDefault(attribute);</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;    }</div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;  <span class="keyword">private</span>:</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;    std::vector&lt;rule&gt; rules;</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;    std::map&lt;std::string, std::shared_ptr&lt;FontFamily_c&gt; &gt; families;</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;    std::shared_ptr&lt;FontCache_c&gt; cache;</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;};</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;}</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00126"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1_text_style_sheet__c.html#aa33f08cafe379df1b6796efb80ee5e38">  126</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#aa33f08cafe379df1b6796efb80ee5e38">setUseOptimizingLayouter</a>(<span class="keywordtype">bool</span> on)</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    {</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;      useOptimizingLayouter = on;</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    }</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;</div>
+<div class="line"><a name="l00132"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a0e2a020be209c16359df0077dd59d2b5">  132</a></span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a0e2a020be209c16359df0077dd59d2b5">getUseOptimizingLayouter</a>(<span class="keywordtype">void</span>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> useOptimizingLayouter; }</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;</div>
+<div class="line"><a name="l00136"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a0189c155bb810d14e603f2005a0b2c2e">  136</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a0189c155bb810d14e603f2005a0b2c2e">setHyphenate</a>(<span class="keywordtype">bool</span> on)</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;    {</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;      hyphenate = on;</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    }</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;</div>
+<div class="line"><a name="l00142"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a10adad34f625112a54276eaa3b3e0cdd">  142</a></span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a10adad34f625112a54276eaa3b3e0cdd">getHyphenate</a>(<span class="keywordtype">void</span>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> hyphenate; }</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;</div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> X&gt;</div>
+<div class="line"><a name="l00160"></a><span class="lineno"><a class="line" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a193fbb02cd6e6c412bab9965eb4707da">  160</a></span>&#160;    <span class="keyword">const</span> std::string &amp; <a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a193fbb02cd6e6c412bab9965eb4707da">getValue</a>(X node, <span class="keyword">const</span> std::string &amp; attribute, <span class="keyword">const</span> std::string &amp; def = <span class="stringliteral">&quot;&quot;</span>)<span class="keyword"> const</span></div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;<span class="keyword">    </span>{</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;      <span class="comment">// go through all rules, check only the ones that give a value to the requested attribute</span></div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;      <span class="comment">// evaluate rule by priority (look at the CSS priority rules</span></div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;      <span class="comment">// choose the highest priority</span></div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;      <span class="keywordflow">while</span> (!internal::xml_isEmpty(node))</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;      {</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;        uint16_t prio = 0;</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;        <span class="keywordtype">size_t</span> bestI;</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; rules.size(); i++)</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;        {</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;          <span class="keywordflow">if</span> (   rules[i].attribute == attribute</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;            &amp;&amp; internal::ruleFits(rules[i].selector, node)</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;            &amp;&amp; internal::rulePrio(rules[i].selector) &gt; prio</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;          )</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;          {</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;            prio = internal::rulePrio(rules[i].selector);</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;            bestI = i;</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;          }</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;        }</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;        <span class="keywordflow">if</span> (prio)</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;          <span class="keywordflow">return</span> rules[bestI].value;</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;        <span class="keywordflow">if</span> (!internal::isInheriting(attribute))</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;        {</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;          <span class="keywordflow">if</span> (def.empty())</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;          {</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;            <span class="keywordflow">return</span> internal::getDefault(attribute);</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;          }</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;          <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;          {</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;            <span class="keywordflow">return</span> def;</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;          }</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;        }</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;          node = internal::xml_getParent(node);</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;      }</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;      <span class="keywordflow">return</span> internal::getDefault(attribute);</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;    }</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;  <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;    std::vector&lt;rule&gt; rules;</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;    std::map&lt;std::string, std::shared_ptr&lt;FontFamily_c&gt; &gt; families;</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    std::shared_ptr&lt;FontCache_c&gt; cache;</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;    <span class="keywordtype">bool</span> useOptimizingLayouter = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;    <span class="keywordtype">bool</span> hyphenate = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;};</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;}</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="class_s_t_l_l_1_1_font_resource__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1_font_resource__c.html">STLL::FontResource_c</a></div><div class="ttdoc">This class represents a font resource. </div><div class="ttdef"><b>Definition:</b> layouterFont.h:87</div></div>
+<div class="ttc" id="class_s_t_l_l_1_1_text_style_sheet__c_html_a0e2a020be209c16359df0077dd59d2b5"><div class="ttname"><a href="class_s_t_l_l_1_1_text_style_sheet__c.html#a0e2a020be209c16359df0077dd59d2b5">STLL::TextStyleSheet_c::getUseOptimizingLayouter</a></div><div class="ttdeci">bool getUseOptimizingLayouter(void) const </div><div class="ttdoc">get status of optimizing layouter </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:132</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1_text_style_sheet__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1_text_style_sheet__c.html">STLL::TextStyleSheet_c</a></div><div class="ttdoc">this class encapsulates information for how to format a text, just like the style sheets in html are ...</div><div class="ttdef"><b>Definition:</b> layouterCSS.h:56</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1_text_style_sheet__c_html_a960a9f109e846aed17a38b914a995545"><div class="ttname"><a href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">STLL::TextStyleSheet_c::addRule</a></div><div class="ttdeci">void addRule(const std::string sel, const std::string attr, const std::string val)</div><div class="ttdoc">add a rule to the stylesheet </div></div>
+<div class="ttc" id="class_s_t_l_l_1_1_text_style_sheet__c_html_aa33f08cafe379df1b6796efb80ee5e38"><div class="ttname"><a href="class_s_t_l_l_1_1_text_style_sheet__c.html#aa33f08cafe379df1b6796efb80ee5e38">STLL::TextStyleSheet_c::setUseOptimizingLayouter</a></div><div class="ttdeci">void setUseOptimizingLayouter(bool on)</div><div class="ttdoc">enable or disable usage of the optimizing layouter. See LayoutProperties_c for details ...</div><div class="ttdef"><b>Definition:</b> layouterCSS.h:126</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1_text_style_sheet__c_html_a99f10f4e1af3ce1f618a61490d2e041f"><div class="ttname"><a href="class_s_t_l_l_1_1_text_style_sheet__c.html#a99f10f4e1af3ce1f618a61490d2e041f">STLL::TextStyleSheet_c::findFamily</a></div><div class="ttdeci">std::shared_ptr&lt; FontFamily_c &gt; findFamily(const std::string &amp;family) const </div><div class="ttdoc">Get a font family from the CSS. </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:102</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1_text_style_sheet__c_html_a7f7e8de26907406e854b770d33a6df99"><div class="ttname"><a href="class_s_t_l_l_1_1_text_style_sheet__c.html#a7f7e8de26907406e854b770d33a6df99">STLL::TextStyleSheet_c::addFont</a></div><div class="ttdeci">void addFont(const std::string &amp;family, const FontResource_c &amp;res, const std::string &amp;style=&quot;normal&quot;, const std::string &amp;variant=&quot;normal&quot;, const std::string &amp;weight=&quot;normal&quot;, const std::string &amp;stretch=&quot;normal&quot;)</div><div class="ttdoc">Add a font to a family. </div></div>
+<div class="ttc" id="class_s_t_l_l_1_1_text_style_sheet__c_html_a10adad34f625112a54276eaa3b3e0cdd"><div class="ttname"><a href="class_s_t_l_l_1_1_text_style_sheet__c.html#a10adad34f625112a54276eaa3b3e0cdd">STLL::TextStyleSheet_c::getHyphenate</a></div><div class="ttdeci">bool getHyphenate(void) const </div><div class="ttdoc">get status of hyphenation setting </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:142</div></div>
 <div class="ttc" id="namespace_s_t_l_l_html"><div class="ttname"><a href="namespace_s_t_l_l.html">STLL</a></div><div class="ttdoc">The namespace for the library. Every function and class is within this namespace. ...</div><div class="ttdef"><b>Definition:</b> color.h:31</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1_xhtml_exception__c_html_a7b19bc689a11ee26657902b4de13d2fa"><div class="ttname"><a href="class_s_t_l_l_1_1_xhtml_exception__c.html#a7b19bc689a11ee26657902b4de13d2fa">STLL::XhtmlException_c::XhtmlException_c</a></div><div class="ttdeci">XhtmlException_c(const std::string &amp;what_arg)</div><div class="ttdef"><b>Definition:</b> layouterCSS.h:46</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1_text_style_sheet__c_html_a4874825f2a6c37daaa7b40b7f5540556"><div class="ttname"><a href="class_s_t_l_l_1_1_text_style_sheet__c.html#a4874825f2a6c37daaa7b40b7f5540556">STLL::TextStyleSheet_c::TextStyleSheet_c</a></div><div class="ttdeci">TextStyleSheet_c(std::shared_ptr&lt; FontCache_c &gt; c=0)</div><div class="ttdoc">create an empty style sheet only with default rules </div></div>
 <div class="ttc" id="layouter_font_8h_html"><div class="ttname"><a href="layouter_font_8h.html">layouterFont.h</a></div><div class="ttdoc">a FreeType wrapper </div></div>
-<div class="ttc" id="class_s_t_l_l_1_1_text_style_sheet__c_html_a193fbb02cd6e6c412bab9965eb4707da"><div class="ttname"><a href="class_s_t_l_l_1_1_text_style_sheet__c.html#a193fbb02cd6e6c412bab9965eb4707da">STLL::TextStyleSheet_c::getValue</a></div><div class="ttdeci">const std::string &amp; getValue(X node, const std::string &amp;attribute, const std::string &amp;def=&quot;&quot;) const </div><div class="ttdoc">get the value for an attribute for a given xml-node </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:141</div></div>
+<div class="ttc" id="class_s_t_l_l_1_1_text_style_sheet__c_html_a193fbb02cd6e6c412bab9965eb4707da"><div class="ttname"><a href="class_s_t_l_l_1_1_text_style_sheet__c.html#a193fbb02cd6e6c412bab9965eb4707da">STLL::TextStyleSheet_c::getValue</a></div><div class="ttdeci">const std::string &amp; getValue(X node, const std::string &amp;attribute, const std::string &amp;def=&quot;&quot;) const </div><div class="ttdoc">get the value for an attribute for a given xml-node </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:160</div></div>
 <div class="ttc" id="class_s_t_l_l_1_1_xhtml_exception__c_html"><div class="ttname"><a href="class_s_t_l_l_1_1_xhtml_exception__c.html">STLL::XhtmlException_c</a></div><div class="ttdoc">exception thrown on XHTML and CSS problems </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:43</div></div>
+<div class="ttc" id="class_s_t_l_l_1_1_text_style_sheet__c_html_a0189c155bb810d14e603f2005a0b2c2e"><div class="ttname"><a href="class_s_t_l_l_1_1_text_style_sheet__c.html#a0189c155bb810d14e603f2005a0b2c2e">STLL::TextStyleSheet_c::setHyphenate</a></div><div class="ttdeci">void setHyphenate(bool on)</div><div class="ttdoc">enable or disable hyphenation. See LayoutProperties_c for details </div><div class="ttdef"><b>Definition:</b> layouterCSS.h:136</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_c28736f5fcbc55beb92dee0f757d1075.html">stll</a></li><li class="navelem"><a class="el" href="layouter_c_s_s_8h.html">layouterCSS.h</a></li>
-    <li class="footer">Generated on Sun Jan 31 2016 18:06:00 for STLL by
+    <li class="footer">Generated on Sat Feb 27 2016 20:56:34 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

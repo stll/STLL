@@ -7,6 +7,7 @@ var NAVTREE =
     [ "Getting started", "index.html#build_sec", null ],
     [ "Design of the library", "index.html#design_sec", [
       [ "Freetype wrapper", "index.html#freetype_wrapper_sec", null ],
+      [ "XML Library wrapper", "index.html#xml_wrapper_sec", null ],
       [ "Paragraph Layouter", "index.html#layouter_sec", null ],
       [ "XHTML Layouter", "index.html#xhtml_sec", null ],
       [ "Output Drivers", "index.html#output_sec", null ],
@@ -25,7 +26,8 @@ var NAVTREE =
     ] ],
     [ "Tutorial", "tutorial_pg.html", [
       [ "Using the Paragraph Layouter and the SDL output", "tutorial_pg.html#tut_basic_sec", null ],
-      [ "Using the XHTML Layouter and the OpenGL output", "tutorial_pg.html#tut_xhtml_sec", null ]
+      [ "Using the XHTML Layouter and the OpenGL output", "tutorial_pg.html#tut_xhtml_sec", null ],
+      [ "Using hyphenation dictionaries", "tutorial_pg.html#tut_hyph_sec", null ]
     ] ],
     [ "XML", "xml_pg.html", null ],
     [ "Namespaces", null, [
@@ -63,7 +65,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_h_t_m_l__c_s_s_pg.html",
-"namespacemembers_eval.html"
+"layouter_font_8h.html#ac0004512e3161f751911cb1352dbd550a969cc7a586cf392aee49512ffefa6de4"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

@@ -6,8 +6,10 @@ var class_s_t_l_l_1_1_layout_properties__c =
     [ "ALG_JUSTIFY_LEFT", "class_s_t_l_l_1_1_layout_properties__c.html#ac10c6269ed10e75e00793e770e27e4e3a481ed2c166502c5f5ef55b2508886a29", null ],
     [ "ALG_JUSTIFY_RIGHT", "class_s_t_l_l_1_1_layout_properties__c.html#ac10c6269ed10e75e00793e770e27e4e3acd3e4c026b3e0a7d911df1b86e222b8c", null ],
     [ "align", "class_s_t_l_l_1_1_layout_properties__c.html#a30774e574e1c0fac952016f047bc9af3", null ],
+    [ "hyphenate", "class_s_t_l_l_1_1_layout_properties__c.html#af965cd216d1fe81418559b62cfa9033f", null ],
     [ "indent", "class_s_t_l_l_1_1_layout_properties__c.html#aa2a485e479d450261b5b775d655d6d30", null ],
     [ "links", "class_s_t_l_l_1_1_layout_properties__c.html#a7d6dbb19686cb56ed9c8de4e92faff32", null ],
     [ "ltr", "class_s_t_l_l_1_1_layout_properties__c.html#afc7b927bc38642ebfe45d6fb24f37043", null ],
+    [ "optimizeLinebreaks", "class_s_t_l_l_1_1_layout_properties__c.html#a774a4bfee27e7f47751bdec58a8bd327", null ],
     [ "underlineFont", "class_s_t_l_l_1_1_layout_properties__c.html#adbf184d43c276708f26e75177d962260", null ]
 ];

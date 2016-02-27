@@ -8,6 +8,7 @@ var class_s_t_l_l_1_1show_open_g_l =
     [ "cacheWidth", "class_s_t_l_l_1_1show_open_g_l.html#a2e99c7b6dd877a66f810295d94b4f869", null ],
     [ "clear", "class_s_t_l_l_1_1show_open_g_l.html#a4605410fc07cf9a3854ffab16ee1b1aa", null ],
     [ "getData", "class_s_t_l_l_1_1show_open_g_l.html#a6cd80b368710809a08d8bb8fc945f38d", null ],
+    [ "setGamma", "class_s_t_l_l_1_1show_open_g_l.html#a0a0157a02e236e05bb25873e04e7f070", null ],
     [ "setupMatrixes", "class_s_t_l_l_1_1show_open_g_l.html#a869d2e13e08f3515139987cc0d5423e6", null ],
     [ "showLayout", "class_s_t_l_l_1_1show_open_g_l.html#abb41ad4cbfc5502a2a311f8813d30029", null ]
 ];

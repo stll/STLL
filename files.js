@@ -3,6 +3,7 @@ var files =
     [ "color.h", "color_8h.html", [
       [ "Color_c", "class_s_t_l_l_1_1_color__c.html", "class_s_t_l_l_1_1_color__c" ]
     ] ],
+    [ "hyphendictionaries.h", "hyphendictionaries_8h.html", "hyphendictionaries_8h" ],
     [ "layouter.h", "layouter_8h.html", "layouter_8h" ],
     [ "layouterCSS.h", "layouter_c_s_s_8h.html", [
       [ "XhtmlException_c", "class_s_t_l_l_1_1_xhtml_exception__c.html", "class_s_t_l_l_1_1_xhtml_exception__c" ],

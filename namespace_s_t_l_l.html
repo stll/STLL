@@ -162,6 +162,12 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a2df2ef46b246a9d319937f645b230836"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#a2df2ef46b246a9d319937f645b230836">addHyphenDictionary</a> (const std::vector&lt; std::string &gt; &amp;langs, std::istream &amp;str)</td></tr>
+<tr class="memdesc:a2df2ef46b246a9d319937f645b230836"><td class="mdescLeft">&#160;</td><td class="mdescRight">register a hyphen dictionary for a given set of languages  <a href="#a2df2ef46b246a9d319937f645b230836">More...</a><br /></td></tr>
+<tr class="separator:a2df2ef46b246a9d319937f645b230836"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0657ab2b47a229c5cb56fbbca2733088"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#a0657ab2b47a229c5cb56fbbca2733088">addHyphenDictionary</a> (const std::vector&lt; std::string &gt; &amp;langs, std::istream &amp;&amp;str)</td></tr>
+<tr class="memdesc:a0657ab2b47a229c5cb56fbbca2733088"><td class="mdescLeft">&#160;</td><td class="mdescRight">see the other addHyphenDictionary function  <a href="#a0657ab2b47a229c5cb56fbbca2733088">More...</a><br /></td></tr>
+<tr class="separator:a0657ab2b47a229c5cb56fbbca2733088"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab663fe7dceae4de54ddc5076a4c8c2dc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_s_t_l_l_1_1_text_layout__c.html">TextLayout_c</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#ab663fe7dceae4de54ddc5076a4c8c2dc">layoutParagraph</a> (const std::u32string &amp;txt32, const <a class="el" href="class_s_t_l_l_1_1_attribute_index__c.html">AttributeIndex_c</a> &amp;attr, const <a class="el" href="class_s_t_l_l_1_1_shape__c.html">Shape_c</a> &amp;shape, const <a class="el" href="class_s_t_l_l_1_1_layout_properties__c.html">LayoutProperties_c</a> &amp;prop, int32_t ystart=0)</td></tr>
 <tr class="separator:ab663fe7dceae4de54ddc5076a4c8c2dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a27d4d9da637cc1f1494fba65768076f4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_s_t_l_l_1_1_text_layout__c.html">TextLayout_c</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespace_s_t_l_l.html#a27d4d9da637cc1f1494fba65768076f4">layoutXML</a> (pugi::xml_node txt, const <a class="el" href="class_s_t_l_l_1_1_text_style_sheet__c.html">TextStyleSheet_c</a> &amp;rules, const <a class="el" href="class_s_t_l_l_1_1_shape__c.html">Shape_c</a> &amp;shape)</td></tr>
@@ -225,6 +231,69 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="a2df2ef46b246a9d319937f645b230836"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void STLL::addHyphenDictionary </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::string &gt; &amp;&#160;</td>
+          <td class="paramname"><em>langs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::istream &amp;&#160;</td>
+          <td class="paramname"><em>str</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>register a hyphen dictionary for a given set of languages </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">langs</td><td>a vector of language strings. The language strings are the ones that you use in the lang xml attributes or in the lang member of the AttributeIndex class. If the language to be looked for when looking for a dictionary to do the hyphenation contains an dash stll will also look for a dictionary with the text just before that dash. So if you register a dictionary for the language "en" and use "en-US" in your language tag it will use your hyphenation dictionary </td></tr>
+    <tr><td class="paramname">str</td><td>must point to an input stream of a hyphen dictionary, the file must be an UTF-8 encoded Open Office hyphen dictionary, nothing else is not supported </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a0657ab2b47a229c5cb56fbbca2733088"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void STLL::addHyphenDictionary </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::string &gt; &amp;&#160;</td>
+          <td class="paramname"><em>langs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::istream &amp;&amp;&#160;</td>
+          <td class="paramname"><em>str</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>see the other addHyphenDictionary function </p>
+
+</div>
+</div>
 <a class="anchor" id="ab663fe7dceae4de54ddc5076a4c8c2dc"></a>
 <div class="memitem">
 <div class="memproto">
@@ -439,7 +508,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespace_s_t_l_l.html">STLL</a></li>
-    <li class="footer">Generated on Sun Jan 31 2016 18:06:00 for STLL by
+    <li class="footer">Generated on Sat Feb 27 2016 20:56:34 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>

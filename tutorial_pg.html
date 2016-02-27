@@ -126,7 +126,7 @@ Using the Paragraph Layouter and the SDL output</h1>
 <div class="line">  <span class="comment">// create the output object, with glyph cache and all local storage, keep this</span></div>
 <div class="line">  <span class="comment">// object around for the lifetime of your program</span></div>
 <div class="line">  <a class="code" href="class_s_t_l_l_1_1show_s_d_l.html">showSDL&lt;&gt;</a> show;</div>
-<div class="line">  show.<a class="code" href="class_s_t_l_l_1_1show_s_d_l.html#a6297de618239c433e4866187c1237cc3">showLayout</a>(layout, 20*64, 20*64, screen);</div>
+<div class="line">  show.<a class="code" href="class_s_t_l_l_1_1show_s_d_l.html#a5fc650bb58a77c2b09c4c2ad1c4e48d5">showLayout</a>(layout, 20*64, 20*64, screen);</div>
 <div class="line">  SDL_Flip(screen);</div>
 <div class="line">  sleep(10);</div>
 <div class="line"></div>
@@ -232,12 +232,100 @@ Using the XHTML Layouter and the OpenGL output</h1>
 <div class="line"></div>
 <div class="line">  <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
+</div><!-- fragment --><h1><a class="anchor" id="tut_hyph_sec"></a>
+Using hyphenation dictionaries</h1>
+<p>The following example shows how to use hyphenation. There are only 2 things to do:</p><ul>
+<li>register the dictionaries required for your language</li>
+<li>provide a language information, either as an attribute in the XHTML code, or to the member variable lang in the CodepointAttributes_c of you text</li>
+</ul>
+<div class="fragment"><div class="line"><span class="preprocessor">#define USE_PUGI_XML</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="layouter_x_h_t_m_l_8h.html">stll/layouterXHTML.h</a>&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="output___s_d_l_8h.html">stll/output_SDL.h</a>&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="hyphendictionaries_8h.html">stll/hyphendictionaries.h</a>&gt;</span></div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor">#include &lt;stll/hyphenationdictionaries/hyph_en_US.h&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;stll/hyphenationdictionaries/hyph_de_DE_gz.h&gt;</span></div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor">#include &lt;boost/iostreams/filter/gzip.hpp&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;boost/iostreams/filtering_stream.hpp&gt;</span></div>
+<div class="line"></div>
+<div class="line"><span class="keyword">using namespace </span><a class="code" href="namespace_s_t_l_l.html">STLL</a>;</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">  <span class="comment">// all the stuff you already know to setup the style sheet</span></div>
+<div class="line">  <a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html">TextStyleSheet_c</a> styleSheet;</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a7f7e8de26907406e854b770d33a6df99">addFont</a>(<span class="stringliteral">&quot;sans&quot;</span>, <a class="code" href="class_s_t_l_l_1_1_font_resource__c.html">FontResource_c</a>(<span class="stringliteral">&quot;tests/FreeSans.ttf&quot;</span>));</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a7f7e8de26907406e854b770d33a6df99">addFont</a>(<span class="stringliteral">&quot;sans&quot;</span>, <a class="code" href="class_s_t_l_l_1_1_font_resource__c.html">FontResource_c</a>(<span class="stringliteral">&quot;tests/FreeSansBold.ttf&quot;</span>), <span class="stringliteral">&quot;normal&quot;</span>, <span class="stringliteral">&quot;normal&quot;</span>, <span class="stringliteral">&quot;bold&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;body&quot;</span>, <span class="stringliteral">&quot;color&quot;</span>, <span class="stringliteral">&quot;#ffffff&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;body&quot;</span>, <span class="stringliteral">&quot;font-size&quot;</span>, <span class="stringliteral">&quot;20px&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;body&quot;</span>, <span class="stringliteral">&quot;text-align&quot;</span>, <span class="stringliteral">&quot;justify&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;body&quot;</span>, <span class="stringliteral">&quot;padding&quot;</span>, <span class="stringliteral">&quot;10px&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;h1&quot;</span>, <span class="stringliteral">&quot;font-weight&quot;</span>, <span class="stringliteral">&quot;bold&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;h1&quot;</span>, <span class="stringliteral">&quot;font-size&quot;</span>, <span class="stringliteral">&quot;60px&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;h1&quot;</span>, <span class="stringliteral">&quot;text-align&quot;</span>, <span class="stringliteral">&quot;center&quot;</span>);</div>
+<div class="line">  styleSheet.<a class="code" href="class_s_t_l_l_1_1_text_style_sheet__c.html#a960a9f109e846aed17a38b914a995545">addRule</a>(<span class="stringliteral">&quot;h1&quot;</span>, <span class="stringliteral">&quot;background-color&quot;</span>, <span class="stringliteral">&quot;#FF8080&quot;</span>);</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// The following lines demonstrate 2 possible ways to register hyphenation</span></div>
+<div class="line">  <span class="comment">// dictionaries.</span></div>
+<div class="line">  <span class="comment">// both use the provided hyphenation dictionaries that come with STLL</span></div>
+<div class="line">  <span class="comment">// to use them you need to include the headers containing the dictionaries.</span></div>
+<div class="line">  <span class="comment">// the included dictionaries are provided in 2 different forms: as a string</span></div>
+<div class="line">  <span class="comment">// that contains the whole dictionary</span></div>
+<div class="line">  <span class="comment">// and as n byte array containing the dictionary compressed using zlib.</span></div>
+<div class="line">  <span class="comment">// if you already have to ling against zlib anyway that might be useful</span></div>
+<div class="line">  <span class="comment">// you only pay for the dictionaries you are actually using as the</span></div>
+<div class="line">  <span class="comment">// dictionaries are only within the header.</span></div>
+<div class="line">  <span class="comment">// It is your responsibility to only include the headers once or your program</span></div>
+<div class="line">  <span class="comment">// will be unnecessarily big.So a good practice for your program would be to</span></div>
+<div class="line">  <span class="comment">// have a module that sets up all the required dictionaries.</span></div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// us this line is the probably best way to load the uncompressed dictionary</span></div>
+<div class="line">  <span class="comment">// you can provide multiple languages to register the dictionary for, but make</span></div>
+<div class="line">  <span class="comment">// sure to not load the same dictionary twice as that would waste your memory</span></div>
+<div class="line">  <span class="comment">// also you can use country code.</span></div>
+<div class="line">  <a class="code" href="namespace_s_t_l_l.html#a2df2ef46b246a9d319937f645b230836">STLL::addHyphenDictionary</a>({<span class="stringliteral">&quot;en&quot;</span>, <span class="stringliteral">&quot;en-us&quot;</span>}, std::istringstream((<span class="keyword">const</span> <span class="keywordtype">char</span>*)hyph_en_US));</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// for zlib there is no one right way. The following lines demonstrate using boosts</span></div>
+<div class="line">  <span class="comment">// iostream library, but there are surely others out there</span></div>
+<div class="line">  {</div>
+<div class="line">    boost::iostreams::filtering_istream in;</div>
+<div class="line">    in.push(boost::iostreams::gzip_decompressor());</div>
+<div class="line">    boost::iostreams::array_source src((<span class="keyword">const</span> <span class="keywordtype">char</span>*)hyph_de_DE_gz, hyph_de_DE_gz_len);</div>
+<div class="line">    in.push(src);</div>
+<div class="line"></div>
+<div class="line">    <a class="code" href="namespace_s_t_l_l.html#a2df2ef46b246a9d319937f645b230836">STLL::addHyphenDictionary</a>({<span class="stringliteral">&quot;de&quot;</span>}, in);</div>
+<div class="line">  }</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// The XHTML code we want to format, you will need to supply language</span></div>
+<div class="line">  <span class="comment">// tags or otherwise nothing will be hyphenated. Texts without language</span></div>
+<div class="line">  <span class="comment">// tag are never hyphenated</span></div>
+<div class="line">  <span class="comment">// when the code is looking for a dictionary to use, it will first look for</span></div>
+<div class="line">  <span class="comment">// the most specific, but then it will start stripping away elements from the specification</span></div>
+<div class="line">  <span class="comment">// until is finds a dictionary, so it will first look for de-de, then for a dictionary</span></div>
+<div class="line">  <span class="comment">// for the language de</span></div>
+<div class="line">  std::string text = u8<span class="stringliteral">&quot;&lt;html&gt;&lt;body&gt;&quot;</span></div>
+<div class="line">    <span class="stringliteral">&quot;&lt;p lang=&#39;en&#39;&gt;Text in English language&lt;/p&gt;&quot;</span></div>
+<div class="line">    <span class="stringliteral">&quot;&lt;p lang=&#39;de-de&#39;&gt;Text in deutscher Sprache&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;&quot;</span>;</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// use a 100 pixel wide rectangle so that we actually see hyphenation</span></div>
+<div class="line">  <span class="keyword">auto</span> layout = <a class="code" href="namespace_s_t_l_l.html#a6b3018805d08e36d166c6247c1d0783b">layoutXHTMLPugi</a>(text, styleSheet, <a class="code" href="class_s_t_l_l_1_1_rectangle_shape__c.html">RectangleShape_c</a>(100*64));</div>
+<div class="line"></div>
+<div class="line">  <span class="comment">// output using SDL as already known</span></div>
+<div class="line">  SDL_Surface *screen = SDL_SetVideoMode(800, 600, 32, SDL_SWSURFACE | SDL_DOUBLEBUF);</div>
+<div class="line">  <a class="code" href="class_s_t_l_l_1_1show_s_d_l.html">showSDL&lt;&gt;</a> show;</div>
+<div class="line">  show.<a class="code" href="class_s_t_l_l_1_1show_s_d_l.html#a5fc650bb58a77c2b09c4c2ad1c4e48d5">showLayout</a>(layout, 20*64, 0*64, screen, <a class="code" href="namespace_s_t_l_l.html#ac0004512e3161f751911cb1352dbd550a7cd968714b637b39ec9397c0120cedb7">SUBP_RGB</a>);</div>
+<div class="line">  SDL_Flip(screen);</div>
+<div class="line">  sleep(10);</div>
+<div class="line"></div>
+<div class="line">  <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
 </div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Jan 31 2016 18:06:00 for STLL by
+    <li class="footer">Generated on Sat Feb 27 2016 20:56:34 for STLL by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
   </ul>
