@@ -47,24 +47,26 @@ namespace internal {
 
 const HyphenDict<char32_t> * getHyphenDict(const std::string & lang)
 {
-  auto d = dictionaries.find(lang);
+  std::string l = lang;
 
-  if (d != dictionaries.end())
+  while (!l.empty())
   {
-    return d->second.get();
-  }
+    auto d = dictionaries.find(l);
 
-  auto p = lang.find_last_of('_');
-
-  if (p != lang.npos)
-  {
-    std::string lang2 = lang.substr(0, p);
-
-    auto d2 = dictionaries.find(lang2);
-
-    if (d2 != dictionaries.end())
+    if (d != dictionaries.end())
     {
-      return d2->second.get();
+      return d->second.get();
+    }
+
+    auto p = lang.find_last_of('-');
+
+    if (p != lang.npos)
+    {
+      l = l.substr(0, p);
+    }
+    else
+    {
+      l = "";
     }
   }
 
