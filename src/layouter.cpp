@@ -1180,25 +1180,32 @@ std::vector<int> getHyphens(const std::u32string & txt32, const AttributeIndex_c
 
       if (dict)
       {
-        std::vector<char> breaks(i-sectionstart);
+        std::vector<char> breaks(i-sectionstart+1);
 
         set_wordbreaks_utf32(reinterpret_cast<const utf32_t*>(txt32.c_str()+sectionstart),
-                             i-sectionstart, curLang.c_str(), breaks.data());
+                             i-sectionstart+1, curLang.c_str(), breaks.data());
+
+        breaks.push_back(WORDBREAK_BREAK);
 
         // now find the words and feed them to the hyphenator
         size_t wordstart = 0;
         for (size_t j = 1; j < breaks.size(); j++)
         {
-          if (breaks[j] == WORDBREAK_BREAK)
+          if (breaks[j-1] == WORDBREAK_BREAK)
           {
-            // assume a word from wordstart to j
-            dict->hyphenate(txt32.substr(wordstart, j-wordstart), hyphens);
+            auto word = txt32.substr(wordstart, j-wordstart);
 
-            for (size_t l = 0; l < j-wordstart+1; l++)
-              if ((hyphens[l].hyphens % 2) && (hyphens[l].rep->length() == 0))
-                result[wordstart+l+1] = 1;
+            // only hyphen, when the user has not done so manually
+            if (word.find_first_of(U'\u00AD') == word.npos)
+            {
+              // assume a word from wordstart to j
+              dict->hyphenate(word, hyphens);
 
-            wordstart = j+1;
+              for (size_t l = 0; l < j-wordstart+1; l++)
+                if ((hyphens[l].hyphens % 2) && (hyphens[l].rep->length() == 0))
+                  result[wordstart+l+1] = 1;
+            }
+            wordstart = j;
           }
         }
       }

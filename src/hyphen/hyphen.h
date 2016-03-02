@@ -108,6 +108,7 @@ struct constants<char>
   std::string compoundlefthyphenmin = "COMPOUNDLEFTHYPHENMIN";
   std::string compoundrighthyphenmin = "COMPOUNDRIGHTHYPHENMIN";
   std::string nohyphen = "NOHYPHEN";
+  std::string casefold = "CASE";
 
   bool getline(std::istream & f, std::string & line) const
   {
@@ -140,6 +141,7 @@ struct constants<char32_t>
   std::u32string compoundlefthyphenmin = U"COMPOUNDLEFTHYPHENMIN";
   std::u32string compoundrighthyphenmin = U"COMPOUNDRIGHTHYPHENMIN";
   std::u32string nohyphen = U"NOHYPHEN";
+  std::u32string casefold = U"CASE";
 
   bool getline(std::istream & f, std::u32string & line) const
   {
@@ -169,6 +171,129 @@ struct constants<char32_t>
   }
 
   bool utf8 = false;
+};
+
+template <class C>
+struct cf_constants { };
+
+template <>
+struct cf_constants<char>
+{
+  std::pair<char32_t, size_t> input(const std::string & in, size_t pos) const
+  {
+    return u8_convertFirstToU32(in, pos);
+  }
+
+  std::string output(char32_t c) const
+  {
+    return U32ToUTF8(c);
+  }
+
+  std::u32string convert(const std::string & in) const
+  {
+    return u8_convertToU32(in);
+  }
+};
+
+template <>
+struct cf_constants<char32_t>
+{
+  std::pair<char32_t, size_t> input(const std::u32string & in, size_t pos) const
+  {
+    return std::make_pair(in[pos], pos+1);
+  }
+
+  char32_t output(char32_t c) const
+  {
+    return c;
+  }
+
+  const std::u32string & convert(const std::u32string & in) const
+  {
+    return in;
+  }
+};
+
+template <class C>
+class casefolding
+{
+  std::vector<char32_t> lowcase;
+  char32_t startindex;
+
+  cf_constants<C> cc;
+
+  public:
+    casefolding(const std::basic_string<C> & load)
+    {
+      auto ll = cc.convert(load);
+
+      if (ll.substr(0, 4) != U"LUT ")
+      {
+        throw std::runtime_error("Only LUT Case folding supported");
+      }
+
+      std::vector<std::pair<char32_t, char32_t>> pairs;
+
+      for (size_t p = 4; p < ll.size(); p++)
+      {
+        if (ll[p] != U' ')
+        {
+          if (ll[p+1] == U' ' || (p+2 < ll.size() && ll[p+2] != U' '))
+          {
+            throw std::runtime_error("CASELUT must be always 2 characters separates by space");
+          }
+          pairs.push_back(std::make_pair(ll[p], ll[p+1]));
+
+          p += 2;
+        }
+      }
+
+      if (pairs.size() == 0)
+      {
+        throw std::runtime_error("CASELUT must contain at least one pair");
+      }
+
+      // find maximum and minimum first character
+      char32_t min = pairs[0].first;
+      char32_t max = min;
+
+      for (size_t i = 1; i < pairs.size(); i++)
+      {
+        min = std::min(min, pairs[i].first);
+        max = std::max(max, pairs[i].first);
+      }
+
+      startindex = min;
+      lowcase.resize(max-min+1);
+
+      for (auto & p : pairs)
+        lowcase[p.first-min] = p.second;
+
+      for (size_t i = 0; i < lowcase.size(); i++)
+        if (lowcase[i] == 0)
+          lowcase[i] = i+startindex;
+    }
+
+    std::basic_string<C> fold(const std::basic_string<C> & in) const
+    {
+      size_t pos = 0;
+      std::basic_string<C> out;
+
+      while (pos < in.size())
+      {
+        char32_t c;
+        std::tie(c, pos) = cc.input(in, pos);
+
+        if ((c >= startindex) && (c-startindex < lowcase.size()))
+        {
+          c = lowcase[c-startindex];
+        }
+
+        out += cc.output(c);
+      }
+
+      return out;
+    }
 };
 
 // supported values for C: char and char32_t
@@ -219,6 +344,8 @@ class HyphenDict
     std::vector<HyphenState> states;
     std::unique_ptr<HyphenDict> nextlevel;
 
+    std::unique_ptr<casefolding<C>> casefold;
+
     typedef std::map<string, int> HashTab;
 
     /* return val if found, otherwise -1 */
@@ -264,6 +391,10 @@ class HyphenDict
       else if (buf2.compare(0, 22, con.compoundrighthyphenmin) == 0)
       {
         crhmin = con.stoi(buf2.substr(22));
+      }
+      else if (buf2.compare(0, 4, con.casefold) == 0)
+      {
+        casefold = std::make_unique<casefolding<C>>(buf2.substr(4));
       }
       else if (buf2.compare(0, 8, con.nohyphen) == 0)
       {
@@ -756,6 +887,7 @@ class HyphenDict
         dict[1]->rhmin = dict[0]->rhmin;
         dict[1]->clhmin = (dict[0]->clhmin) ? dict[0]->clhmin : ((dict[0]->lhmin) ? dict[0]->lhmin : 3);
         dict[1]->crhmin = (dict[0]->crhmin) ? dict[0]->crhmin : ((dict[0]->rhmin) ? dict[0]->rhmin : 3);
+        dict[1]->casefold = std::move(dict[0]->casefold);
         dict[1]->nextlevel = std::move(dict[0]);
         *this = std::move(*dict[1]);
       }
@@ -776,6 +908,7 @@ class HyphenDict
       nohyphen = std::move(d.nohyphen);
       states = std::move(d.states);
       nextlevel = std::move(d.nextlevel);
+      casefold = std::move(d.casefold);
 
       return *this;
     }
@@ -804,7 +937,7 @@ class HyphenDict
      * so assume you have word w and want to use the hyphen at position p. The resulting word
      * would be w.substring(0, i-pos) + rep + w.substring(0, i-pos+cut)
      */
-    void hyphenate(const string & word, std::vector<Hyphens> & result,
+    void hyphenate(string word, std::vector<Hyphens> & result,
         int lhmin_ = 0, int rhmin_ = 0, int clhmin_ = 0, int crhmin_ = 0) const
     {
       lhmin_ = std::max(lhmin_, lhmin);
@@ -815,7 +948,14 @@ class HyphenDict
       if (lhmin_ <= 0) lhmin_ = 2;
       if (rhmin_ <= 0) rhmin_ = 2;
 
-      hyphenate_rec(word, result, clhmin_, crhmin_, true, true);
+      if (casefold)
+      {
+        hyphenate_rec(casefold->fold(word), result, clhmin_, crhmin_, true, true);
+      }
+      else
+      {
+        hyphenate_rec(word, result, clhmin_, crhmin_, true, true);
+      }
 
       hnj_hyphen_lhmin(con.utf8, word, result, lhmin_);
       hnj_hyphen_rhmin(con.utf8, word, result, rhmin_);

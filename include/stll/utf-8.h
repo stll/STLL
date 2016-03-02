@@ -45,6 +45,12 @@ bool u8_isValid(const std::string & str);
  */
 std::u32string u8_convertToU32(const std::string & in);
 
+/** \brief return the first character from the utf-8 encoded input string, including
+ *  the byte length of that character
+ *  return 0, when string ends
+ */
+std::pair<char32_t, size_t> u8_convertFirstToU32(const std::string & in, size_t pos);
+
 /** \brief Convert a single unicode character to an utf-8 string
  * \param ch the character to Convert
  * \return the corresponding utf-8 string

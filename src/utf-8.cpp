@@ -182,6 +182,33 @@ std::u32string u8_convertToU32(const std::string & in)
   return out;
 }
 
+std::pair<char32_t, size_t> u8_convertFirstToU32(const std::string & in, size_t pos)
+{
+  char32_t ch = 0;
+
+  size_t extraBytesToRead = trailingBytesForUTF8[static_cast<uint8_t>(in[pos])];
+
+  if (extraBytesToRead >= in.size())
+  {
+    return std::make_pair(ch, in.npos);
+  }
+
+  /*
+   * The cases all fall through. See "Note A" below.
+   */
+  switch (extraBytesToRead) {
+    case 5: ch += static_cast<uint8_t>(in[pos]); pos++; ch <<= 6;
+    case 4: ch += static_cast<uint8_t>(in[pos]); pos++; ch <<= 6;
+    case 3: ch += static_cast<uint8_t>(in[pos]); pos++; ch <<= 6;
+    case 2: ch += static_cast<uint8_t>(in[pos]); pos++; ch <<= 6;
+    case 1: ch += static_cast<uint8_t>(in[pos]); pos++; ch <<= 6;
+    case 0: ch += static_cast<uint8_t>(in[pos]); pos++;
+  }
+  ch -= offsetsFromUTF8[extraBytesToRead];
+
+  return std::make_pair(ch, pos);
+}
+
 std::string U32ToUTF8(char32_t ch)
 {
   std::string result;

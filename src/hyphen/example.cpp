@@ -22,10 +22,10 @@ using namespace STLL::internal;
 
 /* get the word with all possible hyphenations (output: hyphword) */
 #ifdef UTF8
-void hnj_hyphen_hyphword(const char * word, int l, const std::vector<HyphenDict<char>::Hyphens> & hyphens, char * hyphword)
+void hnj_hyphen_hyphword(const std::string & word, int l, const std::vector<HyphenDict<char>::Hyphens> & hyphens, char * hyphword)
 #endif
 #ifdef UTF32
-void hnj_hyphen_hyphword(const char32_t * word, int l, const std::vector<HyphenDict<char32_t>::Hyphens> & hyphens, char32_t * hyphword)
+void hnj_hyphen_hyphword(const std::u32string & word, int l, const std::vector<HyphenDict<char32_t>::Hyphens> & hyphens, char32_t * hyphword)
 #endif
 {
   int hyphenslen = l + 5;
@@ -60,14 +60,12 @@ int main(int /*argc*/, char** argv)
 {
   int df;
   int wtc;
-  int k, n, i;
+  int k, n;
   char buf[BUFSIZE + 1];
 #ifdef UTF8
-  char lcword[BUFSIZE + 1];
   char hword[BUFSIZE * 2];
 #endif
 #ifdef UTF32
-  char32_t lcword[BUFSIZE + 1];
   char32_t hword[BUFSIZE * 2];
 #endif
   int arg = 1;
@@ -134,27 +132,10 @@ int main(int /*argc*/, char** argv)
     if (k >=2 && buf[k - 2] == '\r') buf[k-- - 2] = '\0';
 
 #ifdef UTF32
-    std::u32string buf2 = STLL::u8_convertToU32(buf);
+    std::u32string lcword = STLL::u8_convertToU32(buf);
 #endif
-
 #ifdef UTF8
-    /* basic ascii lower-case, not suitable for real-world usage*/
-    for (i = 0; i < k; ++i)
-    {
-      lcword[i] = buf[i];
-      if ( (lcword[i] >= 'A') && (lcword[i] <= 'Z') )
-        lcword[i] += 32;
-    }
-#endif
-
-#ifdef UTF32
-    /* basic ascii lower-case, not suitable for real-world usage*/
-    for (i = 0; i < k; ++i)
-    {
-      lcword[i] = buf2[i];
-      if ( (lcword[i] >= U'A') && (lcword[i] <= U'Z') )
-        lcword[i] += 32;
-    }
+    std::string lcword = buf;
 #endif
 
     /* first remove any trailing periods */
