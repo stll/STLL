@@ -22,7 +22,6 @@
 #ifndef STLL_HYPHENDICTIONARY_H
 #define STLL_HYPHENDICTIONARY_H
 
-#include <cstddef>
 #include <string>
 #include <istream>
 #include <vector>
