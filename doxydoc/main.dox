@@ -31,7 +31,7 @@
  * STLL depends on some libraries. The following libraries must be installed
  * - harfbuzz: used for layouting text
  * - freetype: used for reading and rendering fonts
- * - linebreak or unibreak: implementation of the unicode line-break and word-break algorithm
+ * - unibreak: implementation of the unicode line-break and word-break algorithm
  * - fribidi: implementation of the unicode bidi algorithm
  *
  * optionally the following needs to be installed
@@ -43,10 +43,6 @@
  * \section build_sec Getting started
  * First, install all required libraries and tools.
  *
- * On Debian/Wheezy, you can accomplish this via:
- * \code{.sh}
-aptitude install libsdl1.2-dev libfreetype6-dev libharfbuzz-dev libglib2.0-dev libfribidi-dev libboost-test-dev libpugixml-dev liblinebreak2-dev lcov doxygen
-\endcode
  * On Debian/Jessie and above, you can accomplish this via:
  * \code{.sh}
 aptitude install libsdl1.2-dev libfreetype6-dev libharfbuzz-dev libglib2.0-dev libfribidi-dev libboost-test-dev libpugixml-dev libunibreak-dev lcov doxygen
