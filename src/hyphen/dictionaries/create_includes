@@ -15,12 +15,12 @@ echo -e -n "\x00" > null
 
 cat temp2.dic null > $n
 
-xxd -i $n | head -n -1 > $n.h
+xxd -i $n | head -n -1 > ../../../include/stll/hyphenationdictionaries/$n.h
 
 mv temp2.dic $n
 zopfli --i50 $n
 
-xxd -i $n.gz > ${n}_gz.h
+xxd -i $n.gz > ../../../include/stll/hyphenationdictionaries/${n}_gz.h
 
 rm temp0.dic
 rm temp1.dic
