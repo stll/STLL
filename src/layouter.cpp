@@ -1174,7 +1174,7 @@ std::vector<int> getHyphens(const std::u32string & txt32, const AttributeIndex_c
   for (size_t i = 1; i < txt32.length(); i++)
   {
     // find sections within txt32 that have the same language information attached
-    if (!attr.hasAttribute(i) || i == txt32.length()-1 || curLang != attr.get(i).lang)
+    if ((!attr.hasAttribute(i) || i == txt32.length()-1 || curLang != attr.get(i).lang) && !isBidiCharacter(txt32[i]))
     {
       auto dict = internal::getHyphenDict(curLang);
 
@@ -1193,7 +1193,10 @@ std::vector<int> getHyphens(const std::u32string & txt32, const AttributeIndex_c
         {
           if (breaks[j-1] == WORDBREAK_BREAK)
           {
-            auto word = txt32.substr(wordstart, j-wordstart);
+            std::u32string word;
+            for (size_t i = 0; i < j-wordstart; i++)
+              if (!isBidiCharacter(txt32[wordstart+sectionstart+i]))
+                word += txt32[wordstart+sectionstart+i];
 
             // only hyphen, when the user has not done so manually
             if (word.find_first_of(U'\u00AD') == word.npos)
@@ -1203,7 +1206,7 @@ std::vector<int> getHyphens(const std::u32string & txt32, const AttributeIndex_c
 
               for (size_t l = 0; l < j-wordstart+1; l++)
                 if ((hyphens[l].hyphens % 2) && (hyphens[l].rep->length() == 0))
-                  result[wordstart+l+1] = 1;
+                  result[sectionstart+wordstart+l+1] = 1;
             }
             wordstart = j;
           }
