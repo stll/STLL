@@ -8,3 +8,10 @@ The 2 types of includes are
 - one version compressed using zoepfli (a high compression gzip program) to load using a gzip read stream (e.g. from Boost)
 
 I will always include all the files in here. The script is just for the ones that need to add further dictionaries
+
+
+Versions:
+
+de_DE: 2015-12-28
+en_GB: 2016-03-01
+en_US: 2016-03-01
