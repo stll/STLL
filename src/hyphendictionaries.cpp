@@ -58,9 +58,9 @@ const HyphenDict<char32_t> * getHyphenDict(const std::string & lang)
       return d->second.get();
     }
 
-    auto p = lang.find_last_of('-');
+    auto p = l.find_last_of('-');
 
-    if (p != lang.npos)
+    if (p != l.npos)
     {
       l = l.substr(0, p);
     }
