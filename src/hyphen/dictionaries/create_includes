@@ -1,5 +1,7 @@
 #!/bin/sh
 
+type zopfli >/dev/null 2>&1 || { echo >&2 "I require zopfli but it's not installed.  Aborting."; exit 1; }
+
 for i in *.dic
 do
 
