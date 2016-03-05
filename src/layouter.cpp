@@ -1204,9 +1204,19 @@ std::vector<int> getHyphens(const std::u32string & txt32, const AttributeIndex_c
               // assume a word from wordstart to j
               dict->hyphenate(word, hyphens);
 
+              // copy result, but keep the left out bidi caracters in mind
+              size_t bidioffset = 0;
+
               for (size_t l = 0; l < j-wordstart+1; l++)
+              {
+                while (isBidiCharacter(txt32[wordstart+sectionstart+l+bidioffset]))
+                {
+                  bidioffset++;
+                }
+
                 if ((hyphens[l].hyphens % 2) && (hyphens[l].rep->length() == 0))
-                  result[sectionstart+wordstart+l+1] = 1;
+                  result[sectionstart+wordstart+l+1+bidioffset] = 1;
+              }
             }
             wordstart = j;
           }
