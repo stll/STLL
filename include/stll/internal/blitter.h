@@ -27,6 +27,8 @@
 #include "dividers.h"
 #include "glyphCache.h"
 
+#include <limits>
+
 // blitting routines to output the generated glyphs, template code, should be pretty good for
 // most purposes
 

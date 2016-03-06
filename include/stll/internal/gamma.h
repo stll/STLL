@@ -25,6 +25,8 @@
 
 #include <stll/color.h>
 
+#include <cmath>
+
 namespace STLL { namespace internal {
 
 // lookup tables for gamma correct output

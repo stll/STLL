@@ -22,6 +22,8 @@
 
 #include "layouterXMLSaveLoad.h"
 
+#include <algorithm>
+
 using namespace STLL;
 
 void saveLayoutToXML(const TextLayout_c & l, pugi::xml_node & node)

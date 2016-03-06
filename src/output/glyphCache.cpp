@@ -34,6 +34,7 @@
 #include FT_FREETYPE_H
 
 #include <unordered_map>
+#include <algorithm>
 
 // TODO properly handle it, when FreeType returns an bitmap format that is not supported
 
