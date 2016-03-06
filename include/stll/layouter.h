@@ -30,9 +30,6 @@
 
 #include "color.h"
 
-#include <boost/icl/split_interval_map.hpp>
-#include <boost/icl/closed_interval.hpp>
-
 #include <string>
 #include <vector>
 #include <memory>
@@ -417,20 +414,26 @@ class CodepointAttributes_c
 class AttributeIndex_c
 {
   private:
-    boost::icl::interval_map<size_t, CodepointAttributes_c> attr;
+    // possible values that we can assign, the first attribute is used
+    // for all values that no specific attribute is assigned to
+    std::vector<CodepointAttributes_c> val;
+    // value asignment
+    std::vector<size_t> map;
 
   public:
-    /** \brief create an empty index
-     *  \attention you have to add at least one attribute
-     */
-    AttributeIndex_c(void) { }
+
+    AttributeIndex_c(void)
+    {
+      CodepointAttributes_c a;
+      val.emplace_back(std::move(a));
+    }
 
     /** \brief create an index where all entries have the same attribute
      *  \param a the attribute that all will share
      */
-    AttributeIndex_c(const CodepointAttributes_c & a)
+    AttributeIndex_c(CodepointAttributes_c a)
     {
-      attr += std::make_pair(boost::icl::interval<size_t>::closed(0, SIZE_MAX), a);
+      val.emplace_back(a);
     }
 
     /** \brief set attributes for a single indices
@@ -439,7 +442,12 @@ class AttributeIndex_c
      */
     void set(size_t i, CodepointAttributes_c a)
     {
-      attr += std::make_pair(boost::icl::interval<size_t>::closed(i, i), a);
+      size_t v = val.size();
+      val.emplace_back(a);
+
+      if (map.size() <= i) map.resize(i+1);
+
+      map[i] = v;
     }
 
     /** \brief set attributes for a range of indices
@@ -449,21 +457,32 @@ class AttributeIndex_c
      */
     void set(size_t start, size_t end, CodepointAttributes_c a)
     {
-      attr += std::make_pair(boost::icl::interval<size_t>::closed(start, end), a);
+      size_t v = val.size();
+      val.emplace_back(a);
+
+      if (start > end) std::swap(start, end);
+
+      if (map.size() <= end) map.resize(end+1);
+
+      for (size_t i = start; i <= end; i++)
+        map[i] = v;
     }
 
     /** \brief get the attribute for given index
      *  \param i the index for which the attribute is requested
      *  \return the requested attribute
      */
-    const CodepointAttributes_c & get(size_t i) const
+    const CodepointAttributes_c & operator[](size_t i) const
     {
-      return attr.find(i)->second;
+      if (i < map.size())
+        return val[map[i]];
+      else
+        return val[0];
     }
 
     bool hasAttribute(size_t i) const
     {
-      return attr.find(i) != attr.end();
+      return (i < map.size()) && (map[i] != 0);
     }
 };
 

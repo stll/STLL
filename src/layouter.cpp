@@ -200,7 +200,7 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
   // check, if this run is a soft hyphen. Soft hyphens are ignored and not output, except on line endings
   run.shy = txt32[runstart] == U'\u00AD';
 
-  std::string language = attr.get(runstart).lang;
+  std::string language = attr[runstart].lang;
 
   // setup the language for the harfbuzz shaper
   // reset is not required, when no language is set, the buffer
@@ -266,17 +266,17 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
   run.embeddingLevel = embedding_level;
   run.linebreak = linebreak;
   run.font = font;
-  if (attr.get(runstart).inlay)
+  if (attr[runstart].inlay)
   {
     // for inlays the ascender and descender depends on the size of the inlay
-    run.ascender = attr.get(runstart).inlay->getHeight()+attr.get(runstart).baseline_shift;
-    run.descender = attr.get(runstart).inlay->getHeight()-run.ascender;
+    run.ascender = attr[runstart].inlay->getHeight()+attr[runstart].baseline_shift;
+    run.descender = attr[runstart].inlay->getHeight()-run.ascender;
   }
   else
   {
     // for normal text ascender and descender are taken from the font
-    run.ascender = run.font->getAscender()+attr.get(runstart).baseline_shift;
-    run.descender = run.font->getDescender()+attr.get(runstart).baseline_shift;
+    run.ascender = run.font->getAscender()+attr[runstart].baseline_shift;
+    run.descender = run.font->getDescender()+attr[runstart].baseline_shift;
   }
 #ifndef NDEBUG
   run.text = txt32.substr(runstart, spos-runstart);
@@ -294,7 +294,7 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
       continue;
 
     // get the attribute for the current character
-    auto a = attr.get(glyph_info[j].cluster + runstart);
+    auto a = attr[glyph_info[j].cluster + runstart];
 
     // when a new link is started, we save the current x-position within the run
     if ((!curLink && a.link) || (curLink != a.link))
@@ -355,10 +355,10 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
       glyphIndex_t gi = glyph_info[j].codepoint;
 
       int32_t gx = run.dx + (glyph_pos[j].x_offset);
-      int32_t gy = run.dy - (glyph_pos[j].y_offset)-attr.get(runstart).baseline_shift;
+      int32_t gy = run.dy - (glyph_pos[j].y_offset)-attr[runstart].baseline_shift;
 
       // output all shadows of the glyph
-      for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
+      for (size_t j = 0; j < attr[runstart].shadows.size(); j++)
       {
         run.run.push_back(std::make_pair(j,
             CommandData_c(font, gi, gx+a.shadows[j].dx, gy+a.shadows[j].dy, a.shadows[j].c, a.shadows[j].blurr)));
@@ -388,7 +388,7 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
           gy = -((a.font.getUnderlinePosition()+a.font.getUnderlineThickness()/2));
         }
 
-        for (size_t j = 0; j < attr.get(runstart).shadows.size(); j++)
+        for (size_t j = 0; j < attr[runstart].shadows.size(); j++)
         {
           run.run.push_back(std::make_pair(j,
               CommandData_c(gx+a.shadows[j].dx, gy+a.shadows[j].dy, gw, gh, a.shadows[j].c, a.shadows[j].blurr)));
@@ -468,7 +468,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
   {
     if (!isBidiCharacter(txt32[i]))
     {
-      auto a = attr.get(i);
+      auto a = attr[i];
 
       for (auto f : a.font)
       {
@@ -479,7 +479,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
         }
       }
 
-      normalLayer = std::max(normalLayer, attr.get(i).shadows.size());
+      normalLayer = std::max(normalLayer, attr[i].shadows.size());
     }
   }
 
@@ -503,16 +503,16 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     //
     // the continues, as long as
 
-    std::shared_ptr<FontFace_c> font = attr.get(runstart).font.get(txt32[runstart]);
+    std::shared_ptr<FontFace_c> font = attr[runstart].font.get(txt32[runstart]);
 
     while (   (spos < txt32.length())                                                       // there is text left in our string
            && (   isBidiCharacter(txt32[spos])                                              // and
                || (  (embedding_levels[runstart] == embedding_levels[spos])                 //  text direction has not changed
-                  && (attr.get(runstart).lang == attr.get(spos).lang)                       //  text still has the same language
-                  && (font == attr.get(spos).font.get(txt32[spos]))                         //  and the same font
-                  && (attr.get(runstart).baseline_shift == attr.get(spos).baseline_shift)   //  and the same baseline
-                  && (!attr.get(spos).inlay)                                                //  and next char is not an inlay
-                  && (!attr.get(spos-1).inlay)                                              //  and we are an not inlay
+                  && (attr[runstart].lang == attr[spos].lang)                               //  text still has the same language
+                  && (font == attr[spos].font.get(txt32[spos]))                             //  and the same font
+                  && (attr[runstart].baseline_shift == attr[spos].baseline_shift)           //  and the same baseline
+                  && (!attr[spos].inlay)                                                    //  and next char is not an inlay
+                  && (!attr[spos-1].inlay)                                                  //  and we are an not inlay
                   && (   (linebreaks[spos-1] == LINEBREAK_NOBREAK)                          //  and line-break is not requested
                       || (linebreaks[spos-1] == LINEBREAK_INSIDEACHAR)
                      )
@@ -540,7 +540,7 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     {
       // add a run containing a soft hypen after the current run
       std::u32string txt32a = U"\u00AD";
-      AttributeIndex_c attra(attr.get(runstart));
+      AttributeIndex_c attra(attr[runstart]);
 
       runs.emplace_back(createRun(txt32a, 1, 0, attra, buf, prop, font, hbfont, LINEBREAK_ALLOWBREAK, embedding_levels[runstart], normalLayer));
     }
@@ -1138,7 +1138,7 @@ static std::vector<char> getLinebreaks(const std::u32string & txt32, const Attri
     size_t runpos = runstart+1;
 
     // accumulate text that uses the same language and is no bidi character
-    while (runpos < length && (isBidiCharacter(txt32[runpos]) || attr.get(runstart).lang == attr.get(runpos).lang))
+    while (runpos < length && (isBidiCharacter(txt32[runpos]) || attr[runstart].lang == attr[runpos].lang))
     {
       runpos++;
     }
@@ -1150,7 +1150,7 @@ static std::vector<char> getLinebreaks(const std::u32string & txt32, const Attri
     // a real line-break and the wrongly written break is overwritten in the next call
     set_linebreaks_utf32(reinterpret_cast<const utf32_t*>(txt32.c_str())+runstart,
                          runpos-runstart+(runpos < length ? 1 : 0),
-                         attr.get(runstart).lang.c_str(), linebreaks.data()+runstart);
+                         attr[runstart].lang.c_str(), linebreaks.data()+runstart);
 
     runstart = runpos;
     while ((runstart < length) && isBidiCharacter(txt32[runstart])) runstart++;
@@ -1166,7 +1166,7 @@ std::vector<int> getHyphens(const std::u32string & txt32, const AttributeIndex_c
   std::string curLang;
 
   if (attr.hasAttribute(0))
-    curLang = attr.get(0).lang;
+    curLang = attr[0].lang;
 
   std::vector<int> result(txt32.length());
   std::vector<internal::HyphenDict<char32_t>::Hyphens> hyphens;
@@ -1174,7 +1174,7 @@ std::vector<int> getHyphens(const std::u32string & txt32, const AttributeIndex_c
   for (size_t i = 1; i < txt32.length(); i++)
   {
     // find sections within txt32 that have the same language information attached
-    if ((!attr.hasAttribute(i) || i == txt32.length()-1 || curLang != attr.get(i).lang) && !isBidiCharacter(txt32[i]))
+    if ((!attr.hasAttribute(i) || i == txt32.length()-1 || curLang != attr[i].lang) && !isBidiCharacter(txt32[i]))
     {
       auto dict = internal::getHyphenDict(curLang);
 
@@ -1226,7 +1226,7 @@ std::vector<int> getHyphens(const std::u32string & txt32, const AttributeIndex_c
       while (!attr.hasAttribute(i) && i < txt32.length()) i++;
 
       if (attr.hasAttribute(i))
-        curLang = attr.get(i).lang;
+        curLang = attr[i].lang;
 
       sectionstart = i;
     }
