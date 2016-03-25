@@ -175,6 +175,8 @@ class LayoutDataView
     std::vector<size_t> idx;  // index into attr and embedding
     const AttributeIndex_c & attr;
     const std::vector<FriBidiLevel> & embeddingLevels;
+    std::vector<char> linebreaks;
+    std::vector<bool> hyphens;
 
     // check if a character is a bidi control character and should not go into
     // the output stream
@@ -199,6 +201,7 @@ class LayoutDataView
           idx.push_back(i);
         }
       }
+      linebreaks.resize(idx.size());
     }
 
 
@@ -210,6 +213,12 @@ class LayoutDataView
     bool hasatt(size_t i) const { return attr.hasAttribute(idx[i]); }
 
     FriBidiLevel emb(size_t i) const { return embeddingLevels[idx[i]]; }
+
+    char lnb(size_t i) const { return linebreaks[i]; }
+    char * lnb(void) { return linebreaks.data(); }
+
+    void sethyp(size_t i) { hyphens.resize(idx.size()); hyphens[i] = true; }
+    bool hyp(size_t i) const { return i < hyphens.size() && hyphens[i]; }
 };
 
 static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runstart,
@@ -474,9 +483,7 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
 // linebreaks contains the line-break information from liblinebreak or libunibreak
 // prop contains some layouting settings
 static std::vector<runInfo> createTextRuns(const LayoutDataView & view,
-                                           const std::vector<char> & linebreaks,
-                                           const LayoutProperties_c & prop,
-                                           const std::vector<int> & hyphens
+                                           const LayoutProperties_c & prop
                                           )
 {
   // Get our harfbuzz font structs
@@ -522,15 +529,15 @@ static std::vector<runInfo> createTextRuns(const LayoutDataView & view,
                   && (view.att(runstart).baseline_shift == view.att(spos).baseline_shift)           //  and the same baseline
                   && (!view.att(spos).inlay)                                                    //  and next char is not an inlay
                   && (!view.att(spos-1).inlay)                                                  //  and we are an not inlay
-                  && (   (linebreaks[spos-1] == LINEBREAK_NOBREAK)                          //  and line-break is not requested
-                      || (linebreaks[spos-1] == LINEBREAK_INSIDEACHAR)
+                  && (   (view.lnb(spos-1) == LINEBREAK_NOBREAK)                          //  and line-break is not requested
+                      || (view.lnb(spos-1) == LINEBREAK_INSIDEACHAR)
                      )
                   && (view.txt(spos) != U' ')                                                  //  and there is no space (needed to adjust width for justification)
                   && (view.txt(spos-1) != U' ')
                   && (view.txt(spos) != U'\n')                                                 //  also end run on forced line-breaks
                   && (view.txt(spos-1) != U'\n')
                   && (view.txt(spos) != U'\u00AD')                                             //  and on soft hyphen
-                  && (hyphens[spos] == 0)
+                  && (!view.hyp(spos))
                   )
                )
           )
@@ -543,10 +550,10 @@ static std::vector<runInfo> createTextRuns(const LayoutDataView & view,
     if (font) hbfont = hb_ft_fonts[font];
 
     runs.emplace_back(createRun(view, spos, runstart, buf, prop, font, hbfont, view.emb(runstart)));
-    runs.back().linebreak = linebreaks[spos-1];
+    runs.back().linebreak = view.lnb(spos-1);
     runstart = spos;
 
-    if (spos < hyphens.size() && hyphens[spos] != 0)
+    if (view.hyp(spos))
     {
       // add a run containing a soft hypen after the current run
       std::u32string txt32a = U"\u00AD";
@@ -1134,11 +1141,9 @@ static TextLayout_c breakLinesOptimize(std::vector<runInfo> & runs,
 }
 
 // calculate positions of potential line-breaks using liblinebreak
-static std::vector<char> getLinebreaks(LayoutDataView & view)
+static void getLinebreaks(LayoutDataView & view)
 {
   size_t length = view.size();
-
-  std::vector<char> linebreaks(length);
 
   size_t runstart = 0;
 
@@ -1159,15 +1164,13 @@ static std::vector<char> getLinebreaks(LayoutDataView & view)
     // a real line-break and the wrongly written break is overwritten in the next call
     set_linebreaks_utf32(reinterpret_cast<const utf32_t*>(view.txt().c_str()+runstart),
                          runpos-runstart+(runpos < length ? 1 : 0),
-                         view.att(runstart).lang.c_str(), linebreaks.data()+runstart);
+                         view.att(runstart).lang.c_str(), view.lnb()+runstart);
 
     runstart = runpos;
   }
-
-  return linebreaks;
 }
 
-std::vector<int> getHyphens(const LayoutDataView & view)
+static void getHyphens(LayoutDataView & view)
 {
   // simply initial stuff: separate words on spaces, find English words
   size_t sectionstart = 0;
@@ -1210,7 +1213,7 @@ std::vector<int> getHyphens(const LayoutDataView & view)
               for (size_t l = 0; l < j-wordstart+1; l++)
               {
                 if ((hyphens[l].hyphens % 2) && (hyphens[l].rep->length() == 0))
-                  result[sectionstart+wordstart+l+1] = 1;
+                  view.sethyp(sectionstart+wordstart+l+1);
               }
             }
             wordstart = j;
@@ -1226,8 +1229,6 @@ std::vector<int> getHyphens(const LayoutDataView & view)
       sectionstart = i;
     }
   }
-
-  return result;
 }
 
 TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_c & attr,
@@ -1241,18 +1242,13 @@ TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_
   LayoutDataView view(txt32, attr, embedding_levels);
 
   // calculate the possible line-break positions
-  auto linebreaks = getLinebreaks(view);
+  getLinebreaks(view);
 
-  std::vector<int> hyphens;
-
-  if (prop.hyphenate)
-    hyphens = getHyphens(view);
-  else
-    hyphens.resize(view.size());
+  if (prop.hyphenate) getHyphens(view);
 
   // create runs of layout text. Each run is a cohesive set, e.g. a word with a single
   // font, ...
-  std::vector<runInfo> runs = createTextRuns(view, linebreaks, prop, hyphens);
+  std::vector<runInfo> runs = createTextRuns(view, prop);
 
   // layout the runs into lines
   if (prop.optimizeLinebreaks)
