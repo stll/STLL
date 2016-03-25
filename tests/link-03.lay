@@ -8,21 +8,19 @@
 		<glyph x="647" y="896" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" blurr="0" />
 		<glyph x="1193" y="896" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" blurr="0" />
 		<glyph x="1698" y="896" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="1985" y="896" glyphIndex="3" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="2241" y="896" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="2888" y="896" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="3434" y="896" glyphIndex="91" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="3921" y="896" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="4208" y="896" glyphIndex="3" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="4464" y="896" glyphIndex="47" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="5041" y="896" glyphIndex="76" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="5268" y="896" glyphIndex="81" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="5818" y="896" glyphIndex="78" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="6638" y="896" glyphIndex="21" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="7501" y="896" glyphIndex="90" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="8240" y="896" glyphIndex="76" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="8467" y="896" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" blurr="0" />
-		<glyph x="8754" y="896" glyphIndex="75" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2264" y="896" glyphIndex="55" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="2911" y="896" glyphIndex="72" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="3457" y="896" glyphIndex="91" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="3944" y="896" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="4510" y="896" glyphIndex="47" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="5087" y="896" glyphIndex="76" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="5314" y="896" glyphIndex="81" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="5864" y="896" glyphIndex="78" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="6669" y="896" glyphIndex="21" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="7517" y="896" glyphIndex="90" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="8256" y="896" glyphIndex="76" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="8483" y="896" glyphIndex="87" font="0" r="255" g="255" b="255" a="255" blurr="0" />
+		<glyph x="8770" y="896" glyphIndex="75" font="0" r="255" g="255" b="255" a="255" blurr="0" />
 		<glyph x="9598" y="896" glyphIndex="86" font="0" r="255" g="255" b="255" a="255" blurr="0" />
 		<glyph x="10103" y="896" glyphIndex="83" font="0" r="255" g="255" b="255" a="255" blurr="0" />
 		<glyph x="10675" y="896" glyphIndex="68" font="0" r="255" g="255" b="255" a="255" blurr="0" />
@@ -44,15 +42,15 @@
 	</commands>
 	<links>
 		<link url="u1">
-			<area x="2241" y="0" w="1967" h="1088" />
+			<area x="2264" y="0" w="1967" h="1088" />
 		</link>
 		<link url="u2">
-			<area x="4464" y="0" w="1880" h="1088" />
-			<area x="6344" y="0" w="294" h="1088" />
-			<area x="6638" y="0" w="569" h="1088" />
-			<area x="7207" y="0" w="294" h="1088" />
-			<area x="7501" y="0" w="1802" h="1088" />
-			<area x="9303" y="0" w="294" h="1088" />
+			<area x="4510" y="0" w="1880" h="1088" />
+			<area x="6390" y="0" w="279" h="1088" />
+			<area x="6669" y="0" w="569" h="1088" />
+			<area x="7238" y="0" w="279" h="1088" />
+			<area x="7517" y="0" w="1802" h="1088" />
+			<area x="9319" y="0" w="279" h="1088" />
 			<area x="9598" y="0" w="3202" h="1088" />
 		</link>
 	</links>
