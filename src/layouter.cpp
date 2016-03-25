@@ -224,9 +224,8 @@ class LayoutDataView
 static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runstart,
                          hb_buffer_t *buf, const LayoutProperties_c & prop,
                          std::shared_ptr<FontFace_c> & font,
-                         hb_font_t * hb_ft_font,
-                         FriBidiLevel embedding_level
-)
+                         hb_font_t * hb_ft_font
+                        )
 {
   runInfo run;
 
@@ -280,8 +279,10 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
     }
   }
 
+  run.embeddingLevel = view.emb(runstart);
+
   // set text direction for this run
-  if (embedding_level % 2 == 0)
+  if (run.embeddingLevel % 2 == 0)
   {
     hb_buffer_set_direction(buf, HB_DIRECTION_LTR);
   }
@@ -300,7 +301,6 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
   hb_glyph_position_t *glyph_pos    = hb_buffer_get_glyph_positions(buf, &glyph_count);
 
   // fill in some of the run information
-  run.embeddingLevel = embedding_level;
   run.font = font;
   if (view.att(runstart).inlay)
   {
@@ -396,12 +396,12 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
             CommandData_c(font, gi, gx+a.shadows[j].dx, gy+a.shadows[j].dy, a.shadows[j].c, a.shadows[j].blurr)));
       }
 
-      // calculate the new position and round it
-      run.dx += glyph_pos[j].x_advance;
-      run.dy -= glyph_pos[j].y_advance;
-
       // output the final glyph
       run.run.push_back(std::make_pair(0, CommandData_c(font, gi, gx, gy, a.c, 0)));
+
+      // calculate the new position
+      run.dx += glyph_pos[j].x_advance;
+      run.dy -= glyph_pos[j].y_advance;
 
       // create underline commands
       if (a.flags & CodepointAttributes_c::FL_UNDERLINE)
@@ -482,26 +482,16 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
 // embedding_levels are the bidi embedding levels creates by getBidiEmbeddingLevels
 // linebreaks contains the line-break information from liblinebreak or libunibreak
 // prop contains some layouting settings
-static std::vector<runInfo> createTextRuns(const LayoutDataView & view,
-                                           const LayoutProperties_c & prop
-                                          )
+static std::vector<runInfo> createTextRuns(const LayoutDataView & view, const LayoutProperties_c & prop)
 {
   // Get our harfbuzz font structs
   std::map<const std::shared_ptr<FontFace_c>, hb_font_t *> hb_ft_fonts;
 
+  // if we don't have the font in the map yet, we add it
   for (size_t i = 0; i < view.size(); i++)
-  {
-    auto a = view.att(i);
-
-    for (auto f : a.font)
-    {
-      // if we don't have the font in the map yet, we add it
+    for (auto f : view.att(i).font)
       if (hb_ft_fonts.find(f) == hb_ft_fonts.end())
-      {
         hb_ft_fonts[f] = hb_ft_font_create(f->getFace(), NULL);
-      }
-    }
-  }
 
   // Create a buffer for harfbuzz to use
   hb_buffer_t *buf = hb_buffer_create();
@@ -520,26 +510,24 @@ static std::vector<runInfo> createTextRuns(const LayoutDataView & view,
     //
     // the continues, as long as
 
-    std::shared_ptr<FontFace_c> font = view.att(runstart).font.get(view.txt(runstart));
+    auto font = view.att(runstart).font.get(view.txt(runstart));
 
-    while (   (spos < view.size())                                                       // there is text left in our string
-           && (   (  (view.emb(runstart) == view.emb(spos))                 //  text direction has not changed
-                  && (view.att(runstart).lang == view.att(spos).lang)                               //  text still has the same language
-                  && (font == view.att(spos).font.get(view.txt(spos)))                             //  and the same font
-                  && (view.att(runstart).baseline_shift == view.att(spos).baseline_shift)           //  and the same baseline
-                  && (!view.att(spos).inlay)                                                    //  and next char is not an inlay
-                  && (!view.att(spos-1).inlay)                                                  //  and we are an not inlay
-                  && (   (view.lnb(spos-1) == LINEBREAK_NOBREAK)                          //  and line-break is not requested
-                      || (view.lnb(spos-1) == LINEBREAK_INSIDEACHAR)
-                     )
-                  && (view.txt(spos) != U' ')                                                  //  and there is no space (needed to adjust width for justification)
-                  && (view.txt(spos-1) != U' ')
-                  && (view.txt(spos) != U'\n')                                                 //  also end run on forced line-breaks
-                  && (view.txt(spos-1) != U'\n')
-                  && (view.txt(spos) != U'\u00AD')                                             //  and on soft hyphen
-                  && (!view.hyp(spos))
-                  )
-               )
+    while (   (spos < view.size())                                   // there is text left in our string
+           && (view.emb(runstart) == view.emb(spos))                 //  text direction has not changed
+           && (view.att(runstart).lang == view.att(spos).lang)       //  text still has the same language
+           && (font == view.att(spos).font.get(view.txt(spos)))      //  and the same font
+           && (view.att(runstart).baseline_shift == view.att(spos).baseline_shift)           //  and the same baseline
+           && (!view.att(spos).inlay)                                //  and next char is not an inlay
+           && (!view.att(spos-1).inlay)                              //  and we are an not inlay
+           && (   (view.lnb(spos-1) == LINEBREAK_NOBREAK)            //  and line-break is not requested
+               || (view.lnb(spos-1) == LINEBREAK_INSIDEACHAR)
+              )
+           && (view.txt(spos) != U' ')                               //  and there is no space (needed to adjust width for justification)
+           && (view.txt(spos-1) != U' ')
+           && (view.txt(spos) != U'\n')                              //  also end run on forced line-breaks
+           && (view.txt(spos-1) != U'\n')
+           && (view.txt(spos) != U'\u00AD')                          //  and on soft hyphen
+           && (!view.hyp(spos))
           )
     {
       spos++;
@@ -547,11 +535,11 @@ static std::vector<runInfo> createTextRuns(const LayoutDataView & view,
 
     // save the run
     hb_font_t * hbfont = nullptr;
+    // inlays don't have fonts, but still need a run
     if (font) hbfont = hb_ft_fonts[font];
 
-    runs.emplace_back(createRun(view, spos, runstart, buf, prop, font, hbfont, view.emb(runstart)));
+    runs.emplace_back(createRun(view, spos, runstart, buf, prop, font, hbfont));
     runs.back().linebreak = view.lnb(spos-1);
-    runstart = spos;
 
     if (view.hyp(spos))
     {
@@ -563,9 +551,11 @@ static std::vector<runInfo> createTextRuns(const LayoutDataView & view,
 
       LayoutDataView viewa(txt32a, attra, embedding_levelsa);
 
-      runs.emplace_back(createRun(viewa, 1, 0, buf, prop, font, hbfont, view.emb(runstart)));
+      runs.emplace_back(createRun(viewa, 1, 0, buf, prop, font, hbfont));
       runs.back().linebreak = LINEBREAK_ALLOWBREAK;
     }
+
+    runstart = spos;
   }
 
   // free harfbuzz buffer and fonts
@@ -1244,10 +1234,10 @@ TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_
   // calculate the possible line-break positions
   getLinebreaks(view);
 
+  // add hyphenation information, when requested
   if (prop.hyphenate) getHyphens(view);
 
-  // create runs of layout text. Each run is a cohesive set, e.g. a word with a single
-  // font, ...
+  // create runs of layout text. Each run is a cohesive set, e.g. a word with a single font, ...
   std::vector<runInfo> runs = createTextRuns(view, prop);
 
   // layout the runs into lines
