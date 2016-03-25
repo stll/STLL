@@ -598,12 +598,16 @@ static void mergeLinks(TextLayout_c & txt, const std::vector<TextLayout_c::LinkI
   }
 }
 
-typedef enum { FL_FIRST, FL_BREAK, FL_NORMAL } fl;
+#define LF_FIRST 1
+#define LF_LAST 2
+#define LF_SMALL_SPACE 4
+
+typedef enum { FL_FIRST, FL_NORMAL } fl;
 
 static void addLine(const int runstart, const size_t spos, std::vector<runInfo> & runs, TextLayout_c & l,
-                    std::vector<size_t> & runorder, const int max_level, int & ypos, const int curAscend,
-                    const int curDescend, const int curWidth, const Shape_c & shape, const fl firstline,
-                    int numSpace, const LayoutProperties_c & prop, const bool forcebreak, int spacePart
+                    const int max_level, const int ypos,
+                    const int curWidth, int32_t left, int32_t right, const int lineflags,
+                    int numSpace, const LayoutProperties_c & prop
 )
 {
   // this normally doesn't happen because the final run will never be a space
@@ -611,17 +615,20 @@ static void addLine(const int runstart, const size_t spos, std::vector<runInfo> 
   // remove it from the space counter
   if (runs[spos-1].space) numSpace--;
 
+  std::vector<size_t> runorder(spos-runstart);
+  std::iota(runorder.begin(), runorder.end(), runstart);
+
   // reorder runs for current line
   for (int i = max_level-1; i >= 0; i--)
   {
     // find starts of regions to reverse
-    for (size_t j = runstart; j < spos; j++)
+    for (size_t j = 0; j < runorder.size(); j++)
     {
       if (runs[runorder[j]].embeddingLevel > i)
       {
         // find the end of the current regions
         size_t k = j+1;
-        while (k < spos && runs[runorder[k]].embeddingLevel > i)
+        while (k < runorder.size() && runs[runorder[k]].embeddingLevel > i)
         {
           k++;
         }
@@ -633,8 +640,7 @@ static void addLine(const int runstart, const size_t spos, std::vector<runInfo> 
   }
 
   // calculate how many pixels are left on the line (for justification)
-  int32_t spaceLeft = shape.getRight(ypos, ypos+curAscend-curDescend) -
-                      shape.getLeft(ypos, ypos+curAscend-curDescend) - curWidth;
+  int32_t spaceLeft = right - left - curWidth;
 
   // output of runs is always left to right, so depending on the paragraph alignment
   // settings we calculate where at the x-axis we start with the runs and how many
@@ -646,49 +652,46 @@ static void addLine(const int runstart, const size_t spos, std::vector<runInfo> 
   {
     default:
     case LayoutProperties_c::ALG_LEFT:
-      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
-      if (firstline != FL_NORMAL) xpos += prop.indent;
+      xpos = left;
+      if (lineflags & LF_FIRST) xpos += prop.indent;
       break;
 
     case LayoutProperties_c::ALG_RIGHT:
-      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft;
+      xpos = left + spaceLeft;
       break;
 
     case LayoutProperties_c::ALG_CENTER:
-      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft/2;
+      xpos = left + spaceLeft/2;
       break;
 
     case LayoutProperties_c::ALG_JUSTIFY_LEFT:
-      xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
+      xpos = left;
       // don't justify last paragraph
-      if (numSpace > 0 && spos < runs.size() && !forcebreak)
+      if (numSpace > 0 && !(lineflags & LF_LAST))
         spaceadder = 1.0 * spaceLeft / numSpace;
 
-      if (firstline != FL_NORMAL) xpos += prop.indent;
+      if (lineflags & LF_FIRST) xpos += prop.indent;
 
       break;
 
     case LayoutProperties_c::ALG_JUSTIFY_RIGHT:
       // don't justify last paragraph
-      if (numSpace > 0 && spos < runs.size() && !forcebreak)
+      if (numSpace > 0 && !(lineflags & LF_LAST))
       {
-        xpos = shape.getLeft(ypos, ypos+curAscend-curDescend);
+        xpos = left;
         spaceadder = 1.0 * spaceLeft / numSpace;
       }
       else
       {
-        xpos = shape.getLeft(ypos, ypos+curAscend-curDescend) + spaceLeft;
+        xpos = left + spaceLeft;
       }
       break;
   }
 
-  // go down to the baseline
-  ypos += curAscend;
-
   // find the number of layers that we need to output
   size_t maxlayer = 0;
-  for (size_t i = runstart; i < spos; i++)
-    for (auto & r : runs[runorder[i]].run)
+  for (auto ri : runorder)
+    for (auto & r : runs[ri].run)
       maxlayer = std::max(maxlayer, r.first+1);
 
   // output all the layers one after the other
@@ -698,14 +701,14 @@ static void addLine(const int runstart, const size_t spos, std::vector<runInfo> 
     numSpace = 0;
 
     // output runs of current layer
-    for (size_t i = runstart; i < spos; i++)
+    for (auto ri : runorder)
     {
-      if (!runs[runorder[i]].shy || i+1 == spos)
+      if (!runs[ri].shy || ri == spos-1)
       {
         // output only non-space runs
-        if (!runs[runorder[i]].space)
+        if (!runs[ri].space)
         {
-          for (auto & cc : runs[runorder[i]].run)
+          for (auto & cc : runs[ri].run)
           {
             if (cc.first == maxlayer-layer-1)
             {
@@ -719,7 +722,7 @@ static void addLine(const int runstart, const size_t spos, std::vector<runInfo> 
         {
           // in space runs, there may be an rectangular command that represents
           // the underline, make that underline longer by spaceadder
-          for (auto & cc : runs[runorder[i]].run)
+          for (auto & cc : runs[ri].run)
           {
             if (   (cc.first == maxlayer-layer-1)
                 && (cc.second.command == CommandData_c::CMD_RECT)
@@ -733,37 +736,29 @@ static void addLine(const int runstart, const size_t spos, std::vector<runInfo> 
           }
 
           // the link rectangle in spaces also needs to get longer
-          if (!runs[runorder[i]].links.empty() && !runs[runorder[i]].links[0].areas.empty())
+          if (!runs[ri].links.empty() && !runs[ri].links[0].areas.empty())
           {
-            runs[runorder[i]].links[0].areas[0].w += spaceadder;
+            runs[ri].links[0].areas[0].w += spaceadder;
           }
         }
 
         // merge in the links, but only do this once, for the layer 0
         if (layer == 0)
-          mergeLinks(l, runs[runorder[i]].links, xpos2+spaceadder*numSpace, ypos);
+          mergeLinks(l, runs[ri].links, xpos2+spaceadder*numSpace, ypos);
 
         // count the spaces
-        if (runs[runorder[i]].space) numSpace++;
+        if (runs[ri].space) numSpace++;
 
         // advance the x-position
-        if (!runs[runorder[i]].space)
-          xpos2 += runs[runorder[i]].dx;
+        if (!runs[ri].space)
+          xpos2 += runs[ri].dx;
+        else if (lineflags & LF_SMALL_SPACE)
+          xpos2 += 9*runs[ri].dx/10;
         else
-          xpos2 += spacePart*runs[runorder[i]].dx/10;
+          xpos2 += runs[ri].dx;
       }
     }
   }
-
-  // store the baseline position for the first line
-  if (firstline == FL_FIRST)
-  {
-    l.setFirstBaseline(ypos);
-  }
-
-  // go the the top of the next line
-  ypos -= curDescend;
-
 }
 
 // do the line breaking using the runs created before
@@ -772,17 +767,6 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
                                FriBidiLevel max_level,
                                const LayoutProperties_c & prop, int32_t ystart)
 {
-  // this vector is used for the reordering of the runs
-  // it contains the index of the run that should go in
-  // the n-th position.
-  // Theoretically this could be reused for each line, but
-  // that makes things more complicated, so we use one array
-  // for all the runs but reorder only the current line
-  std::vector<size_t> runorder(runs.size());
-  int n(0);
-  // initialize the array with 1...n
-  std::generate(runorder.begin(), runorder.end(), [&]{ return n++; });
-
   // layout a paragraph line by line
   size_t runstart = 0;
   int32_t ypos = ystart;
@@ -900,7 +884,15 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
       }
     }
 
-    addLine(runstart, spos, runs, l, runorder, max_level, ypos, curAscend, curDescend, curWidth, shape, firstline, numSpace, prop, forcebreak, 10);
+    // force break also when end of paragraph is reached
+    forcebreak |= (spos == runs.size());
+
+    addLine(runstart, spos, runs, l, max_level, ypos+curAscend, curWidth,
+        shape.getLeft(ypos, ypos+curAscend-curDescend),
+        shape.getRight(ypos, ypos+curAscend-curDescend),
+        (firstline == FL_FIRST ? LF_FIRST : 0) + (forcebreak ? LF_LAST : 0), numSpace, prop);
+    if (firstline == FL_FIRST) l.setFirstBaseline(ypos+curAscend);
+    ypos = ypos + curAscend - curDescend;
 
     // set the runstart at the next run and skip space runs
     runstart = spos;
@@ -908,7 +900,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
     // if we have a forced break, the next line will be like the first
     // in the way that is will be indented
     if (forcebreak)
-      firstline = FL_BREAK;
+      firstline = FL_FIRST;
     else
       firstline = FL_NORMAL;
   }
@@ -927,17 +919,6 @@ static TextLayout_c breakLinesOptimize(std::vector<runInfo> & runs,
                                        FriBidiLevel max_level,
                                        const LayoutProperties_c & prop, int32_t ystart)
 {
-  // this vector is used for the reordering of the runs
-  // it contains the index of the run that should go in
-  // the n-th position.
-  // Theoretically this could be reused for each line, but
-  // that makes things more complicated, so we use one array
-  // for all the runs but reorder only the current line
-  std::vector<size_t> runorder(runs.size());
-  int n(0);
-  // initialize the array with 1...n
-  std::generate(runorder.begin(), runorder.end(), [&]{ return n++; });
-
   // layout a paragraph line by line
   TextLayout_c l;
 
@@ -1112,8 +1093,12 @@ static TextLayout_c breakLinesOptimize(std::vector<runInfo> & runs,
         size_t s2 = breaks[ii-1];
         while (runs[s1].space) s1++;
         while (runs[s2-1].space) s2--;
-        addLine(s1, s2, runs, l, runorder, max_level, cc.ypos, bb.ascend, bb.descend, bb.width,
-                shape, ii == breaks.size()-1 ? FL_FIRST : FL_NORMAL, bb.spaces, prop, ii == 1, 9);
+        addLine(s1, s2, runs, l, max_level, cc.ypos + bb.ascend, bb.width,
+                shape.getLeft(cc.ypos, cc.ypos+bb.ascend-bb.descend),
+                shape.getRight(cc.ypos, cc.ypos+bb.ascend-bb.descend),
+                (ii == breaks.size()-1 ? LF_FIRST : 0) + (ii == 1 ? LF_LAST : 0) + LF_SMALL_SPACE, bb.spaces, prop);
+        if (ii == breaks.size()-1) l.setFirstBaseline(cc.ypos+bb.ascend);
+        cc.ypos = cc.ypos + bb.ascend - bb.descend;
       }
 
       runs.erase(runs.begin(), runs.begin()+i);
