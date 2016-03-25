@@ -117,26 +117,28 @@ typedef struct
   std::vector<std::pair<size_t, CommandData_c>> run;
 
   // the advance information of this run
-  int dx, dy;
+  int dx = 0;
+  int dy = 0;
 
   // the embedding level (text direction) of this run
-  FriBidiLevel embeddingLevel;
+  FriBidiLevel embeddingLevel = 0;
 
   // line-break information for AFTER this run, for values see liblinebreak
-  char linebreak;
+  char linebreak = LINEBREAK_NOBREAK;
 
   // the font used for this run... will probably be identical to
   // the fonts in the run
   std::shared_ptr<FontFace_c> font;
 
   // is this run a space run? Will be removed at line ends
-  bool space;
+  bool space = false;
 
   // is this a soft hyphen?? will only be shown at line ends
-  bool shy;
+  bool shy = false;
 
   // ascender and descender of this run
-  int32_t ascender, descender;
+  int32_t ascender = 0;
+  int32_t descender = 0;
 
   // link boxes for this run
   std::vector<TextLayout_c::LinkInformation_c> links;
@@ -180,22 +182,13 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
                          const LayoutProperties_c & prop,
                          std::shared_ptr<FontFace_c> & font,
                          hb_font_t * hb_ft_font,
-                         char linebreak,
-                         FriBidiLevel embedding_level,
-                         size_t normalLayer
+                         FriBidiLevel embedding_level
 )
 {
   runInfo run;
 
   // check, if this is a space run, on line ends space runs will be removed
-  if (txt32[spos-1] == U' ' || txt32[spos-1] == U'\n')
-  {
-    run.space = true;
-  }
-  else
-  {
-    run.space = false;
-  }
+  run.space = txt32[spos-1] == U' ' || txt32[spos-1] == U'\n';
 
   // check, if this run is a soft hyphen. Soft hyphens are ignored and not output, except on line endings
   run.shy = txt32[runstart] == U'\u00AD';
@@ -226,7 +219,7 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
   // send the text to harfbuzz, in a normal run, send the normal text
   // for a shy, send a hyphen
   if (!run.shy)
-    hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(txt32.c_str())+runstart, spos-runstart, 0, spos-runstart);
+    hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(txt32.c_str()), -1, runstart, spos-runstart);
   else
   {
     // we want to append a hyphen, sadly not all fonts contain the proper character for
@@ -262,9 +255,7 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
   hb_glyph_position_t *glyph_pos    = hb_buffer_get_glyph_positions(buf, &glyph_count);
 
   // fill in some of the run information
-  run.dx = run.dy = 0;
   run.embeddingLevel = embedding_level;
-  run.linebreak = linebreak;
   run.font = font;
   if (attr[runstart].inlay)
   {
@@ -290,11 +281,11 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
   for (size_t j=0; j < glyph_count; ++j)
   {
     // bidi characters are skipped
-    if (isBidiCharacter(txt32[glyph_info[j].cluster + runstart]))
+    if (isBidiCharacter(txt32[glyph_info[j].cluster]))
       continue;
 
     // get the attribute for the current character
-    auto a = attr[glyph_info[j].cluster + runstart];
+    auto a = attr[glyph_info[j].cluster];
 
     // when a new link is started, we save the current x-position within the run
     if ((!curLink && a.link) || (curLink != a.link))
@@ -315,7 +306,7 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
         in.y -= (run.ascender-1);
         in.x += run.dx;
 
-        run.run.push_back(std::make_pair(normalLayer, in));
+        run.run.push_back(std::make_pair(0, in));
       }
 
       // create the underline for the inlay
@@ -340,11 +331,11 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
 
         for (size_t j = 0; j < a.shadows.size(); j++)
         {
-          run.run.push_back(std::make_pair(j,
+          run.run.push_back(std::make_pair(a.shadows.size()-j,
               CommandData_c(rx+a.shadows[j].dx, ry+a.shadows[j].dy, rw, rh, a.shadows[j].c, a.shadows[j].blurr)));
         }
 
-        run.run.push_back(std::make_pair(normalLayer, CommandData_c(rx, ry, rw, rh, a.c, 0)));
+        run.run.push_back(std::make_pair(0, CommandData_c(rx, ry, rw, rh, a.c, 0)));
       }
 
       run.dx += a.inlay->getRight();
@@ -360,7 +351,7 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
       // output all shadows of the glyph
       for (size_t j = 0; j < attr[runstart].shadows.size(); j++)
       {
-        run.run.push_back(std::make_pair(j,
+        run.run.push_back(std::make_pair(attr[runstart].shadows.size()-j,
             CommandData_c(font, gi, gx+a.shadows[j].dx, gy+a.shadows[j].dy, a.shadows[j].c, a.shadows[j].blurr)));
       }
 
@@ -369,7 +360,7 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
       run.dy -= glyph_pos[j].y_advance;
 
       // output the final glyph
-      run.run.push_back(std::make_pair(normalLayer, CommandData_c(font, gi, gx, gy, a.c, 0)));
+      run.run.push_back(std::make_pair(0, CommandData_c(font, gi, gx, gy, a.c, 0)));
 
       // create underline commands
       if (a.flags & CodepointAttributes_c::FL_UNDERLINE)
@@ -390,11 +381,11 @@ static runInfo createRun(const std::u32string & txt32, size_t spos, size_t runst
 
         for (size_t j = 0; j < attr[runstart].shadows.size(); j++)
         {
-          run.run.push_back(std::make_pair(j,
+          run.run.push_back(std::make_pair(attr[runstart].shadows.size()-j,
               CommandData_c(gx+a.shadows[j].dx, gy+a.shadows[j].dy, gw, gh, a.shadows[j].c, a.shadows[j].blurr)));
         }
 
-        run.run.push_back(std::make_pair(normalLayer, CommandData_c(gx, gy, gw, gh, a.c, 0)));
+        run.run.push_back(std::make_pair(0, CommandData_c(gx, gy, gw, gh, a.c, 0)));
       }
     }
 
@@ -461,9 +452,6 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
   // Get our harfbuzz font structs
   std::map<const std::shared_ptr<FontFace_c>, hb_font_t *> hb_ft_fonts;
 
-  // also get the maximal shadow numbers, so that we know how many layers there are
-  size_t normalLayer = 0;
-
   for (size_t i = 0; i < txt32.length(); i++)
   {
     if (!isBidiCharacter(txt32[i]))
@@ -478,8 +466,6 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
           hb_ft_fonts[f] = hb_ft_font_create(f->getFace(), NULL);
         }
       }
-
-      normalLayer = std::max(normalLayer, attr[i].shadows.size());
     }
   }
 
@@ -533,7 +519,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
     hb_font_t * hbfont = nullptr;
     if (font) hbfont = hb_ft_fonts[font];
 
-    runs.emplace_back(createRun(txt32, spos, runstart, attr, buf, prop, font, hbfont, linebreaks[spos-1], embedding_levels[runstart], normalLayer));
+    runs.emplace_back(createRun(txt32, spos, runstart, attr, buf, prop, font, hbfont, embedding_levels[runstart]));
+    runs.back().linebreak = linebreaks[spos-1];
     runstart = spos;
 
     if (spos < hyphens.size() && hyphens[spos] != 0)
@@ -542,7 +529,8 @@ static std::vector<runInfo> createTextRuns(const std::u32string & txt32,
       std::u32string txt32a = U"\u00AD";
       AttributeIndex_c attra(attr[runstart]);
 
-      runs.emplace_back(createRun(txt32a, 1, 0, attra, buf, prop, font, hbfont, LINEBREAK_ALLOWBREAK, embedding_levels[runstart], normalLayer));
+      runs.emplace_back(createRun(txt32a, 1, 0, attra, buf, prop, font, hbfont, embedding_levels[runstart]));
+      runs.back().linebreak = LINEBREAK_ALLOWBREAK;
     }
 
     // skip bidi characters
@@ -698,7 +686,7 @@ static void addLine(const int runstart, const size_t spos, std::vector<runInfo> 
         {
           for (auto & cc : runs[runorder[i]].run)
           {
-            if (cc.first == layer)
+            if (cc.first == maxlayer-layer-1)
             {
               cc.second.x += xpos2+spaceadder*numSpace;
               cc.second.y += ypos;
@@ -712,7 +700,7 @@ static void addLine(const int runstart, const size_t spos, std::vector<runInfo> 
           // the underline, make that underline longer by spaceadder
           for (auto & cc : runs[runorder[i]].run)
           {
-            if (   (cc.first == layer)
+            if (   (cc.first == maxlayer-layer-1)
                 && (cc.second.command == CommandData_c::CMD_RECT)
                )
             {
