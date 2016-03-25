@@ -771,7 +771,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
   size_t runstart = 0;
   int32_t ypos = ystart;
   TextLayout_c l;
-  fl firstline = FL_FIRST;
+  bool firstline = true;
   bool forcebreak = false;
 
   // while there are runs left to do
@@ -796,7 +796,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
     forcebreak = false;
 
     // if it is a first line, we add the indent first
-    if ((firstline != FL_NORMAL) && prop.align != LayoutProperties_c::ALG_CENTER) curWidth = prop.indent;
+    if (firstline && prop.align != LayoutProperties_c::ALG_CENTER) curWidth = prop.indent;
 
     // now go through the remaining runs and add them
     while (spos < runs.size())
@@ -890,19 +890,13 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
     addLine(runstart, spos, runs, l, max_level, ypos+curAscend, curWidth,
         shape.getLeft(ypos, ypos+curAscend-curDescend),
         shape.getRight(ypos, ypos+curAscend-curDescend),
-        (firstline == FL_FIRST ? LF_FIRST : 0) + (forcebreak ? LF_LAST : 0), numSpace, prop);
-    if (firstline == FL_FIRST) l.setFirstBaseline(ypos+curAscend);
+        (firstline ? LF_FIRST : 0) + (forcebreak ? LF_LAST : 0), numSpace, prop);
+    if (firstline) l.setFirstBaseline(ypos+curAscend);
     ypos = ypos + curAscend - curDescend;
 
     // set the runstart at the next run and skip space runs
     runstart = spos;
-
-    // if we have a forced break, the next line will be like the first
-    // in the way that is will be indented
-    if (forcebreak)
-      firstline = FL_FIRST;
-    else
-      firstline = FL_NORMAL;
+    firstline = false;
   }
 
   // set the final shape of the paragraph
