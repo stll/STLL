@@ -225,7 +225,7 @@ class LayoutDataView
 };
 
 static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runstart,
-                         hb_buffer_t *buf, const LayoutProperties_c & prop,
+                         const LayoutProperties_c & prop,
                          std::shared_ptr<FontFace_c> & font,
                          hb_font_t * hb_ft_font
                         )
@@ -240,10 +240,13 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
 
   std::string language = view.att(runstart).lang;
 
+  // Create a buffer for harfbuzz to use
+  hb_buffer_t *buf = hb_buffer_create();
+
   // setup the language for the harfbuzz shaper
   // reset is not required, when no language is set, the buffer
   // reset automatically resets the language and script info as well
-  if (language != "")
+  if (!language.empty())
   {
     size_t i = language.find_first_of('-');
 
@@ -474,7 +477,8 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
     curLink = 0;
   }
 
-  hb_buffer_reset(buf);
+  // free harfbuzz buffer and fonts
+  hb_buffer_destroy(buf);
 
   return run;
 }
@@ -496,8 +500,6 @@ static std::vector<runInfo> createTextRuns(const LayoutDataView & view, const La
       if (hb_ft_fonts.find(f) == hb_ft_fonts.end())
         hb_ft_fonts[f] = hb_ft_font_create(f->getFace(), NULL);
 
-  // Create a buffer for harfbuzz to use
-  hb_buffer_t *buf = hb_buffer_create();
 
   // runstart always contains the first character for the current run
   size_t runstart = 0;
@@ -541,7 +543,7 @@ static std::vector<runInfo> createTextRuns(const LayoutDataView & view, const La
     // inlays don't have fonts, but still need a run
     if (font) hbfont = hb_ft_fonts[font];
 
-    runs.emplace_back(createRun(view, spos, runstart, buf, prop, font, hbfont));
+    runs.emplace_back(createRun(view, spos, runstart, prop, font, hbfont));
     runs.back().linebreak = view.lnb(spos-1);
 
     if (view.hyp(spos))
@@ -554,15 +556,12 @@ static std::vector<runInfo> createTextRuns(const LayoutDataView & view, const La
 
       LayoutDataView viewa(txt32a, attra, embedding_levelsa);
 
-      runs.emplace_back(createRun(viewa, 1, 0, buf, prop, font, hbfont));
+      runs.emplace_back(createRun(viewa, 1, 0, prop, font, hbfont));
       runs.back().linebreak = LINEBREAK_ALLOWBREAK;
     }
 
     runstart = spos;
   }
-
-  // free harfbuzz buffer and fonts
-  hb_buffer_destroy(buf);
 
   for (auto & a : hb_ft_fonts)
     hb_font_destroy(a.second);
