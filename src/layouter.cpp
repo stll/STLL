@@ -153,18 +153,21 @@ typedef struct
 
 // create the text direction information using libfribidi
 // txt32 and base_dir go in, embedding_levels comes out
-// return value is the maximal embedding level
-static FriBidiLevel getBidiEmbeddingLevels(const std::u32string & txt32,
-                                           std::vector<FriBidiLevel> & embedding_levels,
-                                           FriBidiParType base_dir)
+static std::vector<FriBidiLevel> getBidiEmbeddingLevels(const std::u32string & txt32, const LayoutProperties_c & prop)
 {
   std::vector<FriBidiCharType> bidiTypes(txt32.length());
   fribidi_get_bidi_types(reinterpret_cast<const uint32_t*>(txt32.c_str()), txt32.length(), bidiTypes.data());
-  embedding_levels.resize(txt32.length());
-  FriBidiLevel max_level = fribidi_get_par_embedding_levels(bidiTypes.data(), txt32.length(),
-                                                            &base_dir, embedding_levels.data());
 
-  return max_level;
+  std::vector<FriBidiLevel> embedding_levels(txt32.length());
+  FriBidiParType base_dir = prop.ltr ? FRIBIDI_TYPE_LTR_VAL : FRIBIDI_TYPE_RTL_VAL;
+
+  if (fribidi_get_par_embedding_levels(bidiTypes.data(), txt32.length(), &base_dir, embedding_levels.data()) == 0)
+  {
+    // throw an exception
+    // TODO
+  }
+
+  return embedding_levels;
 }
 
 class LayoutDataView
@@ -602,21 +605,17 @@ static void mergeLinks(TextLayout_c & txt, const std::vector<TextLayout_c::LinkI
 #define LF_LAST 2
 #define LF_SMALL_SPACE 4
 
-typedef enum { FL_FIRST, FL_NORMAL } fl;
-
-static void addLine(const int runstart, const size_t spos, std::vector<runInfo> & runs, TextLayout_c & l,
-                    const int max_level, const int ypos,
-                    const int curWidth, int32_t left, int32_t right, const int lineflags,
+static void addLine(int runstart, size_t spos, std::vector<runInfo> & runs, TextLayout_c & l,
+                    int ypos, int curWidth, int32_t left, int32_t right, int lineflags,
                     int numSpace, const LayoutProperties_c & prop
-)
+                   )
 {
-  // this normally doesn't happen because the final run will never be a space
-  // because the line-break will then happen before that space, but just in case
-  // remove it from the space counter
-  if (runs[spos-1].space) numSpace--;
-
   std::vector<size_t> runorder(spos-runstart);
   std::iota(runorder.begin(), runorder.end(), runstart);
+
+  FriBidiLevel max_level = 0;
+  for (auto ri : runorder)
+    max_level = std::max(max_level, runs[ri].embeddingLevel);
 
   // reorder runs for current line
   for (int i = max_level-1; i >= 0; i--)
@@ -764,7 +763,6 @@ static void addLine(const int runstart, const size_t spos, std::vector<runInfo> 
 // do the line breaking using the runs created before
 static TextLayout_c breakLines(std::vector<runInfo> & runs,
                                const Shape_c & shape,
-                               FriBidiLevel max_level,
                                const LayoutProperties_c & prop, int32_t ystart)
 {
   // layout a paragraph line by line
@@ -887,7 +885,7 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
     // force break also when end of paragraph is reached
     forcebreak |= (spos == runs.size());
 
-    addLine(runstart, spos, runs, l, max_level, ypos+curAscend, curWidth,
+    addLine(runstart, spos, runs, l, ypos+curAscend, curWidth,
         shape.getLeft(ypos, ypos+curAscend-curDescend),
         shape.getRight(ypos, ypos+curAscend-curDescend),
         (firstline ? LF_FIRST : 0) + (forcebreak ? LF_LAST : 0), numSpace, prop);
@@ -910,7 +908,6 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
 // do the line breaking using the runs created before
 static TextLayout_c breakLinesOptimize(std::vector<runInfo> & runs,
                                        const Shape_c & shape,
-                                       FriBidiLevel max_level,
                                        const LayoutProperties_c & prop, int32_t ystart)
 {
   // layout a paragraph line by line
@@ -1087,7 +1084,7 @@ static TextLayout_c breakLinesOptimize(std::vector<runInfo> & runs,
         size_t s2 = breaks[ii-1];
         while (runs[s1].space) s1++;
         while (runs[s2-1].space) s2--;
-        addLine(s1, s2, runs, l, max_level, cc.ypos + bb.ascend, bb.width,
+        addLine(s1, s2, runs, l, cc.ypos + bb.ascend, bb.width,
                 shape.getLeft(cc.ypos, cc.ypos+bb.ascend-bb.descend),
                 shape.getRight(cc.ypos, cc.ypos+bb.ascend-bb.descend),
                 (ii == breaks.size()-1 ? LF_FIRST : 0) + (ii == 1 ? LF_LAST : 0) + LF_SMALL_SPACE, bb.spaces, prop);
@@ -1204,9 +1201,7 @@ TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_
                              const Shape_c & shape, const LayoutProperties_c & prop, int32_t ystart)
 {
   // calculate embedding types for the text
-  std::vector<FriBidiLevel> embedding_levels;
-  FriBidiLevel max_level = getBidiEmbeddingLevels(txt32, embedding_levels,
-                                prop.ltr ? FRIBIDI_TYPE_LTR_VAL : FRIBIDI_TYPE_RTL_VAL);
+  auto embedding_levels = getBidiEmbeddingLevels(txt32, prop);
 
   LayoutDataView view(txt32, attr, embedding_levels);
 
@@ -1217,13 +1212,13 @@ TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_
   if (prop.hyphenate) getHyphens(view);
 
   // create runs of layout text. Each run is a cohesive set, e.g. a word with a single font, ...
-  std::vector<runInfo> runs = createTextRuns(view, prop);
+  auto runs = createTextRuns(view, prop);
 
   // layout the runs into lines
   if (prop.optimizeLinebreaks)
-    return breakLinesOptimize(runs, shape, max_level, prop, ystart);
+    return breakLinesOptimize(runs, shape, prop, ystart);
   else
-    return breakLines(runs, shape, max_level, prop, ystart);
+    return breakLines(runs, shape, prop, ystart);
 }
 
 
