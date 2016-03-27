@@ -62,15 +62,11 @@ void TextLayout_c::append(const TextLayout_c & l, int dx, int dy)
 
   for (auto a : l.links)
   {
-    size_t i = links.size();
-    LinkInformation_c l;
-    l.url = a.url;
-    links.push_back(l);
-    for (auto b : a.areas)
+    links.push_back(LinkInformation_c(a));
+    for (auto b : links.back().areas)
     {
       b.x += dx;
       b.y += dy;
-      links[i].areas.push_back(b);
     }
   }
 
@@ -443,10 +439,7 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
       if (curLink && curLink != a.link)
       {
         // store information for current link
-        TextLayout_c::LinkInformation_c l;
-        l.url = prop.links[curLink-1];
-        l.areas.push_back(linkRect);
-        run.links.push_back(l);
+        run.links.emplace_back(TextLayout_c::LinkInformation_c(prop.links[curLink-1], linkRect));
         curLink = 0;
       }
 
@@ -470,10 +463,7 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
   // finalize an open link
   if (curLink)
   {
-    TextLayout_c::LinkInformation_c l;
-    l.url = prop.links[curLink-1];
-    l.areas.push_back(linkRect);
-    run.links.push_back(l);
+    run.links.emplace_back(TextLayout_c::LinkInformation_c(prop.links[curLink-1], linkRect));
     curLink = 0;
   }
 

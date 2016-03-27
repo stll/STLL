@@ -122,6 +122,9 @@ class TextLayout_c
     {
       public:
         int x, y, w, h;
+
+        Rectangle_c (int x_, int y_, int w_, int h_) : x(x_), y(y_), w(w_), h(h_) {}
+        Rectangle_c (void) : x(0), y(0), w(0), h(0) {}
     };
 
     /** \brief a helper structure to contain information about the interactive
@@ -133,6 +136,15 @@ class TextLayout_c
         std::string url;
         /** \brief the areas where the link is found */
         std::vector<Rectangle_c> areas;
+
+        LinkInformation_c(const std::string & url, Rectangle_c & r) : url(url)
+        {
+          areas.push_back(r);
+        }
+
+        LinkInformation_c(const LinkInformation_c & l) : url(l.url), areas(l.areas) { }
+
+        LinkInformation_c(void) { }
     };
 
     /** \brief information for all links TODO this interface is bad */
