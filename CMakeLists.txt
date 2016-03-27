@@ -36,6 +36,7 @@ endif()
 set(stll_SOURCES
   src/output/blurr.cpp
   src/layouter.cpp
+  src/layoutParagraph.cpp
   src/layouterCSS.cpp
   src/layouterFont.cpp
   src/layouterXHTML.cpp
@@ -194,6 +195,7 @@ set(CPACK_PACKAGE_VERSION_MAJOR "0")
 set(CPACK_PACKAGE_VERSION_MINOR "0")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_SOURCE_GENERATOR "TBZ2")
+set(CPACK_PACKAGE_NAME "STLL")
 set(CPACK_SOURCE_IGNORE_FILES
   "/.git/;/.kdev4/;/tests/*;~$;try2.kdev4;.gitignore;${CPACK_SOURCE_IGNORE_FILES}")
 include(CPack)
