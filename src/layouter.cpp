@@ -220,6 +220,35 @@ class LayoutDataView
     bool hyp(size_t i) const { return i < hyphens.size() && hyphens[i]; }
 };
 
+
+static void addUnderline(runInfo & run, int32_t gx, int32_t gw, const LayoutProperties_c & prop, const CodepointAttributes_c & a)
+{
+  // create underline commands
+  if (a.flags & CodepointAttributes_c::FL_UNDERLINE)
+  {
+    int32_t gh, gy;
+
+    if (prop.underlineFont)
+    {
+      gy = -((prop.underlineFont.getUnderlinePosition()+prop.underlineFont.getUnderlineThickness()/2));
+      gh = std::max(64, prop.underlineFont.getUnderlineThickness());
+    }
+    else
+    {
+      gy = -((a.font.getUnderlinePosition()+a.font.getUnderlineThickness()/2));
+      gh = std::max(64, a.font.getUnderlineThickness());
+    }
+
+    for (size_t j = 0; j < a.shadows.size(); j++)
+    {
+      run.run.push_back(std::make_pair(a.shadows.size()-j,
+          CommandData_c(gx+a.shadows[j].dx, gy+a.shadows[j].dy, gw, gh, a.shadows[j].c, a.shadows[j].blurr)));
+    }
+
+    run.run.push_back(std::make_pair(0, CommandData_c(gx, gy, gw, gh, a.c, 0)));
+  }
+}
+
 static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runstart,
                          const LayoutProperties_c & prop,
                          std::shared_ptr<FontFace_c> & font,
@@ -352,34 +381,7 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
         run.run.push_back(std::make_pair(0, in));
       }
 
-      // create the underline for the inlay
-      // TODO try to merge this with the underline of a normal glyph
-      if (a.flags & CodepointAttributes_c::FL_UNDERLINE)
-      {
-        int32_t rx = run.dx;
-        int32_t ry;
-        int32_t rw = a.inlay->getRight();
-        int32_t rh;
-
-        if (prop.underlineFont)
-        {
-          ry = -((prop.underlineFont.getUnderlinePosition()+prop.underlineFont.getUnderlineThickness()/2));
-          rh = std::max(64, prop.underlineFont.getUnderlineThickness());
-        }
-        else
-        {
-          ry = -((a.font.getUnderlinePosition()+a.font.getUnderlineThickness()/2));
-          rh = std::max(64, a.font.getUnderlineThickness());
-        }
-
-        for (size_t j = 0; j < a.shadows.size(); j++)
-        {
-          run.run.push_back(std::make_pair(a.shadows.size()-j,
-              CommandData_c(rx+a.shadows[j].dx, ry+a.shadows[j].dy, rw, rh, a.shadows[j].c, a.shadows[j].blurr)));
-        }
-
-        run.run.push_back(std::make_pair(0, CommandData_c(rx, ry, rw, rh, a.c, 0)));
-      }
+      addUnderline(run, run.dx, a.inlay->getRight(), prop, a);
 
       run.dx += a.inlay->getRight();
     }
@@ -405,31 +407,7 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
       run.dx += glyph_pos[j].x_advance;
       run.dy -= glyph_pos[j].y_advance;
 
-      // create underline commands
-      if (a.flags & CodepointAttributes_c::FL_UNDERLINE)
-      {
-        int32_t gw = glyph_pos[j].x_advance+64;
-        int32_t gh;
-
-        if (prop.underlineFont)
-        {
-          gh = std::max(64, prop.underlineFont.getUnderlineThickness());
-          gy = -((prop.underlineFont.getUnderlinePosition()+prop.underlineFont.getUnderlineThickness()/2));
-        }
-        else
-        {
-          gh = std::max(64, a.font.getUnderlineThickness());
-          gy = -((a.font.getUnderlinePosition()+a.font.getUnderlineThickness()/2));
-        }
-
-        for (size_t j = 0; j < view.att(runstart).shadows.size(); j++)
-        {
-          run.run.push_back(std::make_pair(view.att(runstart).shadows.size()-j,
-              CommandData_c(gx+a.shadows[j].dx, gy+a.shadows[j].dy, gw, gh, a.shadows[j].c, a.shadows[j].blurr)));
-        }
-
-        run.run.push_back(std::make_pair(0, CommandData_c(gx, gy, gw, gh, a.c, 0)));
-      }
+      addUnderline(run, gx, glyph_pos[j].x_advance+64, prop, a);
     }
 
     // if we have a link, we include that information within the run
