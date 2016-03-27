@@ -349,6 +349,8 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
   run.text = view.txt().substr(runstart, spos-runstart);
 #endif
 
+  run.linebreak = view.lnb(spos-1);
+
   size_t curLink = 0;
   TextLayout_c::Rectangle_c linkRect;
   int linkStart = 0;
@@ -512,20 +514,16 @@ static std::vector<runInfo> createTextRuns(const LayoutDataView & view, const La
     if (font) hbfont = hb_ft_fonts[font];
 
     runs.emplace_back(createRun(view, spos, runstart, prop, font, hbfont));
-    runs.back().linebreak = view.lnb(spos-1);
 
     if (view.hyp(spos))
     {
       // add a run containing a soft hypen after the current run
-      std::u32string txt32a = U"\u00AD";
       AttributeIndex_c attra(view.att(runstart));
-      std::vector<FriBidiLevel> embedding_levelsa;
-      embedding_levelsa.push_back(view.emb(runstart));
-
-      LayoutDataView viewa(txt32a, attra, embedding_levelsa);
+      std::vector<FriBidiLevel> embedding_levelsa {view.emb(runstart)};
+      LayoutDataView viewa(U"\u00AD", attra, embedding_levelsa);
+      viewa.lnb()[0] = LINEBREAK_ALLOWBREAK;
 
       runs.emplace_back(createRun(viewa, 1, 0, prop, font, hbfont));
-      runs.back().linebreak = LINEBREAK_ALLOWBREAK;
     }
 
     runstart = spos;
