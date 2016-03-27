@@ -142,6 +142,8 @@ class TextLayout_c
           areas.push_back(r);
         }
 
+        LinkInformation_c(const std::string & url) : url(url) { }
+
         LinkInformation_c(const LinkInformation_c & l) : url(l.url), areas(l.areas) { }
 
         LinkInformation_c(void) { }
@@ -572,7 +574,8 @@ class LayoutProperties_c
       ALG_JUSTIFY_RIGHT  ///< layout justified and the last line right adjusted
     } align = ALG_LEFT;  ///< alignment that the text is supposed to have
 
-    int32_t indent = 0;  ///< indentation of the first line in pixel
+    int32_t indent = 0;  ///< indentation of the first line in pixel, manual linebreaks in the
+                         ///< paragrapgh don't result in another indent
 
     bool ltr = true;     ///< is the base direction of the text left to right?
 
@@ -605,10 +608,28 @@ class LayoutProperties_c
     bool hyphenate = true;
 };
 
+// This exception gets thrown when layout paragraph encounters a runtime error (out of memory, ...)
+class LayoutException_c : public std::runtime_error
+{
+  public:
+    LayoutException_c(const char* what_arg) : std::runtime_error(what_arg) { }
+};
 
-/** paragraph layouting function
+/** Layout one paragraph of text.
  *
- * \param txt32 the utf-32 encoded text to layout, no control sequences exist, use "\n" for newlines
+ * The provided text is layouted into the provided shape.
+ *
+ * Hyphenation is applied, when a dictionary for the language is available, when no language
+ * is provided no hyphenation takes place.
+ *
+ * Also all words containing manually places soft-hyphens are not re-hyphenated from the database.
+ *
+ * The method right now ignores complex hyphenation, that is hyphenation that changes, adds or removes
+ * letters in front or after the hyphen. Words are simply not hyphenated in those places.
+ *
+ * \param txt32 the utf-32 encoded text to layout, no control sequences exist, use "\n" for newlines (those
+ *              newlines don't intoduce another indent, if you want more indents call the function
+ *              for each paragraph and stack those results
  * \param attr the attributes (colours, ...) for all the characters in the text
  * \param shape the shape that the final result is supposed to have
  * \param prop some parameters that the line breaking algorithm needs to give the result the expected
@@ -619,8 +640,6 @@ class LayoutProperties_c
  *
  * \note: bidi control characters supported, are RLE, RLE, PDF, those don't need to have a valid attribute entry
  * all other characters in txt32 need to have one, or the function will behave wrongly
- *
- * TODO: instead of crashing, rather throw an exception in that case.
  */
 TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_c & attr,
                              const Shape_c & shape, const LayoutProperties_c & prop, int32_t ystart = 0);

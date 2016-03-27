@@ -36,27 +36,101 @@
 #include <algorithm>
 #include <map>
 
+#include <cassert>
+
 namespace STLL {
 
-// TODO better error checking, throw our own exceptions, e.g. when a link was not properly
-// specified
-
-// so let's see how does the whole paragraph layouting work..
-// at first we split the text into runs. A run is a section of the text that "belongs together" line breaks
-// only happen between runs. Also all the text in one run must be using the same font. The text in one
-// run is layouted using harfbuzz and then the runs are assembled into the paragraph
-// a possible fault is that also soft hyphens separate runs, so if the shaping of the not broken
+// This module contains the functions to layout one paragraph of text
+// so let's see how does the whole thing work...
+//
+// At first we split the text into runs. A run is a section of the text that "belongs together"
+// line breaks only happen between runs. Also all the text in one run uses the same font. The text
+// in one run is layouted using harfbuzz.
+//
+// Then the runs are assembled into the paragraph either using a greedy algorithm (fill lines as
+// far as possible and then start the next) or using something akin to TeX Paragraph layout
+// algorithm.
+//
+// Because the complex hyphens are a bit hard to implement (would require creating all possible
+// sub-runs) we leave them out right now
+//
+// A possible fault is that also soft hyphens separate runs, so if the shaping of the not broken
 // word looks different from the shape of the word broken between lines, the results will be wrong
-// you should not use shy in that case
-// if your text has a shadow we create a layout commands containing a layer. This way we can
-// create the glyph command for the text and underlines in the order they appear in the text
-// and later on when we assemble the paragraph we sort the commands of one run by layer. This
-// makes sure that the important top layer is never covered by shadows
+//
+
+// We use two helper-structures for the process
+
+// This class contains information about the text to layout
+// it is mainly there to prevent too many arguments to functions
+class LayoutDataView
+{
+  private:
+
+    std::u32string txt32;     // the text to layout, bidi-control characters are removed
+
+    // we don't want to copy the attribute and the embedding levels, but the txt32
+    // string may miss some of the characters of the original string, the string that
+    // the provided attributes refert to
+    // So we use an index array to index into the original attributeIndex
+    std::vector<size_t> idx;
+
+    // original attributes and embedding levels
+    const AttributeIndex_c & attr;
+    const std::vector<FriBidiLevel> & embeddingLevels;
+
+    // calculated linebreak and hyphenation position
+    std::vector<char> linebreaks;
+    std::vector<bool> hyphens;
+
+    // check if a character is a bidi control character and should not go into
+    // the output stream
+    bool isBidiCharacter(char32_t c)
+    {
+      if (c == U'\U0000202A' || c == U'\U0000202B' || c == U'\U0000202C')
+        return true;
+      else
+        return false;
+    }
+
+  public:
+
+    // create the object, copy the string leaving out all the bidi control characters
+    LayoutDataView(const std::u32string & t, const AttributeIndex_c & a, const std::vector<FriBidiLevel> & e)
+      : attr(a), embeddingLevels(e)
+    {
+      for (size_t i = 0; i < t.size(); i++)
+      {
+        if (!isBidiCharacter(t[i]))
+        {
+          txt32 += t[i];
+          idx.push_back(i);
+        }
+      }
+      linebreaks.resize(idx.size());
+    }
+
+    // accessors for the data
+    const std::u32string & txt(void) const { return txt32; }
+    char32_t txt(size_t i) const { return txt32[i]; }
+    size_t size(void) const { return txt32.size(); }
+
+    const CodepointAttributes_c & att(size_t i) const { return attr[idx[i]]; }
+    bool hasatt(size_t i) const { return attr.hasAttribute(idx[i]); }
+
+    FriBidiLevel emb(size_t i) const { return embeddingLevels[idx[i]]; }
+
+    char lnb(size_t i) const { return linebreaks[i]; }
+    char * lnb(void) { return linebreaks.data(); }
+
+    void sethyp(size_t i) { hyphens.resize(idx.size()); hyphens[i] = true; }
+    bool hyp(size_t i) const { return i < hyphens.size() && hyphens[i]; }
+};
+
 
 // this structure contains the information of a run finished and ready or paragraph assembly
 typedef struct
 {
-  // the commands to output this run including the layer (for shadows)
+  // the commands to output this run including the layer, the larger the number, the more in front to draw
   std::vector<std::pair<size_t, CommandData_c>> run;
 
   // the advance information of this run
@@ -94,6 +168,8 @@ typedef struct
 } runInfo;
 
 
+// the following functions gather additional information about the text to layout
+
 // create the text direction information using libfribidi
 // txt32 and base_dir go in, embedding_levels comes out
 static std::vector<FriBidiLevel> getBidiEmbeddingLevels(const std::u32string & txt32, const LayoutProperties_c & prop)
@@ -107,67 +183,109 @@ static std::vector<FriBidiLevel> getBidiEmbeddingLevels(const std::u32string & t
   if (fribidi_get_par_embedding_levels(bidiTypes.data(), txt32.length(), &base_dir, embedding_levels.data()) == 0)
   {
     // throw an exception
-    // TODO
+    throw LayoutException_c("unable to calculate embedding levels, possible out of memory");
   }
 
   return embedding_levels;
 }
 
-class LayoutDataView
+// calculate positions of potential line-breaks using liblinebreak
+static void getLinebreaks(LayoutDataView & view)
 {
-  private:
+  size_t length = view.size();
 
-    std::u32string txt32;
-    std::vector<size_t> idx;  // index into attr and embedding
-    const AttributeIndex_c & attr;
-    const std::vector<FriBidiLevel> & embeddingLevels;
-    std::vector<char> linebreaks;
-    std::vector<bool> hyphens;
+  size_t runstart = 0;
 
-    // check if a character is a bidi control character and should not go into
-    // the output stream
-    bool isBidiCharacter(char32_t c)
+  while (runstart < length)
+  {
+    size_t runpos = runstart+1;
+
+    // accumulate text that uses the same language and is no bidi character
+    while (runpos < length && view.att(runstart).lang == view.att(runpos).lang)
     {
-      if (c == U'\U0000202A' || c == U'\U0000202B' || c == U'\U0000202C')
-        return true;
-      else
-        return false;
+      runpos++;
     }
 
-  public:
+    // when calculating the length for the function call below, we need to keep in mind
+    // that the function will always force a line-break at the end of the string, to avoid
+    // this when the string really goes on, we include the next character in the string
+    // to line-break (except of course when the string really ends here), that way we get
+    // a real line-break and the wrongly written break is overwritten in the next call
+    set_linebreaks_utf32(reinterpret_cast<const utf32_t*>(view.txt().c_str()+runstart),
+                         runpos-runstart+(runpos < length ? 1 : 0),
+                         view.att(runstart).lang.c_str(), view.lnb()+runstart);
 
-    LayoutDataView(const std::u32string & t, const AttributeIndex_c & a, const std::vector<FriBidiLevel> & e)
-      : attr(a), embeddingLevels(e)
+    runstart = runpos;
+  }
+}
+
+// find possible hyphenation places, of the returned positions
+// we right now ignore complex hyphenations and only take those
+// that correspond to simply adding a soft-hyphen
+static void getHyphens(LayoutDataView & view)
+{
+  std::vector<internal::HyphenDict<char32_t>::Hyphens> hyphens;
+
+  size_t sectionstart = 0;
+
+  while (sectionstart < view.size())
+  {
+    if (view.hasatt(sectionstart) && !view.att(sectionstart).lang.empty())
     {
-      for (size_t i = 0; i < t.size(); i++)
+      // initial stuff: separate words on spaces, find English words
+      std::string curLang = view.att(0).lang;
+
+      // find end of current language section
+      size_t i = sectionstart + 1;
+      while (i < view.size() && view.hasatt(i) && view.att(i).lang == curLang) i++;
+
+      auto dict = internal::getHyphenDict(curLang);
+
+      if (dict)
       {
-        if (!isBidiCharacter(t[i]))
+        std::vector<char> breaks(i-sectionstart+1);
+
+        set_wordbreaks_utf32(reinterpret_cast<const utf32_t*>(view.txt().c_str()+sectionstart),
+                             i-sectionstart+1, curLang.c_str(), breaks.data());
+
+        breaks.push_back(WORDBREAK_BREAK);
+
+        // now find the words and feed them to the hyphenator
+        size_t wordstart = 0;
+        for (size_t j = 1; j < breaks.size(); j++)
         {
-          txt32 += t[i];
-          idx.push_back(i);
+          if (breaks[j-1] == WORDBREAK_BREAK)
+          {
+            // only hyphen, when the user has not done so manually
+            if (view.txt().find_first_of(U'\u00AD', wordstart) >= j)
+            {
+              // assume a word from wordstart to j
+              dict->hyphenate(view.txt().substr(wordstart, j-wordstart), hyphens);
+
+              for (size_t l = 0; l < j-wordstart+1; l++)
+              {
+                if ((hyphens[l].hyphens % 2) && (hyphens[l].rep->length() == 0))
+                  view.sethyp(sectionstart+wordstart+l+1);
+              }
+            }
+            wordstart = j;
+          }
         }
       }
-      linebreaks.resize(idx.size());
+      sectionstart = i;
     }
+    else
+    {
+      sectionstart++;
+    }
+  }
+}
 
+// ok now we come to the generation of the runs
 
-    const std::u32string & txt(void) const { return txt32; }
-    char32_t txt(size_t i) const { return txt32[i]; }
-    size_t size(void) const { return txt32.size(); }
-
-    const CodepointAttributes_c & att(size_t i) const { return attr[idx[i]]; }
-    bool hasatt(size_t i) const { return attr.hasAttribute(idx[i]); }
-
-    FriBidiLevel emb(size_t i) const { return embeddingLevels[idx[i]]; }
-
-    char lnb(size_t i) const { return linebreaks[i]; }
-    char * lnb(void) { return linebreaks.data(); }
-
-    void sethyp(size_t i) { hyphens.resize(idx.size()); hyphens[i] = true; }
-    bool hyp(size_t i) const { return i < hyphens.size() && hyphens[i]; }
-};
-
-
+// This function adds the required commands for an underline to the run
+// gx is the xposition, where to start
+// gw is the width of the object to put the underline below
 static void addUnderline(runInfo & run, int32_t gx, int32_t gw, const LayoutProperties_c & prop, const CodepointAttributes_c & a)
 {
   // create underline commands
@@ -196,12 +314,14 @@ static void addUnderline(runInfo & run, int32_t gx, int32_t gw, const LayoutProp
   }
 }
 
+// create a fun for the texte between runstart and spos
 static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runstart,
                          const LayoutProperties_c & prop,
                          std::shared_ptr<FontFace_c> & font,
                          hb_font_t * hb_ft_font
                         )
 {
+  // the resulting run
   runInfo run;
 
   // check, if this is a space run, on line ends space runs will be removed
@@ -210,24 +330,22 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
   // check, if this run is a soft hyphen. Soft hyphens are ignored and not output, except on line endings
   run.shy = view.txt(runstart) == U'\u00AD';
 
-  std::string language = view.att(runstart).lang;
+  // we may only have this one caracter in the text, when the first character is a shy
+  assert(!run.shy || spos-runstart == 1);
 
-  // Create a buffer for harfbuzz to use
+  // Create a harfbuzz buffer
   hb_buffer_t *buf = hb_buffer_create();
 
   // setup the language for the harfbuzz shaper
-  // reset is not required, when no language is set, the buffer
-  // reset automatically resets the language and script info as well
+  std::string language = view.att(runstart).lang;
   if (!language.empty())
   {
     size_t i = language.find_first_of('-');
 
     if (i != std::string::npos)
     {
-      hb_script_t scr = hb_script_from_iso15924_tag(HB_TAG(language[i+1], language[i+2],
-                                                           language[i+3], language[i+4]));
+      hb_script_t scr = hb_script_from_iso15924_tag(HB_TAG(language[i+1], language[i+2], language[i+3], language[i+4]));
       hb_buffer_set_script(buf, scr);
-
       hb_buffer_set_language(buf, hb_language_from_string(language.c_str(), i-1));
     }
     else
@@ -236,16 +354,16 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
     }
   }
 
-  // send the text to harfbuzz, in a normal run, send the normal text
-  // for a shy, send a hyphen
   if (!run.shy)
   {
+    // copy the text to layout into the harfbuzz buffer
     hb_buffer_add_utf32(buf, reinterpret_cast<const uint32_t*>(view.txt().c_str()), -1, runstart, spos-runstart);
   }
   else
   {
-    // we want to append a hyphen, sadly not all fonts contain the proper character for
-    // this simple symbol, so we first try the proper one, and if that is not available
+    // we want to append a hyphen, in that case we only append a hyphen,
+    // not all fonts contain the proper character for this symbol, so we
+    // first try the proper one, and if that is not available
     // we use hyphen-minus, which all should have
     if (font->containsGlyph(U'\u2010'))
     {
@@ -292,12 +410,14 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
     run.ascender = run.font->getAscender()+view.att(runstart).baseline_shift;
     run.descender = run.font->getDescender()+view.att(runstart).baseline_shift;
   }
+
 #ifndef NDEBUG
   run.text = view.txt().substr(runstart, spos-runstart);
 #endif
 
   run.linebreak = view.lnb(spos-1);
 
+  // information for a hyperlink within the text
   size_t curLink = 0;
   TextLayout_c::Rectangle_c linkRect;
   int linkStart = 0;
@@ -332,6 +452,7 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
 
       addUnderline(run, run.dx, a.inlay->getRight(), prop, a);
 
+      // advance
       run.dx += a.inlay->getRight();
     }
     else
@@ -352,11 +473,14 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
       // output the final glyph
       run.run.push_back(std::make_pair(0, CommandData_c(font, gi, gx, gy, a.c, 0)));
 
-      // calculate the new position
-      run.dx += glyph_pos[j].x_advance;
-      run.dy -= glyph_pos[j].y_advance;
-
       addUnderline(run, gx, glyph_pos[j].x_advance+64, prop, a);
+
+      // advance
+      run.dx += glyph_pos[j].x_advance;
+
+      // we only support line wise scripts
+      if (glyph_pos[j].y_advance != 0)
+        throw LayoutException_c("STLL only supports line based scripts and this text appears to be something else");
     }
 
     // if we have a link, we include that information within the run
@@ -400,27 +524,20 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
   return run;
 }
 
-// use harfbuzz to layout runs of text
-// txt32 is the test to break into runs
-// attr contains the attributes for each character of txt32
-// embedding_levels are the bidi embedding levels creates by getBidiEmbeddingLevels
-// linebreaks contains the line-break information from liblinebreak or libunibreak
-// prop contains some layouting settings
+// split the text to layout into runs
 static std::vector<runInfo> createTextRuns(const LayoutDataView & view, const LayoutProperties_c & prop)
 {
-  // Get our harfbuzz font structs
+  // Get harfbuzz font structs for all required fonts within the text
   std::map<const std::shared_ptr<FontFace_c>, hb_font_t *> hb_ft_fonts;
-
-  // if we don't have the font in the map yet, we add it
   for (size_t i = 0; i < view.size(); i++)
     for (auto f : view.att(i).font)
       if (hb_ft_fonts.find(f) == hb_ft_fonts.end())
         hb_ft_fonts[f] = hb_ft_font_create(f->getFace(), NULL);
 
-
   // runstart always contains the first character for the current run
   size_t runstart = 0;
 
+  // the result
   std::vector<runInfo> runs;
 
   // as long as there is something left in the text
@@ -428,43 +545,51 @@ static std::vector<runInfo> createTextRuns(const LayoutDataView & view, const La
   {
     // pos points at the first character AFTER the current run
     size_t spos = runstart+1;
-    // find end of current run
-    //
-    // the continues, as long as
 
+    // the font for this run
     auto font = view.att(runstart).font.get(view.txt(runstart));
 
+    // Find end of current run. This run continues, as long as
     while (   (spos < view.size())                                   // there is text left in our string
-           && (view.emb(runstart) == view.emb(spos))                 //  text direction has not changed
-           && (view.att(runstart).lang == view.att(spos).lang)       //  text still has the same language
-           && (font == view.att(spos).font.get(view.txt(spos)))      //  and the same font
+           && (view.emb(runstart) == view.emb(spos))                 // text direction has not changed
+           && (view.att(runstart).lang == view.att(spos).lang)       // text still has the same language
+           && (font == view.att(spos).font.get(view.txt(spos)))      // and the same font
            && (view.att(runstart).baseline_shift == view.att(spos).baseline_shift)           //  and the same baseline
-           && (!view.att(spos).inlay)                                //  and next char is not an inlay
-           && (!view.att(spos-1).inlay)                              //  and we are an not inlay
-           && (   (view.lnb(spos-1) == LINEBREAK_NOBREAK)            //  and line-break is not requested
+           && (!view.att(spos).inlay)                                // and next char is not an inlay
+           && (!view.att(spos-1).inlay)                              // and we are an not inlay
+           && (   (view.lnb(spos-1) == LINEBREAK_NOBREAK)            // and line-break is not requested
                || (view.lnb(spos-1) == LINEBREAK_INSIDEACHAR)
               )
-           && (view.txt(spos) != U' ')                               //  and there is no space (needed to adjust width for justification)
+           && (view.txt(spos) != U' ')                               // and there is no space (needed to adjust width for justification)
            && (view.txt(spos-1) != U' ')
-           && (view.txt(spos) != U'\n')                              //  also end run on forced line-breaks
+           && (view.txt(spos) != U'\n')                              // also end run on forced line-breaks
            && (view.txt(spos-1) != U'\n')
-           && (view.txt(spos) != U'\u00AD')                          //  and on soft hyphen
+           && (view.txt(spos) != U'\u00AD')                          // and on soft hyphen
            && (!view.hyp(spos))
           )
     {
       spos++;
     }
 
-    // save the run
+    // get the harbuzz foont structure
+    // inlays don't have fonts, but still need a run, that is why it might be
+    // possible to provide nullptrs to the run creator
     hb_font_t * hbfont = nullptr;
-    // inlays don't have fonts, but still need a run
     if (font) hbfont = hb_ft_fonts[font];
 
+    // create and add the run
     runs.emplace_back(createRun(view, spos, runstart, prop, font, hbfont));
 
+    // the manually insert soft hyphens are recognized and separated into single runs with
+    // the condition of the look above (before is recognized by the character
+    // comparison, behin is recognized by the linebreak condition
+    //
+    // but the automatically inserted hyphenation positions are just marked
+    // with the hyphenation flag, here we need to manually
+    // insert a run containing a soft hyphen character
+    // TODO it might be better to change the string
     if (view.hyp(spos))
     {
-      // add a run containing a soft hypen after the current run
       AttributeIndex_c attra(view.att(runstart));
       std::vector<FriBidiLevel> embedding_levelsa {view.emb(runstart)};
       LayoutDataView viewa(U"\u00AD", attra, embedding_levelsa);
@@ -476,6 +601,7 @@ static std::vector<runInfo> createTextRuns(const LayoutDataView & view, const La
     runstart = spos;
   }
 
+  // free harfbuzz font structures
   for (auto & a : hb_ft_fonts)
     hb_font_destroy(a.second);
 
@@ -496,9 +622,7 @@ static void mergeLinks(TextLayout_c & txt, const std::vector<TextLayout_c::LinkI
     // when not found create it
     if (i == txt.links.end())
     {
-      TextLayout_c::LinkInformation_c l2;
-      l2.url = l.url;
-      txt.links.emplace_back(l2);
+      txt.links.emplace_back(TextLayout_c::LinkInformation_c(l.url));
       i = txt.links.end()-1;
     }
 
@@ -517,14 +641,25 @@ static void mergeLinks(TextLayout_c & txt, const std::vector<TextLayout_c::LinkI
 #define LF_LAST 2
 #define LF_SMALL_SPACE 4
 
+// add a single line to the result layout
+// take the runs from the runs argument, start with runstart and end before spos
+// add to l
+// add at ypos between left and right
+// curWidth contains the sum of all the runs to add, curWidth already contains indent, if any
+// numSpace the number of spaces within all those runs
 static void addLine(int runstart, size_t spos, std::vector<runInfo> & runs, TextLayout_c & l,
                     int ypos, int curWidth, int32_t left, int32_t right, int lineflags,
                     int numSpace, const LayoutProperties_c & prop
                    )
 {
+  // first find out the order in which the runs must be
+  // this is fribidi terrain, start with the logical order
+  // and then use the embedding levels to reverse the
+  // ranges with the same level
   std::vector<size_t> runorder(spos-runstart);
   std::iota(runorder.begin(), runorder.end(), runstart);
 
+  // find the maximum level
   FriBidiLevel max_level = 0;
   for (auto ri : runorder)
     max_level = std::max(max_level, runs[ri].embeddingLevel);
@@ -550,12 +685,14 @@ static void addLine(int runstart, size_t spos, std::vector<runInfo> & runs, Text
     }
   }
 
-  // calculate how many pixels are left on the line (for justification)
+  // calculate how much space is left on the line (for justification)
   int32_t spaceLeft = right - left - curWidth;
 
   // output of runs is always left to right, so depending on the paragraph alignment
   // settings we calculate where at the x-axis we start with the runs and how many
   // additional pixels we add to each space
+  //
+  // TODO later on we want to output in logical order instead of left to right
   int32_t xpos;
   double spaceadder = 0;
 
@@ -605,7 +742,8 @@ static void addLine(int runstart, size_t spos, std::vector<runInfo> & runs, Text
     for (auto & r : runs[ri].run)
       maxlayer = std::max(maxlayer, r.first+1);
 
-  // output all the layers one after the other
+  // output all the layers one after the other starting with maximal layer index
+  // and working down to layer 0
   for (uint32_t layer = 0; layer < maxlayer; layer++)
   {
     int32_t xpos2 = xpos;
@@ -614,6 +752,7 @@ static void addLine(int runstart, size_t spos, std::vector<runInfo> & runs, Text
     // output runs of current layer
     for (auto ri : runorder)
     {
+      // output soft hyphen runs only, when the last in line
       if (!runs[ri].shy || ri == spos-1)
       {
         // output only non-space runs
@@ -633,6 +772,7 @@ static void addLine(int runstart, size_t spos, std::vector<runInfo> & runs, Text
         {
           // in space runs, there may be an rectangular command that represents
           // the underline, make that underline longer by spaceadder
+          // to accommodate larger spaces due to justification
           for (auto & cc : runs[ri].run)
           {
             if (   (cc.first == maxlayer-layer-1)
@@ -817,13 +957,17 @@ static TextLayout_c breakLines(std::vector<runInfo> & runs,
   return l;
 }
 
-// do the line breaking using the runs created before
+// do the line breaking using the runs created before, using an optimizing
+// paragraph layouting algorithm
 static TextLayout_c breakLinesOptimize(std::vector<runInfo> & runs,
                                        const Shape_c & shape,
                                        const LayoutProperties_c & prop, int32_t ystart)
 {
   // layout a paragraph line by line
   TextLayout_c l;
+
+  // for details look into the TeX documentation...
+  // This is a very similar method
 
   typedef struct
   {
@@ -1018,96 +1162,6 @@ static TextLayout_c breakLinesOptimize(std::vector<runInfo> & runs,
   return l;
 }
 
-// calculate positions of potential line-breaks using liblinebreak
-static void getLinebreaks(LayoutDataView & view)
-{
-  size_t length = view.size();
-
-  size_t runstart = 0;
-
-  while (runstart < length)
-  {
-    size_t runpos = runstart+1;
-
-    // accumulate text that uses the same language and is no bidi character
-    while (runpos < length && view.att(runstart).lang == view.att(runpos).lang)
-    {
-      runpos++;
-    }
-
-    // when calculating the length for the function call below, we need to keep in mind
-    // that the function will always force a line-break at the end of the string, to avoid
-    // this when the string really goes on, we include the next character in the string
-    // to line-break (except of course when the string really ends here), that way we get
-    // a real line-break and the wrongly written break is overwritten in the next call
-    set_linebreaks_utf32(reinterpret_cast<const utf32_t*>(view.txt().c_str()+runstart),
-                         runpos-runstart+(runpos < length ? 1 : 0),
-                         view.att(runstart).lang.c_str(), view.lnb()+runstart);
-
-    runstart = runpos;
-  }
-}
-
-static void getHyphens(LayoutDataView & view)
-{
-  // simply initial stuff: separate words on spaces, find English words
-  size_t sectionstart = 0;
-  std::string curLang;
-
-  if (view.hasatt(0))
-    curLang = view.att(0).lang;
-
-  std::vector<int> result(view.size());
-  std::vector<internal::HyphenDict<char32_t>::Hyphens> hyphens;
-
-  for (size_t i = 1; i < view.size(); i++)
-  {
-    // find sections within txt32 that have the same language information attached
-    if (!view.hasatt(i) || i == view.size()-1 || curLang != view.att(i).lang)
-    {
-      auto dict = internal::getHyphenDict(curLang);
-
-      if (dict)
-      {
-        std::vector<char> breaks(i-sectionstart+1);
-
-        set_wordbreaks_utf32(reinterpret_cast<const utf32_t*>(view.txt().c_str()+sectionstart),
-                             i-sectionstart+1, curLang.c_str(), breaks.data());
-
-        breaks.push_back(WORDBREAK_BREAK);
-
-        // now find the words and feed them to the hyphenator
-        size_t wordstart = 0;
-        for (size_t j = 1; j < breaks.size(); j++)
-        {
-          if (breaks[j-1] == WORDBREAK_BREAK)
-          {
-            // only hyphen, when the user has not done so manually
-            if (view.txt().find_first_of(U'\u00AD', wordstart) >= j)
-            {
-              // assume a word from wordstart to j
-              dict->hyphenate(view.txt().substr(wordstart, j-wordstart), hyphens);
-
-              for (size_t l = 0; l < j-wordstart+1; l++)
-              {
-                if ((hyphens[l].hyphens % 2) && (hyphens[l].rep->length() == 0))
-                  view.sethyp(sectionstart+wordstart+l+1);
-              }
-            }
-            wordstart = j;
-          }
-        }
-      }
-
-      while (!view.hasatt(i) && i < view.size()) i++;
-
-      if (view.hasatt(i))
-        curLang = view.att(i).lang;
-
-      sectionstart = i;
-    }
-  }
-}
 
 TextLayout_c layoutParagraph(const std::u32string & txt32, const AttributeIndex_c & attr,
                              const Shape_c & shape, const LayoutProperties_c & prop, int32_t ystart)
