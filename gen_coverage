@@ -1,0 +1,7 @@
+cmake -DCMAKE_BUILD_TYPE=COVERAGE $1
+lcov --directory . --zerocounters
+make clean
+make -j5
+make test
+lcov --directory . --capture --output-file cov.info
+genhtml cov.info --output-directory coverage
