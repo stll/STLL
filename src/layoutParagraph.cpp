@@ -423,16 +423,69 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
   int linkStart = 0;
 
   // off we go creating the drawing commands
+  // BUT, we need to make sure we keep the logical order here
+  // harfbuzz will reverse the order of commands, when set to RTL
+  // direction
+  // BUT again harfbuzz has made the glyph_pos output dependent on the order
+  // so make a first pass through this array to make absolute positions out
+  // of the relative ones
   for (size_t j=0; j < glyph_count; ++j)
   {
     // get the attribute for the current character
     auto a = view.att(glyph_info[j].cluster);
 
-    // when a new link is started, we save the current x-position within the run
-    if ((!curLink && a.link) || (curLink != a.link))
+    if (!a.inlay)
     {
-      linkStart = run.dx;
+      // when a new link is started, we save the current x-position within the run
+      if ((!curLink && a.link) || (curLink != a.link))
+      {
+        linkStart = run.dx;
+      }
+
+      glyph_pos[j].x_offset += run.dx;
+      run.dx += glyph_pos[j].x_advance;
+
+      // if we have a link, we include that information within the run
+      if (a.link)
+      {
+        // link has changed
+        if (curLink && curLink != a.link)
+        {
+          // store information for current link
+          run.links.emplace_back(TextLayout_c::LinkInformation_c(prop.links[curLink-1], linkRect));
+          curLink = 0;
+        }
+
+        if (!curLink)
+        {
+          // start new link
+          linkRect.x = linkStart;
+          linkRect.y = -run.ascender;
+          linkRect.w = run.dx-linkStart;
+          linkRect.h = run.ascender-run.descender;
+          curLink = a.link;
+        }
+        else
+        {
+          // make link box for current link wider
+          linkRect.w = run.dx-linkStart;
+        }
+      }
     }
+  }
+
+  // now output using these absolute positions
+  for (size_t jj=0; jj < glyph_count; ++jj)
+  {
+    size_t j = jj;
+
+    if (run.embeddingLevel % 2 != 0)
+    {
+      j = glyph_count-1-jj;
+    }
+
+    // get the attribute for the current character
+    auto a = view.att(glyph_info[j].cluster);
 
     if (a.inlay)
     {
@@ -460,7 +513,7 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
       // output the glyph
       glyphIndex_t gi = glyph_info[j].codepoint;
 
-      int32_t gx = run.dx + (glyph_pos[j].x_offset);
+      int32_t gx = glyph_pos[j].x_offset;
       int32_t gy = run.dy - (glyph_pos[j].y_offset)-view.att(runstart).baseline_shift;
 
       // output all shadows of the glyph
@@ -475,39 +528,9 @@ static runInfo createRun(const LayoutDataView & view, size_t spos, size_t runsta
 
       addUnderline(run, gx, glyph_pos[j].x_advance+64, prop, a);
 
-      // advance
-      run.dx += glyph_pos[j].x_advance;
-
       // we only support line wise scripts
       if (glyph_pos[j].y_advance != 0)
         throw LayoutException_c("STLL only supports line based scripts and this text appears to be something else");
-    }
-
-    // if we have a link, we include that information within the run
-    if (a.link)
-    {
-      // link has changed
-      if (curLink && curLink != a.link)
-      {
-        // store information for current link
-        run.links.emplace_back(TextLayout_c::LinkInformation_c(prop.links[curLink-1], linkRect));
-        curLink = 0;
-      }
-
-      if (!curLink)
-      {
-        // start new link
-        linkRect.x = linkStart;
-        linkRect.y = -run.ascender;
-        linkRect.w = run.dx-linkStart;
-        linkRect.h = run.ascender-run.descender;
-        curLink = a.link;
-      }
-      else
-      {
-        // make link box for current link wider
-        linkRect.w = run.dx-linkStart;
-      }
     }
   }
 
@@ -736,6 +759,62 @@ static void addLine(int runstart, size_t spos, std::vector<runInfo> & runs, Text
       break;
   }
 
+  int32_t xpos2 = xpos;
+  numSpace = 0;
+
+  // place all elements of the line according to alignment
+  for (auto ri : runorder)
+  {
+    // output soft hyphen runs only, when the last in line
+    if (!runs[ri].shy || ri == spos-1)
+    {
+      // output only non-space runs
+      if (!runs[ri].space)
+      {
+        for (auto & cc : runs[ri].run)
+        {
+          cc.second.x += xpos2+spaceadder*numSpace;
+          cc.second.y += ypos;
+        }
+      }
+      else
+      {
+        // in space runs, there may be an rectangular command that represents
+        // the underline, make that underline longer by spaceadder
+        // to accommodate larger spaces due to justification
+        for (auto & cc : runs[ri].run)
+        {
+          if (cc.second.command == CommandData_c::CMD_RECT)
+          {
+            cc.second.w += spaceadder;
+            cc.second.x += xpos2+spaceadder*numSpace;
+            cc.second.y += ypos;
+          }
+        }
+
+        // the link rectangle in spaces also needs to get longer
+        if (!runs[ri].links.empty() && !runs[ri].links[0].areas.empty())
+        {
+          runs[ri].links[0].areas[0].w += spaceadder;
+        }
+      }
+
+      // merge in the links, but only do this once, for the layer 0
+      mergeLinks(l, runs[ri].links, xpos2+spaceadder*numSpace, ypos);
+
+      // count the spaces
+      if (runs[ri].space) numSpace++;
+
+      // advance the x-position
+      if (!runs[ri].space)
+        xpos2 += runs[ri].dx;
+      else if (lineflags & LF_SMALL_SPACE)
+        xpos2 += 9*runs[ri].dx/10;
+      else
+        xpos2 += runs[ri].dx;
+    }
+  }
+
   // find the number of layers that we need to output
   size_t maxlayer = 0;
   for (auto ri : runorder)
@@ -746,67 +825,34 @@ static void addLine(int runstart, size_t spos, std::vector<runInfo> & runs, Text
   // and working down to layer 0
   for (uint32_t layer = 0; layer < maxlayer; layer++)
   {
-    int32_t xpos2 = xpos;
-    numSpace = 0;
-
     // output runs of current layer
-    for (auto ri : runorder)
+    for (size_t i = runstart; i < spos; i++)
     {
       // output soft hyphen runs only, when the last in line
-      if (!runs[ri].shy || ri == spos-1)
+      if (!runs[i].shy || i == spos-1)
       {
         // output only non-space runs
-        if (!runs[ri].space)
+        if (!runs[i].space)
         {
-          for (auto & cc : runs[ri].run)
-          {
+          for (auto & cc : runs[i].run)
             if (cc.first == maxlayer-layer-1)
-            {
-              cc.second.x += xpos2+spaceadder*numSpace;
-              cc.second.y += ypos;
               l.addCommand(cc.second);
-            }
-          }
         }
         else
         {
           // in space runs, there may be an rectangular command that represents
           // the underline, make that underline longer by spaceadder
           // to accommodate larger spaces due to justification
-          for (auto & cc : runs[ri].run)
+          for (auto & cc : runs[i].run)
           {
             if (   (cc.first == maxlayer-layer-1)
                 && (cc.second.command == CommandData_c::CMD_RECT)
                )
             {
-              cc.second.w += spaceadder;
-              cc.second.x += xpos2+spaceadder*numSpace;
-              cc.second.y += ypos;
               l.addCommand(cc.second);
             }
           }
-
-          // the link rectangle in spaces also needs to get longer
-          if (!runs[ri].links.empty() && !runs[ri].links[0].areas.empty())
-          {
-            runs[ri].links[0].areas[0].w += spaceadder;
-          }
         }
-
-        // merge in the links, but only do this once, for the layer 0
-        if (layer == 0)
-          mergeLinks(l, runs[ri].links, xpos2+spaceadder*numSpace, ypos);
-
-        // count the spaces
-        if (runs[ri].space) numSpace++;
-
-        // advance the x-position
-        if (!runs[ri].space)
-          xpos2 += runs[ri].dx;
-        else if (lineflags & LF_SMALL_SPACE)
-          xpos2 += 9*runs[ri].dx/10;
-        else
-          xpos2 += runs[ri].dx;
       }
     }
   }
