@@ -734,6 +734,8 @@ TextLayout_c layoutXML_UL(X & xml, const TextStyleSheet_c & rules, const Shape_c
       prop.indent = 0;
       prop.ltr = true;
       prop.align = LayoutProperties_c::ALG_CENTER;
+      prop.optimizeLinebreaks = rules.getUseOptimizingLayouter();
+      prop.hyphenate = rules.getHyphenate();
 
       std::unique_ptr<Shape_c> bulletshape;
 
